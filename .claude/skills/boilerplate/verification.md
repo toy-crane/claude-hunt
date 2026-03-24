@@ -1,21 +1,8 @@
-# Step 5: Cleanup and Verification
+# Step 5: Verification
 
-## 5a. Auto-fix all files
+Run all checks to confirm the template is correctly configured.
 
-```bash
-bunx ultracite fix
-```
-
-## 5b. Fix `import * as React` patterns
-
-Search for namespace React imports and convert to named imports:
-```bash
-grep -rl 'import \* as React' --include="*.tsx" --include="*.ts" .
-```
-
-For each file found, replace `import * as React from "react"` with specific named imports (e.g., `useEffect`, `useState`, `type ComponentProps`) based on actual usage in the file. In React 19, JSX no longer requires a React import.
-
-## 5c. Verify the setup
+## 5a. Lint & type check
 
 Run in parallel:
 ```bash
@@ -25,11 +12,11 @@ bun run check
 
 Both should exit with code 0. If either fails, investigate and fix before proceeding.
 
-## 5d. Verify Supabase
+## 5b. Database
 
 ```bash
 supabase db reset
 supabase test db
 ```
 
-Both should complete without errors. If tests fail, investigate and fix before proceeding.
+All pgTAP tests should pass. If tests fail, investigate and fix before proceeding.
