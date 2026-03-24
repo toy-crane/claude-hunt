@@ -30,6 +30,7 @@ pnpm-debug.log*
 
 # env files
 .env*.local
+supabase/.env
 
 # typescript
 *.tsbuildinfo
