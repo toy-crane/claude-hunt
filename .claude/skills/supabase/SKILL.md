@@ -148,7 +148,7 @@ See `references/testing.md` for detailed patterns, application-level testing, an
 
 When configuring `config.toml` or OAuth providers, always use `localhost` (not `127.0.0.1`) for all URLs. Supabase's `additional_redirect_urls` performs exact string matching — a hostname mismatch will silently break OAuth callbacks.
 
-See `references/local-development.md` for the full URL convention and OAuth callback flow.
+See `references/oauth-local-setup.md` for details.
 
 ## Workflow Summary
 
