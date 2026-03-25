@@ -9,7 +9,8 @@
   "linter": {
     "rules": {
       "correctness": {
-        // next/font/google exports are generated at build time
+        // next/font/google, next/server, react, @supabase/ssr etc.
+        // cannot be statically resolved by Biome (virtual/bundled modules)
         "noUnresolvedImports": "warn"
       }
     }
