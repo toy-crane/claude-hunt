@@ -1,5 +1,10 @@
 #!/bin/bash
 
+# Skip tests if no files were modified
+if git diff --quiet HEAD && git diff --cached --quiet; then
+  exit 0
+fi
+
 # Retry counter to prevent infinite retry loops
 COUNTER_FILE="/tmp/claude-test-gate-retry"
 COUNT=$(cat "$COUNTER_FILE" 2>/dev/null || echo 0)
