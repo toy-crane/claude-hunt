@@ -11,9 +11,9 @@ This guide explains how to obtain OAuth credentials for Supabase local developme
 3. Click **"Create Credentials"** → **"OAuth client ID"**
 4. Application type: **"Web application"**
 5. Add authorized JavaScript origins:
-   - `http://127.0.0.1:3000`
+   - `http://localhost:3000`
 6. Add authorized redirect URIs:
-   - `http://127.0.0.1:54321/auth/v1/callback`
+   - `http://localhost:54321/auth/v1/callback`
 7. Click **"Create"**
 
 ### 2. Copy Credentials
@@ -40,8 +40,8 @@ SUPABASE_AUTH_GOOGLE_SECRET=<your-client-secret>
 2. Click **"New OAuth App"**
 3. Fill in:
    - **Application name**: Your project name (e.g., `claude-hunt-local`)
-   - **Homepage URL**: `http://127.0.0.1:3000`
-   - **Authorization callback URL**: `http://127.0.0.1:54321/auth/v1/callback`
+   - **Homepage URL**: `http://localhost:3000`
+   - **Authorization callback URL**: `http://localhost:54321/auth/v1/callback`
 4. Click **"Register application"**
 
 ### 2. Generate Client Secret
@@ -72,4 +72,4 @@ supabase stop
 supabase start
 ```
 
-Verify providers are enabled in Supabase Studio at `http://127.0.0.1:54323` → Authentication → Providers.
+Verify providers are enabled in Supabase Studio at `http://localhost:54323` → Authentication → Providers.

@@ -1,6 +1,6 @@
 ---
 name: supabase
-description: Guides Supabase database workflow — declarative schemas, migration generation, table conventions, and pgTAP testing. Use this skill whenever creating tables, editing schemas, generating migrations, writing database tests, or working with Supabase locally. Also triggers for supabase db diff, supabase db reset, supabase test db, schema file edits, or any database schema discussion.
+description: Guides Supabase workflow — declarative schemas, migration generation, table conventions, pgTAP testing, and local development configuration. Use this skill whenever creating tables, editing schemas, generating migrations, writing database tests, working with Supabase locally, or configuring auth/OAuth settings. Also triggers for supabase db diff, supabase db reset, supabase test db, config.toml, auth config, local development setup, schema file edits, or any database schema discussion.
 ---
 
 # Supabase Database Workflow
@@ -143,6 +143,12 @@ ROLLBACK;
 - Constraints and foreign keys
 
 See `references/testing.md` for detailed patterns, application-level testing, and CI/CD setup.
+
+## Local Development
+
+When configuring `config.toml` or OAuth providers, always use `localhost` (not `127.0.0.1`) for all URLs. Supabase's `additional_redirect_urls` performs exact string matching — a hostname mismatch will silently break OAuth callbacks.
+
+See `references/local-development.md` for the full URL convention and OAuth callback flow.
 
 ## Workflow Summary
 

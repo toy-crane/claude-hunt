@@ -5,8 +5,10 @@ import { createClient } from "@/lib/supabase/server.ts";
 
 export default async function Page() {
   const supabase = await createClient();
-  const { data } = await supabase.auth.getClaims();
-  const isLoggedIn = !!data?.claims;
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+  const isLoggedIn = !!user;
 
   return (
     <div className="flex min-h-svh p-6">
@@ -15,6 +17,15 @@ export default async function Page() {
           <h1 className="font-medium">Project ready!</h1>
           <p>You may now add components and start building.</p>
           <p>We&apos;ve already added the button component for you.</p>
+          {isLoggedIn && user && (
+            <div className="mt-2 rounded-md border p-3">
+              <p className="text-muted-foreground text-xs">Signed in as</p>
+              <p className="font-medium">{user.email}</p>
+              <p className="text-muted-foreground text-xs capitalize">
+                via {user.app_metadata?.provider}
+              </p>
+            </div>
+          )}
           <div className="mt-2 flex gap-2">
             {isLoggedIn ? (
               <form action={signOut}>

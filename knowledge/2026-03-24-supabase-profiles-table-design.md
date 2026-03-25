@@ -51,14 +51,14 @@ create table public.profiles (
 - 테이블/RLS는 `supabase/schemas/*.sql`에 선언적으로 정의
 - auth.users에 걸리는 trigger는 `supabase db diff`로 캡처 불가 → 별도 수동 migration 필요
 
-### 127.0.0.1 vs localhost
-OAuth redirect URL에 `localhost` 대신 `127.0.0.1` 사용. `localhost`는 IPv4/IPv6 해석이 시스템마다 달라 redirect URL 불일치 발생 가능.
+### localhost vs 127.0.0.1
+OAuth redirect URL에 `localhost` 사용. macOS 환경에서는 `localhost` 해석이 안정적이며, Next.js 기본값(`localhost:3000`)과 일치. `config.toml`의 `site_url`, `additional_redirect_urls`, OAuth provider 콘솔 모두 동일한 호스트명으로 통일해야 함.
 
 ## Prevention
 
 - profiles 설계 시 auth.users 필드 먼저 확인하여 불필요한 중복 방지
 - trigger가 auth 스키마에 걸리는 경우 반드시 수동 migration으로 분리
-- OAuth 로컬 개발 시 항상 `127.0.0.1` 사용
+- OAuth 로컬 개발 시 항상 `localhost` 사용 (config.toml, OAuth provider 콘솔 모두 통일)
 
 ## Related Files
 
