@@ -10,7 +10,9 @@
     "typecheck": "tsc --noEmit",
     "check": "ultracite check",
     "fix": "ultracite fix",
-    "test": "vitest run",
+    "test": "vitest run --passWithNoTests && supabase test db",
+    "test:unit": "vitest run --passWithNoTests",
+    "test:db": "supabase test db",
     "test:watch": "vitest",
     "test:coverage": "vitest run --coverage"
   },

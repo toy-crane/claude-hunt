@@ -1,15 +1,29 @@
 {
+  "env": {
+    "CLAUDE_CODE_EXPERIMENTAL_AGENT_TEAMS": "1"
+  },
   "hooks": {
     "PostToolUse": [
+      {
+        "matcher": "Write|Edit",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "\"$(git rev-parse --show-toplevel)\"/.claude/hooks/lint-fix.sh",
+            "statusMessage": "Running ultracite fix..."
+          }
+        ]
+      }
+    ],
+    "Stop": [
       {
         "hooks": [
           {
             "type": "command",
-            "command": "bash .claude/hooks/lint-fix.sh",
-            "statusMessage": "Running ultracite fix..."
+            "command": "\"$(git rev-parse --show-toplevel)\"/.claude/hooks/stop-test.sh",
+            "timeout": 120
           }
-        ],
-        "matcher": "Write|Edit"
+        ]
       }
     ]
   }
