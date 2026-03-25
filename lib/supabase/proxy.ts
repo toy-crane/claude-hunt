@@ -26,13 +26,8 @@ export async function updateSession(request: NextRequest) {
     }
   );
 
-  const { data } = await supabase.auth.getClaims();
-
-  if (!(data?.claims || request.nextUrl.pathname.startsWith("/auth"))) {
-    const url = request.nextUrl.clone();
-    url.pathname = "/auth/login";
-    return NextResponse.redirect(url);
-  }
+  // Refresh session for authenticated users (no forced login redirect)
+  await supabase.auth.getClaims();
 
   return supabaseResponse;
 }
