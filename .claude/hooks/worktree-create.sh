@@ -7,8 +7,9 @@ NAME=$(echo "$INPUT" | jq -r '.name')
 PROJECT_ROOT="$(git rev-parse --show-toplevel)"
 WORKTREE_PATH="$PROJECT_ROOT/.claude/worktrees/$NAME"
 
-# Create git worktree (redirect stdout to avoid polluting the path output)
-git worktree add "$WORKTREE_PATH" >/dev/null 2>&1
+# Fetch latest main and create worktree from origin/main
+git fetch origin main >/dev/null 2>&1
+git worktree add "$WORKTREE_PATH" -b "$NAME" origin/main >/dev/null 2>&1
 
 # Copy only gitignored .env files (tracked ones already exist in worktree)
 find "$PROJECT_ROOT" -maxdepth 2 -name '.env*' -type f \
