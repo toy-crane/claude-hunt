@@ -1,13 +1,42 @@
 ---
 name: boilerplate
-description: Scaffold a Next.js project with Ultracite (Biome) and shadcn/ui. Use this skill when the user wants to create a new Next.js project, set up a frontend boilerplate, or convert an existing Next.js project to use Ultracite instead of ESLint/Prettier. Trigger on phrases like "new project", "scaffold", "boilerplate", "init project", "set up Next.js", "새 프로젝트", "보일러플레이트".
-argument-hint: <project-name> [--existing]
+description: Scaffold a new project from this Next.js template. Use this skill when the user wants to create a new project, set up a frontend boilerplate. Trigger on phrases like "new project", "scaffold", "boilerplate", "init project", "set up Next.js", "새 프로젝트", "보일러플레이트".
+argument-hint: <project-name>
 user-invocable: true
 ---
 
-# Boilerplate — Next.js + Ultracite + shadcn/ui
+# Boilerplate — Next.js Template Setup
 
-Scaffold a production-ready Next.js project with strict TypeScript, Tailwind CSS v4, shadcn/ui components, and Ultracite (Biome) for linting/formatting — all wired up with a Claude Code auto-fix hook.
+This repo is a production-ready template. Scaffold a new project by cloning it and configuring the required inputs.
+
+## What's Included
+
+| Layer | Stack |
+|-------|-------|
+| Framework | Next.js 16 + TypeScript (strict) + Turbopack |
+| Styling | Tailwind CSS v4 + shadcn/ui (radix-lyra preset) |
+| Linting | Ultracite (Biome) — replaces ESLint + Prettier |
+| Auth | Supabase Auth with OAuth callback route |
+| Database | Supabase PostgreSQL + RLS + auto-profile trigger |
+| Proxy | Next.js 16 `proxy.ts` with JWT session refresh |
+| Dark Mode | next-themes + `d` hotkey toggle |
+| Hook | Claude Code auto-fix on Write|Edit |
+
+## Required Inputs
+
+| Input | Where | How to get |
+|-------|-------|------------|
+| Project name | directory name, `package.json` | User provides |
+| `NEXT_PUBLIC_SUPABASE_URL` | `.env` | Printed by `supabase start` |
+| `NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY` | `.env` | Printed by `supabase start` |
+
+## Optional Inputs
+
+| Input | Where | How to get |
+|-------|-------|------------|
+| shadcn preset | re-run `shadcn init` | User preference (default: `radix-lyra`) |
+| Google OAuth credentials | `supabase/.env` | [Google Cloud Console](https://console.cloud.google.com/apis/credentials) |
+| GitHub OAuth credentials | `supabase/.env` | [GitHub Developer Settings](https://github.com/settings/developers) |
 
 ## Workflow
 
@@ -15,137 +44,43 @@ Scaffold a production-ready Next.js project with strict TypeScript, Tailwind CSS
 
 Parse the arguments for:
 - **Project name** (first positional arg)
-- **`--existing` flag** — set up in the current directory instead of creating a new project
 
-If no project name and no `--existing` flag, ask the user what the project should be called.
+If no project name, ask the user what the project should be called.
 
-Then always ask the user which **shadcn preset** they'd like. Presets control the visual style (colors, border radius, etc.). They can provide:
-- A preset name (e.g., `radix-lyra`)
-- A preset URL
-- Or skip to use defaults
+Then ask the user:
+- Which **shadcn preset** they'd like (default `radix-lyra`, a URL, or skip to keep current)
+- Whether they need **OAuth login** (Google/GitHub)
 
-### Step 2: Create Next.js Project
+### Step 2: Create Project from Template
 
-**Skip this step if `--existing` flag is set.**
+Clone the template into a new directory:
 
 ```bash
-bunx create-next-app@latest <project-name> \
-  --typescript \
-  --tailwind \
-  --app \
-  --src-dir=false \
-  --import-alias="@/*" \
-  --use-bun \
-  --turbopack
+bunx degit toycrane/claude-hunt <project-name>
+cd <project-name>
+git init && git add -A && git commit -m "feat: initial commit from template"
 ```
 
-After creation, all subsequent commands run inside the new project directory.
+Update `package.json` name field to match the project name.
 
-### Step 3: Set up shadcn/ui
-
-Run shadcn init with the user's preset choice:
-
-**With preset:**
+If the user chose a different shadcn preset:
 ```bash
 bunx shadcn@latest init -d -p <preset>
 ```
 
-**Without preset (defaults):**
-```bash
-bunx shadcn@latest init -d
-```
+### Step 3: Install & Configure Supabase
 
-The `-d` flag uses default configuration to avoid interactive prompts.
+See [supabase-setup.md](./supabase-setup.md) for dependency installation, environment configuration, and local Supabase startup.
 
-Verify that `components.json` was created after this step.
+### Step 4: Configure OAuth Providers (Optional)
 
-### Step 4: Replace ESLint/Prettier with Ultracite
+If the user wants Google/GitHub login, see [supabase-auth.md](./supabase-auth.md) for credential setup.
 
-This is the core transformation. Execute these steps in order:
+Skip this step if the user does not need OAuth.
 
-**4a. Remove old linting/formatting packages:**
-```bash
-bun remove eslint @eslint/eslintrc eslint-config-next prettier prettier-plugin-tailwindcss 2>/dev/null || true
-```
-Some packages may not exist depending on the create-next-app version — that's fine.
+### Step 5: Verification
 
-**4b. Remove old config files:**
-```bash
-rm -f eslint.config.mjs .eslintrc.json .eslintrc.js .prettierrc .prettierrc.json .prettierignore
-```
-
-**4c. Initialize Ultracite:**
-```bash
-npx ultracite init --quiet --pm bun --linter biome --frameworks next react --type-aware --hooks claude
-```
-
-This installs `ultracite` + `@biomejs/biome`, creates `biome.jsonc`, adds `check`/`fix` scripts, and sets up the Claude Code hook.
-
-**4d. Patch `biome.jsonc`**
-
-Add the `noUnresolvedImports` override — Next.js uses virtual modules (`next/font/google`) that Biome's type-aware linting cannot resolve statically. This is a known false positive.
-
-Target `biome.jsonc`:
-```jsonc
-{
-  "$schema": "./node_modules/@biomejs/biome/configuration_schema.json",
-  "extends": [
-    "ultracite/biome/core",
-    "ultracite/biome/type-aware",
-    "ultracite/biome/next",
-    "ultracite/biome/react"
-  ],
-  "linter": {
-    "rules": {
-      "correctness": {
-        // next/font/google exports are generated at build time
-        "noUnresolvedImports": "warn"
-      }
-    }
-  }
-}
-```
-
-Read the generated `biome.jsonc` first — if it already has more content from ultracite, preserve it and only add the linter override.
-
-**4e. Patch `tsconfig.json`**
-
-Add `"allowImportingTsExtensions": true` to `compilerOptions`. Biome's auto-fix adds `.ts`/`.tsx` extensions to imports, which TypeScript rejects without this flag. Safe to use because Next.js sets `noEmit: true`.
-
-**4f. Ensure `typecheck` script exists**
-
-Read `package.json` and add to scripts if missing:
-```json
-"typecheck": "tsc --noEmit"
-```
-
-Also remove the old `lint` and `format` scripts if they reference eslint/prettier.
-
-### Step 5: Cleanup and Verify
-
-**5a. Auto-fix all files:**
-```bash
-bunx ultracite fix
-```
-
-**5b. Fix `import * as React` patterns:**
-
-Search for namespace React imports and convert to named imports:
-```bash
-grep -rl 'import \* as React' --include="*.tsx" --include="*.ts" .
-```
-
-For each file found, replace `import * as React from "react"` with specific named imports (e.g., `useEffect`, `useState`, `type ComponentProps`) based on actual usage in the file. In React 19, JSX no longer requires a React import.
-
-**5c. Verify the setup:**
-
-Run in parallel:
-```bash
-bun run typecheck
-bun run check
-```
-
-Both should exit with code 0. If either fails, investigate and fix before proceeding.
+See [verification.md](./verification.md) for build, lint, and database verification.
 
 ### Step 6: Summary
 
@@ -154,10 +89,10 @@ Display the result:
 ```
 Project scaffolded successfully!
 
-  Stack:     Next.js + TypeScript + Tailwind CSS v4 + shadcn/ui
+  Stack:     Next.js 16 + TypeScript + Tailwind CSS v4 + shadcn/ui + Supabase
   Linter:    Ultracite (Biome) — replaces ESLint + Prettier
   Package:   bun
-  Preset:    <preset or "default">
+  Preset:    <preset or "radix-lyra (default)">
 
   Scripts:
     bun dev          Start dev server (Turbopack)
@@ -166,12 +101,17 @@ Project scaffolded successfully!
     bun run fix      Auto-fix (Ultracite)
     bun run typecheck  TypeScript check
 
+  Supabase:
+    supabase start   Start local Supabase
+    supabase stop    Stop local Supabase
+    supabase test db Run pgTAP tests
+
   Claude Code hook: auto-fix on Write|Edit
 ```
 
 ## Constraints
 
 - Do NOT create sub-agents. Perform all steps inline.
-- Do NOT skip the verification step (5c). If it fails, report errors and fix them.
+- Do NOT skip the verification step (5). If it fails, report errors and fix them.
 - Keep all file patches minimal — read first, modify only what's needed, preserve existing content.
 - All output and skill content must be in English.
