@@ -4,8 +4,9 @@
       {
         "hooks": [
           {
-            "command": "bun fix --skip=correctness/noUnusedImports",
-            "type": "command"
+            "type": "command",
+            "command": "bash .claude/hooks/lint-fix.sh",
+            "statusMessage": "Running ultracite fix..."
           }
         ],
         "matcher": "Write|Edit"
