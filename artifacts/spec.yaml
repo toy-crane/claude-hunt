@@ -1,0 +1,125 @@
+product:
+  name: "Claude Hunt"
+  description: "A Next.js app with shadcn/ui, spec-driven TDD workflow"
+
+features:
+  - id: login
+    title: "Login page"
+    scenarios:
+      - id: LOGIN-001
+        given: "The login page with email form visible"
+        when: "Enter 'test@example.com' in the email input and click the 'Continue' button"
+        then: "'We sent a magic link to test@example.com. Check your email to sign in.' text is displayed"
+        examples:
+          - input: { email: "test@example.com" }
+            expect: { message: "We sent a magic link to test@example.com. Check your email to sign in." }
+      - id: LOGIN-002
+        given: "The OTP sent confirmation is displayed for 'test@example.com'"
+        when: "Click the 'Try another email' button"
+        then: "The email input field reappears with an empty value and the OTP confirmation disappears"
+        examples:
+          - input: { action: "click Try another email" }
+            expect: { emailInput: true, emailValue: "", otpMessage: false }
+      - id: LOGIN-003
+        given: "The login page with email form visible"
+        when: "Any login action is in progress"
+        then: "All interactive elements are disabled"
+        examples:
+          - input: { loadingState: "email" }
+            expect: { githubButtonDisabled: true, googleButtonDisabled: true, emailInputDisabled: true, continueButtonDisabled: true }
+      - id: LOGIN-004
+        given: "The login page with email form visible"
+        when: "Enter a valid email and click the 'Continue' button while the request is in-flight"
+        then: "The 'Continue' button displays the text 'Sending...'"
+        examples:
+          - input: { email: "test@example.com", state: "loading" }
+            expect: { continueButtonText: "Sending..." }
+    excludes:
+      - "OAuth redirect flow (external system boundary)"
+      - "Email delivery verification"
+
+  - id: home
+    title: "Home page auth status"
+    scenarios:
+      - id: HOME-001
+        given: "The home page visited by an unauthenticated user"
+        when: "The page loads"
+        then: "A 'Sign in' button linking to /login is displayed"
+        examples:
+          - input: { authenticated: false }
+            expect: { signInButton: true, signInHref: "/login" }
+      - id: HOME-002
+        given: "The home page visited by a user logged in via GitHub with email 'user@example.com'"
+        when: "The page loads"
+        then: "'Signed in as' label, the email, the provider name, and a 'Sign out' button are displayed"
+        examples:
+          - input: { authenticated: true, email: "user@example.com", provider: "github" }
+            expect: { signedInLabel: "Signed in as", email: "user@example.com", provider: "via github", signOutButton: true }
+    excludes:
+      - "Sign out server action behavior (integration test concern)"
+
+  - id: theme
+    title: "Theme toggle hotkey"
+    scenarios:
+      - id: THEME-001
+        given: "Any page with light theme active and focus not on an input field"
+        when: "Press the 'd' key"
+        then: "The theme switches to dark and the HTML element has class 'dark'"
+        examples:
+          - input: { key: "d", currentTheme: "light" }
+            expect: { theme: "dark", htmlClass: "dark" }
+          - input: { key: "d", currentTheme: "dark" }
+            expect: { theme: "light", htmlClass: "light" }
+      - id: THEME-002
+        given: "An input field is focused on the login page"
+        when: "Press the 'd' key"
+        then: "The theme does not change and 'd' is typed into the input"
+        examples:
+          - input: { key: "d", focusedElement: "input" }
+            expect: { themeChanged: false }
+
+  - id: auth-error
+    title: "Auth error page"
+    scenarios:
+      - id: AUTH-ERR-001
+        given: "The /auth/auth-code-error page"
+        when: "The page loads"
+        then: "'Authentication Error' heading, error message, and 'Back to login' link to /login are displayed"
+        examples:
+          - input: { route: "/auth/auth-code-error" }
+            expect: { heading: "Authentication Error", message: "Something went wrong during sign-in. Please try again.", backToLoginHref: "/login" }
+
+  - id: profile
+    title: "Profile auto-creation and RLS"
+    scenarios:
+      - id: PROFILE-001
+        given: "A new user signs up with email 'new@example.com' and metadata full_name 'Jane Doe'"
+        when: "The signup trigger fires"
+        then: "A profile row is created with matching id, email, full_name, and display_name"
+        examples:
+          - input: { email: "new@example.com", metadata: { full_name: "Jane Doe" } }
+            expect: { profileExists: true, email: "new@example.com", fullName: "Jane Doe", displayName: "Jane Doe" }
+          - input: { email: "new@example.com", metadata: { name: "Jane Doe" } }
+            expect: { profileExists: true, fullName: "Jane Doe", displayName: "Jane Doe" }
+          - input: { email: "new@example.com", metadata: { user_name: "janedoe" } }
+            expect: { profileExists: true, fullName: "janedoe", displayName: "janedoe" }
+      - id: PROFILE-002
+        given: "An authenticated user with their own profile in the profiles table"
+        when: "Query the profiles table"
+        then: "Only the user's own profile row is returned"
+        examples:
+          - input: { queryAs: "authenticated_user" }
+            expect: { rowCount: 1 }
+          - input: { queryAs: "authenticated_user", filterBy: "other_user_id" }
+            expect: { rowCount: 0 }
+      - id: PROFILE-003
+        given: "An authenticated user attempts to update a profile"
+        when: "Execute an update query on a profile row"
+        then: "Only their own profile can be updated"
+        examples:
+          - input: { updateTarget: "own_profile", displayName: "New Name" }
+            expect: { affectedRows: 1 }
+          - input: { updateTarget: "other_user_profile" }
+            expect: { affectedRows: 0 }
+    preconditions:
+      - "Supabase local instance running with profiles table and RLS policies"
