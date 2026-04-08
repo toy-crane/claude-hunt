@@ -1,28 +1,36 @@
 #!/bin/bash
+# Stop hook: run tests after Claude finishes, retry on failure
+# exit 0 = continue, exit 2 = block (Claude resumes to fix)
 
-# Skip tests if no files were modified
-if git diff --quiet HEAD && git diff --cached --quiet; then
+set -euo pipefail
+
+REPO_ROOT=$(git rev-parse --show-toplevel 2>/dev/null || pwd)
+RETRY_FILE="/tmp/harness-test-retry-$(echo "$REPO_ROOT" | md5 -q)"
+MAX_RETRIES=3
+
+# Skip if no files changed
+if git diff --quiet HEAD 2>/dev/null && git diff --cached --quiet 2>/dev/null; then
   exit 0
 fi
 
-# Retry counter to prevent infinite retry loops
-COUNTER_FILE="/tmp/claude-test-gate-retry"
-COUNT=$(cat "$COUNTER_FILE" 2>/dev/null || echo 0)
-COUNT=$((COUNT + 1))
-echo "$COUNT" > "$COUNTER_FILE"
+# Read retry counter
+RETRY_COUNT=0
+[ -f "$RETRY_FILE" ] && RETRY_COUNT=$(cat "$RETRY_FILE")
 
-if [ "$COUNT" -ge 3 ]; then
-  echo "Tests still failing after 3 retries. User intervention required." >&2
-  rm -f "$COUNTER_FILE"
+# Max retries exceeded -> give up, let human handle
+if [ "$RETRY_COUNT" -ge "$MAX_RETRIES" ]; then
+  echo "Test failed $MAX_RETRIES times. Stopping for human review."
+  rm -f "$RETRY_FILE"
   exit 0
 fi
 
-# Run all tests (unit + db)
-if bun run test 2>/tmp/test-gate.err; then
-  rm -f "$COUNTER_FILE"
+# Run tests
+if bun run test 2>&1; then
+  rm -f "$RETRY_FILE"
   exit 0
 else
-  echo "Tests failed (attempt $COUNT/3):" >&2
-  tail -30 /tmp/test-gate.err >&2
+  RETRY_COUNT=$((RETRY_COUNT + 1))
+  echo "$RETRY_COUNT" > "$RETRY_FILE"
+  echo "Tests failed (attempt $RETRY_COUNT/$MAX_RETRIES). Fix and retry."
   exit 2
 fi

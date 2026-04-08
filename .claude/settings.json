@@ -22,6 +22,17 @@
             "command": "\"$(git rev-parse --show-toplevel)\"/.claude/hooks/worktree-guard.sh"
           }
         ]
+      },
+      {
+        "matcher": "Bash",
+        "hooks": [
+          {
+            "type": "command",
+            "if": "Bash(git *)",
+            "command": "\"$(git rev-parse --show-toplevel)\"/.claude/hooks/secret-guard.sh",
+            "timeout": 10
+          }
+        ]
       }
     ],
     "PostToolUse": [
@@ -31,7 +42,8 @@
           {
             "type": "command",
             "command": "\"$(git rev-parse --show-toplevel)\"/.claude/hooks/lint-fix.sh",
-            "statusMessage": "Running ultracite fix..."
+            "statusMessage": "Running ultracite fix...",
+            "timeout": 30
           }
         ]
       }
