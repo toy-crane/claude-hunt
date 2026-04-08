@@ -1,17 +1,17 @@
-# <Feature Name> — 요구사항 정의서
+# <Feature Name> -- Requirements Definition
 
-## 핵심 아이디어
-(한 문장: 무엇을 + 왜)
+## Core Idea
+(One sentence: what + why)
 
-## 사용자 흐름
-1. (첫 번째 단계)
-2. (다음 단계)
-3. (완료 단계)
+## User Flow
+1. (First step)
+2. (Next step)
+3. (Completion step)
 
-## 설계 원칙
-- (원칙 — 부연 설명)
+## Design Principles
+- (Principle -- Explanation)
 
-## 핵심 도구
-| 역할 | 도구 |
+## Key Tools
+| Role | Tool |
 |---|---|
-| (역할) | (새로 도입하는 라이브러리/API) |
+| (Role) | (Newly introduced library/API) |

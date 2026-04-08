@@ -1,36 +1,36 @@
 ## Overview
-이 기능이 해결하는 문제를 1-2문장으로 설명
+Explain in 1-2 sentences the problem this feature solves
 
-## 시나리오
+## Scenarios
 
-### 1. 시나리오 제목
-[상황] 사용자가 ~하면
-[동작] 시스템이 ~한다
+### 1. Scenario Title
+[Context] When the user does ~
+[Action] The system does ~
 
-성공 기준:
-- [ ] 구체적 입력 -> 기대 출력
-- [ ] 구체적 입력 -> 기대 출력
+Success Criteria:
+- [ ] Concrete input -> Expected output
+- [ ] Concrete input -> Expected output
 
-### 2. 시나리오 제목
-[상황] 사용자가 ~하면
-[동작] 시스템이 ~한다
+### 2. Scenario Title
+[Context] When the user does ~
+[Action] The system does ~
 
-성공 기준:
-- [ ] 구체적 입력 -> 기대 출력
-- [ ] 구체적 입력 -> 기대 출력
+Success Criteria:
+- [ ] Concrete input -> Expected output
+- [ ] Concrete input -> Expected output
 
-(3-5개 시나리오)
+(3-5 scenarios)
 
-## 범위
+## Scope
 
-### 포함
-- 이번에 구현할 것
+### Included
+- What will be implemented this time
 
-### 제외
-- 의도적으로 빼는 것과 그 이유
+### Excluded
+- What is intentionally left out and the reason why
 
-## 전제 조건
-- 전제 조건 나열
+## Prerequisites
+- List of prerequisites
 
-## 미결정 사항
-- 질문했으나 사용자가 결정하지 못한 항목
+## Undecided Items
+- Items that were asked but the user could not decide on

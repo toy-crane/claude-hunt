@@ -1,83 +1,83 @@
 ---
 name: write-spec
-description: 유저와 대화하며 기능의 스펙을 작성한다. 사용자 흐름을 시뮬레이션하고, 빈칸을 질문으로 채운 뒤, spec.md(논의 기록)와 spec.yaml(검증 가능한 요구사항)을 생성한다. "/write-spec", "스펙 작성", "기능 정의" 등으로 실행.
-argument-hint: "기능 설명"
+description: Write a feature spec through conversation with the user. Simulate user flows, fill in the blanks with questions, then generate spec.md (discussion record) and spec.yaml (verifiable requirements). Trigger with "/write-spec", "write spec", "define feature", etc.
+argument-hint: "feature description"
 ---
 
-# 스펙 작성
+# Write Spec
 
-## Step 1: 사전 탐색
+## Step 1: Pre-exploration
 
-기존 기능을 확장하는 경우, 질문 전에 먼저 탐색한다:
+When extending an existing feature, explore before asking questions:
 
-- `artifacts/<feature>/requirements.md`가 있으면 읽는다. 핵심 아이디어와 설계 원칙을 질문의 시작점으로 활용하고, 이미 결정된 사항은 다시 질문하지 않는다
-- `artifacts/spec.yaml`에서 관련 시나리오 읽기
-- `artifacts/<feature>/spec.md` 확인
-- 관련 컴포넌트의 현재 구현 확인
-- `artifacts/<feature>/references/` 디렉토리에 레퍼런스 이미지가 있으면 읽는다. 이미지의 화면 구성(컴포넌트 배치, 요소 종류, 화면 흐름)에서 시나리오 후보를 추출하여 반복 질문에 활용한다. 시각 디자인(색상, 폰트, 간격 수치)은 무시한다
+- If `artifacts/<feature>/requirements.md` exists, read it. Use the core idea and design principles as a starting point for questions, and do not re-ask about already decided items
+- Read related scenarios from `artifacts/spec.yaml`
+- Check `artifacts/<feature>/spec.md`
+- Check the current implementation of related components
+- If reference images exist in the `artifacts/<feature>/references/` directory, read them. Extract scenario candidates from the screen composition (component placement, element types, screen flow) in the images and use them in iterative questioning. Ignore visual design (colors, fonts, spacing values)
 
-완전히 새로운 기능이면 기존 코드 탐색은 건너뛰되, references/ 디렉토리는 확인한다.
+If it is an entirely new feature, skip existing code exploration but still check the references/ directory.
 
-## Step 2: 반복 질문
+## Step 2: Iterative Questioning
 
-`$ARGUMENTS`에 대해 사용자 흐름을 시뮬레이션하며 빈칸을 찾는다.
-각 단계에서 정상 경로, 에러 경로, 경계 조건, 기존 기능과의 교차점을 확인한다.
+Simulate user flows for `$ARGUMENTS` and find the blanks.
+At each step, check the happy path, error paths, boundary conditions, and intersections with existing features.
 
-변경 비용으로 분류한다:
-- **변경 비용이 큰 것**: 반드시 질문한다
-- **변경 비용이 작은 것**: 기본값을 제안하고 넘어간다
+Classify by cost of change:
+- **High cost of change**: Must ask
+- **Low cost of change**: Suggest a default and move on
 
-### 질문 규칙
+### Question Rules
 
-- 한 번에 질문 하나. 2-4개 선택지를 제시하고, 응답을 받기 전까지 진행하지 않는다
-- 질문 전에 코드베이스에서 답을 찾을 수 있는지 먼저 확인한다
-- 기존 시나리오와의 교차점이 있으면 구체적으로 언급하며 질문한다
-- 3회 이상 새로운 발견이 없으면 다음 단계로 이동한다. 단, 변경 비용이 큰 미탐색 분기가 있으면 먼저 질문한다
+- One question at a time. Present 2-4 options and do not proceed until receiving a response
+- Before asking, first check if the answer can be found in the codebase
+- If there are intersections with existing scenarios, mention them specifically when asking
+- If there are no new discoveries for 3 or more rounds, move to the next step. However, if there are unexplored branches with high cost of change, ask about those first
 
-## Step 3: 첨부 이미지 저장
+## Step 3: Save Attached Images
 
-대화 중 사용자가 이미지를 첨부했으면 `artifacts/<feature-name>/references/`에 저장한다.
+If the user attached images during the conversation, save them to `artifacts/<feature-name>/references/`.
 
-- 파일명: 이미지 내용을 설명하는 영문 kebab-case (예: `main-dashboard-layout.png`)
-- 이미 같은 이미지가 있으면 건너뛴다
-- 저장 후 어떤 파일을 저장했는지 한 줄로 알려준다
+- Filename: English kebab-case describing the image content (e.g., `main-dashboard-layout.png`)
+- If the same image already exists, skip it
+- After saving, notify in one line which file was saved
 
-## Step 4: spec.md 생성
+## Step 4: Generate spec.md
 
-`references/spec-template.md`를 읽고 그 형식에 맞춰 작성한다.
+Read `references/spec-template.md` and write according to that format.
 
-### 작성 규칙
+### Writing Rules
 
-- 모든 성공 기준이 구체적 입력 -> 기대 출력을 명시하는가
-- 범위 제외 항목에 이유가 있는가
-- 미결정 사항은 사용자가 모른다고 답한 항목만 기록한다
+- Do all success criteria specify concrete input -> expected output
+- Do scope exclusion items have reasons
+- Undecided items are recorded only for items the user said they don't know
 
-파일명: `artifacts/<feature-name>/spec.md`
+Filename: `artifacts/<feature-name>/spec.md`
 
-## Step 5: spec.yaml 추출
+## Step 5: Extract spec.yaml
 
-spec.md의 시나리오를 `artifacts/spec.yaml`에 추출한다. `references/scenario-guide.md`의 기준과 `references/spec-example.yaml`의 구조를 따른다.
+Extract scenarios from spec.md into `artifacts/spec.yaml`. Follow the criteria in `references/scenario-guide.md` and the structure in `references/spec-example.yaml`.
 
-### 추출 규칙
+### Extraction Rules
 
-- ID 형식: `{FEATURE}-{NNN}` (기존 번호와 충돌하지 않게 이어서 부여)
-- 기존 `artifacts/spec.yaml`이 있으면 features에 append한다. 없으면 새로 생성한다
-- `examples`의 input/expect는 화면에서 확인 가능한 구체적 값으로 작성한다
+- ID format: `{FEATURE}-{NNN}` (assign sequentially without conflicting with existing numbers)
+- If `artifacts/spec.yaml` already exists, append to features. If not, create a new one
+- Write input/expect in `examples` with concrete values verifiable on screen
 
-### 검증 체크리스트 (저장 전)
+### Verification Checklist (before saving)
 
-- [ ] input이 구체적 값인가 (플레이스홀더가 아닌 실제 값)
-- [ ] expect가 화면에서 단언 가능한 값인가 (내부 상태가 아님)
-- [ ] given/when/then이 `references/scenario-guide.md` 기준을 충족하는가
-- [ ] 동일한 의미의 중복 시나리오가 없는가
-- [ ] examples가 1개 이상인가
+- [ ] Is the input a concrete value (an actual value, not a placeholder)
+- [ ] Is the expect a value that can be asserted on screen (not internal state)
+- [ ] Do given/when/then meet the criteria in `references/scenario-guide.md`
+- [ ] Are there no duplicate scenarios with the same meaning
+- [ ] Is there at least 1 example
 
-## Step 6: 누락 점검
+## Step 6: Gap Check
 
-spec.yaml 저장 후, `spec-reviewer` 에이전트를 호출하여 spec.md와 spec.yaml 사이의 누락 시나리오를 검증한다.
+After saving spec.yaml, invoke the `spec-reviewer` agent to verify missing scenarios between spec.md and spec.yaml.
 
-갭이 있으면 사용자에게 보여주고, 반영할 갭을 선택받아 Step 5의 규칙을 적용하여 추가한다.
+If there are gaps, show them to the user, let them select which gaps to incorporate, and add them applying the rules from Step 5.
 
-## 완료
+## Done
 
-spec에 UI 변경이 포함되어 있으면 `/sketch-wireframe`을, 없으면 `/draft-plan`을 안내한다.
+If the spec includes UI changes, guide to `/sketch-wireframe`; otherwise, guide to `/draft-plan`.

@@ -1,58 +1,58 @@
 ---
 name: write-requirements
-description: 유저의 아이디어를 인터뷰로 정리하여 요구사항 문서를 작성한다. 전체 사용자 흐름을 같이 걸어보며 핵심 아이디어, 설계 원칙, 핵심 도구를 정리한다. "/write-requirements", "요구사항", "요구사항 정리", "기능 정리" 등으로 실행.
-argument-hint: "기능 설명 (자유 형식)"
+description: Organize the user's idea into a requirements document through an interview. Walk through the entire user flow together, organizing the core idea, design principles, and key tools. Trigger with "/write-requirements", "requirements", "organize requirements", "organize features", etc.
+argument-hint: "feature description (free format)"
 ---
 
-# 요구사항 정리
+# Organize Requirements
 
-MVP 최초 기능을 정의할 때, 사용자와 전체 흐름을 같이 걸어보며 요구사항을 정리한다. 산출물은 `artifacts/<feature>/requirements.md`이다.
+When defining the initial MVP feature, walk through the entire flow with the user and organize the requirements. The deliverable is `artifacts/<feature>/requirements.md`.
 
-이 스킬의 목적��� 사용자의 머릿속 아��디어를 rough하게 구조화하는 것이다. 완벽하거나 빈틈없을 필요 없다 — 그건 `/write-spec`의 역할이다.
+The purpose of this skill is to roughly structure the idea in the user's mind. It does not need to be perfect or airtight -- that is the role of `/write-spec`.
 
-## Step 1: 아이디어 듣기
+## Step 1: Listen to the Idea
 
-`$ARGUMENTS`가 있으면 그것을 출발점으로 삼는다. 없으면 AskUserQuestion으로 "어떤 걸 만들고 싶으세요?"로 시작한다.
+If `$ARGUMENTS` exists, use it as the starting point. If not, start with AskUserQuestion: "What would you like to build?"
 
-## Step 2: 흐름 같이 걷기
+## Step 2: Walk Through the Flow Together
 
-사용자 흐름을 처음부터 끝까지 같이 따라간다. 이것이 인터뷰의 핵심이다.
+Follow the user flow from beginning to end together. This is the core of the interview.
 
-"사용자가 이 기능을 처음 접했을 때, 첫 번째로 하는 행동은 뭔가요?"에서 시작해서, 각 단계마다 "그다음은요?"로 자연스럽�� 이어간다.
+Start with "When the user first encounters this feature, what is the first action they take?" and naturally continue at each step with "What happens next?"
 
-흐름을 걷는 과정에서 자연스럽게 드러나는 것들을 메모한다:
+Take note of things that naturally emerge while walking through the flow:
 
-- 사용자가 "~는 안 돼요", "~없이"라고 말하면 → 설계 원칙
-- 사용자가 특정 라이브러리나 API를 언급하면 → 핵심 도구
+- When the user says "~ must not", "without ~" -> Design principle
+- When the user mentions a specific library or API -> Key tool
 
-억지로 끌어내지 않는다. 흐름 설명에서 자연스럽게 나오지 않은 원칙이나 도구는 비워둬도 된다. `/write-spec`이 나중에 채울 수 있다.
+Do not force it. Principles or tools that do not naturally come up from the flow explanation can be left empty. `/write-spec` can fill them in later.
 
-흐름이 끝까지 도달하면 인터뷰를 종료한다.
+End the interview when the flow reaches its conclusion.
 
-### 질문 규칙
+### Question Rules
 
-- AskUserQuestion을 사용한다
-- 한 번에 하나씩 묻는다
-- 흐름의 다음 단계를 묻는 것이 기본이다 — 섹션별로 묻지 않는다
+- Use AskUserQuestion
+- Ask one at a time
+- Asking about the next step in the flow is the default -- do not ask section by section
 
-## Step 3: 문서 정리
+## Step 3: Organize the Document
 
-`references/requirements-template.md`를 읽고 인터뷰에서 나온 내용을 4개 섹션으로 정리한다.
+Read `references/requirements-template.md` and organize the content from the interview into 4 sections.
 
-### 섹션별 작성 기준
+### Writing Criteria per Section
 
-- **핵심 아이디어**: 한 문장, "무엇을 + 왜" 형태
-- **사용자 흐름**: 번호가 매겨진 단계, 해피 패스만
-- **설계 원칙**: "원칙 — 부연 설명" 형태, 흐름에서 드러난 것만
-- **핵심 도구**: `package.json`에 이미 있는 스택은 제외, 새로 도입하는 것만 기록. 없으면 섹션 자체를 비운다
+- **Core Idea**: One sentence, in the form of "what + why"
+- **User Flow**: Numbered steps, happy path only
+- **Design Principles**: In the form of "Principle -- Explanation", only what emerged from the flow
+- **Key Tools**: Exclude stacks already in `package.json`, only record newly introduced ones. If none, leave the section empty
 
-### 저장
+### Saving
 
-- feature 이름은 대화에서 추출 (영문 kebab-case). 애매하면 사용자에게 확인
-- 저장 경로: `artifacts/<feature>/requirements.md`
+- Extract the feature name from the conversation (English kebab-case). If ambiguous, confirm with the user
+- Save path: `artifacts/<feature>/requirements.md`
 
-## Step 4: 확인 및 안내
+## Step 4: Confirm and Guide
 
-완성된 문서를 보여준다. 수정 요청이 있으면 반영한다.
+Show the completed document. If there are revision requests, incorporate them.
 
-완료 후 `/write-spec <feature>`로 다음 단계를 안내한다.
+After completion, guide to the next step with `/write-spec <feature>`.
