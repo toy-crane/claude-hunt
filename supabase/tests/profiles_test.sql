@@ -1,3 +1,8 @@
+-- Spec scenario mapping (artifacts/spec.yaml):
+-- PROFILE-001 (auto-creation + metadata fallbacks) → tests #13-18
+-- PROFILE-002 (RLS select own / block others)      → tests #10-11
+-- PROFILE-003 (RLS update own / block others)       → tests #19-20
+
 BEGIN;
 SELECT plan(20);
 
