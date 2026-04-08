@@ -29,6 +29,20 @@ SELECT has_function('public', 'handle_new_user', 'handle_new_user function shoul
 -- 9. Trigger exists on auth.users
 SELECT has_trigger('auth', 'users', 'on_auth_user_created', 'trigger should exist on auth.users');
 
+-- Seed user for RLS tests
+INSERT INTO auth.users (id, email, raw_user_meta_data, raw_app_meta_data, aud, role, instance_id, created_at, updated_at)
+VALUES (
+  '00000000-0000-0000-0000-000000000001',
+  'rls-test@example.com',
+  '{"full_name": "RLS Test User"}'::jsonb,
+  '{"provider": "email"}'::jsonb,
+  'authenticated',
+  'authenticated',
+  '00000000-0000-0000-0000-000000000000',
+  now(),
+  now()
+);
+
 -- 10-11. RLS: authenticated user can see only their own profile
 SET local role authenticated;
 SET local request.jwt.claims TO '{"sub": "00000000-0000-0000-0000-000000000001"}';
