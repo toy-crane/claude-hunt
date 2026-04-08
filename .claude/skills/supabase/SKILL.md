@@ -150,6 +150,12 @@ When configuring `config.toml` or OAuth providers, always use `localhost` (not `
 
 See `references/oauth-local-setup.md` for details.
 
+## Production OAuth Setup
+
+When deploying OAuth (GitHub, Google) to production, configure the Supabase dashboard URL settings, create separate OAuth apps per environment, and set up provider credentials.
+
+See `references/oauth-production-setup.md` for the full checklist.
+
 ## Email Magic Link (OTP) Login
 
 This project supports passwordless email login via `signInWithOtp`. Key points:
