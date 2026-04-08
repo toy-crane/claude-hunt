@@ -1,37 +1,37 @@
-# decisions.md 작성 가이드
+# decisions.md Writing Guide
 
-`artifacts/<feature>/decisions.md`에 Team Lead의 판단을 기록한다.
+Record the Team Lead's decisions in `artifacts/<feature>/decisions.md`.
 
-## 엔트리 형식
-
-```markdown
-## <제목>
-
-- 내용: <무엇이 있었는가>
-- 판단: <어떻게 결정했는가>
-- 근거: <왜 그렇게 결정했는가>
-- 결과: 미정
-```
-
-## 결과 갱신
-
-실행이 진행되면 `미정`을 아래 상태값 중 하나로 갱신한다:
-
-| 상태값 | 의미 |
-|--------|------|
-| 성공 | 판단이 의도대로 작동함 |
-| 부분 | 작동했으나 추가 수정이 필요했음 |
-| 실패 | 다른 접근이 필요했음 |
-
-상태값 뒤에 자유 형식으로 구체적 결과를 기술한다.
+## Entry Format
 
 ```markdown
-- 결과: 성공 — 1회 Builder 위임으로 Reviewer pass
-- 결과: 부분 — 기능 동작하나 shadcn 패턴 미준수로 2차 수정
-- 결과: 실패 — 동일 barrel import 위반이 다음 feature에서도 재발
+## <Title>
+
+- Content: <What happened>
+- Decision: <How it was decided>
+- Rationale: <Why it was decided that way>
+- Result: Pending
 ```
 
-## 갱신 시점
+## Result Updates
 
-- Step 5(평가 루프) 완료 후: Step 2-3 판단의 결과 갱신
-- Step 7(완료) 시: 남은 `미정` 결과를 모두 갱신
+As execution progresses, update `Pending` to one of the following status values:
+
+| Status | Meaning |
+|--------|---------|
+| Success | The decision worked as intended |
+| Partial | It worked but required additional fixes |
+| Failure | A different approach was needed |
+
+After the status value, describe the specific result in free-form text.
+
+```markdown
+- Result: Success — Reviewer pass on first Builder delegation
+- Result: Partial — Feature works but required a second fix for shadcn pattern non-compliance
+- Result: Failure — Same barrel import violation recurred in next feature
+```
+
+## Update Timing
+
+- After Step 5 (evaluation loop) completion: Update results for Step 2-3 decisions
+- At Step 7 (done): Update all remaining `Pending` results

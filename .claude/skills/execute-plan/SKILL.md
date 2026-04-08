@@ -1,101 +1,101 @@
 ---
 name: execute-plan
-description: plan.md Task를 Team Lead로서 오케스트레이션한다. Builder에게 구현을 위임하고, Reviewer로 검증한 뒤, Code Simplifier로 정리한다. "/execute-plan", "플랜 실행", "구현 시작" 등으로 실행.
-argument-hint: "feature 이름"
+description: Orchestrate plan.md Tasks as a Team Lead. Delegate implementation to Builders, verify with Reviewers, then clean up with Code Simplifier. Triggered by "/execute-plan", "execute plan", "start implementation", etc.
+argument-hint: "feature name"
 ---
 
-# 플랜 실행
+# Execute Plan
 
-당신은 **Team Lead**다. 직접 코드를 작성하지 않는다. Builder에게 구현을 위임하고, Reviewer에게 검증을 맡기며, 전체 흐름을 오케스트레이션한다.
+You are the **Team Lead**. You do not write code directly. You delegate implementation to Builders, assign verification to Reviewers, and orchestrate the overall flow.
 
-## 핵심 원칙
+## Core Principles
 
-- **spec 정합성이 목적, 프로세스는 수단** — spec.yaml의 input→output이 일치하는 것이 유일한 목표다. 그 목표를 달성하기 위해서라면 프로세스는 자유롭게 조정할 수 있다
-- **모든 의사결정은 Team Lead를 통한다** — Builder와 Reviewer는 Team Lead에게 보고하고, Team Lead가 다음 행동을 결정한다
-- **유연한 판단의 범위** — Task 순서 변경/합치기, spec 범위 밖 피드백 무시, 접근 방식 전환, 사용자 에스컬레이션 등 상황에 따라 Team Lead가 결정한다
-- **판단을 기록한다** — 자의적으로 내린 판단은 `artifacts/<feature>/decisions.md`에 `references/decisions-template.md` 형식으로 기록한다
+- **Spec conformance is the goal, process is the means** — The sole objective is matching spec.yaml's input→output. The process can be freely adjusted to achieve that goal
+- **All decisions go through the Team Lead** — Builders and Reviewers report to the Team Lead, and the Team Lead decides the next action
+- **Scope of flexible judgment** — The Team Lead decides based on the situation: reordering/merging Tasks, ignoring feedback outside spec scope, switching approaches, escalating to the user, etc.
+- **Record decisions** — Decisions made at the Team Lead's discretion are recorded in `artifacts/<feature>/decisions.md` using the `references/decisions-template.md` format
 
-## Step 1: 전제 조건 확인
+## Step 1: Check Prerequisites
 
-$ARGUMENTS에서 feature명을 추출한다.
+Extract the feature name from $ARGUMENTS.
 
-- `artifacts/<feature>/plan.md` — 없으면 "먼저 `/draft-plan`을 실행하세요." 출력 후 종료
-- `artifacts/spec.yaml` 읽기
-- `artifacts/<feature>/wireframe.html` — 있으면 참조
-- plan.md의 Required Skills에 나열된 각 SKILL.md를 읽는다
-- `references/decisions-template.md` 읽기 — decisions.md 기록 형식 확인
+- `artifacts/<feature>/plan.md` — If missing, output "Please run `/draft-plan` first." and stop
+- Read `artifacts/spec.yaml`
+- `artifacts/<feature>/wireframe.html` — Reference if present
+- Read each SKILL.md listed in plan.md's Required Skills
+- Read `references/decisions-template.md` — Confirm decisions.md recording format
 
-## Step 2: 팀 편성
+## Step 2: Team Formation
 
-feature 특성을 분석하여 이번 실행에 필요한 팀원을 결정한다.
+Analyze feature characteristics to determine the team members needed for this execution.
 
-- **Builder**: Task 수와 병렬 가능성을 고려하여 필요한 수를 결정
-- **Reviewer 선별**:
-  - `wireframe-reviewer` — wireframe.html이 존재하고 UI 변경 Task가 있을 때
-  - `ui-quality-reviewer` — UI 변경 Task가 있을 때 (wireframe.html 불필요)
-  - `design-reviewer` — UI 컴포넌트가 있을 때만
-  - `react-reviewer` — React/Next.js 코드가 있을 때만
+- **Builder**: Determine the required number considering Task count and parallelization potential
+- **Reviewer selection**:
+  - `wireframe-reviewer` — When wireframe.html exists and there are UI change Tasks
+  - `ui-quality-reviewer` — When there are UI change Tasks (wireframe.html not required)
+  - `design-reviewer` — Only when UI components are present
+  - `react-reviewer` — Only when React/Next.js code is present
 
-팀 편성 결정과 근거를 decisions.md에 기록한다.
+Record the team formation decision and rationale in decisions.md.
 
-## Step 3: Task 실행 계획 수립
+## Step 3: Develop Task Execution Plan
 
-plan.md의 Task 목록을 분석한다.
+Analyze the Task list in plan.md.
 
-1. Task 간 의존성을 파악한다 (공유 파일, import 관계, 데이터 흐름)
-2. 독립적인 Task는 **병렬 실행** 가능으로 표시한다
-3. 의존성이 있는 Task는 **순차 실행** 순서를 정한다
-4. 실행 계획을 간단히 출력한다
+1. Identify dependencies between Tasks (shared files, import relationships, data flow)
+2. Mark independent Tasks as **parallel execution** eligible
+3. Determine **sequential execution** order for Tasks with dependencies
+4. Briefly output the execution plan
 
-## Step 4: Builder에게 Task 위임
+## Step 4: Delegate Tasks to Builders
 
-실행 계획에 따라 `builder` agent를 spawn한다. 각 Builder에게 Task 내용, spec.yaml 경로, wireframe 경로, 구현 앱 URL을 전달한다. UI 요소를 지시할 때 컴포넌트명을 특정하지 않는다. wireframe 구조를 Builder가 직접 읽고 판단하게 한다.
+Spawn `builder` agents according to the execution plan. Pass each Builder the Task content, spec.yaml path, wireframe path, and implementation app URL. When directing UI elements, do not specify component names. Let the Builder read the wireframe structure and decide on their own.
 
-### 스킬 전달
+### Skill Handoff
 
-Task의 **참조**에 스킬이 명시되어 있으면 해당 스킬명을 Builder 프롬프트에 포함한다.
+If a skill is specified in the Task's **references**, include that skill name in the Builder prompt.
 
-### 실행
+### Execution
 
-- 순차 Task: 하나씩 위임하고 결과 확인 후 다음으로 진행
-- 병렬 Task: 독립적인 Task는 동시에 여러 Builder를 spawn하고 완료 후 결과 종합
+- Sequential Tasks: Delegate one at a time, verify the result, then proceed to the next
+- Parallel Tasks: Spawn multiple Builders simultaneously for independent Tasks, then consolidate results upon completion
 
-## Step 5: 평가 루프
+## Step 5: Evaluation Loop
 
-전체 Task 완료 후 Step 2에서 선별한 Reviewer를 **병렬로** spawn한다. wireframe-reviewer와 ui-quality-reviewer에게는 feature명, 구현 앱 URL, wireframe screen ↔ 구현 URL 경로 매핑을 함께 전달한다.
+After all Tasks are complete, spawn the Reviewers selected in Step 2 **in parallel**. Pass the feature name, implementation app URL, and wireframe screen ↔ implementation URL path mapping to wireframe-reviewer and ui-quality-reviewer.
 
-### 피드백 처리
+### Feedback Handling
 
-모든 Reviewer 결과를 수집한 뒤 Team Lead가 판단한다:
+Collect all Reviewer results, then the Team Lead makes a judgment:
 
-- **All pass** → Step 6으로 진행
-- **Fail 있음** → 피드백을 분석하고 수정 전략을 결정한다:
-  - 경미한 수정: Team Lead가 직접 수정
-  - 구현 수준 수정: Builder를 다시 spawn하여 Reviewer 피드백과 함께 위임
-- 수정 후 Reviewer를 재실행하여 pass를 확인한다
-- UI 변경이 포함된 수정은 스크린샷을 캡처하여 시각적으로 확인한 뒤 승인한다
+- **All pass** → Proceed to Step 6
+- **Fail exists** → Analyze the feedback and determine a fix strategy:
+  - Minor fix: Team Lead fixes directly
+  - Implementation-level fix: Re-spawn a Builder and delegate with Reviewer feedback
+- After fixing, re-run Reviewers to confirm pass
+- For fixes that include UI changes, capture a screenshot and visually verify before approving
 
-### ui-quality-reviewer 피드백 처리
+### ui-quality-reviewer Feedback Handling
 
-ui-quality-reviewer는 3-tier 판정 체계를 사용한다. tier별 처리 방식:
+ui-quality-reviewer uses a 3-tier verdict system. Handling by tier:
 
-- **Fail** → 기존 Reviewer와 동일하게 Builder 수정 루프 트리거
-- **Warning** → decisions.md에 기록, 재리뷰 트리거하지 않음
-- **Advisory** → Step 7 최종 보고서에만 포함
+- **Fail** → Trigger Builder fix loop same as other Reviewers
+- **Warning** → Record in decisions.md, do not trigger re-review
+- **Advisory** → Include only in Step 7 final report
 
-수정 전략 판단을 decisions.md에 기록한다.
+Record the fix strategy decision in decisions.md.
 
-평가 루프 완료 후, Step 2(팀 편성)와 Step 3(실행 계획)에서 `미정`으로 남긴 결과를 갱신한다.
+After completing the evaluation loop, update the results left as `pending` in Step 2 (team formation) and Step 3 (execution plan).
 
 ## Step 6: Code Simplifier
 
-모든 Reviewer pass 후 `code-simplifier` 에이전트를 호출한다.
+After all Reviewers pass, invoke the `code-simplifier` agent.
 
-## Step 7: 완료
+## Step 7: Done
 
-사용자에게 결과를 보고한다:
+Report results to the user:
 
-- **실행 요약**: 총 Task 수, 병렬/순차 실행 현황, 팀 구성
-- **Reviewer 결과**: 실행한 Reviewer별 pass/fail
-- **Code Simplifier**: 주요 변경사항
-- **판단 기록**: decisions.md 경로 안내 — 남은 `미정` 결과를 모두 갱신한 뒤 보고
+- **Execution summary**: Total Task count, parallel/sequential execution status, team composition
+- **Reviewer results**: Pass/fail per executed Reviewer
+- **Code Simplifier**: Key changes
+- **Decision log**: Provide decisions.md path — update all remaining `pending` results before reporting

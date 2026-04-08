@@ -1,9 +1,9 @@
-# <Feature> 구현 계획
+# <Feature> Implementation Plan
 
 ## Architecture Decisions
 
-| 결정 사항 | 선택 | 사유 |
-|-----------|------|------|
+| Decision | Choice | Reason |
+|----------|--------|--------|
 
 ## Data Model
 
@@ -13,33 +13,33 @@
 
 ## Required Skills
 
-| 스킬 | 적용 Task | 용도 |
-|------|-----------|------|
+| Skill | Applicable Task | Purpose |
+|-------|-----------------|---------|
 
 ## Affected Files
 
-| 파일 경로 | 변경 유형 | 관련 Task |
-|-----------|----------|-----------|
+| File Path | Change Type | Related Task |
+|-----------|-------------|--------------|
 
-변경 유형: 신규 | 수정 | 삭제
+Change Type: New | Modify | Delete
 
 ## Tasks
 
-### Task 1: (제목)
+### Task 1: (Title)
 
-- **시나리오**: FEATURE-XXX, FEATURE-YYY
-- **의존성**: 없음 | Task N (사유), Task M (사유)
-- **참조**:
-  - (스킬명 — 키워드)
-  - (외부 문서 URL)
-  - (프로젝트 내 파일 경로)
-- **구현 대상**:
-  - `파일/경로.tsx`
-    - 완료 시 존재해야 하는 것 1
-    - 완료 시 존재해야 하는 것 2
-- **수용 기준**:
-  - [ ] (구체적 입력 -> 기대 출력)
+- **Scenarios**: FEATURE-XXX, FEATURE-YYY
+- **Dependencies**: None | Task N (reason), Task M (reason)
+- **References**:
+  - (skill name — keywords)
+  - (external document URL)
+  - (project file path)
+- **Implementation targets**:
+  - `file/path.tsx`
+    - Must exist upon completion 1
+    - Must exist upon completion 2
+- **Acceptance criteria**:
+  - [ ] (specific input -> expected output)
 
 ---
 
-## 미결정 사항
+## Undecided Items

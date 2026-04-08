@@ -1,72 +1,72 @@
 ---
 name: draft-plan
-description: spec.yaml 기반으로 구현 계획을 작성한다. skill-researcher로 관련 스킬을 찾고, TDD 기반 task 목록을 생성한다. "/draft-plan", "계획 작성", "구현 계획" 등으로 실행.
-argument-hint: "feature 이름"
+description: Create an implementation plan based on spec.yaml. Find related skills via skill-researcher and generate a TDD-based task list. Triggered by "/draft-plan", "create plan", "implementation plan", etc.
+argument-hint: "feature name"
 ---
 
-# 구현 계획 작성
+# Create Implementation Plan
 
-## Step 1: 전제 조건 확인
+## Step 1: Check Prerequisites
 
-$ARGUMENTS에서 feature명을 추출한다.
+Extract the feature name from $ARGUMENTS.
 
-- `artifacts/spec.yaml` -- 없으면 "먼저 `/write-spec`을 실행하세요." 출력 후 종료
-- `artifacts/<feature>/spec.md` -- 선택
-- `artifacts/<feature>/wireframe.html` -- 선택
+- `artifacts/spec.yaml` -- If missing, output "Please run `/write-spec` first." and stop
+- `artifacts/<feature>/spec.md` -- Optional
+- `artifacts/<feature>/wireframe.html` -- Optional
 
-## Step 2: 코드베이스 탐색
+## Step 2: Codebase Exploration
 
-기존 코드를 탐색하여 아키텍처와 관련 패턴을 파악한다.
+Explore the existing code to understand the architecture and related patterns.
 
-- 프로젝트 구조, 기존 컴포넌트, 상태 관리 방식 확인
-- 이 feature가 영향을 줄 파일과 그 의존 관계 파악
-- 유사한 기존 기능이 있으면 그 구현을 참조한다
+- Check project structure, existing components, and state management approach
+- Identify files this feature will affect and their dependency relationships
+- If similar existing functionality exists, reference its implementation
 
-## Step 3: 스킬 탐색
+## Step 3: Skill Search
 
-`skill-researcher` 에이전트를 호출하여 이 feature의 시나리오에 도움이 될 스킬을 찾는다.
+Invoke the `skill-researcher` agent to find skills that can help with this feature's scenarios.
 
-추천 목록을 사용자에게 보여주고, 확인/조정을 받는다.
+Show the recommendation list to the user and receive confirmation/adjustments.
 
-## Step 4: 빈칸 채우기
+## Step 4: Fill in the Blanks
 
-위 입력을 읽고, 구현에 필요하지만 아직 결정되지 않은 사항을 찾는다.
+Read the above inputs and find items that are needed for implementation but not yet decided.
 
-- 변경 비용이 큰 결정만 질문한다
-- 한 번에 질문 하나, 2-4개 선택지 제시
+- Only ask about decisions with high cost of change
+- One question at a time, present 2-4 options
 
-## Step 5: 계획 문서 생성
+## Step 5: Generate Plan Document
 
-`references/plan-template.md`를 읽고 그 형식에 맞춰 작성한다.
+Read `references/plan-template.md` and write following its format.
 
-### 계획 요건
+### Plan Requirements
 
-#### Task 작성 원칙
-- task에는 What과 수용 기준만 포함한다. 코드베이스가 변할 수 있으므로 How는 제외한다
-- task 참조에는 executor가 직접 찾을 수 없는 외부 소스만 포함한다 (스킬은 이름 + 키워드만)
+#### Task Writing Principles
+- Tasks include only What and acceptance criteria. Exclude How since the codebase may change
+- Task references include only external sources that the executor cannot find on their own (for skills, only name + keywords)
 
-#### 배치 순서
-- spec 테스트(*.spec.test.tsx) 생성을 가장 먼저 배치한다. 선행 작업이 필요하면 사유와 함께 앞에 둔다
-- 의존성이 적은 것부터 task를 배치한다
+#### Ordering
+- Place spec test (*.spec.test.tsx) generation first. If prerequisite work is needed, place it before with a reason
+- Order tasks starting with those that have the fewest dependencies
 
-#### 테스트
-- 각 구현 task의 수용 기준에 구현 테스트 통과를 포함한다
+#### Testing
+- Include implementation test pass in the acceptance criteria of each implementation task
 
-#### Wireframe 반영
-- wireframe.html이 있으면, 컴포넌트 타입을 task의 구현 대상에 반영한다
-- wireframe에서 식별된 컴포넌트 중 프로젝트에 없는 것은, 직접 구현 전에 패키지 레지스트리에서 설치 가능 여부를 확인한다
+#### Wireframe Integration
+- If wireframe.html exists, reflect component types in the task's implementation targets
+- For components identified in the wireframe that don't exist in the project, check package registry for installability before implementing directly
 
-#### 기타
-- Affected Files 섹션에 코드베이스 탐색 결과를 반영한다
+#### Other
+- Reflect codebase exploration results in the Affected Files section
 
-`artifacts/<feature>/plan.md`로 저장한다.
+Save as `artifacts/<feature>/plan.md`.
 
-## Step 6: 독립 검토
+## Step 6: Independent Review
 
-`plan-reviewer` 에이전트를 호출하여 위 입력과 plan.md 사이의 불일치를 검증한다.
+Invoke the `plan-reviewer` agent to verify inconsistencies between the above inputs and plan.md.
 
-갭이 있으면 사용자에게 보여주고, 반영할 갭을 선택받아 plan.md에 반영한다.
+If gaps exist, show them to the user, let them select which gaps to address, and apply them to plan.md.
 
-## 완료
+## Done
 
-사용자에게 `/execute-plan <feature>` 진행 여부를 안내한다.
+Inform the user whether to proceed with `/execute-plan <feature>`.
