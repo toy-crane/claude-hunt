@@ -7,7 +7,7 @@ NAME=$(echo "$INPUT" | jq -r '.name')
 PROJECT_ROOT="$(git rev-parse --show-toplevel)"
 WORKTREE_PATH="$PROJECT_ROOT/.claude/worktrees/$NAME"
 
-# 이미 worktree가 존재하면 경로만 반환
+# If the worktree already exists, just return the path
 if [ -d "$WORKTREE_PATH" ]; then
   echo "$WORKTREE_PATH"
   exit 0

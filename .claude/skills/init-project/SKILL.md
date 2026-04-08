@@ -1,6 +1,6 @@
 ---
 name: init-project
-description: Initialize this Next.js template for local development. Use this skill when the user wants to set up the project, install dependencies, or configure Supabase. Trigger on phrases like "init project", "set up", "initialize", "configure", "프로젝트 초기화", "설정해줘", "세팅해줘".
+description: Initialize this Next.js template for local development. Use this skill when the user wants to set up the project, install dependencies, or configure Supabase. Trigger on phrases like "init project", "set up", "initialize", "configure".
 user-invocable: true
 ---
 
