@@ -27,7 +27,7 @@ jobs:
       SUPABASE_ACCESS_TOKEN: ${{ secrets.SUPABASE_ACCESS_TOKEN }}
     steps:
       - uses: actions/checkout@v4
-      - uses: supabase/setup-cli@v2
+      - uses: supabase/setup-cli@v1
         with:
           version: latest
       - run: supabase link --project-ref ${{ secrets.PRODUCTION_PROJECT_ID }}
