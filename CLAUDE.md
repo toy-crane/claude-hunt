@@ -20,6 +20,7 @@
 |---|---|---|
 | `{feature-id}.spec.test.tsx` | `__tests__/` | Acceptance criteria tests per spec.yaml feature |
 | `*.test.tsx` | Next to component/module | Implementation unit tests |
+| `*_test.sql` | `supabase/tests/` | Database acceptance tests (pgTAP) for triggers, RLS, constraints |
 | `helpers.tsx` | `__tests__/` | Shared test helpers (renderWithContent, etc.) |
 
 - Spec tests are split into files per spec.yaml feature
