@@ -1,6 +1,11 @@
 {
   "version": 1,
   "skills": {
+    "idea-refine": {
+      "source": "addyosmani/agent-skills",
+      "sourceType": "github",
+      "computedHash": "486faf25de80c7f03fc5546423fd4fe143a45558bd1482a9f126e492941d7a6d"
+    },
     "supabase-postgres-best-practices": {
       "source": "supabase/agent-skills",
       "sourceType": "github",
