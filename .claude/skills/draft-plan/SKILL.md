@@ -79,7 +79,7 @@ Break a task down further when:
 
 #### Acceptance Criteria
 
-Quote spec.yaml examples verbatim. Copy the `input` and `expect` values directly — do not paraphrase or rewrite them. Format: `SCENARIO-ID: { input } → { expect }`.
+Quote spec.yaml examples verbatim. Copy the `input` and `expect` values directly — do not paraphrase or rewrite them. Use the checkbox format from plan-template.md: `- [ ] SCENARIO-ID: { input } → { expect }`.
 
 #### Ordering
 
@@ -91,10 +91,6 @@ Quote spec.yaml examples verbatim. Copy the `input` and `expect` values directly
 #### Checkpoint Discipline
 
 Insert a checkpoint after every 2-3 tasks. A checkpoint verifies: all tests pass, build succeeds, and the vertical slice works end-to-end.
-
-#### Testing
-
-Include implementation test pass in the acceptance criteria of each implementation task.
 
 #### Wireframe Integration
 
