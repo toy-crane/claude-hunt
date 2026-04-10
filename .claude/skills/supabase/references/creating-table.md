@@ -11,7 +11,7 @@ Create `supabase/schemas/<table_name>.sql`:
 
 create table public.posts (
   id uuid primary key default gen_random_uuid(),
-  user_id uuid not null references auth.users on delete cascade,
+  user_id uuid not null references public.profiles (id) on delete cascade,
   title text not null,
   content text,
   created_at timestamptz default now() not null,
@@ -51,7 +51,8 @@ grant all on table public.posts to service_role;
 - `created_at` and `updated_at` always go last
 - Use `timestamptz` (never bare `timestamp`)
 - Use `text` (never `varchar(n)`)
-- Use `uuid` for PKs that reference `auth.users`
+- Use `uuid` for PKs that reference `auth.users` or `profiles`
+- Only `profiles` references `auth.users(id)` directly. All other tables reference `profiles(id)`
 - Wrap `auth.uid()` in `(select auth.uid())` for performance
 - Scope policies to `authenticated` (not `public`)
 - Grants: `anon` = SELECT only, `authenticated` = SELECT/INSERT/UPDATE, `service_role` = ALL

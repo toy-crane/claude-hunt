@@ -47,6 +47,7 @@ Run through this checklist when working on auth, RLS, views, or user data:
 - Use `text` (never `varchar(n)`)
 - Use `uuid` for primary keys that reference `auth.users`
 - Use `numeric(10,2)` for money (never `float`)
+- Only `profiles` may reference `auth.users(id)` directly. All other tables should reference `profiles(id)`
 
 ## RLS & Security Patterns
 
