@@ -10,16 +10,6 @@
     "CLAUDE_CODE_EXPERIMENTAL_AGENT_TEAMS": "1"
   },
   "hooks": {
-    "SessionStart": [
-      {
-        "hooks": [
-          {
-            "type": "command",
-            "command": "bash \"$(git rev-parse --show-toplevel)\"/.claude/hooks/session-start.sh"
-          }
-        ]
-      }
-    ],
     "WorktreeCreate": [
       {
         "hooks": [

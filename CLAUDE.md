@@ -1,3 +1,7 @@
+## Workflow Phases
+
+Define → Plan → Build → Verify → Review → Ship
+
 ## Development Workflow
 
 - Package manager: `bun`
