@@ -33,7 +33,7 @@ Identify component patterns used in each screen of wireframe.html and check whet
 
 ### 3. Plan Internal Consistency Verification (always)
 
-- Verify each task has scenario mappings and acceptance criteria
+- Verify each task has scenario mappings, acceptance criteria, and verification commands
 - Verify task dependency ordering is correct
 
 ## Output
