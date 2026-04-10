@@ -14,7 +14,8 @@
     "test:unit": "vitest run --passWithNoTests",
     "test:db": "supabase test db",
     "test:watch": "vitest",
-    "test:coverage": "vitest run --coverage"
+    "test:coverage": "vitest run --coverage",
+    "gen:types": "supabase gen types typescript --local > types/database.types.ts"
   },
   "dependencies": {
     "@remixicon/react": "^4.9.0",
