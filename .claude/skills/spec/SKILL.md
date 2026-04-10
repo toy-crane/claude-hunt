@@ -48,6 +48,15 @@ REFRAMED SUCCESS CRITERIA:
 
 Read `references/spec-template.md` and fill in each section based on the information gathered in Steps 1–3.
 
+Tips for filling it well:
+
+- **Objective** — What are we building and why? Who is the user? What does success look like?
+- **Commands** — Full executable commands (build, test, lint, dev)
+- **Project Structure** — Where source code, tests, and docs live
+- **Code Style** — One real code snippet showing the style beats three paragraphs describing it
+- **Testing Strategy** — Framework, test locations, coverage expectations, test levels
+- **Boundaries** — Always do / Ask first / Never do
+
 ## Step 5: Verify Completeness
 
 Before saving, confirm:
