@@ -10,9 +10,12 @@ argument-hint: "feature name"
 
 Extract the feature name from $ARGUMENTS.
 
+Required (project-level, shared across all features):
 - `artifacts/spec.yaml` -- If missing, output "Please run `/write-spec` first." and stop
-- `artifacts/<feature>/spec.md` -- Optional
-- `artifacts/<feature>/wireframe.html` -- Optional
+
+Optional (per-feature):
+- `artifacts/<feature>/spec.md`
+- `artifacts/<feature>/wireframe.html`
 
 ## Step 2: Enter Plan Mode
 
