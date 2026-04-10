@@ -46,5 +46,4 @@ Reverse dependencies are forbidden to prevent circular dependencies. Implement f
 ## Boundary
 
 ### Ask-first
-- Changes to spec.yaml
 - Adding new external dependencies
