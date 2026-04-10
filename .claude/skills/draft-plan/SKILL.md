@@ -1,6 +1,6 @@
 ---
 name: draft-plan
-description: Create an implementation plan based on spec.yaml. Find related skills via skill-researcher and generate a TDD-based task list with vertical slicing and dependency ordering. Triggered by "/draft-plan", "create plan", "implementation plan", etc.
+description: Create an implementation plan based on spec.yaml. Discover related skills and generate a TDD-based task list with vertical slicing and dependency ordering. Triggered by "/draft-plan", "create plan", "implementation plan", etc.
 argument-hint: "feature name"
 ---
 
@@ -30,9 +30,10 @@ Explore the existing code to understand the architecture and related patterns.
 - If similar existing functionality exists, reference its implementation
 - Note risks and unknowns
 
-## Step 4: Skill Search
+## Step 4: Discover Skills
 
-Invoke the `skill-researcher` agent to find skills that can help with this feature's scenarios.
+Scan `.claude/skills/` and select every skill that has even a slight connection to this feature.
+When in doubt, include it — builders can ignore what they don't need.
 
 ## Step 5: Fill in the Blanks
 
