@@ -12,11 +12,9 @@ Explore existing context before asking questions. Read in order if they exist:
 
 1. `artifacts/<feature>/idea.md` — core idea, design principles (don't re-ask decided items)
 2. `artifacts/spec.yaml` — related scenarios
-3. `artifacts/<feature>/spec.md`
-4. `artifacts/<feature>/references/` — extract scenario candidates from screen composition; ignore visual design
-5. Related components in the codebase
+3. `artifacts/<feature>/spec.md` — prior discussion record
 
-For entirely new features, skip 2–5 but still check the references/ directory.
+For entirely new features, only check idea.md.
 
 ## Step 2: Surface Assumptions
 
