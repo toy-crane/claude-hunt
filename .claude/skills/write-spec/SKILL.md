@@ -60,15 +60,9 @@ Classify by cost of change:
 - If there are intersections with existing scenarios, mention them specifically when asking
 - If there are no new discoveries for 3 or more rounds, move to the next step. However, if there are unexplored branches with high cost of change, ask about those first
 
-## Step 5: Save Attached Images
+## Step 5: Generate spec.md
 
-If the user attached images during the conversation, save them to `artifacts/<feature-name>/references/`.
-
-- Filename: English kebab-case describing the image content (e.g., `main-dashboard-layout.png`)
-- If the same image already exists, skip it
-- After saving, notify in one line which file was saved
-
-## Step 6: Generate spec.md
+If the user attached images, save them to `artifacts/<feature-name>/references/` first (kebab-case filename, skip duplicates).
 
 Read `references/spec-template.md` and write according to that format.
 
@@ -80,7 +74,7 @@ Read `references/spec-template.md` and write according to that format.
 
 Filename: `artifacts/<feature-name>/spec.md`
 
-## Step 7: Extract spec.yaml
+## Step 6: Extract spec.yaml
 
 Extract scenarios from spec.md into `artifacts/spec.yaml`. Follow the criteria in `references/scenario-guide.md` and the structure in `references/spec-example.yaml`.
 
@@ -98,11 +92,11 @@ Extract scenarios from spec.md into `artifacts/spec.yaml`. Follow the criteria i
 - [ ] Are there no duplicate scenarios with the same meaning
 - [ ] Is there at least 1 example
 
-## Step 8: Gap Check
+## Step 7: Gap Check
 
 After saving spec.yaml, invoke the `spec-reviewer` agent to verify missing scenarios between spec.md and spec.yaml.
 
-If there are gaps, show them to the user, let them select which gaps to incorporate, and add them applying the rules from Step 5.
+If there are gaps, show them to the user, let them select which gaps to incorporate, and add them applying the rules from Step 6.
 
 ## Done
 
