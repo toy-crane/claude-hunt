@@ -38,6 +38,7 @@ Run through this checklist when working on auth, RLS, views, or user data:
 | Local OAuth setup | [oauth-local-setup.md](references/oauth-local-setup.md) |
 | Production OAuth setup | [oauth-production-setup.md](references/oauth-production-setup.md) |
 | Email magic link (OTP) login | [email-magiclink-local-setup.md](references/email-magiclink-local-setup.md) |
+| Type-safe client setup | [type-safe-client.md](references/type-safe-client.md) |
 
 ## Table Conventions
 
@@ -68,4 +69,5 @@ Run `supabase test db` after every change. Create tests with `supabase test new 
 | `supabase db reset` | Reset local DB, replay all migrations |
 | `supabase test db` | Run all pgTAP tests |
 | `supabase test new <name>.test` | Create new test file |
+| `bun run gen:types` | Regenerate TypeScript types from local DB |
 | `supabase start` / `supabase stop` | Start / stop local Supabase |

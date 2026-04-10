@@ -86,8 +86,17 @@ Create a test file in `supabase/tests/` covering:
 
 See `testing.md` for patterns.
 
-## Step 6: Verify
+## Step 6: Regenerate Types
+
+```bash
+bun run gen:types
+```
+
+This updates `types/database.types.ts` with the new table. See `type-safe-client.md` for details.
+
+## Step 7: Verify
 
 ```bash
 supabase test db
+bun run typecheck
 ```

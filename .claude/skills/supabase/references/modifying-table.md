@@ -72,8 +72,15 @@ For destructive changes (dropping columns, changing types), prefer `supabase db 
 
 Update existing pgTAP tests or add new assertions for the changed columns/policies. See `testing.md` for patterns.
 
-## Step 7: Verify
+## Step 7: Regenerate Types
+
+```bash
+bun run gen:types
+```
+
+## Step 8: Verify
 
 ```bash
 supabase test db
+bun run typecheck
 ```
