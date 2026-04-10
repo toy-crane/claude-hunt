@@ -8,15 +8,15 @@ argument-hint: "feature description"
 
 ## Step 1: Pre-exploration
 
-When extending an existing feature, explore before asking questions:
+Explore existing context before asking questions. Read in order if they exist:
 
-- If `artifacts/<feature>/requirements.md` exists, read it. Use the core idea and design principles as a starting point for questions, and do not re-ask about already decided items
-- Read related scenarios from `artifacts/spec.yaml`
-- Check `artifacts/<feature>/spec.md`
-- Check the current implementation of related components
-- If reference images exist in the `artifacts/<feature>/references/` directory, read them. Extract scenario candidates from the screen composition (component placement, element types, screen flow) in the images and use them in iterative questioning. Ignore visual design (colors, fonts, spacing values)
+1. `artifacts/<feature>/idea.md` — core idea, design principles (don't re-ask decided items)
+2. `artifacts/spec.yaml` — related scenarios
+3. `artifacts/<feature>/spec.md`
+4. `artifacts/<feature>/references/` — extract scenario candidates from screen composition; ignore visual design
+5. Related components in the codebase
 
-If it is an entirely new feature, skip existing code exploration but still check the references/ directory.
+For entirely new features, skip 2–5 but still check the references/ directory.
 
 ## Step 2: Surface Assumptions
 
