@@ -34,8 +34,6 @@ Explore the existing code to understand the architecture and related patterns.
 
 Invoke the `skill-researcher` agent to find skills that can help with this feature's scenarios.
 
-Show the recommendation list to the user and receive confirmation/adjustments.
-
 ## Step 5: Fill in the Blanks
 
 Read the above inputs and find items that are needed for implementation but not yet decided.
@@ -44,6 +42,8 @@ Read the above inputs and find items that are needed for implementation but not 
 - One question at a time, present 2-4 options
 
 ## Step 6: Generate Plan Document
+
+Read the SKILL.md of each skill confirmed in Step 4 to understand their conventions and constraints. The plan must respect these — architecture decisions, data models, and task descriptions should not contradict rules defined in the skills that builders will load during execution.
 
 Read `references/plan-template.md` and write following its format.
 
