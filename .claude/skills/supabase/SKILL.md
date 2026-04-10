@@ -5,174 +5,67 @@ description: Guides Supabase workflow — declarative schemas, migration generat
 
 # Supabase Database Workflow
 
-This skill defines the standard workflow for managing Supabase database schemas, migrations, and tests in this project. It complements the `supabase-postgres-best-practices` skill, which covers SQL-level query and schema optimization.
+This skill defines the standard workflow for managing Supabase database schemas, migrations, and tests. It complements the `supabase-postgres-best-practices` skill for SQL-level optimization.
 
-## Declarative Schema Workflow
+## Core Principles
 
-This project uses Supabase's **declarative schema** approach. You define the desired database state in SQL files, and the CLI generates migrations automatically.
+- **Doc-verification**: Supabase changes frequently. Verify against [current docs](https://supabase.com/docs) before implementing unfamiliar APIs or CLI commands.
+- **Verify your work**: Run `supabase test db` after every schema change. A fix without verification is incomplete.
+- **Error recovery**: If a command fails after 2-3 attempts, stop and reconsider. Read the error carefully — do not retry blindly.
+- **Declarative-first**: Define desired state in `supabase/schemas/*.sql`, generate migrations with `supabase db diff`. Never write migration files by hand for schema changes. See [declarative-schemas.md](references/declarative-schemas.md) for details and caveats.
 
-### Core Rules
+## Security Checklist
 
-1. **Define schemas in `supabase/schemas/*.sql`** — these are the source of truth for table structure
-2. **Never write migration files by hand** for schema changes — always generate them with `supabase db diff`
-3. **Manually write migrations only** for entities the diff tool cannot capture (triggers, functions, DML, RLS policy alterations)
+Run through this checklist when working on auth, RLS, views, or user data:
 
-### Generating Migrations
+- **`raw_user_meta_data` is user-editable** — never use it for authorization decisions (RLS policies, role checks). Store authorization data in `raw_app_meta_data` instead.
+- **Views bypass RLS by default** — on Postgres 15+, use `CREATE VIEW ... WITH (security_invoker = true)`. On older versions, put views in an unexposed schema.
+- **UPDATE requires a SELECT policy** — without a matching SELECT policy, updates silently return 0 rows (no error).
+- **`security definer` in exposed schemas** — if you must use it in `public`, always set `search_path = ''`.
+- **Deleting a user does not invalidate tokens** — sign out or revoke sessions first. Keep JWT expiry short for sensitive apps.
+- **Never expose `service_role` key client-side** — use the publishable anon key for frontend code. In Next.js, any `NEXT_PUBLIC_` env var is sent to the browser.
 
-```bash
-# After editing a schema file:
-supabase db diff -f <descriptive_name>
+## Workflows
 
-# For triggers, functions, or DML (not captured by diff):
-supabase migration new <descriptive_name>
-# Then edit the generated file manually
-```
-
-### Applying and Verifying
-
-```bash
-# Reset local database and apply all migrations from scratch:
-supabase db reset
-
-# Or apply only pending migrations:
-supabase migration up
-```
-
-Always review generated migration files before committing — the diff tool is not foolproof. See `references/declarative-schemas.md` for the full workflow details and known caveats.
+| Task | Guide |
+|------|-------|
+| Create a new table | [creating-table.md](references/creating-table.md) |
+| Create an auth-synced profile table | [auth-profile-table.md](references/auth-profile-table.md) |
+| Modify an existing table | [modifying-table.md](references/modifying-table.md) |
+| Reset the local database | [reset-database.md](references/reset-database.md) |
+| Declarative schema details and caveats | [declarative-schemas.md](references/declarative-schemas.md) |
+| pgTAP testing patterns | [testing.md](references/testing.md) |
+| Local OAuth setup | [oauth-local-setup.md](references/oauth-local-setup.md) |
+| Production OAuth setup | [oauth-production-setup.md](references/oauth-production-setup.md) |
+| Email magic link (OTP) login | [email-magiclink-local-setup.md](references/email-magiclink-local-setup.md) |
 
 ## Table Conventions
 
-Every table in this project follows these conventions:
+- Every table MUST have `created_at` and `updated_at` columns (always last)
+- Use `timestamptz` (never bare `timestamp`)
+- Use `text` (never `varchar(n)`)
+- Use `uuid` for primary keys that reference `auth.users`
+- Use `numeric(10,2)` for money (never `float`)
 
-### Required Timestamp Columns
+## RLS & Security Patterns
 
-Every table MUST include both `created_at` and `updated_at` columns:
-
-```sql
-create table public.example (
-  id uuid not null references auth.users on delete cascade primary key,
-  -- ... other columns ...
-  created_at timestamptz default now() not null,
-  updated_at timestamptz default now() not null
-);
-```
-
-These columns provide audit trails, enable debugging, and support time-based queries. Always append new columns before the timestamp columns to keep them consistently at the end.
-
-### Data Type Guidelines
-
-- **Timestamps**: Always use `timestamptz` (never bare `timestamp` — timezone info matters)
-- **Strings**: Use `text` (not `varchar(n)` — same performance, no artificial limit)
-- **UUIDs**: Use `uuid` for primary keys that reference `auth.users`
-- **Money**: Use `numeric(10,2)` (not `float` — precision matters)
-
-## RLS & Security
-
-Every table must have Row Level Security enabled. Follow these patterns:
-
-```sql
-alter table public.example enable row level security;
-
--- Wrap auth.uid() in (select ...) — evaluated once, not per row
-create policy "Users can view their own data"
-  on public.example
-  for select
-  to authenticated
-  using ((select auth.uid()) = user_id);
-```
-
-Key rules:
 - Always `enable row level security` on every public table
-- Wrap `auth.uid()` in `(select auth.uid())` for performance (avoids per-row function call)
-- Scope policies to `authenticated` role (not `public`) unless there's a specific reason for anonymous access
-- Apply least-privilege grants: `anon` gets `SELECT` only, `authenticated` gets `SELECT/INSERT/UPDATE`, `service_role` gets all
+- Wrap `auth.uid()` in `(select auth.uid())` for performance (evaluated once, not per row)
+- Scope policies to `authenticated` role (not `public`) unless anonymous access is needed
+- Grants: `anon` = SELECT only, `authenticated` = SELECT/INSERT/UPDATE, `service_role` = ALL
 
-For detailed SQL patterns, index strategies, and security best practices, consult the `supabase-postgres-best-practices` skill.
+## Testing
 
-## Testing with pgTAP
+Run `supabase test db` after every change. Create tests with `supabase test new <name>.test`. See [testing.md](references/testing.md) for patterns including role simulation, trigger testing, and CI/CD setup.
 
-Write database tests using pgTAP to verify table structure, RLS policies, and triggers.
+## Common Commands
 
-### Creating and Running Tests
-
-```bash
-# Create a new test file:
-supabase test new <name>.test
-
-# Run all tests:
-supabase test db
-```
-
-### Test Structure
-
-```sql
-BEGIN;
-SELECT plan(N);  -- declare number of test cases
-
--- Test table/column existence
-SELECT has_table('public', 'example', 'example table should exist');
-SELECT has_column('public', 'example', 'id', 'should have id column');
-
--- Test RLS policies by simulating roles
-SET local role authenticated;
-SET local request.jwt.claims TO '{"sub": "<user-uuid>"}';
-
-SELECT results_eq(
-  'SELECT count(*)::int FROM example',
-  ARRAY[expected_count],
-  'User should only see their own data'
-);
-
--- Test negative cases (what users should NOT be able to do)
-SET local role anon;
-SELECT results_eq(
-  'SELECT count(*)::int FROM example',
-  ARRAY[0],
-  'Anonymous user cannot see any data'
-);
-
-SELECT * FROM finish();
-ROLLBACK;
-```
-
-### What to Test
-- Table and column existence
-- RLS policies: both positive (can access own data) and negative (cannot access others' data)
-- Role-based access: test as `authenticated`, `anon`, and reset role
-- Trigger functions: verify they fire and produce expected results
-- Constraints and foreign keys
-
-See `references/testing.md` for detailed patterns, application-level testing, and CI/CD setup.
-
-## Local Development
-
-When configuring `config.toml` or OAuth providers, always use `localhost` (not `127.0.0.1`) for all URLs. Supabase's `additional_redirect_urls` performs exact string matching — a hostname mismatch will silently break OAuth callbacks.
-
-See `references/oauth-local-setup.md` for details.
-
-## Production OAuth Setup
-
-When deploying OAuth (GitHub, Google) to production, configure the Supabase dashboard URL settings, create separate OAuth apps per environment, and set up provider credentials.
-
-See `references/oauth-production-setup.md` for the full checklist.
-
-## Email Magic Link (OTP) Login
-
-This project supports passwordless email login via `signInWithOtp`. Key points:
-
-- **No SMTP needed locally** — Inbucket captures all emails at `http://localhost:54324`
-- **No separate signup flow** — `signInWithOtp` auto-creates users if the email doesn't exist
-- **Same callback route** — magic links use the same `/auth/callback` code exchange as OAuth
-- Call `supabase.auth.signInWithOtp({ email, options: { emailRedirectTo } })` on the client
-
-See `references/email-magiclink-local-setup.md` for config.toml settings, client usage, and local testing workflow.
-
-## Workflow Summary
-
-1. Edit or create schema files in `supabase/schemas/`
-2. Run `supabase db diff -f <descriptive_name>` to generate migration
-3. Review the generated migration file
-4. For triggers/functions/DML: use `supabase migration new <name>` and write manually
-5. Write pgTAP tests in `supabase/tests/`
-6. Run `supabase db reset` then `supabase test db` to verify
-7. Consult `supabase-postgres-best-practices` skill to review SQL quality
+| Command | Purpose |
+|---------|---------|
+| `supabase db diff -f <name>` | Generate migration from schema changes |
+| `supabase migration new <name>` | Create empty migration (for triggers, DML) |
+| `supabase migration up` | Apply pending migrations |
+| `supabase db reset` | Reset local DB, replay all migrations |
+| `supabase test db` | Run all pgTAP tests |
+| `supabase test new <name>.test` | Create new test file |
+| `supabase start` / `supabase stop` | Start / stop local Supabase |
