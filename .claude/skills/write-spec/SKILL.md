@@ -62,7 +62,7 @@ Classify by cost of change:
 
 ## Step 5: Generate spec.md
 
-If the user attached images, save them to `artifacts/<feature-name>/references/` first (kebab-case filename, skip duplicates).
+If the user attached images, save them to `artifacts/<feature-name>/references/` first.
 
 Read `references/spec-template.md` and write according to that format.
 
