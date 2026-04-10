@@ -90,7 +90,7 @@ Produce a markdown one-pager. The MVP should test the **riskiest assumption firs
 
 The **"Not Doing" list is the most valuable part.** Focus is about saying no to good ideas. Make the trade-offs explicit.
 
-Ask the user if they'd like to save to `docs/ideas/[idea-name].md`. Only save if they confirm.
+Ask the user if they'd like to save to `artifacts/[feature-name]/idea.md`. Only save if they confirm.
 
 ## Quality Standards
 

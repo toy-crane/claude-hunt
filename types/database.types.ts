@@ -34,24 +34,6 @@ export type Database = {
   }
   public: {
     Tables: {
-      cohorts: {
-        Row: {
-          created_at: string
-          id: string
-          name: string
-        }
-        Insert: {
-          created_at?: string
-          id?: string
-          name: string
-        }
-        Update: {
-          created_at?: string
-          id?: string
-          name?: string
-        }
-        Relationships: []
-      }
       profiles: {
         Row: {
           avatar_url: string | null
@@ -81,90 +63,6 @@ export type Database = {
           updated_at?: string
         }
         Relationships: []
-      }
-      projects: {
-        Row: {
-          cohort_id: string
-          created_at: string
-          id: string
-          project_url: string
-          screenshot_url: string
-          tagline: string
-          title: string
-          user_id: string
-        }
-        Insert: {
-          cohort_id: string
-          created_at?: string
-          id?: string
-          project_url: string
-          screenshot_url: string
-          tagline: string
-          title: string
-          user_id: string
-        }
-        Update: {
-          cohort_id?: string
-          created_at?: string
-          id?: string
-          project_url?: string
-          screenshot_url?: string
-          tagline?: string
-          title?: string
-          user_id?: string
-        }
-        Relationships: [
-          {
-            foreignKeyName: "projects_cohort_id_fkey"
-            columns: ["cohort_id"]
-            isOneToOne: false
-            referencedRelation: "cohorts"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "projects_user_id_fkey"
-            columns: ["user_id"]
-            isOneToOne: false
-            referencedRelation: "profiles"
-            referencedColumns: ["id"]
-          },
-        ]
-      }
-      votes: {
-        Row: {
-          created_at: string
-          id: string
-          project_id: string
-          user_id: string
-        }
-        Insert: {
-          created_at?: string
-          id?: string
-          project_id: string
-          user_id: string
-        }
-        Update: {
-          created_at?: string
-          id?: string
-          project_id?: string
-          user_id?: string
-        }
-        Relationships: [
-          {
-            foreignKeyName: "votes_project_id_fkey"
-            columns: ["project_id"]
-            isOneToOne: false
-            referencedRelation: "projects"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "votes_user_id_fkey"
-            columns: ["user_id"]
-            isOneToOne: false
-            referencedRelation: "profiles"
-            referencedColumns: ["id"]
-          },
-        ]
       }
     }
     Views: {

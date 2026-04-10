@@ -8,17 +8,43 @@ argument-hint: "feature description"
 
 ## Step 1: Pre-exploration
 
-When extending an existing feature, explore before asking questions:
+Explore existing context before asking questions. Read in order if they exist:
 
-- If `artifacts/<feature>/requirements.md` exists, read it. Use the core idea and design principles as a starting point for questions, and do not re-ask about already decided items
-- Read related scenarios from `artifacts/spec.yaml`
-- Check `artifacts/<feature>/spec.md`
-- Check the current implementation of related components
-- If reference images exist in the `artifacts/<feature>/references/` directory, read them. Extract scenario candidates from the screen composition (component placement, element types, screen flow) in the images and use them in iterative questioning. Ignore visual design (colors, fonts, spacing values)
+1. `artifacts/<feature>/idea.md` — core idea, design principles (don't re-ask decided items)
+2. `artifacts/spec.yaml` — related scenarios
+3. `artifacts/<feature>/spec.md` — prior discussion record
 
-If it is an entirely new feature, skip existing code exploration but still check the references/ directory.
+For entirely new features, only check idea.md.
 
-## Step 2: Iterative Questioning
+## Step 2: Surface Assumptions
+
+Before asking questions, list what you are assuming based on exploration:
+
+```
+ASSUMPTIONS I'M MAKING:
+1. ...
+2. ...
+→ Correct me now or I'll proceed with these.
+```
+
+Don't silently fill in ambiguous requirements. The spec's purpose is to surface misunderstandings before code gets written.
+
+## Step 3: Reframe as Success Criteria
+
+Translate vague requirements from the user's description into concrete, testable conditions:
+
+```
+REQUIREMENT: "Make the dashboard faster"
+
+REFRAMED:
+- Dashboard LCP < 2.5s on 4G connection
+- Initial data load completes in < 500ms
+→ Are these the right targets?
+```
+
+If the user's description is already concrete, skip this step.
+
+## Step 4: Iterative Questioning
 
 Simulate user flows for `$ARGUMENTS` and find the blanks.
 At each step, check the happy path, error paths, boundary conditions, and intersections with existing features.
@@ -34,15 +60,9 @@ Classify by cost of change:
 - If there are intersections with existing scenarios, mention them specifically when asking
 - If there are no new discoveries for 3 or more rounds, move to the next step. However, if there are unexplored branches with high cost of change, ask about those first
 
-## Step 3: Save Attached Images
+## Step 5: Generate spec.md
 
-If the user attached images during the conversation, save them to `artifacts/<feature-name>/references/`.
-
-- Filename: English kebab-case describing the image content (e.g., `main-dashboard-layout.png`)
-- If the same image already exists, skip it
-- After saving, notify in one line which file was saved
-
-## Step 4: Generate spec.md
+If the user attached images, save them to `artifacts/<feature-name>/references/` first.
 
 Read `references/spec-template.md` and write according to that format.
 
@@ -54,7 +74,7 @@ Read `references/spec-template.md` and write according to that format.
 
 Filename: `artifacts/<feature-name>/spec.md`
 
-## Step 5: Extract spec.yaml
+## Step 6: Extract spec.yaml
 
 Extract scenarios from spec.md into `artifacts/spec.yaml`. Follow the criteria in `references/scenario-guide.md` and the structure in `references/spec-example.yaml`.
 
@@ -72,11 +92,11 @@ Extract scenarios from spec.md into `artifacts/spec.yaml`. Follow the criteria i
 - [ ] Are there no duplicate scenarios with the same meaning
 - [ ] Is there at least 1 example
 
-## Step 6: Gap Check
+## Step 7: Gap Check
 
 After saving spec.yaml, invoke the `spec-reviewer` agent to verify missing scenarios between spec.md and spec.yaml.
 
-If there are gaps, show them to the user, let them select which gaps to incorporate, and add them applying the rules from Step 5.
+If there are gaps, show them to the user, let them select which gaps to incorporate, and add them applying the rules from Step 6.
 
 ## Done
 

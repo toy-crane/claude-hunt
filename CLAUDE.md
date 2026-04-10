@@ -2,6 +2,21 @@
 
 Define → Plan → Build → Verify → Review → Ship
 
+### Spec-Driven Development
+
+Use when starting a new project or feature, requirements are ambiguous, the change touches multiple files, or the task would take more than 30 minutes. Skip for single-line fixes or unambiguous changes.
+
+| Phase | Skill / Command |
+|-------|----------------|
+| Specify | `/write-spec` skill |
+| Plan | `/plan` command |
+| Build | `/build` command |
+| Verify | `/test` command |
+| Review | `/review` command |
+| Ship | `/ship` command |
+
+Each phase has a human review gate. Do not advance until the current phase is validated.
+
 ## Development Workflow
 
 - Package manager: `bun`
@@ -31,5 +46,4 @@ Reverse dependencies are forbidden to prevent circular dependencies. Implement f
 ## Boundary
 
 ### Ask-first
-- Changes to spec.yaml
 - Adding new external dependencies
