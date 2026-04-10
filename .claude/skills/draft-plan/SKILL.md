@@ -43,7 +43,7 @@ Read the above inputs and find items that are needed for implementation but not 
 
 ## Step 6: Generate Plan Document
 
-Read the SKILL.md of each skill confirmed in Step 4 to understand their conventions and constraints. The plan must respect these — architecture decisions, data models, and task descriptions should not contradict rules defined in the skills that builders will load during execution.
+Read each confirmed skill's SKILL.md. The plan must not contradict rules that builders will load during execution.
 
 Read `references/plan-template.md` and write following its format.
 
