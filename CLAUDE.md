@@ -9,7 +9,7 @@ Use when starting a new project or feature, requirements are ambiguous, the chan
 | Phase | Skill / Command |
 |-------|----------------|
 | Specify | `/write-spec` skill |
-| Plan | `/plan` command |
+| Plan | `/draft-plan` skill |
 | Build | `/build` command |
 | Verify | `/test` command |
 | Review | `/review` command |
