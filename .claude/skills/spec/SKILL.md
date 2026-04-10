@@ -46,17 +46,7 @@ REFRAMED SUCCESS CRITERIA:
 
 ## Step 4: Write the Spec
 
-Cover these six core areas:
-
-1. **Objective** — What are we building and why? Who is the user? What does success look like?
-2. **Commands** — Full executable commands (build, test, lint, dev)
-3. **Project Structure** — Where source code, tests, and docs live
-4. **Code Style** — One real code snippet showing the style beats three paragraphs describing it
-5. **Testing Strategy** — Framework, test locations, coverage expectations, test levels
-6. **Boundaries**
-   - **Always do:** Run tests before commits, follow naming conventions, validate inputs
-   - **Ask first:** Database schema changes, adding dependencies, changing CI config
-   - **Never do:** Commit secrets, edit vendor directories, remove failing tests without approval
+Read `references/spec-template.md` and fill in each section based on the information gathered in Steps 1–3.
 
 ## Step 5: Verify Completeness
 
