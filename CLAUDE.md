@@ -8,7 +8,7 @@ Use when starting a new project or feature, requirements are ambiguous, the chan
 
 | Phase | Skill / Command |
 |-------|----------------|
-| Specify | `/spec` skill |
+| Specify | `/write-spec` skill |
 | Plan | `/plan` command |
 | Build | `/build` command |
 | Verify | `/test` command |
