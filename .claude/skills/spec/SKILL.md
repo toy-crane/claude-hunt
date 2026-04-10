@@ -67,4 +67,4 @@ Before saving, confirm:
 - [ ] Success criteria are specific and testable
 - [ ] Boundaries (Always / Ask First / Never) are defined
 
-Save the spec as `SPEC.md` in the project root and confirm with the user before proceeding.
+Save the spec as `artifacts/[feature-name]/spec.md` and confirm with the user before proceeding.
