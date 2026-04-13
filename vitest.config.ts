@@ -8,6 +8,7 @@ export default defineConfig({
     alias: {
       "@core": resolve(import.meta.dirname, "./core"),
       "@features": resolve(import.meta.dirname, "./features"),
+      "@widgets": resolve(import.meta.dirname, "./widgets"),
       "@entities": resolve(import.meta.dirname, "./entities"),
       "@shared": resolve(import.meta.dirname, "./shared"),
     },
@@ -20,7 +21,14 @@ export default defineConfig({
     exclude: ["**/node_modules/**", ".claude/worktrees/**"],
     coverage: {
       provider: "v8",
-      include: ["app/**", "core/**", "features/**", "entities/**", "shared/**"],
+      include: [
+        "app/**",
+        "core/**",
+        "features/**",
+        "widgets/**",
+        "entities/**",
+        "shared/**",
+      ],
       exclude: ["**/*.test.*", "**/*.d.ts"],
     },
   },

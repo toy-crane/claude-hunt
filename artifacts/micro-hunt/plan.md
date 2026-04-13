@@ -270,11 +270,11 @@
   - `app/page.tsx` (replace welcome with `<ProjectGrid />`)
   - `app/__tests__/page.test.tsx` (uses `renderServerComponent` + `createMockSupabaseClient`)
 - **Acceptance**:
-  - [ ] 5 seeded projects → 5 cards render in vote-count-descending order
-  - [ ] Each card shows screenshot, title, tagline, author `display_name`, vote count
-  - [ ] Top three cards show "1st", "2nd", "3rd" badges respectively
-  - [ ] 2 projects → only "1st" and "2nd" badges visible ("3rd" absent)
-  - [ ] 0 projects → `"No projects yet"` message renders instead of the grid
+  - [x] 5 seeded projects → 5 cards render in vote-count-descending order
+  - [x] Each card shows screenshot, title, tagline, author `display_name`, vote count
+  - [x] Top three cards show "1st", "2nd", "3rd" badges respectively
+  - [x] 2 projects → only "1st" and "2nd" badges visible ("3rd" absent)
+  - [x] 0 projects → `"No projects yet"` message renders instead of the grid
 - **Verification**:
   - `bun run test:unit -- widgets/project-grid app`
   - `bun run build`
