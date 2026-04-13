@@ -25,11 +25,7 @@ Extract the feature name from $ARGUMENTS.
 - Read each SKILL.md listed in plan.md's Required Skills
 - Read `references/decisions-template.md` — Confirm decisions.md recording format
 
-**Load these three skills at session start** (they govern how each Task is executed in Step 4):
-
-- `.claude/skills/incremental-implementation/SKILL.md`
-- `.claude/skills/test-driven-development/SKILL.md`
-- `.claude/skills/debugging-and-error-recovery/SKILL.md`
+**Invoke these skills at session start**: `incremental-implementation`, `test-driven-development`, `debugging-and-error-recovery`. They govern how each Task runs in Step 4.
 
 ## Step 2: Select Reviewers
 
@@ -54,50 +50,29 @@ Record the order and rationale in decisions.md.
 
 ## Step 4: Execute Tasks
 
-The Team Lead implements Tasks directly, one at a time, in the order from Step 3. For each Task:
+Implement Tasks one at a time, in the order from Step 3. For each Task:
 
-1. Read the Task's **Acceptance Criteria**
-2. Load relevant context (existing code, patterns, types) — follow `incremental-implementation` guidance
-3. Decide TDD application:
-   - Logic / backend Tasks → write failing test first (RED), then minimum implementation (GREEN), using `test-driven-development`
-   - UI Tasks → TDD is optional; visual verification happens via Reviewers in Step 5
-4. Implement the minimum code to satisfy the Acceptance Criteria
-5. Run relevant tests (if any were added or touched)
-6. Run `bun run build` to verify compilation / type-check
-7. Create a **conventional commit** (one commit per Task) following CLAUDE.md's commit rules
-8. Mark the Task complete in plan.md and move to the next Task
+1. Read the Acceptance Criteria
+2. Apply TDD for logic / backend Tasks (RED → GREEN); UI Tasks rely on Reviewers in Step 5
+3. Implement the minimum code to satisfy the criteria
+4. Run `bun run build` and any touched tests
+5. Create one conventional commit per Task (CLAUDE.md rules)
+6. Mark the Task complete in plan.md
 
-**On failure** (test fail, build fail, unexpected behavior): use the `debugging-and-error-recovery` skill to find the root cause before retrying. Do not skip steps to work around a failure.
-
-**Judgment calls during Step 4** — record in decisions.md with Harness Signal:
-
-- Spec ambiguity → which interpretation was chosen and why
-- Task scope changed (added / removed / merged)
-- Build or test failure recovery path
-- User escalation triggered
+Use `debugging-and-error-recovery` on any failure — find the root cause, do not work around it. Record judgment calls (spec ambiguity, scope changes, recovery paths, user escalation) in decisions.md with a Harness Signal.
 
 ## Step 5: Evaluation Loop
 
-After all Tasks are complete, spawn the Reviewers selected in Step 2 **in parallel**. Pass the feature name, implementation app URL, and wireframe screen ↔ implementation URL path mapping to `wireframe-reviewer` and `ui-quality-reviewer`.
+After all Tasks complete, spawn the Reviewers from Step 2 **in parallel**. Pass the feature name, app URL, and wireframe ↔ implementation URL mapping to `wireframe-reviewer` and `ui-quality-reviewer`.
 
-### Feedback Handling
-
-Collect all Reviewer results, then the Team Lead makes a judgment:
+On results:
 
 - **All pass** → Proceed to Step 6
-- **Fail exists** → Analyze the feedback and fix directly in the main context. After fixing, re-run the relevant Reviewer(s) to confirm pass. For fixes that include UI changes, capture a screenshot and visually verify before approving
+- **Fail** → Fix directly and re-run the affected Reviewer. For UI fixes, screenshot-verify before approving
 
-### ui-quality-reviewer Feedback Handling
+`ui-quality-reviewer` uses 3 tiers: **Fail** triggers the fix loop; **Warning** is recorded in decisions.md without re-review; **Advisory** appears only in the Step 6 report.
 
-`ui-quality-reviewer` uses a 3-tier verdict system. Handling by tier:
-
-- **Fail** → Team Lead fix loop (same as other Reviewers)
-- **Warning** → Record in decisions.md, do not trigger re-review
-- **Advisory** → Include only in Step 6 final report
-
-Record feedback judgments in decisions.md.
-
-After completing the evaluation loop, update the `Pending` results left in Step 2 (Reviewer selection) and Step 3 (Task order).
+Record feedback judgments in decisions.md. After the loop closes, finalize the `Pending` results from Step 2 and Step 3.
 
 ## Step 6: Done
 
