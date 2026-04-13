@@ -7,6 +7,10 @@ export default defineConfig({
   resolve: {
     alias: {
       "@": resolve(import.meta.dirname, "."),
+      "@core": resolve(import.meta.dirname, "./core"),
+      "@features": resolve(import.meta.dirname, "./features"),
+      "@entities": resolve(import.meta.dirname, "./entities"),
+      "@shared": resolve(import.meta.dirname, "./shared"),
     },
   },
   test: {
