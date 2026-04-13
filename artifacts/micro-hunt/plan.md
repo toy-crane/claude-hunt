@@ -468,11 +468,11 @@ Split into 8a and 8b — two independent hardening slices, both small.
   - `widgets/project-grid/ui/project-card.tsx` (mount the right variant per viewer state)
   - `widgets/project-grid/api/fetch-projects.ts` (include `viewer_has_voted` flag by joining to votes for the current `auth.uid()`)
 - **Acceptance**:
-  - [ ] Card has 3 votes, viewer has not voted, viewer is signed in + not the owner → pressing upvote → vote count becomes 4 and button shows "upvoted" state
-  - [ ] Card has 4 votes, viewer already voted → pressing upvote → vote count becomes 3 and button returns to default state
-  - [ ] Viewer is the owner → upvote button is not rendered
-  - [ ] Unauthenticated viewer → vote count visible; the upvote slot is replaced with a "Sign in to vote" prompt
-  - [ ] Direct server-action insert where `user_id = project.user_id` is rejected by the trigger (defence-in-depth test)
+  - [x] Card has 3 votes, viewer has not voted, viewer is signed in + not the owner → pressing upvote → vote count becomes 4 and button shows "upvoted" state
+  - [x] Card has 4 votes, viewer already voted → pressing upvote → vote count becomes 3 and button returns to default state
+  - [x] Viewer is the owner → upvote button is not rendered
+  - [x] Unauthenticated viewer → vote count visible; the upvote slot is replaced with a "Sign in to vote" prompt
+  - [x] Direct server-action insert where `user_id = project.user_id` is rejected by the trigger (defence-in-depth test)
 - **Verification**:
   - `bun run test:unit -- features/toggle-vote widgets/project-grid`
   - `bun run build`

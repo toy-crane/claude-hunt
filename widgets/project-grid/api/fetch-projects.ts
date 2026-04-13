@@ -3,18 +3,29 @@ import { createClient } from "@shared/api/supabase/server.ts";
 
 export interface FetchProjectsOptions {
   cohortId?: string | null;
+  /**
+   * When set, a second query pulls the viewer's votes so each returned
+   * row can expose a `viewer_has_voted` flag. Null means anonymous.
+   */
+  viewerUserId?: string | null;
 }
+
+export type ProjectGridRow = ProjectWithVoteCount & {
+  viewer_has_voted: boolean;
+};
 
 /**
  * Reads the landing-page grid rows from `projects_with_vote_count` (a
  * definer-mode view that exposes each project joined with its author's
  * public display fields and the aggregated vote count). Rows are sorted
  * vote-count-descending; ties are broken by `created_at` so the ordering
- * is stable.
+ * is stable. When a `viewerUserId` is supplied, each row is enriched
+ * with `viewer_has_voted` via a second query (the view can't embed
+ * per-viewer state).
  */
 export async function fetchProjects(
   options: FetchProjectsOptions = {}
-): Promise<ProjectWithVoteCount[]> {
+): Promise<ProjectGridRow[]> {
   const supabase = await createClient();
   let query = supabase
     .from("projects_with_vote_count")
@@ -30,5 +41,23 @@ export async function fetchProjects(
   if (error) {
     throw error;
   }
-  return data ?? [];
+  const rows = data ?? [];
+
+  let votedProjectIds: Set<string> = new Set();
+  if (options.viewerUserId) {
+    const { data: votes } = await supabase
+      .from("votes")
+      .select("project_id")
+      .eq("user_id", options.viewerUserId);
+    if (votes) {
+      votedProjectIds = new Set(
+        votes.map((v: { project_id: string | null }) => v.project_id ?? "")
+      );
+    }
+  }
+
+  return rows.map((row) => ({
+    ...row,
+    viewer_has_voted: row.id != null && votedProjectIds.has(row.id),
+  }));
 }

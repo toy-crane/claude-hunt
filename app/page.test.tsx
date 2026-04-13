@@ -162,7 +162,9 @@ describe("home page", () => {
 
     await renderPage({ cohort: "a1" });
 
-    expect(fetchProjectsMock).toHaveBeenCalledWith({ cohortId: "a1" });
+    expect(fetchProjectsMock).toHaveBeenCalledWith(
+      expect.objectContaining({ cohortId: "a1" })
+    );
   });
 
   it("passes null cohortId when no cohort searchParam is set", async () => {
@@ -170,6 +172,8 @@ describe("home page", () => {
 
     await renderPage();
 
-    expect(fetchProjectsMock).toHaveBeenCalledWith({ cohortId: null });
+    expect(fetchProjectsMock).toHaveBeenCalledWith(
+      expect.objectContaining({ cohortId: null })
+    );
   });
 });

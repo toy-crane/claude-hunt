@@ -2,6 +2,7 @@ import { CohortDropdown, fetchCohorts } from "@features/cohort-filter/index.ts";
 import { DeleteButton } from "@features/delete-project/index.ts";
 import { EditDialog } from "@features/edit-project/index.ts";
 import { SubmitForm } from "@features/submit-project/index.ts";
+import { VoteButton } from "@features/toggle-vote/index.ts";
 import { createClient } from "@shared/api/supabase/server.ts";
 import { fetchProjects, ProjectGrid } from "@widgets/project-grid/index.ts";
 
@@ -29,7 +30,10 @@ export default async function Page({ searchParams }: PageProps) {
   }
 
   const [projects, cohorts] = await Promise.all([
-    fetchProjects({ cohortId: selectedCohortId }),
+    fetchProjects({
+      cohortId: selectedCohortId,
+      viewerUserId: user?.id ?? null,
+    }),
     fetchCohorts(),
   ]);
 
@@ -83,6 +87,19 @@ export default async function Page({ searchParams }: PageProps) {
               projectTitle={project.title ?? ""}
             />
           </>
+        )}
+        renderVoteButton={(project) => (
+          <VoteButton
+            alreadyVoted={
+              "viewer_has_voted" in project
+                ? Boolean(project.viewer_has_voted)
+                : false
+            }
+            isAuthenticated={Boolean(user)}
+            ownedByViewer={user?.id != null && project.user_id === user.id}
+            projectId={project.id ?? ""}
+            voteCount={project.vote_count ?? 0}
+          />
         )}
         resolveScreenshotUrl={resolveScreenshotUrl}
         viewerUserId={user?.id ?? null}
