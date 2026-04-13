@@ -76,19 +76,37 @@ Filename: `artifacts/<feature-name>/spec.md`
 
 ## Step 6: Extract spec.yaml
 
-Extract scenarios from spec.md into `artifacts/spec.yaml`. Follow the criteria in `references/scenario-guide.md` and the structure in `references/spec-example.yaml`.
+Extract scenarios from spec.md into `artifacts/spec.yaml`. Follow the criteria in `references/scenario-guide.md` (especially section 3 "Choosing the Right Layer") and the structure in `references/spec-example.yaml`.
+
+### Layer Assignment (FSD projects)
+
+For each scenario, decide which FSD layer it belongs to:
+
+| Scenario shape | Goes to | ID prefix |
+|----------------|---------|-----------|
+| Single user action (click, submit, toggle) | `features/<action>/` | `F-` |
+| Domain object rendering (card, badge, list item) | `entities/<domain>/` | `E-` |
+| Composition of multiple features on one screen | `pages/<page>/` | `P-` |
+| Reusable composite UI block (header, sidebar) | `widgets/<block>/` | `W-` |
+| App-global behavior (hotkey, theme) | `shared/<capability>/` | `S-` |
+| DB constraints / RLS / triggers (no UI) | `db/<table>/` (pgTAP) | `DB-` |
+
+If the target project does not use FSD, use the historic `{FEATURE}-{NNN}` format.
 
 ### Extraction Rules
 
-- ID format: `{FEATURE}-{NNN}` (assign sequentially without conflicting with existing numbers)
-- If `artifacts/spec.yaml` already exists, append to features. If not, create a new one
-- Write input/expect in `examples` with concrete values verifiable on screen
+- **ID format (FSD)**: `{L}-{SLICE}-{NNN}` where L ∈ {E, F, W, P, S, DB}. Slice name matches the folder name exactly (e.g. `F-SUBMIT-PROJECT-001`, not `F-SUBMIT-001`).
+- **ID format (non-FSD)**: `{FEATURE}-{NNN}`.
+- spec.yaml top-level groups (FSD): `entities:`, `features:`, `widgets:`, `pages:`, `shared:`, `db:`. Omit groups that have no scenarios.
+- If `artifacts/spec.yaml` already exists, append to the appropriate group. If not, create a new one.
+- Write input/expect in `examples` with concrete values verifiable on screen.
 
 ### Verification Checklist (before saving)
 
 - [ ] Is the input a concrete value (an actual value, not a placeholder)
 - [ ] Is the expect a value that can be asserted on screen (not internal state)
 - [ ] Do given/when/then meet the criteria in `references/scenario-guide.md`
+- [ ] Is each scenario in the correct layer group per the Layer Assignment table
 - [ ] Are there no duplicate scenarios with the same meaning
 - [ ] Is there at least 1 example
 
