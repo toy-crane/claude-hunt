@@ -41,9 +41,7 @@ Each phase has a human review gate. Do not advance until the current phase is va
 - **Shared helpers**: `shared/lib/test-utils.tsx` (`createMockSupabaseClient`, `renderServerComponent`) — extend, do not duplicate
 
 ### Naming
-- Test names use natural language describing the behavior; **do not** use scenario IDs (spec.md dropped scenario IDs in `e91ff75` — tests follow the same convention)
-- Good: `it("shows OTP sent confirmation after submitting email", ...)`
-- Bad: `it("F-AUTH-LOGIN-001: OTP sent confirmation", ...)`
+- Test names use natural language describing the behavior; **do not** use scenario IDs
 
 ### Commands
 | Command | Scope |
@@ -67,7 +65,7 @@ Organize code **by business domain first, technical role second**. Implement fro
 | 5 | `core/` | App-wide providers, bootstrap wiring | shared |
 | 6 | `app/` | Next.js routing + page composition | all of the above |
 
-**Aliases**: `@core/*`, `@features/*`, `@entities/*`, `@shared/*`. Next.js `app/` stays as the router — FSD `pages` layer is dropped in favor of Next.js `app/*/page.tsx`, and FSD's original `app` layer is renamed to `core/` to avoid conflict.
+**Aliases**: `@core/*`, `@features/*`, `@entities/*`, `@shared/*`.
 
 ### Slice rules
 
