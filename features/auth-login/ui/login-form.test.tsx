@@ -28,6 +28,7 @@ vi.mock("@shared/api/supabase/client", () => ({
 const GITHUB_RE = /GitHub/i;
 const GOOGLE_RE = /Google/i;
 const SENDING_RE = /Sending/i;
+const CALLBACK_PATH_RE = /\/auth\/callback$/;
 
 function neverResolve() {
   // Intentionally never resolves to keep loading state active
@@ -124,5 +125,85 @@ describe("login", () => {
         screen.getByRole("button", { name: "Sending..." })
       ).toBeInTheDocument();
     });
+  });
+
+  it("F-AUTH-LOGIN-005: clicking GitHub calls signInWithOAuth with provider=github and /auth/callback redirectTo", async () => {
+    mockClient.auth.signInWithOAuth = vi
+      .fn()
+      .mockResolvedValue({ error: null });
+
+    const user = userEvent.setup();
+    render(<LoginForm />);
+
+    await user.click(screen.getByRole("button", { name: GITHUB_RE }));
+
+    expect(mockClient.auth.signInWithOAuth).toHaveBeenCalledTimes(1);
+    const arg = (mockClient.auth.signInWithOAuth as ReturnType<typeof vi.fn>)
+      .mock.calls[0][0];
+    expect(arg.provider).toBe("github");
+    expect(arg.options.redirectTo).toMatch(CALLBACK_PATH_RE);
+  });
+
+  it("F-AUTH-LOGIN-006: clicking Google calls signInWithOAuth with provider=google and /auth/callback redirectTo", async () => {
+    mockClient.auth.signInWithOAuth = vi
+      .fn()
+      .mockResolvedValue({ error: null });
+
+    const user = userEvent.setup();
+    render(<LoginForm />);
+
+    await user.click(screen.getByRole("button", { name: GOOGLE_RE }));
+
+    expect(mockClient.auth.signInWithOAuth).toHaveBeenCalledTimes(1);
+    const arg = (mockClient.auth.signInWithOAuth as ReturnType<typeof vi.fn>)
+      .mock.calls[0][0];
+    expect(arg.provider).toBe("google");
+    expect(arg.options.redirectTo).toMatch(CALLBACK_PATH_RE);
+  });
+
+  it("F-AUTH-LOGIN-007: OTP error keeps email form visible and re-enables inputs", async () => {
+    mockClient.auth.signInWithOtp = vi
+      .fn()
+      .mockResolvedValue({ error: { message: "rate limited" } });
+
+    const user = userEvent.setup();
+    render(<LoginForm />);
+
+    const emailInput = screen.getByLabelText("Email");
+    await user.type(emailInput, "test@example.com");
+    await user.click(screen.getByRole("button", { name: "Continue" }));
+
+    // OTP confirmation screen does NOT appear
+    await waitFor(() => {
+      expect(
+        screen.getByRole("button", { name: "Continue" })
+      ).not.toBeDisabled();
+    });
+    expect(
+      screen.queryByText((content) =>
+        content.includes("We sent a magic link to")
+      )
+    ).not.toBeInTheDocument();
+    expect(screen.getByLabelText("Email")).not.toBeDisabled();
+    expect(screen.getByRole("button", { name: GITHUB_RE })).not.toBeDisabled();
+    expect(screen.getByRole("button", { name: GOOGLE_RE })).not.toBeDisabled();
+  });
+
+  it("F-AUTH-LOGIN-008: OAuth error re-enables GitHub and Google buttons", async () => {
+    mockClient.auth.signInWithOAuth = vi
+      .fn()
+      .mockResolvedValue({ error: { message: "provider error" } });
+
+    const user = userEvent.setup();
+    render(<LoginForm />);
+
+    await user.click(screen.getByRole("button", { name: GITHUB_RE }));
+
+    await waitFor(() => {
+      expect(
+        screen.getByRole("button", { name: GITHUB_RE })
+      ).not.toBeDisabled();
+    });
+    expect(screen.getByRole("button", { name: GOOGLE_RE })).not.toBeDisabled();
   });
 });
