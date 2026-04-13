@@ -21,7 +21,7 @@ vi.mock("next/link", () => ({
 
 const mockClient = createMockSupabaseClient();
 
-vi.mock("@/lib/supabase/client.ts", () => ({
+vi.mock("@shared/api/supabase/client", () => ({
   createClient: () => mockClient,
 }));
 
