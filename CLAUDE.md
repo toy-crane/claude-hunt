@@ -53,7 +53,13 @@ Each phase has a human review gate. Do not advance until the current phase is va
 
 ## Architecture — Feature-Sliced Design (FSD)
 
-Organize code **by business domain first, technical role second**. Implement from least to most dependent; reverse dependencies are forbidden.
+### Core rules
+
+- **Domain-first**: organize by business domain first, technical role second.
+- **Bottom-up**: implement from least to most dependent.
+- **No reverse dependencies**: higher layers import lower; never the reverse.
+
+### Layers
 
 | Order | Layer | Role | Allowed Dependencies |
 |-------|-------|------|----------------------|
