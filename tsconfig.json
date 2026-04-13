@@ -22,7 +22,11 @@
     ],
     "baseUrl": ".",
     "paths": {
-      "@/*": ["./*"]
+      "@/*": ["./*"],
+      "@core/*": ["./core/*"],
+      "@features/*": ["./features/*"],
+      "@entities/*": ["./entities/*"],
+      "@shared/*": ["./shared/*"]
     }
   },
   "include": [
