@@ -1,6 +1,6 @@
+import { createMockSupabaseClient } from "@shared/lib/test-utils.tsx";
 import { render, screen } from "@testing-library/react";
 import { vi } from "vitest";
-import { createMockSupabaseClient } from "@/__tests__/helpers.tsx";
 
 vi.mock("next/link", () => ({
   default: ({
@@ -37,7 +37,7 @@ describe("home", () => {
       .fn()
       .mockResolvedValue({ data: { user: null }, error: null });
 
-    const Page = (await import("@/app/page.tsx")).default;
+    const Page = (await import("../page.tsx")).default;
     const jsx = await Page();
     render(jsx);
 
@@ -57,7 +57,7 @@ describe("home", () => {
       error: null,
     });
 
-    const Page = (await import("@/app/page.tsx")).default;
+    const Page = (await import("../page.tsx")).default;
     const jsx = await Page();
     render(jsx);
 
