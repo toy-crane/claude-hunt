@@ -29,19 +29,20 @@ Change Type: New | Modify | Delete
 
 - **Covers**: Scenario 1 (full) | Scenario 2 (partial — happy path only)
 - **Size**: S (1-2 files) | M (3-5 files)
+- **Tier**: Small (unit) | Medium (integration) | Large (E2E) — per `test-driven-development` pyramid
 - **Dependencies**: None | Task N (reason), Task M (reason)
 - **References**:
   - (skill name — keywords)
   - (external document URL)
   - (project file path)
 - **Implementation targets**:
-  - `file/path.tsx`
-  - `tests/path/test.tsx`
+  - `features/<slice>/ui/<component>.tsx`
+  - `features/<slice>/ui/<component>.test.tsx` (colocated; `app/**/__tests__/` for App Router pages)
 - **Acceptance**:
   - [ ] Concrete input → observable result (one line per Success Criteria covered)
   - [ ] Concrete input → observable result
 - **Verification**:
-  - `bun run test -- <pattern>`
+  - `bun run test:unit -- <pattern>` (or `bun run test:db` for DB-only changes)
   - `bun run build`
 
 ---
