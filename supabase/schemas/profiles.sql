@@ -4,16 +4,17 @@ create table public.profiles (
   full_name text,
   display_name text,
   avatar_url text,
+  cohort_id uuid references public.cohorts(id) on delete set null,
   created_at timestamptz default now() not null,
   updated_at timestamptz default now() not null
 );
 
 alter table public.profiles enable row level security;
 
-create policy "Users can view their own profile"
+create policy "Authenticated users can view all profiles"
   on public.profiles for select
   to authenticated
-  using ((select auth.uid()) = id);
+  using (true);
 
 create policy "Users can update their own profile"
   on public.profiles for update

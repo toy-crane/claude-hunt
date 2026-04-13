@@ -161,11 +161,11 @@
   - Manual migration seeding "Cohort A" and "Cohort B"
   - `entities/cohort/model/schema.ts`, `entities/cohort/index.ts`
 - **Acceptance**:
-  - [ ] `cohorts` table exists with `id`, `name` (unique), `created_at`; RLS enabled; anon & authenticated can `select`
-  - [ ] `profiles.cohort_id` column exists as nullable FK to `cohorts(id)`, `on delete set null`
-  - [ ] Any authenticated user can `select` every profile's `display_name` & `cohort_id` (needed for cards)
-  - [ ] Existing "users can only update their own profile" behaviour is preserved
-  - [ ] Seed migration inserts at least two cohort rows visible to anon
+  - [x] `cohorts` table exists with `id`, `name` (unique), `created_at`; RLS enabled; anon & authenticated can `select`
+  - [x] `profiles.cohort_id` column exists as nullable FK to `cohorts(id)`, `on delete set null`
+  - [x] Any authenticated user can `select` every profile's `display_name` & `cohort_id` (needed for cards)
+  - [x] Existing "users can only update their own profile" behaviour is preserved
+  - [x] Seed migration inserts at least two cohort rows visible to anon
 - **Verification**:
   - `bun run test:db`
   - `supabase db diff --debug` shows no drift
