@@ -11,7 +11,7 @@ Running log of Team Lead judgment calls during `/execute-plan`. See
 **Decision**: Use `ui-quality-reviewer`, `design-reviewer`, and `react-reviewer`. Skip `wireframe-reviewer`.
 **Why**: No `wireframe.html` exists in `artifacts/micro-hunt/`, so wireframe-vs-impl comparison is not applicable. The plan has heavy UI work (Tasks 5, 6, 7, 9, 10, 11) composed of shadcn components inside React Server Components + client islands, so the other three reviewers all apply.
 **Harness Signal**: N/A — the rule in `SKILL.md` Step 2 already captures this ("when wireframe.html exists" / "when UI present" / "when UI components present" / "when React/Next.js present").
-**Result**: Pending
+**Result**: Success — all three reviewers delivered actionable findings; no reviewer was a false positive.
 
 ---
 
@@ -26,7 +26,7 @@ Running log of Team Lead judgment calls during `/execute-plan`. See
 - Task 12 depends on 5–11.
 No reordering was needed; the plan's ordering is already dependency-correct.
 **Harness Signal**: N/A — plan.md's explicit per-Task "Dependencies" field made ordering derivable without guesswork.
-**Result**: Pending
+**Result**: Success — every task landed as a single commit in the prescribed order; no mid-flight reordering or merging required. (One in-flight scope adjustment inside Task 2 ↔ Task 3 for the view, logged separately.)
 
 ---
 
@@ -97,3 +97,56 @@ No reordering was needed; the plan's ordering is already dependency-correct.
 **Why**: Task 5 replaced `app/page.tsx`'s scaffold welcome (which rendered the signed-in user's email) with the Micro-Hunt grid. The old assertion was about proving auth succeeded; the new assertion does the same by checking the landing header + the cohort warning banner that only renders for signed-in users.
 **Harness Signal**: N/A — routine spec maintenance when a page is restructured.
 **Result**: Success — auth spec passes alongside the micro-hunt spec.
+
+---
+
+## Step 5: design-reviewer feedback accepted in full, fixed in two passes
+
+**When**: Step 5, first pass
+**Decision**: Accept all 5 design-reviewer FAIL issues and fix them rather than defer. Re-run the reviewer. Second pass surfaced a newly-noticed issue (Button loading state requires `Spinner` + `data-icon`) — also accepted and fixed.
+**Why**: Every issue was an objective violation of the shadcn rules in `.claude/skills/shadcn/rules/` (`styling.md` for raw palette colors, `composition.md` for Alert/Empty/Spinner composition, `forms.md` for FieldGroup/Field/FieldLabel). No judgement call trade-off existed — the fixes are trivially better and take <100 LOC total.
+**Harness Signal**: Two harness-level improvements suggest themselves: (1) the shadcn SKILL could include a pre-flight check that scans touched files for common anti-patterns (raw color classes on status indicators, `div + Label + Input` triads, plain-text loading buttons) and surfaces them as warnings during Step 4 — before the reviewer pass — so the Team Lead front-loads the fix. (2) `shadcn add <component>` could be called proactively when a component slot is detected (Alert/Empty/Spinner/Field were only installed on demand after the reviewer flagged).
+**Result**: Success — final design-reviewer re-review on commit 0937310 reports PASS.
+
+---
+
+## Step 5: react-reviewer feedback accepted, two waterfalls fixed
+
+**When**: Step 5, first pass
+**Decision**: Accept both `async-parallel` FAIL issues. Log all advisory notes (error boundaries, next/image, useOptimistic, useTransition, Suspense wrapper) for later without fixing now.
+**Why**: The two FAILs are measurable performance regressions — they add avoidable request-round-trip latency to every anonymous and authenticated page load respectively. The advisories are genuine polish items but outside the spec's Success Criteria and each one is a multi-file change (e.g. `error.tsx` + `loading.tsx` at the app route, next/image requires `remotePatterns` config + Supabase Storage URL wiring, `useOptimistic` rewrites the `vote-button` state model).
+**Harness Signal**: The `async-parallel` rule is easy to statically check: any `await` inside an `async` function followed by a subsequent `await` on a value that does not reference the first `await`'s result is a waterfall. A harness-level lint — not just a reviewer — would catch these during Step 4 and reduce Step 5 back-and-forth.
+**Result**: Success — react-reviewer re-review confirms both FAILs resolved, no new regressions.
+
+---
+
+## Step 5: ui-quality-reviewer warnings logged (no re-review)
+
+**When**: Step 5
+**Decision**: Log all three Warnings from `ui-quality-reviewer` without re-running the reviewer (per `execute-plan/SKILL.md` rule: "Warning → log in decisions.md without re-review"). The first Warning (cohort dropdown isolation) was also addressed inline during the design fix pass — a "Filter by cohort" label was added above the dropdown and the dropdown now shares a flex row with the heading. The other two are acknowledged as polish debt.
+**Why**: Warnings are explicitly below the fail threshold. Fixing them is optional per the skill's rules.
+
+**Warnings logged:**
+1. Cohort dropdown lacks a visible label, floats in isolation on the right edge. **Addressed** in the design fix pass — now paired with a "Filter by cohort" text and shares the header flex row.
+2. ~550px dead space below the empty-state card on desktop (~400px on mobile) because the `<main>` has `min-h-svh` but content collapses. **Not fixed** — low impact; easy follow-up by swapping `min-h-svh` for a flex push footer or dropping the min-height.
+3. Mobile alignment axis inconsistency — cohort dropdown is right-aligned while heading is left-aligned. **Partially addressed** by the new header flex layout; still worth verifying on a real device.
+
+**Harness Signal**: The warning/advisory distinction in `ui-quality-reviewer` is useful — it keeps the reviewer loop bounded without losing signal. No change recommended.
+
+**Result**: Success — Warning 1 fixed, Warnings 2 & 3 accepted as debt.
+
+---
+
+## Step 5: ui-quality-reviewer advisories surfaced in Step 6 report
+
+**When**: Step 5
+**Decision**: Surface the three Advisory items in the Step 6 final report rather than address them in-line.
+**Why**: Advisories are polish suggestions below Warning severity. Per SKILL.md: "Advisory → surface only in the Step 6 report."
+
+**Advisories surfaced:**
+1. Empty state gives no actionable path for anonymous visitors — consider a "Sign in to submit" hint.
+2. The "N" avatar badge visible in the bottom-left corner of all screenshots looks like a local Supabase auth dev UI artifact — worth confirming it does not render in production.
+3. Vertical rhythm between heading block, filter row, and grid could be tightened.
+
+**Harness Signal**: N/A.
+**Result**: Success — surfaced in Step 6 report (below).
