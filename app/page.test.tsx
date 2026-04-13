@@ -1,3 +1,4 @@
+import type { Cohort } from "@entities/cohort/index.ts";
 import type { ProjectWithVoteCount } from "@entities/vote/index.ts";
 import { createMockSupabaseClient } from "@shared/lib/test-utils.tsx";
 import { render, screen } from "@testing-library/react";
@@ -18,7 +19,17 @@ vi.mock("next/link", () => ({
   ),
 }));
 
-const fetchProjectsMock = vi.fn<() => Promise<ProjectWithVoteCount[]>>();
+vi.mock("next/navigation", () => ({
+  useRouter: () => ({ replace: vi.fn() }),
+  usePathname: () => "/",
+  useSearchParams: () => new URLSearchParams(),
+}));
+
+const fetchProjectsMock =
+  vi.fn<
+    (options?: { cohortId?: string | null }) => Promise<ProjectWithVoteCount[]>
+  >();
+const fetchCohortsMock = vi.fn<() => Promise<Cohort[]>>();
 
 vi.mock("@widgets/project-grid", async () => {
   const actual = await vi.importActual<typeof import("@widgets/project-grid")>(
@@ -27,6 +38,16 @@ vi.mock("@widgets/project-grid", async () => {
   return {
     ...actual,
     fetchProjects: fetchProjectsMock,
+  };
+});
+
+vi.mock("@features/cohort-filter", async () => {
+  const actual = await vi.importActual<
+    typeof import("@features/cohort-filter")
+  >("@features/cohort-filter");
+  return {
+    ...actual,
+    fetchCohorts: fetchCohortsMock,
   };
 });
 
@@ -64,6 +85,18 @@ function buildProject(
   };
 }
 
+const cohorts: Cohort[] = [
+  { id: "a1", name: "Cohort A", created_at: "2026-04-14T00:00:00Z" },
+  { id: "b2", name: "Cohort B", created_at: "2026-04-14T00:00:00Z" },
+];
+
+async function renderPage(search: Record<string, string> = {}) {
+  fetchCohortsMock.mockResolvedValue(cohorts);
+  const Page = (await import("./page.tsx")).default;
+  const jsx = await Page({ searchParams: Promise.resolve(search) });
+  render(jsx);
+}
+
 describe("home page", () => {
   beforeEach(() => {
     vi.clearAllMocks();
@@ -78,9 +111,7 @@ describe("home page", () => {
       buildProject({ id: "p5", title: "E", vote_count: 1 }),
     ]);
 
-    const Page = (await import("./page.tsx")).default;
-    const jsx = await Page();
-    render(jsx);
+    await renderPage();
 
     expect(screen.getAllByTestId("project-card")).toHaveLength(5);
     expect(screen.getByText("1st")).toBeInTheDocument();
@@ -94,9 +125,7 @@ describe("home page", () => {
       buildProject({ id: "p2", title: "B", vote_count: 7 }),
     ]);
 
-    const Page = (await import("./page.tsx")).default;
-    const jsx = await Page();
-    render(jsx);
+    await renderPage();
 
     expect(screen.getByText("1st")).toBeInTheDocument();
     expect(screen.getByText("2nd")).toBeInTheDocument();
@@ -106,10 +135,24 @@ describe("home page", () => {
   it("renders the empty state when there are no projects", async () => {
     fetchProjectsMock.mockResolvedValue([]);
 
-    const Page = (await import("./page.tsx")).default;
-    const jsx = await Page();
-    render(jsx);
+    await renderPage();
 
     expect(screen.getByTestId("project-grid-empty")).toBeInTheDocument();
+  });
+
+  it("passes the cohort searchParam to fetchProjects when set", async () => {
+    fetchProjectsMock.mockResolvedValue([]);
+
+    await renderPage({ cohort: "a1" });
+
+    expect(fetchProjectsMock).toHaveBeenCalledWith({ cohortId: "a1" });
+  });
+
+  it("passes null cohortId when no cohort searchParam is set", async () => {
+    fetchProjectsMock.mockResolvedValue([]);
+
+    await renderPage();
+
+    expect(fetchProjectsMock).toHaveBeenCalledWith({ cohortId: null });
   });
 });

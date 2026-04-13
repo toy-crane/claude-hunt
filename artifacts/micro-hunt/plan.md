@@ -297,11 +297,11 @@
   - `widgets/project-grid/api/fetch-projects.ts` (accept optional `cohortId` filter)
   - `app/page.tsx` (read `searchParams.cohort`, pass to `fetch-projects`, mount dropdown above the grid)
 - **Acceptance**:
-  - [ ] First visit (no `?cohort=`) → all cohorts' projects appear
-  - [ ] Selecting "Cohort A" navigates to `/?cohort=<id>` and only that cohort's projects render
-  - [ ] Top-3 badges recalculate against the filtered set (not the global set)
-  - [ ] "Clear" option returns to all projects with global top-3 badges
-  - [ ] Filter active with no matches → `"No projects yet"` empty state
+  - [x] First visit (no `?cohort=`) → all cohorts' projects appear
+  - [x] Selecting "Cohort A" navigates to `/?cohort=<id>` and only that cohort's projects render
+  - [x] Top-3 badges recalculate against the filtered set (not the global set)
+  - [x] "Clear" option returns to all projects with global top-3 badges
+  - [x] Filter active with no matches → `"No projects yet"` empty state
 - **Verification**:
   - `bun run test:unit -- features/cohort-filter widgets/project-grid app`
   - `bun run build`
