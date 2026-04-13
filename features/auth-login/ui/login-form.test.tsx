@@ -2,7 +2,7 @@ import { render, screen, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { vi } from "vitest";
 import { createMockSupabaseClient } from "@/__tests__/helpers.tsx";
-import { LoginForm } from "@/components/login-form.tsx";
+import { LoginForm } from "./login-form.tsx";
 
 vi.mock("next/link", () => ({
   default: ({

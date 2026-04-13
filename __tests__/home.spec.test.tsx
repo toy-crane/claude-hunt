@@ -23,7 +23,7 @@ vi.mock("@shared/api/supabase/server", () => ({
   createClient: vi.fn().mockResolvedValue(mockClient),
 }));
 
-vi.mock("@/app/auth/actions.ts", () => ({
+vi.mock("@features/auth-login", () => ({
   signOut: vi.fn(),
 }));
 
