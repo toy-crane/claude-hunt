@@ -9,6 +9,7 @@ import {
   FieldLabel,
 } from "@shared/ui/field.tsx";
 import { Input } from "@shared/ui/input.tsx";
+import { Spinner } from "@shared/ui/spinner.tsx";
 import { Textarea } from "@shared/ui/textarea.tsx";
 import { useId, useState } from "react";
 import { submitProject } from "../api/actions.ts";
@@ -181,6 +182,7 @@ export function SubmitForm({ cohortId }: SubmitFormProps) {
       ) : null}
 
       <Button disabled={blocked || submitting} type="submit">
+        {submitting ? <Spinner data-icon="inline-start" /> : null}
         {submitting ? "Submitting..." : "Submit project"}
       </Button>
     </form>

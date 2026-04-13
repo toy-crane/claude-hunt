@@ -18,6 +18,7 @@ import {
 } from "@shared/ui/dialog.tsx";
 import { Field, FieldGroup, FieldLabel } from "@shared/ui/field.tsx";
 import { Input } from "@shared/ui/input.tsx";
+import { Spinner } from "@shared/ui/spinner.tsx";
 import { Textarea } from "@shared/ui/textarea.tsx";
 import { useId, useState } from "react";
 import { editProject } from "../api/actions.ts";
@@ -181,6 +182,7 @@ export function EditDialog({ project }: EditDialogProps) {
               Cancel
             </Button>
             <Button disabled={submitting} type="submit">
+              {submitting ? <Spinner data-icon="inline-start" /> : null}
               {submitting ? "Saving..." : "Save changes"}
             </Button>
           </DialogFooter>
