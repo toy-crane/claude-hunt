@@ -77,9 +77,7 @@ Organize code **by business domain first, technical role second**. Implement fro
 
 `supabase/` sits **outside** the FSD tree (migrations, schemas, pgTAP tests). Each `entities/<name>/` slice pairs 1:1 with `supabase/schemas/<names>.sql` (singular entity, plural table).
 
-The raw Supabase-generated `Database` type lives at `shared/api/supabase/types.ts`. Domain code must import narrowed types from `@entities/<slice>` (e.g. `Profile` from `@entities/profile`), never the raw file. Biome enforces this via `noRestrictedImports`.
-
-**Biome rule limitation**: Biome cannot express directional (`from A, block B`) rules, so feature-to-feature imports and `supabase.from("table")` row-type leakage are not lint-caught. Rely on code review.
+The raw Supabase-generated `Database` type lives at `shared/api/supabase/types.ts`. Domain code must import narrowed types from `@entities/<slice>` (e.g. `Profile` from `@entities/profile`), never the raw file.
 
 ## Boundary
 
