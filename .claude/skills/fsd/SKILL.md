@@ -49,7 +49,3 @@ This skill is a workflow reference — no triggers, no scaffolding commands. Loa
 4. **Implement bottom-up**: `shared` deps first, then `entities`, then the new slice.
 5. **Co-locate tests** alongside source (`login-form.tsx` + `login-form.test.tsx`). Use relative imports inside the slice; barrel imports only for cross-slice test mocks.
 6. **Consume via the public API** from higher layers (`app/*/page.tsx`, `widgets/*/ui/*.tsx`, etc.).
-
-## Workflow — Adding a Scenario to spec.yaml
-
-See `.claude/skills/write-spec` (scenario-guide.md section 3, spec-example.yaml). IDs use `{L}-{SLICE}-{NNN}` with L ∈ {E, F, W, P, S, DB}.
