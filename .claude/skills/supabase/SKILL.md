@@ -32,6 +32,7 @@ Run through this checklist when working on auth, RLS, views, or user data:
 | Create a new table | [creating-table.md](references/creating-table.md) |
 | Create an auth-synced profile table | [auth-profile-table.md](references/auth-profile-table.md) |
 | Modify an existing table | [modifying-table.md](references/modifying-table.md) |
+| Create a storage bucket | [storage-buckets.md](references/storage-buckets.md) |
 | Reset the local database | [reset-database.md](references/reset-database.md) |
 | Declarative schema details and caveats | [declarative-schemas.md](references/declarative-schemas.md) |
 | pgTAP testing patterns | [testing.md](references/testing.md) |
