@@ -15,27 +15,32 @@ export default async function Page({ searchParams }: PageProps) {
   const selectedCohortId = cohortParam ?? null;
 
   const supabase = await createClient();
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
 
-  let viewerCohortId: string | null = null;
-  if (user) {
-    const { data: profile } = await supabase
-      .from("profiles")
-      .select("cohort_id")
-      .eq("id", user.id)
-      .single();
-    viewerCohortId = profile?.cohort_id ?? null;
-  }
+  // Stage 1: auth + cohorts in parallel (cohorts do not depend on the
+  // viewer; getUser returns quickly from the session cookie).
+  const [
+    {
+      data: { user },
+    },
+    cohorts,
+  ] = await Promise.all([supabase.auth.getUser(), fetchCohorts()]);
 
-  const [projects, cohorts] = await Promise.all([
+  // Stage 2: projects (+ viewer's votes merged inside) and profile's
+  // cohort_id lookup in parallel. Both depend on `user`, neither on
+  // each other.
+  const [projects, profileResult] = await Promise.all([
     fetchProjects({
       cohortId: selectedCohortId,
       viewerUserId: user?.id ?? null,
     }),
-    fetchCohorts(),
+    user
+      ? supabase.from("profiles").select("cohort_id").eq("id", user.id).single()
+      : Promise.resolve({
+          data: null as { cohort_id: string | null } | null,
+          error: null,
+        }),
   ]);
+  const viewerCohortId = profileResult.data?.cohort_id ?? null;
 
   const resolveScreenshotUrl = (path: string) =>
     supabase.storage.from("project-screenshots").getPublicUrl(path).data
@@ -43,14 +48,17 @@ export default async function Page({ searchParams }: PageProps) {
 
   return (
     <main className="mx-auto flex min-h-svh w-full max-w-6xl flex-col gap-8 p-6">
-      <header className="flex flex-col gap-4">
+      <header className="flex flex-wrap items-end justify-between gap-4">
         <div className="flex flex-col gap-2">
           <h1 className="font-heading font-medium text-2xl">Micro-Hunt</h1>
           <p className="text-muted-foreground text-sm">
             Projects built by cohort students. Upvote your favourites.
           </p>
         </div>
-        <div className="flex items-center justify-end">
+        <div className="flex items-center gap-2">
+          <span aria-hidden="true" className="text-muted-foreground text-xs">
+            Filter by cohort
+          </span>
           <CohortDropdown
             cohorts={cohorts}
             selectedCohortId={selectedCohortId}

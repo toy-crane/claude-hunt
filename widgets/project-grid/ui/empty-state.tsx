@@ -1,13 +1,17 @@
+import {
+  Empty,
+  EmptyDescription,
+  EmptyHeader,
+  EmptyTitle,
+} from "@shared/ui/empty.tsx";
+
 export function EmptyState() {
   return (
-    <div
-      className="flex flex-col items-center justify-center gap-2 rounded-none border border-dashed py-16 text-center"
-      data-testid="project-grid-empty"
-    >
-      <p className="font-medium text-sm">No projects yet</p>
-      <p className="text-muted-foreground text-xs">
-        Be the first to submit a project.
-      </p>
-    </div>
+    <Empty className="border" data-testid="project-grid-empty">
+      <EmptyHeader>
+        <EmptyTitle>No projects yet</EmptyTitle>
+        <EmptyDescription>Be the first to submit a project.</EmptyDescription>
+      </EmptyHeader>
+    </Empty>
   );
 }

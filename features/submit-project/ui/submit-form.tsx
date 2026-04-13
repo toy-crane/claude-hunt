@@ -1,8 +1,14 @@
 "use client";
 
+import { Alert, AlertDescription, AlertTitle } from "@shared/ui/alert.tsx";
 import { Button } from "@shared/ui/button.tsx";
+import {
+  Field,
+  FieldDescription,
+  FieldGroup,
+  FieldLabel,
+} from "@shared/ui/field.tsx";
 import { Input } from "@shared/ui/input.tsx";
-import { Label } from "@shared/ui/label.tsx";
 import { Textarea } from "@shared/ui/textarea.tsx";
 import { useId, useState } from "react";
 import { submitProject } from "../api/actions.ts";
@@ -89,67 +95,66 @@ export function SubmitForm({ cohortId }: SubmitFormProps) {
       onSubmit={handleSubmit}
     >
       {blocked ? (
-        <p
-          className="rounded-md border border-amber-400/40 bg-amber-50 px-3 py-2 text-amber-900 text-xs dark:border-amber-500/30 dark:bg-amber-500/10 dark:text-amber-200"
-          data-testid="submit-form-cohort-warning"
-          role="status"
-        >
-          Contact your instructor to get assigned to a cohort before submitting
-          a project.
-        </p>
+        <Alert data-testid="submit-form-cohort-warning">
+          <AlertTitle>Cohort assignment needed</AlertTitle>
+          <AlertDescription>
+            Contact your instructor to get assigned to a cohort before
+            submitting a project.
+          </AlertDescription>
+        </Alert>
       ) : null}
 
-      <div className="flex flex-col gap-1.5">
-        <Label htmlFor={titleId}>Title</Label>
-        <Input
-          disabled={blocked || submitting}
-          id={titleId}
-          maxLength={MAX_TITLE_LENGTH}
-          name="title"
-          placeholder="My App"
-          required
-        />
-      </div>
+      <FieldGroup>
+        <Field>
+          <FieldLabel htmlFor={titleId}>Title</FieldLabel>
+          <Input
+            disabled={blocked || submitting}
+            id={titleId}
+            maxLength={MAX_TITLE_LENGTH}
+            name="title"
+            placeholder="My App"
+            required
+          />
+        </Field>
 
-      <div className="flex flex-col gap-1.5">
-        <Label htmlFor={taglineId}>Tagline</Label>
-        <Textarea
-          disabled={blocked || submitting}
-          id={taglineId}
-          maxLength={MAX_TAGLINE_LENGTH}
-          name="tagline"
-          placeholder="A cool tool"
-          required
-          rows={2}
-        />
-      </div>
+        <Field>
+          <FieldLabel htmlFor={taglineId}>Tagline</FieldLabel>
+          <Textarea
+            disabled={blocked || submitting}
+            id={taglineId}
+            maxLength={MAX_TAGLINE_LENGTH}
+            name="tagline"
+            placeholder="A cool tool"
+            required
+            rows={2}
+          />
+        </Field>
 
-      <div className="flex flex-col gap-1.5">
-        <Label htmlFor={urlId}>Project URL</Label>
-        <Input
-          disabled={blocked || submitting}
-          id={urlId}
-          name="projectUrl"
-          placeholder="https://myapp.com"
-          required
-          type="url"
-        />
-      </div>
+        <Field>
+          <FieldLabel htmlFor={urlId}>Project URL</FieldLabel>
+          <Input
+            disabled={blocked || submitting}
+            id={urlId}
+            name="projectUrl"
+            placeholder="https://myapp.com"
+            required
+            type="url"
+          />
+        </Field>
 
-      <div className="flex flex-col gap-1.5">
-        <Label htmlFor={screenshotId}>Screenshot</Label>
-        <Input
-          accept="image/jpeg,image/png,image/webp"
-          disabled={blocked || submitting}
-          id={screenshotId}
-          name="screenshot"
-          required
-          type="file"
-        />
-        <p className="text-muted-foreground text-xs">
-          JPEG, PNG, or WebP up to 5 MB.
-        </p>
-      </div>
+        <Field>
+          <FieldLabel htmlFor={screenshotId}>Screenshot</FieldLabel>
+          <Input
+            accept="image/jpeg,image/png,image/webp"
+            disabled={blocked || submitting}
+            id={screenshotId}
+            name="screenshot"
+            required
+            type="file"
+          />
+          <FieldDescription>JPEG, PNG, or WebP up to 5 MB.</FieldDescription>
+        </Field>
+      </FieldGroup>
 
       {fieldError ? (
         <p
@@ -170,10 +175,7 @@ export function SubmitForm({ cohortId }: SubmitFormProps) {
         </p>
       ) : null}
       {success ? (
-        <p
-          className="text-emerald-700 text-xs dark:text-emerald-400"
-          role="status"
-        >
+        <p className="text-primary text-xs" role="status">
           Project submitted!
         </p>
       ) : null}

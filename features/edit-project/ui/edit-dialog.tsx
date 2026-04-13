@@ -16,8 +16,8 @@ import {
   DialogTitle,
   DialogTrigger,
 } from "@shared/ui/dialog.tsx";
+import { Field, FieldGroup, FieldLabel } from "@shared/ui/field.tsx";
 import { Input } from "@shared/ui/input.tsx";
-import { Label } from "@shared/ui/label.tsx";
 import { Textarea } from "@shared/ui/textarea.tsx";
 import { useId, useState } from "react";
 import { editProject } from "../api/actions.ts";
@@ -103,50 +103,54 @@ export function EditDialog({ project }: EditDialogProps) {
           className="flex flex-col gap-4"
           onSubmit={handleSubmit}
         >
-          <div className="flex flex-col gap-1.5">
-            <Label htmlFor={titleId}>Title</Label>
-            <Input
-              defaultValue={project.title ?? ""}
-              disabled={submitting}
-              id={titleId}
-              maxLength={MAX_TITLE_LENGTH}
-              name="title"
-              required
-            />
-          </div>
-          <div className="flex flex-col gap-1.5">
-            <Label htmlFor={taglineId}>Tagline</Label>
-            <Textarea
-              defaultValue={project.tagline ?? ""}
-              disabled={submitting}
-              id={taglineId}
-              maxLength={MAX_TAGLINE_LENGTH}
-              name="tagline"
-              required
-              rows={2}
-            />
-          </div>
-          <div className="flex flex-col gap-1.5">
-            <Label htmlFor={urlId}>Project URL</Label>
-            <Input
-              defaultValue={project.project_url ?? ""}
-              disabled={submitting}
-              id={urlId}
-              name="projectUrl"
-              required
-              type="url"
-            />
-          </div>
-          <div className="flex flex-col gap-1.5">
-            <Label htmlFor={screenshotId}>Screenshot (optional)</Label>
-            <Input
-              accept="image/jpeg,image/png,image/webp"
-              disabled={submitting}
-              id={screenshotId}
-              name="screenshot"
-              type="file"
-            />
-          </div>
+          <FieldGroup>
+            <Field>
+              <FieldLabel htmlFor={titleId}>Title</FieldLabel>
+              <Input
+                defaultValue={project.title ?? ""}
+                disabled={submitting}
+                id={titleId}
+                maxLength={MAX_TITLE_LENGTH}
+                name="title"
+                required
+              />
+            </Field>
+            <Field>
+              <FieldLabel htmlFor={taglineId}>Tagline</FieldLabel>
+              <Textarea
+                defaultValue={project.tagline ?? ""}
+                disabled={submitting}
+                id={taglineId}
+                maxLength={MAX_TAGLINE_LENGTH}
+                name="tagline"
+                required
+                rows={2}
+              />
+            </Field>
+            <Field>
+              <FieldLabel htmlFor={urlId}>Project URL</FieldLabel>
+              <Input
+                defaultValue={project.project_url ?? ""}
+                disabled={submitting}
+                id={urlId}
+                name="projectUrl"
+                required
+                type="url"
+              />
+            </Field>
+            <Field>
+              <FieldLabel htmlFor={screenshotId}>
+                Screenshot (optional)
+              </FieldLabel>
+              <Input
+                accept="image/jpeg,image/png,image/webp"
+                disabled={submitting}
+                id={screenshotId}
+                name="screenshot"
+                type="file"
+              />
+            </Field>
+          </FieldGroup>
 
           {fieldError ? (
             <p
