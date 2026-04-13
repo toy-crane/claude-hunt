@@ -29,7 +29,6 @@ Change Type: New | Modify | Delete
 
 - **Covers**: Scenario 1 (full) | Scenario 2 (partial — happy path only)
 - **Size**: S (1-2 files) | M (3-5 files)
-- **Tier**: Small (unit) | Medium (integration) | Large (E2E) — per `test-driven-development` pyramid
 - **Dependencies**: None | Task N (reason), Task M (reason)
 - **References**:
   - (skill name — keywords)

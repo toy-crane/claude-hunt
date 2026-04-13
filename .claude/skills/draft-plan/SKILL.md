@@ -38,7 +38,7 @@ Scan `.claude/skills/` and select every skill that has even a slight connection 
 When in doubt, include it — builders can ignore what they don't need.
 
 **Always include** (regardless of feature):
-- `test-driven-development` — any task that adds or modifies behavior. Drives tier selection (unit / integration / E2E), RED → GREEN discipline, and test-writing patterns. See also `CLAUDE.md` → Test Infrastructure for project-specific stack and placement rules.
+- `test-driven-development` — any task that adds or modifies behavior. Drives RED → GREEN discipline and criterion-to-test mapping. See also `CLAUDE.md` → Testing for the project's success-criteria principle, stack, and placement rules.
 
 ## Step 5: Fill in the Blanks
 
@@ -85,13 +85,15 @@ Break a task down further when:
 
 #### Acceptance
 
-Each task's **Acceptance** section is a flat checklist of natural-language outcomes derived from the Success Criteria of the scenarios listed in **Covers**. One bullet per Success Criteria covered by this task. Use concrete values from spec.md — paraphrasing is allowed but the outcome must remain externally observable.
+Each task's **Acceptance** section is a flat checklist of natural-language outcomes derived from the Success Criteria of the scenarios listed in **Covers**. One bullet per Success Criteria covered by this task. Use concrete values from the spec — paraphrasing is allowed but the outcome must remain externally observable.
 
-The task's **Covers** line names which spec.md scenarios are addressed and whether coverage is full or partial. If partial, note which subset (e.g. "happy path only", "validation only").
+**Each acceptance bullet must map 1:1 to a test case that proves it.** Pick the lowest boundary where the criterion is actually provable — if a mock would obscure what the criterion is about, don't mock there (see `CLAUDE.md` → Testing).
+
+The task's **Covers** line names which scenarios are addressed and whether coverage is full or partial. If partial, note which subset (e.g. "happy path only", "validation only").
 
 #### Ordering
 
-- Place test file generation first (colocated `<file>.test.tsx`, or `__tests__/` for App Router pages — see `CLAUDE.md` → Test Infrastructure). If prerequisite work is needed, place it before with a reason
+- Place test file generation first (colocated `<file>.test.tsx`, or `__tests__/` for App Router pages — see `CLAUDE.md` → Testing). If prerequisite work is needed, place it before with a reason
 - Order tasks starting with those that have the fewest dependencies
 - Place high-risk tasks early (fail fast)
 - Each task must leave the system in a working state

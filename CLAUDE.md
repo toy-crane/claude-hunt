@@ -28,20 +28,24 @@ Each phase has a human review gate. Do not advance until the current phase is va
 ### Question Rules
 - Always use the AskUserQuestion tool for multiple-choice questions
 
-## Test Infrastructure
+## Testing
 
-### Stack
-- **Unit / component**: Vitest + jsdom + `@testing-library/react`
-- **Database**: pgTAP (`supabase/tests/*_test.sql`)
-- **E2E**: Playwright (`e2e/**/*.spec.ts`) — runs against local Supabase
+### Principle
+**Define success criteria. Loop until verified.**
 
-### File Placement
-- **Colocation is the default** for unit/component tests: `<file>.test.tsx` next to `<file>.tsx` (e.g. `features/auth-login/ui/login-form.test.tsx`, `app/dashboard/page.test.tsx`)
-- **E2E tests live in `e2e/`** (not colocated) because flows span features; they use `.spec.ts` to distinguish from Vitest's `.test.{ts,tsx}`
-- **Shared helpers**: `shared/lib/test-utils.tsx` (`createMockSupabaseClient`, `renderServerComponent`) — extend, do not duplicate
+Every change needs measurable success criteria — concrete input → observable outcome. Each criterion must have a test that proves it. Without a passing test, the criterion is not met.
+
+Pick the lowest boundary where the criterion is actually provable. If a mock would obscure what the criterion is about (real DB state, RLS, auth, cross-page flow), don't mock there — let the test hit the real dependency.
+
+### Stack & file placement
+- **Vitest** (jsdom, `@testing-library/react`) — colocated `<file>.test.tsx` next to `<file>.tsx` (e.g. `features/auth-login/ui/login-form.test.tsx`, `app/dashboard/page.test.tsx`)
+- **pgTAP** — `supabase/tests/*_test.sql`
+- **Playwright** (real browser + real Supabase) — `e2e/*.spec.ts` (not colocated; flows span features, and `.spec.ts` distinguishes from Vitest's `.test.{ts,tsx}`)
+
+Shared helpers live in `shared/lib/test-utils.tsx` (e.g. `createMockSupabaseClient`, `renderServerComponent`) — extend, do not duplicate.
 
 ### Naming
-- Test names use natural language describing the behavior; **do not** use scenario IDs
+Test names describe the behavior in natural language — do not use scenario IDs.
 
 ### Commands
 | Command | Scope |
@@ -54,10 +58,10 @@ Each phase has a human review gate. Do not advance until the current phase is va
 | `bun run test:watch` | Vitest watch mode |
 | `bun run test:coverage` | Vitest with v8 coverage |
 
-### E2E Preconditions
-- `supabase start` is running (API on `:54321`)
+### E2E preconditions
+- `supabase start` running (API on `:54321`)
 - `.env.local` contains `SUPABASE_SECRET_KEY` (copy from `supabase status`)
-- Playwright browser installed once: `bunx playwright install chromium`
+- `bunx playwright install chromium` (once)
 
 ## Architecture — Feature-Sliced Design (FSD)
 
