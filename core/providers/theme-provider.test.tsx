@@ -16,7 +16,7 @@ vi.mock("next-themes", () => ({
 }));
 
 // Import after mock setup
-import { ThemeProvider } from "@/components/theme-provider.tsx";
+import { ThemeProvider } from "./theme-provider.tsx";
 
 describe("theme", () => {
   beforeEach(() => {
