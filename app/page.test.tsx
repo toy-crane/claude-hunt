@@ -37,7 +37,7 @@ describe("home", () => {
       .fn()
       .mockResolvedValue({ data: { user: null }, error: null });
 
-    const Page = (await import("../page.tsx")).default;
+    const Page = (await import("./page.tsx")).default;
     const jsx = await Page();
     render(jsx);
 
@@ -57,7 +57,7 @@ describe("home", () => {
       error: null,
     });
 
-    const Page = (await import("../page.tsx")).default;
+    const Page = (await import("./page.tsx")).default;
     const jsx = await Page();
     render(jsx);
 

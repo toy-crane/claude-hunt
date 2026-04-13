@@ -36,8 +36,7 @@ Each phase has a human review gate. Do not advance until the current phase is va
 - **E2E**: not yet installed — requires `/write-spec` and user approval before adding a browser-testing dependency (e.g. Playwright)
 
 ### File Placement
-- **Colocation is the default**: `<file>.test.tsx` next to `<file>.tsx` (e.g. `features/auth-login/ui/login-form.test.tsx`)
-- **Exception — App Router**: page and route tests go in `app/**/__tests__/` so Next.js does not treat `.test.tsx` files as routes (e.g. `app/__tests__/home.test.tsx`). A colocated test is still fine for route handlers (`route.ts` ↔ `route.test.ts`) because Next.js does not route those
+- **Colocation is the default**: `<file>.test.tsx` next to `<file>.tsx` (e.g. `features/auth-login/ui/login-form.test.tsx`, `app/dashboard/page.test.tsx`)
 - **Shared helpers**: `shared/lib/test-utils.tsx` (`createMockSupabaseClient`, `renderServerComponent`) — extend, do not duplicate
 
 ### Naming
