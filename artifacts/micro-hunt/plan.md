@@ -239,10 +239,10 @@
   - Manual migration for RLS on `storage.objects`
   - `supabase/tests/storage_project_screenshots_test.sql`
 - **Acceptance**:
-  - [ ] Bucket `project-screenshots` exists after `supabase start`; public URL reads succeed without auth
-  - [ ] Authenticated `insert` succeeds only when `owner = auth.uid()`; other-owner writes rejected
-  - [ ] File larger than 5 MiB or outside the allowed MIME list is rejected by the bucket
-  - [ ] Delete/update restricted to the object's owner
+  - [x] Bucket `project-screenshots` exists after `supabase start`; public URL reads succeed without auth
+  - [x] Authenticated `insert` succeeds only when `owner = auth.uid()`; other-owner writes rejected
+  - [x] File larger than 5 MiB or outside the allowed MIME list is rejected by the bucket (enforced at storage layer via config.toml; pgTAP asserts the bucket has the 5 MiB limit and the JPEG/PNG/WebP allow-list)
+  - [x] Delete/update restricted to the object's owner
 - **Verification**:
   - `supabase stop && supabase start` (config reload)
   - `bun run test:db`
