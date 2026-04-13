@@ -11,8 +11,31 @@
       "correctness": {
         // next/font/google, next/server, react, @supabase/ssr etc.
         // cannot be statically resolved by Biome (virtual/bundled modules)
-        "noUnresolvedImports": "warn"
+        "noUnresolvedImports": "warn",
+        // Biome 2.4.7 misreads FSD path aliases like @shared/config as
+        // scoped NPM packages. tsc + bundler resolution already protect
+        // against typos; this rule is redundant here.
+        "noUndeclaredDependencies": "off"
       }
     }
-  }
+  },
+  "overrides": [
+    {
+      // shadcn/ui generated components must not be modified
+      // (see .claude/rules/shadcn-guard.md). Relax rules that trigger
+      // on shadcn's upstream style.
+      "includes": ["components/ui/**", "shared/ui/**"],
+      "linter": {
+        "rules": {
+          "a11y": {
+            "useSemanticElements": "off"
+          },
+          "suspicious": {
+            "noDoubleEquals": "off",
+            "noArrayIndexKey": "off"
+          }
+        }
+      }
+    }
+  ]
 }

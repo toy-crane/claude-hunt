@@ -1,8 +1,8 @@
 import { Geist_Mono, Noto_Sans } from "next/font/google";
 
 import "./globals.css";
+import { cn } from "@shared/lib/utils.ts";
 import { ThemeProvider } from "@/components/theme-provider.tsx";
-import { cn } from "@/lib/utils.ts";
 
 const notoSans = Noto_Sans({ subsets: ["latin"], variable: "--font-sans" });
 

@@ -1,5 +1,6 @@
 "use client";
 
+import { createClient } from "@shared/api/supabase/client.ts";
 import Link from "next/link";
 import { useState } from "react";
 import { GitHubIcon } from "@/components/icons/github.tsx";
@@ -7,7 +8,6 @@ import { GoogleIcon } from "@/components/icons/google.tsx";
 import { Button } from "@/components/ui/button.tsx";
 import { Input } from "@/components/ui/input.tsx";
 import { Label } from "@/components/ui/label.tsx";
-import { createClient } from "@/lib/supabase/client.ts";
 
 export function LoginForm() {
   const [email, setEmail] = useState("");
