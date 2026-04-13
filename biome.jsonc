@@ -6,6 +6,12 @@
     "ultracite/biome/next",
     "ultracite/biome/react"
   ],
+  "files": {
+    // Skill templates, agent definitions, and harness assets live under
+    // .claude/. They're not production code and often contain inline
+    // scripts written for readability rather than lint-cleanliness.
+    "includes": ["!.claude"]
+  },
   "linter": {
     "rules": {
       "correctness": {
