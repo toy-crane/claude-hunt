@@ -5,15 +5,37 @@ import { RankBadge } from "./rank-badge.tsx";
 export interface ProjectCardProps {
   project: ProjectWithVoteCount;
   rank: number;
+  /**
+   * Slot for owner-only controls (edit + delete buttons). Rendered only
+   * when `viewerUserId === project.user_id`. Kept as a render prop so
+   * the widget layer doesn't import individual features.
+   */
+  renderOwnerActions?: (project: ProjectWithVoteCount) => React.ReactNode;
+  /**
+   * Slot for the vote button. Rendered for every viewer (the feature
+   * itself decides whether to show a "Sign in" prompt or an actual
+   * toggle, based on viewer state).
+   */
+  renderVoteButton?: (project: ProjectWithVoteCount) => React.ReactNode;
   screenshotUrl: string;
+  /**
+   * Optional `auth.uid()` of the current viewer. Used to decide whether
+   * to render the owner actions slot (edit / delete triggers). `null`
+   * means anonymous or not-the-owner.
+   */
+  viewerUserId?: string | null;
 }
 
 export function ProjectCard({
   project,
   rank,
   screenshotUrl,
+  viewerUserId,
+  renderOwnerActions,
+  renderVoteButton,
 }: ProjectCardProps) {
   const voteCount = project.vote_count ?? 0;
+  const isOwner = viewerUserId != null && project.user_id === viewerUserId;
   return (
     <article
       className="group flex flex-col overflow-hidden rounded-md bg-card ring-1 ring-foreground/10"
@@ -65,6 +87,22 @@ export function ProjectCard({
             {project.author_display_name ?? "Anonymous"}
           </span>
         </p>
+        {renderVoteButton || (isOwner && renderOwnerActions) ? (
+          <div
+            className="mt-2 flex flex-wrap items-center justify-between gap-2"
+            data-testid="project-card-actions"
+          >
+            {renderVoteButton ? renderVoteButton(project) : <span />}
+            {isOwner && renderOwnerActions ? (
+              <div
+                className="flex items-center gap-2"
+                data-testid="project-card-owner-actions"
+              >
+                {renderOwnerActions(project)}
+              </div>
+            ) : null}
+          </div>
+        ) : null}
       </div>
     </article>
   );

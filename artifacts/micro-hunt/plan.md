@@ -411,10 +411,10 @@ Split into 8a and 8b — two independent hardening slices, both small.
   - `shared/ui/dialog.tsx` (shadcn add)
   - `widgets/project-grid/ui/project-card.tsx` (render "Edit" trigger only when `session.user.id === project.user_id`)
 - **Acceptance**:
-  - [ ] Student viewing their own card → "Edit" trigger is visible
-  - [ ] Student viewing another student's card → "Edit" trigger is not rendered
-  - [ ] Editing tagline from "A cool tool" to "An awesome tool" → the card rerenders with "An awesome tool"
-  - [ ] Server action attempting to update another user's project is rejected by RLS (test invokes action with a spoofed `id`)
+  - [x] Student viewing their own card → "Edit" trigger is visible
+  - [x] Student viewing another student's card → "Edit" trigger is not rendered
+  - [x] Editing tagline from "A cool tool" to "An awesome tool" → the card rerenders with "An awesome tool"
+  - [x] Server action attempting to update another user's project is rejected by RLS (test invokes action with a spoofed `id`)
 - **Verification**:
   - `bun run test:unit -- features/edit-project widgets/project-grid`
 

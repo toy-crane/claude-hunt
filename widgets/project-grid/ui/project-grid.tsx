@@ -4,17 +4,26 @@ import { ProjectCard } from "./project-card.tsx";
 
 export interface ProjectGridProps {
   projects: ProjectWithVoteCount[];
+  /** Owner-only actions slot forwarded to each card. */
+  renderOwnerActions?: (project: ProjectWithVoteCount) => React.ReactNode;
+  /** Vote button slot forwarded to each card. */
+  renderVoteButton?: (project: ProjectWithVoteCount) => React.ReactNode;
   /**
    * Maps a `screenshot_path` from the view to a fetchable URL. Injected by
    * the RSC page so this component can stay framework-agnostic and
    * testable without a supabase client.
    */
   resolveScreenshotUrl: (path: string) => string;
+  /** Current viewer's `auth.uid()` (null for anonymous). */
+  viewerUserId?: string | null;
 }
 
 export function ProjectGrid({
   projects,
   resolveScreenshotUrl,
+  viewerUserId,
+  renderOwnerActions,
+  renderVoteButton,
 }: ProjectGridProps) {
   if (projects.length === 0) {
     return <EmptyState />;
@@ -30,7 +39,10 @@ export function ProjectGrid({
           key={project.id}
           project={project}
           rank={index + 1}
+          renderOwnerActions={renderOwnerActions}
+          renderVoteButton={renderVoteButton}
           screenshotUrl={resolveScreenshotUrl(project.screenshot_path ?? "")}
+          viewerUserId={viewerUserId}
         />
       ))}
     </div>
