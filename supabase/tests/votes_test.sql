@@ -6,7 +6,7 @@
 --   Anonymous visitors can read author_display_name via the view
 
 BEGIN;
-SELECT plan(11);
+SELECT plan(13);
 
 -- 1. votes table exists
 SELECT has_table('public', 'votes', 'votes table should exist');
@@ -116,6 +116,37 @@ SELECT results_eq(
     WHERE project_id = '00000000-0000-0000-0000-000000000031'$$,
   ARRAY[0],
   'Deleting a project cascades to delete its votes'
+);
+
+-- 12-13. Self-vote prevention trigger (Task 8b)
+-- Insert a fresh project owned by user 000...021 and try to vote on it
+-- from that same user's session — trigger must raise.
+SET local role authenticated;
+SET local request.jwt.claims TO '{"sub": "00000000-0000-0000-0000-000000000021"}';
+
+SELECT lives_ok(
+  $$INSERT INTO public.projects (id, user_id, cohort_id, title, tagline, project_url, screenshot_path)
+    VALUES (
+      '00000000-0000-0000-0000-000000000032',
+      '00000000-0000-0000-0000-000000000021',
+      (SELECT id FROM public.cohorts ORDER BY name LIMIT 1),
+      'Self Vote Test',
+      'target for self-vote',
+      'https://self.example.com',
+      'owner/self.png'
+    )$$,
+  'Owner can insert their own project'
+);
+
+SELECT throws_ok(
+  $$INSERT INTO public.votes (user_id, project_id)
+    VALUES (
+      '00000000-0000-0000-0000-000000000021',
+      '00000000-0000-0000-0000-000000000032'
+    )$$,
+  '23514',
+  'users cannot vote on their own projects',
+  'Self-vote trigger rejects the insert'
 );
 
 SELECT * FROM finish();

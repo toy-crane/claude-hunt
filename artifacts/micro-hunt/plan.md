@@ -380,8 +380,8 @@ Split into 8a and 8b — two independent hardening slices, both small.
   - Manual migration creating `public.prevent_self_vote()` trigger function + `BEFORE INSERT` trigger on `public.votes`
   - `supabase/tests/votes_test.sql` (extend)
 - **Acceptance**:
-  - [ ] Inserting a vote where `user_id = projects.user_id` raises a `raise_exception`
-  - [ ] Inserting a vote on someone else's project still succeeds
+  - [x] Inserting a vote where `user_id = projects.user_id` raises a `raise_exception`
+  - [x] Inserting a vote on someone else's project still succeeds
 - **Verification**:
   - `bun run test:db`
 
