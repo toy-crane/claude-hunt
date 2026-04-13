@@ -20,7 +20,6 @@ Each phase has a human review gate. Do not advance until the current phase is va
 ## Development Workflow
 
 - Package manager: `bun`
-- Tests: `bun run test`
 
 ### Commit Rules
 - Commit per logical unit of work; do not mix unrelated changes
@@ -28,6 +27,32 @@ Each phase has a human review gate. Do not advance until the current phase is va
 
 ### Question Rules
 - Always use the AskUserQuestion tool for multiple-choice questions
+
+## Test Infrastructure
+
+### Stack
+- **Unit / component**: Vitest + jsdom + `@testing-library/react`
+- **Database**: pgTAP (`supabase/tests/*_test.sql`)
+- **E2E**: not yet installed — requires `/write-spec` and user approval before adding a browser-testing dependency (e.g. Playwright)
+
+### File Placement
+- **Colocation is the default**: `<file>.test.tsx` next to `<file>.tsx` (e.g. `features/auth-login/ui/login-form.test.tsx`)
+- **Exception — App Router**: page and route tests go in `app/**/__tests__/` so Next.js does not treat `.test.tsx` files as routes (e.g. `app/__tests__/home.test.tsx`). A colocated test is still fine for route handlers (`route.ts` ↔ `route.test.ts`) because Next.js does not route those
+- **Shared helpers**: `shared/lib/test-utils.tsx` (`createMockSupabaseClient`, `renderServerComponent`) — extend, do not duplicate
+
+### Naming
+- Test names use natural language describing the behavior; **do not** use scenario IDs (spec.md dropped scenario IDs in `e91ff75` — tests follow the same convention)
+- Good: `it("shows OTP sent confirmation after submitting email", ...)`
+- Bad: `it("F-AUTH-LOGIN-001: OTP sent confirmation", ...)`
+
+### Commands
+| Command | Scope |
+|---------|-------|
+| `bun run test` | Full suite — Vitest + pgTAP |
+| `bun run test:unit` | Vitest only |
+| `bun run test:db` | pgTAP only |
+| `bun run test:watch` | Vitest watch mode |
+| `bun run test:coverage` | Vitest with v8 coverage |
 
 ## Architecture — Feature-Sliced Design (FSD)
 
