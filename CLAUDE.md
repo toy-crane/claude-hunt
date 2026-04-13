@@ -33,10 +33,11 @@ Each phase has a human review gate. Do not advance until the current phase is va
 ### Stack
 - **Unit / component**: Vitest + jsdom + `@testing-library/react`
 - **Database**: pgTAP (`supabase/tests/*_test.sql`)
-- **E2E**: not yet installed — requires `/write-spec` and user approval before adding a browser-testing dependency (e.g. Playwright)
+- **E2E**: Playwright (`e2e/**/*.spec.ts`) — runs against local Supabase
 
 ### File Placement
-- **Colocation is the default**: `<file>.test.tsx` next to `<file>.tsx` (e.g. `features/auth-login/ui/login-form.test.tsx`, `app/dashboard/page.test.tsx`)
+- **Colocation is the default** for unit/component tests: `<file>.test.tsx` next to `<file>.tsx` (e.g. `features/auth-login/ui/login-form.test.tsx`, `app/dashboard/page.test.tsx`)
+- **E2E tests live in `e2e/`** (not colocated) because flows span features; they use `.spec.ts` to distinguish from Vitest's `.test.{ts,tsx}`
 - **Shared helpers**: `shared/lib/test-utils.tsx` (`createMockSupabaseClient`, `renderServerComponent`) — extend, do not duplicate
 
 ### Naming
@@ -45,11 +46,18 @@ Each phase has a human review gate. Do not advance until the current phase is va
 ### Commands
 | Command | Scope |
 |---------|-------|
-| `bun run test` | Full suite — Vitest + pgTAP |
+| `bun run test` | Vitest + pgTAP (fast tier) |
 | `bun run test:unit` | Vitest only |
 | `bun run test:db` | pgTAP only |
+| `bun run test:e2e` | Playwright (requires Supabase running) |
+| `bun run test:e2e:ui` | Playwright with UI mode |
 | `bun run test:watch` | Vitest watch mode |
 | `bun run test:coverage` | Vitest with v8 coverage |
+
+### E2E Preconditions
+- `supabase start` is running (API on `:54321`)
+- `.env.local` contains `SUPABASE_SECRET_KEY` (copy from `supabase status`)
+- Playwright browser installed once: `bunx playwright install chromium`
 
 ## Architecture — Feature-Sliced Design (FSD)
 
