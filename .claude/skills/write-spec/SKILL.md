@@ -1,18 +1,19 @@
 ---
 name: write-spec
-description: Write a feature spec through conversation with the user. Simulate user flows, fill in the blanks with questions, then generate spec.md (discussion record) and spec.yaml (verifiable requirements). Trigger with "/write-spec", "write spec", "define feature", etc.
+description: Write a feature spec through conversation with the user. Simulate user flows, fill in the blanks with questions, then generate spec.md (a single WHAT-only specification covering scope, scenarios, and invariants). Trigger with "/write-spec", "write spec", "define feature", etc.
 argument-hint: "feature description"
 ---
 
 # Write Spec
 
+The output of this skill is a single document: `artifacts/<feature-name>/spec.md`. The spec describes WHAT the feature must do from an externally observable perspective. Implementation choices (FSD slice placement, file layout, table schemas, test types, libraries) belong in `plan.md`, not here.
+
 ## Step 1: Pre-exploration
 
 Explore existing context before asking questions. Read in order if they exist:
 
-1. `artifacts/<feature>/idea.md` — core idea, design principles (don't re-ask decided items)
-2. `artifacts/spec.yaml` — related scenarios
-3. `artifacts/<feature>/spec.md` — prior discussion record
+1. `artifacts/<feature>/idea.md` — core idea and design principles (do not re-ask decided items)
+2. `artifacts/<feature>/spec.md` — prior discussion record, if a previous pass exists
 
 For entirely new features, only check idea.md.
 
@@ -46,8 +47,9 @@ If the user's description is already concrete, skip this step.
 
 ## Step 4: Iterative Questioning
 
-Simulate user flows for `$ARGUMENTS` and find the blanks.
-At each step, check the happy path, error paths, boundary conditions, and intersections with existing features.
+Simulate user flows for `$ARGUMENTS` and find the blanks. At each step, check the happy path, error paths, boundary conditions, and intersections with existing features.
+
+Keep questions about WHAT the user can observe — not about HOW it is built. Avoid questions about file paths, slice placement, table design, or test strategy.
 
 Classify by cost of change:
 - **High cost of change**: Must ask
@@ -56,65 +58,25 @@ Classify by cost of change:
 ### Question Rules
 
 - One question at a time. Present 2-4 options and do not proceed until receiving a response
-- Before asking, first check if the answer can be found in the codebase
-- If there are intersections with existing scenarios, mention them specifically when asking
-- If there are no new discoveries for 3 or more rounds, move to the next step. However, if there are unexplored branches with high cost of change, ask about those first
+- Before asking, first check if the answer can be found in the codebase or in existing spec/idea documents
+- If a question intersects an existing scenario, mention that scenario specifically
+- After 3 rounds with no new discoveries, move to the next step — unless an unexplored branch has a high cost of change, in which case ask about that first
 
 ## Step 5: Generate spec.md
 
 If the user attached images, save them to `artifacts/<feature-name>/references/` first.
 
-Read `references/spec-template.md` and write according to that format.
+Read `references/spec-template.md` and write following that format. Use `references/spec-example.md` as a model for tone and concreteness, and `references/scenario-guide.md` for Given/When/Then and Success Criteria rules.
 
 ### Writing Rules
 
-- Do all success criteria specify concrete input -> expected output
-- Do scope exclusion items have reasons
-- Undecided items are recorded only for items the user said they don't know
+- **WHAT only.** No FSD slices, file paths, table or column names, test types, or library names appear in spec.md.
+- **Success Criteria are observable.** Every bullet describes input → output that a user, an API consumer, or a test harness can verify externally. Never reference internal state or function calls.
+- **Excluded items have a reason.**
+- **Undecided Items only record items the user explicitly could not decide.**
+- **Use Invariants for cross-scenario rules** (security, performance, data consistency). Omit the section if none apply.
 
 Filename: `artifacts/<feature-name>/spec.md`
-
-## Step 6: Extract spec.yaml
-
-Extract scenarios from spec.md into `artifacts/spec.yaml`. Follow the criteria in `references/scenario-guide.md` (especially section 3 "Choosing the Right Layer") and the structure in `references/spec-example.yaml`.
-
-### Layer Assignment (FSD projects)
-
-For each scenario, decide which FSD layer it belongs to:
-
-| Scenario shape | Goes to | ID prefix |
-|----------------|---------|-----------|
-| Single user action (click, submit, toggle) | `features/<action>/` | `F-` |
-| Domain object rendering (card, badge, list item) | `entities/<domain>/` | `E-` |
-| Composition of multiple features on one screen | `pages/<page>/` | `P-` |
-| Reusable composite UI block (header, sidebar) | `widgets/<block>/` | `W-` |
-| App-global behavior (hotkey, theme) | `shared/<capability>/` | `S-` |
-| DB constraints / RLS / triggers (no UI) | `db/<table>/` (pgTAP) | `DB-` |
-
-If the target project does not use FSD, use the historic `{FEATURE}-{NNN}` format.
-
-### Extraction Rules
-
-- **ID format (FSD)**: `{L}-{SLICE}-{NNN}` where L ∈ {E, F, W, P, S, DB}. Slice name matches the folder name exactly (e.g. `F-SUBMIT-PROJECT-001`, not `F-SUBMIT-001`).
-- **ID format (non-FSD)**: `{FEATURE}-{NNN}`.
-- spec.yaml top-level groups (FSD): `entities:`, `features:`, `widgets:`, `pages:`, `shared:`, `db:`. Omit groups that have no scenarios.
-- If `artifacts/spec.yaml` already exists, append to the appropriate group. If not, create a new one.
-- Write input/expect in `examples` with concrete values verifiable on screen.
-
-### Verification Checklist (before saving)
-
-- [ ] Is the input a concrete value (an actual value, not a placeholder)
-- [ ] Is the expect a value that can be asserted on screen (not internal state)
-- [ ] Do given/when/then meet the criteria in `references/scenario-guide.md`
-- [ ] Is each scenario in the correct layer group per the Layer Assignment table
-- [ ] Are there no duplicate scenarios with the same meaning
-- [ ] Is there at least 1 example
-
-## Step 7: Gap Check
-
-After saving spec.yaml, invoke the `spec-reviewer` agent to verify missing scenarios between spec.md and spec.yaml.
-
-If there are gaps, show them to the user, let them select which gaps to incorporate, and add them applying the rules from Step 6.
 
 ## Done
 
