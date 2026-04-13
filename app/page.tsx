@@ -1,7 +1,7 @@
+import { signOut } from "@features/auth-login/index.ts";
 import { createClient } from "@shared/api/supabase/server.ts";
 import { Button } from "@shared/ui/button.tsx";
 import Link from "next/link";
-import { signOut } from "@/app/auth/actions.ts";
 
 export default async function Page() {
   const supabase = await createClient();

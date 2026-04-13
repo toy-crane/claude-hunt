@@ -16,6 +16,12 @@
         // scoped NPM packages. tsc + bundler resolution already protect
         // against typos; this rule is redundant here.
         "noUndeclaredDependencies": "off"
+      },
+      "performance": {
+        // FSD's Public API convention requires each slice to expose
+        // its surface via index.ts (a barrel). Next.js tree-shakes
+        // these cleanly via modularizeImports-aware bundling.
+        "noBarrelFile": "off"
       }
     }
   },
