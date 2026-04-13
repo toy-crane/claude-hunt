@@ -39,3 +39,8 @@ supabase/.env
 *.tsbuildinfo
 next-env.d.ts
 .vercel
+
+# playwright
+/playwright-report/
+/test-results/
+/playwright/.cache/
