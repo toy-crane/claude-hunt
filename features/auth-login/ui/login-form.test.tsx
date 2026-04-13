@@ -40,7 +40,7 @@ describe("login", () => {
     mockClient.auth.signInWithOtp = vi.fn().mockResolvedValue({ error: null });
   });
 
-  it("LOGIN-001: shows OTP sent confirmation after entering email and clicking Continue", async () => {
+  it("F-AUTH-LOGIN-001: shows OTP sent confirmation after entering email and clicking Continue", async () => {
     const user = userEvent.setup();
     render(<LoginForm />);
 
@@ -61,7 +61,7 @@ describe("login", () => {
     ).toBeInTheDocument();
   });
 
-  it("LOGIN-002: Try another email resets the form", async () => {
+  it("F-AUTH-LOGIN-002: Try another email resets the form", async () => {
     const user = userEvent.setup();
     render(<LoginForm />);
 
@@ -91,7 +91,7 @@ describe("login", () => {
     ).not.toBeInTheDocument();
   });
 
-  it("LOGIN-003: all interactive elements disabled during loading", async () => {
+  it("F-AUTH-LOGIN-003: all interactive elements disabled during loading", async () => {
     mockClient.auth.signInWithOtp = vi.fn().mockReturnValue(neverResolve());
 
     const user = userEvent.setup();
@@ -109,7 +109,7 @@ describe("login", () => {
     });
   });
 
-  it("LOGIN-004: Continue button shows 'Sending...' during loading", async () => {
+  it("F-AUTH-LOGIN-004: Continue button shows 'Sending...' during loading", async () => {
     mockClient.auth.signInWithOtp = vi.fn().mockReturnValue(neverResolve());
 
     const user = userEvent.setup();

@@ -2,32 +2,61 @@ product:
   name: "Claude Hunt"
   description: "A Next.js app with shadcn/ui, spec-driven TDD workflow"
 
-features:
-  - id: login
-    title: "Login page"
+# FSD layer grouping: entities / features / pages / shared / db
+# ID format: {L}-{SLICE}-{NNN}  where L ∈ {E, F, W, P, S, DB}
+# Slice name matches the folder under the corresponding layer.
+
+entities:
+  - id: project
+    title: "Project — card presentation"
     scenarios:
-      - id: LOGIN-001
+      - id: E-PROJECT-001
+        given: "The project grid with 5 projects sorted by vote count"
+        when: "The page loads"
+        then: "The top 3 cards display rank badges '1st', '2nd', '3rd'"
+        examples:
+          - input: { projectCount: 5 }
+            expect: { badgeCount: 3, badges: ["1st", "2nd", "3rd"] }
+          - input: { projectCount: 2 }
+            expect: { badgeCount: 2, badges: ["1st", "2nd"] }
+      - id: E-PROJECT-002
+        given: "The project grid showing a card authored by the viewer vs another user"
+        when: "The page loads"
+        then: "Edit and delete options appear only on the viewer's own card"
+        examples:
+          - input: { cardOwner: "current_user" }
+            expect: { editOption: true, deleteOption: true }
+          - input: { cardOwner: "other_user" }
+            expect: { editOption: false, deleteOption: false }
+
+features:
+  - id: auth-login
+    title: "Magic-link login"
+    scenarios:
+      - id: F-AUTH-LOGIN-001
         given: "The login page with email form visible"
         when: "Enter 'test@example.com' in the email input and click the 'Continue' button"
         then: "'We sent a magic link to test@example.com. Check your email to sign in.' text is displayed"
         examples:
           - input: { email: "test@example.com" }
-            expect: { message: "We sent a magic link to test@example.com. Check your email to sign in." }
-      - id: LOGIN-002
+            expect:
+              { message: "We sent a magic link to test@example.com. Check your email to sign in." }
+      - id: F-AUTH-LOGIN-002
         given: "The OTP sent confirmation is displayed for 'test@example.com'"
         when: "Click the 'Try another email' button"
         then: "The email input field reappears with an empty value and the OTP confirmation disappears"
         examples:
           - input: { action: "click Try another email" }
             expect: { emailInput: true, emailValue: "", otpMessage: false }
-      - id: LOGIN-003
+      - id: F-AUTH-LOGIN-003
         given: "The login page with email form visible"
         when: "Any login action is in progress"
         then: "All interactive elements are disabled"
         examples:
           - input: { loadingState: "email" }
-            expect: { githubButtonDisabled: true, googleButtonDisabled: true, emailInputDisabled: true, continueButtonDisabled: true }
-      - id: LOGIN-004
+            expect:
+              { githubButtonDisabled: true, googleButtonDisabled: true, emailInputDisabled: true, continueButtonDisabled: true }
+      - id: F-AUTH-LOGIN-004
         given: "The login page with email form visible"
         when: "Enter a valid email and click the 'Continue' button while the request is in-flight"
         then: "The 'Continue' button displays the text 'Sending...'"
@@ -38,30 +67,192 @@ features:
       - "OAuth redirect flow (external system boundary)"
       - "Email delivery verification"
 
-  - id: home
-    title: "Home page auth status"
+  - id: submit-project
+    title: "Submit a project"
     scenarios:
-      - id: HOME-001
+      - id: F-SUBMIT-PROJECT-001
+        given: "The project submission form for an authenticated student with a cohort assigned"
+        when: "Fill in title 'My App', tagline 'A cool tool', URL 'https://myapp.com', upload a valid screenshot, and click submit"
+        then: "The project card appears in the grid with the submitted details"
+        examples:
+          - input: { title: "My App", tagline: "A cool tool", url: "https://myapp.com", screenshot: "valid.png" }
+            expect: { cardTitle: "My App", cardTagline: "A cool tool", cardVisible: true }
+      - id: F-SUBMIT-PROJECT-002
+        given: "The project submission form with the title field empty"
+        when: "Click the submit button"
+        then: "A validation error message is displayed"
+        examples:
+          - input: { title: "", tagline: "A cool tool", url: "https://myapp.com" }
+            expect: { validationError: true }
+      - id: F-SUBMIT-PROJECT-003
+        given: "The project submission form"
+        when: "Upload a 6MB PNG file as the screenshot"
+        then: "An error message about file size is displayed"
+        examples:
+          - input: { screenshotSize: "6MB", screenshotType: "image/png" }
+            expect: { errorMessage: true }
+      - id: F-SUBMIT-PROJECT-004
+        given: "The project submission form"
+        when: "Upload a .gif file as the screenshot"
+        then: "An error message about unsupported file type is displayed"
+        examples:
+          - input: { screenshotType: "image/gif" }
+            expect: { errorMessage: true }
+      - id: F-SUBMIT-PROJECT-005
+        given: "The project submission form for an authenticated student without a cohort assigned"
+        when: "The form loads"
+        then: "'Contact your instructor to get assigned to a cohort' message is displayed and the submit button is disabled"
+        examples:
+          - input: { cohortId: null }
+            expect: { message: "Contact your instructor to get assigned to a cohort", submitDisabled: true }
+
+  - id: edit-project
+    title: "Edit own project"
+    scenarios:
+      - id: F-EDIT-PROJECT-001
+        given: "The edit form for the current user's project with tagline 'A cool tool'"
+        when: "Change the tagline to 'An awesome tool' and save"
+        then: "The project card displays 'An awesome tool'"
+        examples:
+          - input: { newTagline: "An awesome tool" }
+            expect: { cardTagline: "An awesome tool" }
+
+  - id: delete-project
+    title: "Delete own project"
+    scenarios:
+      - id: F-DELETE-PROJECT-001
+        given: "The project grid showing a card the current user submitted"
+        when: "Click the delete option and then click 'Confirm' on the confirmation prompt"
+        then: "The project card is removed from the grid"
+        examples:
+          - input: { action: "delete", confirm: true }
+            expect: { cardRemoved: true }
+      - id: F-DELETE-PROJECT-002
+        given: "The project grid showing a card the current user submitted"
+        when: "Click the delete option and then click 'Cancel' on the confirmation prompt"
+        then: "The project card remains in the grid"
+        examples:
+          - input: { action: "delete", confirm: false }
+            expect: { cardRemoved: false }
+
+  - id: toggle-vote
+    title: "Upvote / un-upvote projects"
+    scenarios:
+      - id: F-TOGGLE-VOTE-001
+        given: "The project grid with a card showing 3 votes, submitted by another user"
+        when: "Click the upvote button"
+        then: "The vote count changes to 4 and the button shows an upvoted state"
+        examples:
+          - input: { currentVotes: 3, action: "upvote" }
+            expect: { voteCount: 4, upvoted: true }
+      - id: F-TOGGLE-VOTE-002
+        given: "The project grid with a card showing 4 votes that the current user has already upvoted"
+        when: "Click the upvote button again"
+        then: "The vote count changes to 3 and the button returns to the default state"
+        examples:
+          - input: { currentVotes: 4, action: "un-upvote" }
+            expect: { voteCount: 3, upvoted: false }
+      - id: F-TOGGLE-VOTE-003
+        given: "The project grid viewed by an authenticated student"
+        when: "The page loads showing the user's own project"
+        then: "The upvote button is hidden on the user's own project card"
+        examples:
+          - input: { cardOwner: "current_user" }
+            expect: { upvoteButton: false }
+      - id: F-TOGGLE-VOTE-004
+        given: "The project grid viewed by an unauthenticated visitor"
+        when: "The page loads"
+        then: "Project cards display vote counts, no upvote button, and a 'Sign in to vote' prompt"
+        examples:
+          - input: { authenticated: false }
+            expect: { voteCountVisible: true, upvoteButton: false, signInPrompt: "Sign in to vote" }
+
+  - id: filter-by-cohort
+    title: "Filter projects by cohort"
+    scenarios:
+      - id: F-FILTER-BY-COHORT-001
+        given: "The landing page with 5 projects, 2 in 'Cohort A' and 3 in 'Cohort B'"
+        when: "Select 'Cohort A' from the cohort filter dropdown"
+        then: "Only 2 project cards from Cohort A are displayed with top 3 badges recalculated"
+        examples:
+          - input: { filter: "Cohort A" }
+            expect: { cardCount: 2 }
+          - input: { filter: "" }
+            expect: { cardCount: 5 }
+
+pages:
+  - id: home
+    title: "Home page — auth status + project showcase"
+    scenarios:
+      - id: P-HOME-001
         given: "The home page visited by an unauthenticated user"
         when: "The page loads"
         then: "A 'Sign in' button linking to /login is displayed"
         examples:
           - input: { authenticated: false }
             expect: { signInButton: true, signInHref: "/login" }
-      - id: HOME-002
+      - id: P-HOME-002
         given: "The home page visited by a user logged in via GitHub with email 'user@example.com'"
         when: "The page loads"
         then: "'Signed in as' label, the email, the provider name, and a 'Sign out' button are displayed"
         examples:
           - input: { authenticated: true, email: "user@example.com", provider: "github" }
-            expect: { signedInLabel: "Signed in as", email: "user@example.com", provider: "via github", signOutButton: true }
+            expect:
+              { signedInLabel: "Signed in as", email: "user@example.com", provider: "via github", signOutButton: true }
+      - id: P-HOME-003
+        given: "The landing page with 5 projects from mixed cohorts"
+        when: "The page loads"
+        then: "A grid of 5 project cards is displayed sorted by vote count descending, each showing screenshot, title, tagline, author display name, and vote count"
+        examples:
+          - input: { projectCount: 5 }
+            expect:
+              { cardCount: 5, sortOrder: "vote_count_desc", cardFields: ["screenshot", "title", "tagline", "displayName", "voteCount"] }
+      - id: P-HOME-004
+        given: "The landing page on first visit with 5 projects across multiple cohorts"
+        when: "The page loads with no filter selected"
+        then: "All 5 project cards are displayed and the cohort filter dropdown shows no active selection"
+        examples:
+          - input: { firstVisit: true, projectCount: 5 }
+            expect: { cardCount: 5, activeFilter: null }
+      - id: P-HOME-005
+        given: "The landing page with no projects in the database or no projects matching the active filter"
+        when: "The page loads"
+        then: "'No projects yet' message is displayed"
+        examples:
+          - input: { projectCount: 0 }
+            expect: { emptyMessage: "No projects yet" }
+          - input: { projectCount: 0, filter: "Cohort A" }
+            expect: { emptyMessage: "No projects yet" }
     excludes:
-      - "Sign out server action behavior (integration test concern)"
+      - "Comments and feedback (moderation burden)"
+      - "Voting deadline mechanism"
+      - "Project detail pages (URL links out)"
+      - "Admin dashboard for cohort management"
+      - "Separate cohort routes"
+      - "Avatar display on cards"
+      - "Onboarding form for cohort selection (future feature)"
+      - "Screenshot cropping or aspect ratio enforcement"
+    preconditions:
+      - "Supabase auth and profiles table with RLS"
+      - "Supabase Storage configured for screenshot uploads"
 
-  - id: theme
-    title: "Theme toggle hotkey"
+  - id: auth-error
+    title: "Auth error page"
     scenarios:
-      - id: THEME-001
+      - id: P-AUTH-ERROR-001
+        given: "The /auth/auth-code-error page"
+        when: "The page loads"
+        then: "'Authentication Error' heading, error message, and 'Back to login' link to /login are displayed"
+        examples:
+          - input: { route: "/auth/auth-code-error" }
+            expect:
+              { heading: "Authentication Error", message: "Something went wrong during sign-in. Please try again.", backToLoginHref: "/login" }
+
+shared:
+  - id: theme-hotkey
+    title: "Theme toggle hotkey ('d')"
+    scenarios:
+      - id: S-THEME-HOTKEY-001
         given: "Any page with light theme active and focus not on an input field"
         when: "Press the 'd' key"
         then: "The theme switches to dark and the HTML element has class 'dark'"
@@ -70,7 +261,7 @@ features:
             expect: { theme: "dark", htmlClass: "dark" }
           - input: { key: "d", currentTheme: "dark" }
             expect: { theme: "light", htmlClass: "light" }
-      - id: THEME-002
+      - id: S-THEME-HOTKEY-002
         given: "An input field is focused on the login page"
         when: "Press the 'd' key"
         then: "The theme does not change and 'd' is typed into the input"
@@ -78,21 +269,11 @@ features:
           - input: { key: "d", focusedElement: "input" }
             expect: { themeChanged: false }
 
-  - id: auth-error
-    title: "Auth error page"
+db:
+  - id: profiles
+    title: "Profiles table — auto-creation trigger and RLS"
     scenarios:
-      - id: AUTH-ERR-001
-        given: "The /auth/auth-code-error page"
-        when: "The page loads"
-        then: "'Authentication Error' heading, error message, and 'Back to login' link to /login are displayed"
-        examples:
-          - input: { route: "/auth/auth-code-error" }
-            expect: { heading: "Authentication Error", message: "Something went wrong during sign-in. Please try again.", backToLoginHref: "/login" }
-
-  - id: profile
-    title: "Profile auto-creation and RLS"
-    scenarios:
-      - id: PROFILE-001
+      - id: DB-PROFILES-001
         given: "A new user signs up with email 'new@example.com' and metadata full_name 'Jane Doe'"
         when: "The signup trigger fires"
         then: "A profile row is created with matching id, email, full_name, and display_name"
@@ -103,7 +284,7 @@ features:
             expect: { profileExists: true, fullName: "Jane Doe", displayName: "Jane Doe" }
           - input: { email: "new@example.com", metadata: { user_name: "janedoe" } }
             expect: { profileExists: true, fullName: "janedoe", displayName: "janedoe" }
-      - id: PROFILE-002
+      - id: DB-PROFILES-002
         given: "An authenticated user with their own profile in the profiles table"
         when: "Query the profiles table"
         then: "Only the user's own profile row is returned"
@@ -112,7 +293,7 @@ features:
             expect: { rowCount: 1 }
           - input: { queryAs: "authenticated_user", filterBy: "other_user_id" }
             expect: { rowCount: 0 }
-      - id: PROFILE-003
+      - id: DB-PROFILES-003
         given: "An authenticated user attempts to update a profile"
         when: "Execute an update query on a profile row"
         then: "Only their own profile can be updated"
@@ -124,171 +305,34 @@ features:
     preconditions:
       - "Supabase local instance running with profiles table and RLS policies"
 
-  - id: micro-hunt
-    title: "Micro Hunt — Project Showcase"
-    scenarios:
-      - id: MH-001
-        given: "The landing page with 5 projects from mixed cohorts"
-        when: "The page loads"
-        then: "A grid of 5 project cards is displayed sorted by vote count descending, each showing screenshot, title, tagline, author display name, and vote count"
-        examples:
-          - input: { projectCount: 5 }
-            expect: { cardCount: 5, sortOrder: "vote_count_desc", cardFields: ["screenshot", "title", "tagline", "displayName", "voteCount"] }
-
-      - id: MH-002
-        given: "The landing page with 5 projects, 2 in 'Cohort A' and 3 in 'Cohort B'"
-        when: "Select 'Cohort A' from the cohort filter dropdown"
-        then: "Only 2 project cards from Cohort A are displayed with top 3 badges recalculated"
-        examples:
-          - input: { filter: "Cohort A" }
-            expect: { cardCount: 2 }
-          - input: { filter: "" }
-            expect: { cardCount: 5 }
-
-      - id: MH-003
-        given: "The landing page with projects sorted by vote count"
-        when: "The page loads"
-        then: "The top 3 project cards display rank badges (1st, 2nd, 3rd)"
-        examples:
-          - input: { projectCount: 5 }
-            expect: { badgeCount: 3, badges: ["1st", "2nd", "3rd"] }
-          - input: { projectCount: 2 }
-            expect: { badgeCount: 2, badges: ["1st", "2nd"] }
-
-      - id: MH-004
-        given: "The project submission form for an authenticated student with cohort assigned"
-        when: "Fill in title 'My App', tagline 'A cool tool', URL 'https://myapp.com', upload a valid screenshot, and click submit"
-        then: "The project card appears in the grid with the submitted details"
-        examples:
-          - input: { title: "My App", tagline: "A cool tool", url: "https://myapp.com", screenshot: "valid.png" }
-            expect: { cardTitle: "My App", cardTagline: "A cool tool", cardVisible: true }
-
-      - id: MH-005
-        given: "The project submission form with the title field empty"
-        when: "Click the submit button"
-        then: "A validation error message is displayed"
-        examples:
-          - input: { title: "", tagline: "A cool tool", url: "https://myapp.com" }
-            expect: { validationError: true }
-
-      - id: MH-006
-        given: "The project submission form"
-        when: "Upload a 6MB PNG file as the screenshot"
-        then: "An error message about file size is displayed"
-        examples:
-          - input: { screenshotSize: "6MB", screenshotType: "image/png" }
-            expect: { errorMessage: true }
-
-      - id: MH-006a
-        given: "The project submission form"
-        when: "Upload a .gif file as the screenshot"
-        then: "An error message about unsupported file type is displayed"
-        examples:
-          - input: { screenshotType: "image/gif" }
-            expect: { errorMessage: true }
-
-      - id: MH-007
-        given: "The project submission form for an authenticated student without a cohort assigned"
-        when: "The form loads"
-        then: "'Contact your instructor to get assigned to a cohort' message is displayed and the submit button is disabled"
-        examples:
-          - input: { cohortId: null }
-            expect: { message: "Contact your instructor to get assigned to a cohort", submitDisabled: true }
-
-      - id: MH-008
-        given: "The project grid showing a card the current user submitted"
-        when: "The page loads"
-        then: "Edit and delete options are visible on the user's own project card"
-        examples:
-          - input: { cardOwner: "current_user" }
-            expect: { editOption: true, deleteOption: true }
-          - input: { cardOwner: "other_user" }
-            expect: { editOption: false, deleteOption: false }
-
-      - id: MH-009
-        given: "The edit form for the current user's project with tagline 'A cool tool'"
-        when: "Change the tagline to 'An awesome tool' and save"
-        then: "The project card displays 'An awesome tool'"
-        examples:
-          - input: { newTagline: "An awesome tool" }
-            expect: { cardTagline: "An awesome tool" }
-
-      - id: MH-010
-        given: "The project grid showing a card the current user submitted"
-        when: "Click the delete option and then click 'Confirm' on the confirmation prompt"
-        then: "The project card is removed from the grid"
-        examples:
-          - input: { action: "delete", confirm: true }
-            expect: { cardRemoved: true }
-
-      - id: MH-010a
-        given: "The project grid showing a card the current user submitted"
-        when: "Click the delete option and then click 'Cancel' on the confirmation prompt"
-        then: "The project card remains in the grid"
-        examples:
-          - input: { action: "delete", confirm: false }
-            expect: { cardRemoved: false }
-
-      - id: MH-011
-        given: "The project grid with a card showing 3 votes, submitted by another user"
-        when: "Click the upvote button"
-        then: "The vote count changes to 4 and the button shows an upvoted state"
-        examples:
-          - input: { currentVotes: 3, action: "upvote" }
-            expect: { voteCount: 4, upvoted: true }
-
-      - id: MH-012
-        given: "The project grid with a card showing 4 votes that the current user has already upvoted"
-        when: "Click the upvote button again"
-        then: "The vote count changes to 3 and the button returns to the default state"
-        examples:
-          - input: { currentVotes: 4, action: "un-upvote" }
-            expect: { voteCount: 3, upvoted: false }
-
-      - id: MH-013
-        given: "The project grid viewed by an authenticated student"
-        when: "The page loads showing the user's own project"
-        then: "The upvote button is hidden on the user's own project card"
-        examples:
-          - input: { cardOwner: "current_user" }
-            expect: { upvoteButton: false }
-
-      - id: MH-014
-        given: "The project grid viewed by an unauthenticated visitor"
-        when: "The page loads"
-        then: "Project cards display vote counts, no upvote button, and a 'Sign in to vote' prompt"
-        examples:
-          - input: { authenticated: false }
-            expect: { voteCountVisible: true, upvoteButton: false, signInPrompt: "Sign in to vote" }
-
-      - id: MH-015
-        given: "The landing page on first visit with 5 projects across multiple cohorts"
-        when: "The page loads with no filter selected"
-        then: "All 5 project cards are displayed and the cohort filter dropdown shows no active selection"
-        examples:
-          - input: { firstVisit: true, projectCount: 5 }
-            expect: { cardCount: 5, activeFilter: null }
-
-      - id: MH-016
-        given: "The landing page with no projects in the database or no projects matching the active filter"
-        when: "The page loads"
-        then: "'No projects yet' message is displayed"
-        examples:
-          - input: { projectCount: 0 }
-            expect: { emptyMessage: "No projects yet" }
-          - input: { projectCount: 0, filter: "Cohort A" }
-            expect: { emptyMessage: "No projects yet" }
-
-    excludes:
-      - "Comments and feedback (moderation burden)"
-      - "Voting deadline mechanism"
-      - "Project detail pages (URL links out)"
-      - "Admin dashboard for cohort management"
-      - "Separate cohort routes"
-      - "Avatar display on cards"
-      - "Onboarding form for cohort selection (future feature)"
-      - "Screenshot cropping or aspect ratio enforcement"
-
-    preconditions:
-      - "Supabase auth and profiles table with RLS"
-      - "Supabase Storage configured for screenshot uploads"
+# ID remap (previous → current):
+#   LOGIN-001      → F-AUTH-LOGIN-001
+#   LOGIN-002      → F-AUTH-LOGIN-002
+#   LOGIN-003      → F-AUTH-LOGIN-003
+#   LOGIN-004      → F-AUTH-LOGIN-004
+#   HOME-001       → P-HOME-001
+#   HOME-002       → P-HOME-002
+#   THEME-001      → S-THEME-HOTKEY-001
+#   THEME-002      → S-THEME-HOTKEY-002
+#   AUTH-ERR-001   → P-AUTH-ERROR-001
+#   PROFILE-001    → DB-PROFILES-001
+#   PROFILE-002    → DB-PROFILES-002
+#   PROFILE-003    → DB-PROFILES-003
+#   MH-001         → P-HOME-003
+#   MH-002         → F-FILTER-BY-COHORT-001
+#   MH-003         → E-PROJECT-001
+#   MH-004         → F-SUBMIT-PROJECT-001
+#   MH-005         → F-SUBMIT-PROJECT-002
+#   MH-006         → F-SUBMIT-PROJECT-003
+#   MH-006a        → F-SUBMIT-PROJECT-004
+#   MH-007         → F-SUBMIT-PROJECT-005
+#   MH-008         → E-PROJECT-002
+#   MH-009         → F-EDIT-PROJECT-001
+#   MH-010         → F-DELETE-PROJECT-001
+#   MH-010a        → F-DELETE-PROJECT-002
+#   MH-011         → F-TOGGLE-VOTE-001
+#   MH-012         → F-TOGGLE-VOTE-002
+#   MH-013         → F-TOGGLE-VOTE-003
+#   MH-014         → F-TOGGLE-VOTE-004
+#   MH-015         → P-HOME-004
+#   MH-016         → P-HOME-005
