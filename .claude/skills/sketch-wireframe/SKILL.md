@@ -1,6 +1,6 @@
 ---
 name: sketch-wireframe
-description: Generate an HTML wireframe based on spec.yaml. Visually verify layout and run a feedback loop. Use only in projects that include UI features. Triggered by "/sketch-wireframe", "wireframe", "layout check", etc.
+description: Generate an HTML wireframe based on spec.md. Visually verify layout and run a feedback loop. Use only in projects that include UI features. Triggered by "/sketch-wireframe", "wireframe", "layout check", etc.
 argument-hint: "feature name"
 ---
 
@@ -12,8 +12,8 @@ A tool for verifying component placement, information hierarchy, and screen-to-s
 
 ## Constraints
 
-- Check the relevant feature's scenarios in `artifacts/spec.yaml`. If none exist, output "Please run `/write-spec` first." and stop
-- Do not modify spec.yaml directly. If changes are needed, stop the wireframe and return to `/write-spec`
+- Read the feature's scenarios from `artifacts/<feature>/spec.md`. If the file does not exist, output "Please run `/write-spec <feature>` first." and stop
+- Do not modify spec.md directly. If changes are needed, stop the wireframe and return to `/write-spec`
 
 ## Style
 
@@ -51,18 +51,18 @@ Add remaining scenarios as tabs on top of the finalized layout.
 
 Criteria for adding screens:
 - Scenarios requiring new element placement or layout structure → create as a new screen
-- Scenarios that only differ in data/state from an existing screen → map scenario ID to that screen's `data-scenario`
+- Scenarios that only differ in data/state from an existing screen → map the scenario number to that screen's `data-scenario`
 
 Rules:
-- Specify scenario IDs in the `data-scenario` attribute (do not put IDs in the body text)
-- Use specific data from spec.yaml's examples
-- Screen Notes: describe only screen flow (entry conditions, transitions, element roles). Validation rules and business logic belong in spec.yaml
+- Specify scenario numbers in the `data-scenario` attribute using the form `scenario-N` (do not put numbers in the body text)
+- Use the concrete values from each scenario's Success Criteria as the example data
+- Screen Notes: describe only screen flow (entry conditions, transitions, element roles). Validation rules and business logic belong in spec.md
 
 Verify with the same feedback loop.
 
 ## Step 4: Coverage Verification
 
-Check that no scenarios with visual changes in spec.yaml are missing from the wireframe screens. Report any omissions to the user. Non-visual scenarios (data storage, validation logic, etc.) are not wireframe coverage targets.
+Check that no scenarios with visual changes in spec.md are missing from the wireframe screens. Report any omissions to the user. Non-visual scenarios (data storage, validation logic, etc.) are not wireframe coverage targets.
 
 ## Done
 

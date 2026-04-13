@@ -32,7 +32,7 @@ Components are placed in `components/ui/`. Do not modify `components/ui/*` direc
 This project uses a spec-driven TDD workflow:
 
 1. **Write requirements** — `/write-requirements`
-2. **Write spec** — `/write-spec` generates `spec.md` + `spec.yaml`
+2. **Write spec** — `/write-spec` generates `spec.md` (a single WHAT-only specification)
 3. **Sketch wireframe** — `/sketch-wireframe` creates an HTML wireframe
 4. **Draft plan** — `/draft-plan` produces a TDD task list
 5. **Execute plan** — `/execute-plan` orchestrates Builders and Reviewers
@@ -43,7 +43,7 @@ The `.claude/` directory contains the automation harness:
 
 - **Hooks** — auto-lint on file save, secret detection before commits, test gate on stop, worktree isolation
 - **Rules** — shadcn component guard
-- **Agents** — builder, reviewers (design, react, spec, plan, wireframe, UI quality), code simplifier, skill researcher
+- **Agents** — builder, reviewers (design, react, plan, wireframe, UI quality), code simplifier, skill researcher
 - **Skills** — 19 skills covering Next.js best practices, React patterns, spec writing, wireframing, and more
 
 ### Prerequisites
