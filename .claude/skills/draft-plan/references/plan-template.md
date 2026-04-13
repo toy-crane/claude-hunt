@@ -27,7 +27,7 @@ Change Type: New | Modify | Delete
 
 ### Task 1: (Title — one vertical slice, no "and")
 
-- **Scenarios**: FEATURE-XXX, FEATURE-YYY
+- **Covers**: Scenario 1 (full) | Scenario 2 (partial — happy path only)
 - **Size**: S (1-2 files) | M (3-5 files)
 - **Dependencies**: None | Task N (reason), Task M (reason)
 - **References**:
@@ -37,11 +37,11 @@ Change Type: New | Modify | Delete
 - **Implementation targets**:
   - `file/path.tsx`
   - `tests/path/test.tsx`
-- **Acceptance criteria** (quote spec.yaml examples verbatim):
-  - [ ] FEATURE-XXX: `{ input }` → `{ expect }`
-  - [ ] FEATURE-YYY: `{ input }` → `{ expect }`
+- **Acceptance**:
+  - [ ] Concrete input → observable result (one line per Success Criteria covered)
+  - [ ] Concrete input → observable result
 - **Verification**:
-  - `bun run test -- --grep "feature"`
+  - `bun run test -- <pattern>`
   - `bun run build`
 
 ---
