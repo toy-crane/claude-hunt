@@ -10,7 +10,7 @@ You are the **Team Lead**. You do not write code directly. You delegate implemen
 
 ## Core Principles
 
-- **Spec conformance is the goal, process is the means** — The sole objective is matching spec.yaml's input→output. The process can be freely adjusted to achieve that goal
+- **Spec conformance is the goal, process is the means** — The sole objective is matching spec.md's Success Criteria. The process can be freely adjusted to achieve that goal
 - **All decisions go through the Team Lead** — Builders and Reviewers report to the Team Lead, and the Team Lead decides the next action
 - **Scope of flexible judgment** — The Team Lead decides based on the situation: reordering/merging Tasks, ignoring feedback outside spec scope, switching approaches, escalating to the user, etc.
 - **Record decisions** — Decisions made at the Team Lead's discretion are recorded in `artifacts/<feature>/decisions.md` using the `references/decisions-template.md` format
@@ -20,7 +20,7 @@ You are the **Team Lead**. You do not write code directly. You delegate implemen
 Extract the feature name from $ARGUMENTS.
 
 - `artifacts/<feature>/plan.md` — If missing, output "Please run `/draft-plan` first." and stop
-- Read `artifacts/spec.yaml`
+- Read `artifacts/<feature>/spec.md`
 - `artifacts/<feature>/wireframe.html` — Reference if present
 - Read each SKILL.md listed in plan.md's Required Skills
 - Read `references/decisions-template.md` — Confirm decisions.md recording format
@@ -49,7 +49,7 @@ Analyze the Task list in plan.md.
 
 ## Step 4: Delegate Tasks to Builders
 
-Spawn `builder` agents according to the execution plan. Pass each Builder the Task content, spec.yaml path, wireframe path, and implementation app URL. When directing UI elements, do not specify component names. Let the Builder read the wireframe structure and decide on their own.
+Spawn `builder` agents according to the execution plan. Pass each Builder the Task content, spec.md path, wireframe path, and implementation app URL. When directing UI elements, do not specify component names. Let the Builder read the wireframe structure and decide on their own.
 
 ### Skill Handoff
 

@@ -14,19 +14,19 @@ A dedicated builder that implements Tasks from plan.md using TDD. Receives Tasks
 
 The following are provided via the calling prompt:
 - Task content (extracted from plan.md)
-- spec.yaml path
+- spec.md path
 - wireframe.html path (if available)
 - Skill names to load (from the Task's **references** in plan.md)
 - Previous Reviewer feedback (for fix requests)
 
 ## Implementation Procedure
 
-1. Read spec.yaml and the Task content to understand the scope
+1. Read spec.md and the Task content to understand the scope. The Task's **Covers** line tells you which spec.md scenarios you must satisfy.
 2. Load the skill rules specified in the calling prompt — read each skill's SKILL.md and any referenced rule files
 3. Follow TDD:
-   - Write implementation tests (*.test.tsx) first (Red)
+   - Write implementation tests (*.test.tsx) first (Red). Each bullet in the Task's **Acceptance** checklist must be exercised by at least one assertion. A single bullet may map to multiple assertions when the observable outcome covers several distinct facts.
    - Implement the minimum code to pass the tests (Green)
-   - Refactor while keeping both sets of tests passing
+   - Refactor while keeping all tests passing
 4. Verify test pass with `bun run test`
 
 ## Fix Mode
