@@ -1,5 +1,5 @@
+import { Button } from "@shared/ui/button.tsx";
 import Link from "next/link";
-import { Button } from "@/components/ui/button.tsx";
 
 export default function AuthCodeError() {
   return (
