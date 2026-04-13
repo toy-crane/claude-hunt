@@ -186,11 +186,11 @@
   - `supabase/schemas/projects.sql` (table + view; view defined inline in the same schema file)
   - `entities/project/model/schema.ts`, `entities/project/index.ts`
 - **Acceptance**:
-  - [ ] `projects` table exists with all documented columns; FKs to `profiles` (cascade) and `cohorts` (restrict)
-  - [ ] RLS: public `select`; `insert`/`update`/`delete` only when `auth.uid() = user_id`
-  - [ ] View `projects_with_vote_count` returns `vote_count = 0` when no votes exist (validates LEFT JOIN + coalesce)
-  - [ ] Authenticated user can `insert` a project as themselves; blocked when `user_id` spoofs another user
-  - [ ] Indexes exist on `projects(user_id)` and `projects(cohort_id)`
+  - [x] `projects` table exists with all documented columns; FKs to `profiles` (cascade) and `cohorts` (restrict)
+  - [x] RLS: public `select`; `insert`/`update`/`delete` only when `auth.uid() = user_id`
+  - [ ] View `projects_with_vote_count` returns `vote_count = 0` when no votes exist (validates LEFT JOIN + coalesce) — moved to Task 3 (depends on votes table, see decisions.md)
+  - [x] Authenticated user can `insert` a project as themselves; blocked when `user_id` spoofs another user
+  - [x] Indexes exist on `projects(user_id)` and `projects(cohort_id)`
 - **Verification**:
   - `bun run test:db`
   - `bun run gen:types` regenerates `shared/api/supabase/types.ts` without error

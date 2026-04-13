@@ -47,3 +47,13 @@ No reordering was needed; the plan's ordering is already dependency-correct.
 **Why**: spec.md Scenario 1 says anon visitors see cards that include `author display_name`, but plan.md Task 1 explicitly scopes the broader SELECT policy to `authenticated` only, and plan.md Task 2 says the view should be `security_invoker = true`. These two statements conflict for anon readers. Deferring resolution to Task 2 keeps the Task 1 change surface minimal and lets the view be tuned there (e.g. joining via a narrow public-projection view or switching to `security_invoker = false` scoped to the display-only columns).
 **Harness Signal**: `draft-plan` could check spec Scenarios marked "any visitor" against plan.md RLS decisions and flag any authenticated-only policies on entities that anon needs to read through a view. A "public reachability" cross-check would catch this before execution.
 **Result**: Pending — resolution belongs to Task 2.
+
+---
+
+## Moved `projects_with_vote_count` view from Task 2 into Task 3
+
+**When**: Step 4, Task 2 start
+**Decision**: Create `public.projects` table in Task 2 but defer the `projects_with_vote_count` view to Task 3 (after the `votes` table exists).
+**Why**: plan.md Task 2 asks for the view inline in `supabase/schemas/projects.sql`, but the view performs `LEFT JOIN public.votes` — that table is introduced in Task 3. Declaring the view in Task 2 would fail at `supabase db reset`. Moving the view into Task 3 keeps each Task's migration self-applicable and preserves the "vote_count = 0 when no votes exist" acceptance test at its natural location.
+**Harness Signal**: `draft-plan` could check that SQL views/functions declared in a Task only reference tables from the same or earlier Task — a simple dependency sort on SQL objects would catch this before execution.
+**Result**: Pending — will finalize after Task 3 completes.
