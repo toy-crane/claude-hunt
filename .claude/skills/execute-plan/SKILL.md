@@ -13,7 +13,7 @@ You are the **Team Lead**. You implement Tasks directly in the main context, one
 - **Spec conformance is the goal, process is the means** — The sole objective is matching spec.md's Success Criteria. The process can be freely adjusted to achieve that goal
 - **Team Lead implements and adjusts** — The Team Lead writes code directly and is responsible for responding to Reviewer feedback. All judgment calls stay with the Team Lead
 - **Scope of flexible judgment** — The Team Lead decides based on the situation: reordering/merging Tasks, ignoring feedback outside spec scope, switching approaches, escalating to the user, etc.
-- **Record decisions with harness signals** — Judgment calls are recorded in `artifacts/<feature>/decisions.md` using the `references/decisions-template.md` format. Emphasize the **Harness Signal** field so future harness updates can learn from each execution
+- **Record decisions with harness signals** — Judgment calls are recorded in `artifacts/<feature>/decisions.md` using the `references/decisions-template.md` format (entries start as `Pending` and resolve to `Success` / `Partial` / `Failure` once their effect is observable). Emphasize the **Harness Signal** field so future harness updates can learn from each execution
 
 ## Step 1: Check Prerequisites
 
@@ -53,24 +53,24 @@ Record the order and rationale in decisions.md.
 Implement Tasks one at a time, in the order from Step 3. For each Task:
 
 1. Read the Acceptance Criteria
-2. Apply TDD for logic / backend Tasks (RED → GREEN); UI Tasks rely on Reviewers in Step 5
+2. Apply TDD (RED → GREEN) where it fits
 3. Implement the minimum code to satisfy the criteria
 4. Run `bun run build` and any touched tests
-5. Create one conventional commit per Task (CLAUDE.md rules)
+5. Create one conventional commit per Task
 6. Mark the Task complete in plan.md
 
 Use `debugging-and-error-recovery` on any failure — find the root cause, do not work around it. Record judgment calls (spec ambiguity, scope changes, recovery paths, user escalation) in decisions.md with a Harness Signal.
 
 ## Step 5: Evaluation Loop
 
-After all Tasks complete, spawn the Reviewers from Step 2 **in parallel**. Pass the feature name, app URL, and wireframe ↔ implementation URL mapping to `wireframe-reviewer` and `ui-quality-reviewer`.
+After all Tasks complete, spawn the Reviewers from Step 2 **in parallel** to shorten wall-clock time. Each reviewer's agent spec defines its own input contract.
 
 On results:
 
 - **All pass** → Proceed to Step 6
 - **Fail** → Fix directly and re-run the affected Reviewer. For UI fixes, screenshot-verify before approving
 
-`ui-quality-reviewer` uses 3 tiers: **Fail** triggers the fix loop; **Warning** is recorded in decisions.md without re-review; **Advisory** appears only in the Step 6 report.
+For `ui-quality-reviewer` only: **Warning** → log in decisions.md without re-review. **Advisory** → surface only in the Step 6 report.
 
 Record feedback judgments in decisions.md. After the loop closes, finalize the `Pending` results from Step 2 and Step 3.
 
