@@ -1,19 +1,19 @@
 ---
 name: execute-plan
-description: Orchestrate plan.md Tasks as a Team Lead. Delegate implementation to Builders, verify with Reviewers, then clean up with Code Simplifier. Triggered by "/execute-plan", "execute plan", "start implementation", etc.
+description: Execute plan.md Tasks directly as Team Lead with Reviewer feedback. Load TDD/incremental/debugging skills, implement each Task with one commit, then run Reviewers at the end. Triggered by "/execute-plan", "execute plan", "start implementation", etc.
 argument-hint: "feature name"
 ---
 
 # Execute Plan
 
-You are the **Team Lead**. You do not write code directly. You delegate implementation to Builders, assign verification to Reviewers, and orchestrate the overall flow.
+You are the **Team Lead**. You implement Tasks directly in the main context, one Task at a time, and adjust based on Reviewer feedback at the end. You do not delegate implementation to sub-agents.
 
 ## Core Principles
 
 - **Spec conformance is the goal, process is the means** — The sole objective is matching spec.md's Success Criteria. The process can be freely adjusted to achieve that goal
-- **All decisions go through the Team Lead** — Builders and Reviewers report to the Team Lead, and the Team Lead decides the next action
+- **Team Lead implements and adjusts** — The Team Lead writes code directly and is responsible for responding to Reviewer feedback. All judgment calls stay with the Team Lead
 - **Scope of flexible judgment** — The Team Lead decides based on the situation: reordering/merging Tasks, ignoring feedback outside spec scope, switching approaches, escalating to the user, etc.
-- **Record decisions** — Decisions made at the Team Lead's discretion are recorded in `artifacts/<feature>/decisions.md` using the `references/decisions-template.md` format
+- **Record decisions with harness signals** — Judgment calls are recorded in `artifacts/<feature>/decisions.md` using the `references/decisions-template.md` format. Emphasize the **Harness Signal** field so future harness updates can learn from each execution
 
 ## Step 1: Check Prerequisites
 
@@ -25,77 +25,84 @@ Extract the feature name from $ARGUMENTS.
 - Read each SKILL.md listed in plan.md's Required Skills
 - Read `references/decisions-template.md` — Confirm decisions.md recording format
 
-## Step 2: Team Formation
+**Load these three skills at session start** (they govern how each Task is executed in Step 4):
 
-Analyze feature characteristics to determine the team members needed for this execution.
+- `.claude/skills/incremental-implementation/SKILL.md`
+- `.claude/skills/test-driven-development/SKILL.md`
+- `.claude/skills/debugging-and-error-recovery/SKILL.md`
 
-- **Builder**: Determine the required number considering Task count and parallelization potential
-- **Reviewer selection**:
-  - `wireframe-reviewer` — When wireframe.html exists and there are UI change Tasks
-  - `ui-quality-reviewer` — When there are UI change Tasks (wireframe.html not required)
-  - `design-reviewer` — Only when UI components are present
-  - `react-reviewer` — Only when React/Next.js code is present
+## Step 2: Select Reviewers
 
-Record the team formation decision and rationale in decisions.md.
+Choose the Reviewer combination for this feature. Reviewers run once at the end (Step 5).
 
-## Step 3: Develop Task Execution Plan
+- `wireframe-reviewer` — When wireframe.html exists and there are UI change Tasks
+- `ui-quality-reviewer` — When there are UI change Tasks (wireframe.html not required)
+- `design-reviewer` — Only when UI components are present
+- `react-reviewer` — Only when React/Next.js code is present
+
+Record the Reviewer selection and rationale in decisions.md.
+
+## Step 3: Order Tasks
 
 Analyze the Task list in plan.md.
 
 1. Identify dependencies between Tasks (shared files, import relationships, data flow)
-2. Mark independent Tasks as **parallel execution** eligible
-3. Determine **sequential execution** order for Tasks with dependencies
-4. Briefly output the execution plan
+2. Determine execution order — sequential, dependency-first
+3. Briefly output the order
 
-## Step 4: Delegate Tasks to Builders
+Record the order and rationale in decisions.md.
 
-Spawn `builder` agents according to the execution plan. Pass each Builder the Task content, spec.md path, wireframe path, and implementation app URL. When directing UI elements, do not specify component names. Let the Builder read the wireframe structure and decide on their own.
+## Step 4: Execute Tasks
 
-### Skill Handoff
+The Team Lead implements Tasks directly, one at a time, in the order from Step 3. For each Task:
 
-If a skill is specified in the Task's **references**, include that skill name in the Builder prompt.
+1. Read the Task's **Acceptance Criteria**
+2. Load relevant context (existing code, patterns, types) — follow `incremental-implementation` guidance
+3. Decide TDD application:
+   - Logic / backend Tasks → write failing test first (RED), then minimum implementation (GREEN), using `test-driven-development`
+   - UI Tasks → TDD is optional; visual verification happens via Reviewers in Step 5
+4. Implement the minimum code to satisfy the Acceptance Criteria
+5. Run relevant tests (if any were added or touched)
+6. Run `bun run build` to verify compilation / type-check
+7. Create a **conventional commit** (one commit per Task) following CLAUDE.md's commit rules
+8. Mark the Task complete in plan.md and move to the next Task
 
-### Execution
+**On failure** (test fail, build fail, unexpected behavior): use the `debugging-and-error-recovery` skill to find the root cause before retrying. Do not skip steps to work around a failure.
 
-- Sequential Tasks: Delegate one at a time, verify the result, then proceed to the next
-- Parallel Tasks: Spawn multiple Builders simultaneously for independent Tasks, then consolidate results upon completion
+**Judgment calls during Step 4** — record in decisions.md with Harness Signal:
+
+- Spec ambiguity → which interpretation was chosen and why
+- Task scope changed (added / removed / merged)
+- Build or test failure recovery path
+- User escalation triggered
 
 ## Step 5: Evaluation Loop
 
-After all Tasks are complete, spawn the Reviewers selected in Step 2 **in parallel**. Pass the feature name, implementation app URL, and wireframe screen ↔ implementation URL path mapping to wireframe-reviewer and ui-quality-reviewer.
+After all Tasks are complete, spawn the Reviewers selected in Step 2 **in parallel**. Pass the feature name, implementation app URL, and wireframe screen ↔ implementation URL path mapping to `wireframe-reviewer` and `ui-quality-reviewer`.
 
 ### Feedback Handling
 
 Collect all Reviewer results, then the Team Lead makes a judgment:
 
 - **All pass** → Proceed to Step 6
-- **Fail exists** → Analyze the feedback and determine a fix strategy:
-  - Minor fix: Team Lead fixes directly
-  - Implementation-level fix: Re-spawn a Builder and delegate with Reviewer feedback
-- After fixing, re-run Reviewers to confirm pass
-- For fixes that include UI changes, capture a screenshot and visually verify before approving
+- **Fail exists** → Analyze the feedback and fix directly in the main context. After fixing, re-run the relevant Reviewer(s) to confirm pass. For fixes that include UI changes, capture a screenshot and visually verify before approving
 
 ### ui-quality-reviewer Feedback Handling
 
-ui-quality-reviewer uses a 3-tier verdict system. Handling by tier:
+`ui-quality-reviewer` uses a 3-tier verdict system. Handling by tier:
 
-- **Fail** → Trigger Builder fix loop same as other Reviewers
+- **Fail** → Team Lead fix loop (same as other Reviewers)
 - **Warning** → Record in decisions.md, do not trigger re-review
-- **Advisory** → Include only in Step 7 final report
+- **Advisory** → Include only in Step 6 final report
 
-Record the fix strategy decision in decisions.md.
+Record feedback judgments in decisions.md.
 
-After completing the evaluation loop, update the results left as `pending` in Step 2 (team formation) and Step 3 (execution plan).
+After completing the evaluation loop, update the `Pending` results left in Step 2 (Reviewer selection) and Step 3 (Task order).
 
-## Step 6: Code Simplifier
-
-After all Reviewers pass, invoke the `code-simplifier` agent.
-
-## Step 7: Done
+## Step 6: Done
 
 Report results to the user:
 
-- **Execution summary**: Total Task count, parallel/sequential execution status, team composition
-- **Reviewer results**: Pass/fail per executed Reviewer
-- **Code Simplifier**: Key changes
-- **Decision log**: Provide decisions.md path — update all remaining `pending` results before reporting
+- **Execution summary**: Total Task count, Reviewer composition
+- **Reviewer results**: Pass / fail per executed Reviewer
+- **Decision log**: Provide decisions.md path — update all remaining `Pending` results before reporting, and include a brief summary of the **Harness Signal** entries so future harness tuning has usable input
