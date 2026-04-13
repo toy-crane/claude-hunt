@@ -1,6 +1,6 @@
 ---
 name: draft-plan
-description: Create an implementation plan based on spec.yaml. Discover related skills and generate a TDD-based task list with vertical slicing and dependency ordering. Triggered by "/draft-plan", "create plan", "implementation plan", etc.
+description: Create an implementation plan based on spec.md. Discover related skills and generate a TDD-based task list with vertical slicing and dependency ordering. Triggered by "/draft-plan", "create plan", "implementation plan", etc.
 argument-hint: "feature name"
 ---
 
@@ -10,11 +10,10 @@ argument-hint: "feature name"
 
 Extract the feature name from $ARGUMENTS.
 
-Required (project-level, shared across all features):
-- `artifacts/spec.yaml` -- If missing, output "Please run `/write-spec` first." and stop
+Required (per-feature):
+- `artifacts/<feature>/spec.md` -- If missing, output "Please run `/write-spec <feature>` first." and stop
 
 Optional (per-feature):
-- `artifacts/<feature>/spec.md`
 - `artifacts/<feature>/wireframe.html`
 
 ## Step 2: Enter Plan Mode
@@ -81,9 +80,11 @@ Break a task down further when:
 - It touches 2 or more independent subsystems
 - The title contains "and" (sign it is two tasks)
 
-#### Acceptance Criteria
+#### Acceptance
 
-Quote spec.yaml examples verbatim. Copy the `input` and `expect` values directly — do not paraphrase or rewrite them. Use the checkbox format from plan-template.md: `- [ ] SCENARIO-ID: { input } → { expect }`.
+Each task's **Acceptance** section is a flat checklist of natural-language outcomes derived from the Success Criteria of the scenarios listed in **Covers**. One bullet per Success Criteria covered by this task. Use concrete values from spec.md — paraphrasing is allowed but the outcome must remain externally observable.
+
+The task's **Covers** line names which spec.md scenarios are addressed and whether coverage is full or partial. If partial, note which subset (e.g. "happy path only", "validation only").
 
 #### Ordering
 
