@@ -1,7 +1,7 @@
--- Spec scenario mapping (artifacts/spec.yaml):
--- DB-PROFILES-001 (auto-creation + metadata fallbacks) → tests #13-18
--- DB-PROFILES-002 (RLS select own / block others)      → tests #10-11
--- DB-PROFILES-003 (RLS update own / block others)       → tests #19-20
+-- pgTAP tests for the profiles table:
+--   auto-creation + metadata fallbacks (tests #13-18)
+--   RLS select own / block others        (tests #10-11)
+--   RLS update own / block others        (tests #19-20)
 
 BEGIN;
 SELECT plan(20);
@@ -50,14 +50,14 @@ SET local request.jwt.claims TO '{"sub": "00000000-0000-0000-0000-000000000001"}
 SELECT results_eq(
   'SELECT count(*)::int FROM profiles WHERE id != ''00000000-0000-0000-0000-000000000001''::uuid',
   ARRAY[0],
-  'DB-PROFILES-002: Authenticated user cannot see other profiles'
+  'Authenticated user cannot see other profiles'
 );
 
--- 11. DB-PROFILES-002: authenticated user can see own profile
+-- 11. RLS: authenticated user can see own profile
 SELECT results_eq(
   'SELECT count(*)::int FROM profiles WHERE id = ''00000000-0000-0000-0000-000000000001''::uuid',
   ARRAY[1],
-  'DB-PROFILES-002: Authenticated user can see their own profile'
+  'Authenticated user can see their own profile'
 );
 
 -- 12. RLS: anon cannot see profiles
@@ -68,7 +68,7 @@ SELECT results_eq(
   'Anonymous user cannot see any profiles'
 );
 
--- 13-14. DB-PROFILES-001: Trigger auto-creates profile with full_name metadata
+-- 13-14. Trigger auto-creates profile with full_name metadata
 RESET role;
 SELECT lives_ok(
   $$INSERT INTO auth.users (id, email, raw_user_meta_data, raw_app_meta_data, aud, role, instance_id, created_at, updated_at)
@@ -83,16 +83,16 @@ SELECT lives_ok(
       now(),
       now()
     )$$,
-  'DB-PROFILES-001: Inserting into auth.users should succeed'
+  'Inserting into auth.users should succeed'
 );
 
 SELECT results_eq(
   $$SELECT display_name FROM profiles WHERE id = '00000000-0000-0000-0000-000000000099'$$,
   ARRAY['Test User'::text],
-  'DB-PROFILES-001: Trigger should create profile with display_name = full_name'
+  'Trigger should create profile with display_name = full_name'
 );
 
--- 15-16. DB-PROFILES-001: Trigger fallback to 'name' metadata key
+-- 15-16. Trigger fallback to 'name' metadata key
 SELECT lives_ok(
   $$INSERT INTO auth.users (id, email, raw_user_meta_data, raw_app_meta_data, aud, role, instance_id, created_at, updated_at)
     VALUES (
@@ -106,16 +106,16 @@ SELECT lives_ok(
       now(),
       now()
     )$$,
-  'DB-PROFILES-001: Insert user with name metadata should succeed'
+  'Insert user with name metadata should succeed'
 );
 
 SELECT results_eq(
   $$SELECT full_name FROM profiles WHERE id = '00000000-0000-0000-0000-000000000098'$$,
   ARRAY['Jane Doe'::text],
-  'DB-PROFILES-001: Trigger should fallback to name metadata key'
+  'Trigger should fallback to name metadata key'
 );
 
--- 17-18. DB-PROFILES-001: Trigger fallback to 'user_name' metadata key
+-- 17-18. Trigger fallback to 'user_name' metadata key
 SELECT lives_ok(
   $$INSERT INTO auth.users (id, email, raw_user_meta_data, raw_app_meta_data, aud, role, instance_id, created_at, updated_at)
     VALUES (
@@ -129,32 +129,32 @@ SELECT lives_ok(
       now(),
       now()
     )$$,
-  'DB-PROFILES-001: Insert user with user_name metadata should succeed'
+  'Insert user with user_name metadata should succeed'
 );
 
 SELECT results_eq(
   $$SELECT full_name FROM profiles WHERE id = '00000000-0000-0000-0000-000000000097'$$,
   ARRAY['janedoe'::text],
-  'DB-PROFILES-001: Trigger should fallback to user_name metadata key'
+  'Trigger should fallback to user_name metadata key'
 );
 
--- 19. DB-PROFILES-003: Authenticated user can update own profile
+-- 19. Authenticated user can update own profile
 SET local role authenticated;
 SET local request.jwt.claims TO '{"sub": "00000000-0000-0000-0000-000000000001"}';
 
 SELECT lives_ok(
   $$UPDATE profiles SET display_name = 'New Name' WHERE id = '00000000-0000-0000-0000-000000000001'$$,
-  'DB-PROFILES-003: Authenticated user can update own profile'
+  'Authenticated user can update own profile'
 );
 
--- 20. DB-PROFILES-003: Authenticated user cannot update other user's profile
+-- 20. Authenticated user cannot update other user's profile
 SELECT results_eq(
   $$WITH updated AS (
     UPDATE profiles SET display_name = 'Hacked' WHERE id = '00000000-0000-0000-0000-000000000099'
     RETURNING id
   ) SELECT count(*)::int FROM updated$$,
   ARRAY[0],
-  'DB-PROFILES-003: Authenticated user cannot update other profiles'
+  'Authenticated user cannot update other profiles'
 );
 
 SELECT * FROM finish();
