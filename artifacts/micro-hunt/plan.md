@@ -220,9 +220,9 @@
 ---
 
 ### Checkpoint: After Tasks 1–3
-- [ ] `bun run test` green
-- [ ] `bun run build` succeeds
-- [ ] Tables + view queryable from `supabase studio`; entity types exported from `@entities/{cohort,project,vote}`
+- [x] `bun run test` green (54 pgTAP checks across 4 files; Vitest passes with no unit tests yet)
+- [x] `bun run build` succeeds
+- [x] Tables + view queryable from `supabase studio`; entity types exported from `@entities/{cohort,project,vote}`
 
 ---
 
