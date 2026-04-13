@@ -434,12 +434,12 @@ Split into 8a and 8b — two independent hardening slices, both small.
   - `features/delete-project/index.ts`
   - `widgets/project-grid/ui/project-card.tsx` (render trigger)
 - **Acceptance**:
-  - [ ] Student viewing their own card → "Delete" trigger is visible
-  - [ ] Student viewing another student's card → "Delete" trigger is not rendered
-  - [ ] Clicking "Delete" opens a confirmation dialog
-  - [ ] Confirming → row is deleted, revalidation re-renders grid without the card
-  - [ ] Cancelling → dialog closes, card stays in the grid
-  - [ ] Delete action on a non-owned project is rejected by RLS (defence-in-depth test)
+  - [x] Student viewing their own card → "Delete" trigger is visible
+  - [x] Student viewing another student's card → "Delete" trigger is not rendered
+  - [x] Clicking "Delete" opens a confirmation dialog
+  - [x] Confirming → row is deleted, revalidation re-renders grid without the card
+  - [x] Cancelling → dialog closes, card stays in the grid
+  - [x] Delete action on a non-owned project is rejected by RLS (defence-in-depth test)
 - **Verification**:
   - `bun run test:unit -- features/delete-project widgets/project-grid`
 

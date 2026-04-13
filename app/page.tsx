@@ -1,4 +1,5 @@
 import { CohortDropdown, fetchCohorts } from "@features/cohort-filter/index.ts";
+import { DeleteButton } from "@features/delete-project/index.ts";
 import { EditDialog } from "@features/edit-project/index.ts";
 import { SubmitForm } from "@features/submit-project/index.ts";
 import { createClient } from "@shared/api/supabase/server.ts";
@@ -68,14 +69,20 @@ export default async function Page({ searchParams }: PageProps) {
       <ProjectGrid
         projects={projects}
         renderOwnerActions={(project) => (
-          <EditDialog
-            project={{
-              id: project.id ?? "",
-              title: project.title ?? "",
-              tagline: project.tagline ?? "",
-              project_url: project.project_url ?? "",
-            }}
-          />
+          <>
+            <EditDialog
+              project={{
+                id: project.id ?? "",
+                title: project.title ?? "",
+                tagline: project.tagline ?? "",
+                project_url: project.project_url ?? "",
+              }}
+            />
+            <DeleteButton
+              projectId={project.id ?? ""}
+              projectTitle={project.title ?? ""}
+            />
+          </>
         )}
         resolveScreenshotUrl={resolveScreenshotUrl}
         viewerUserId={user?.id ?? null}
