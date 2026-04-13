@@ -32,7 +32,7 @@ describe("home", () => {
     vi.clearAllMocks();
   });
 
-  it("HOME-001: unauthenticated user sees Sign in button linking to /login", async () => {
+  it("P-HOME-001: unauthenticated user sees Sign in button linking to /login", async () => {
     mockClient.auth.getUser = vi
       .fn()
       .mockResolvedValue({ data: { user: null }, error: null });
@@ -46,7 +46,7 @@ describe("home", () => {
     expect(signInLink).toHaveAttribute("href", "/login");
   });
 
-  it("HOME-002: authenticated user sees email, provider, and Sign out button", async () => {
+  it("P-HOME-002: authenticated user sees email, provider, and Sign out button", async () => {
     mockClient.auth.getUser = vi.fn().mockResolvedValue({
       data: {
         user: {

@@ -18,7 +18,7 @@ vi.mock("next/link", () => ({
 }));
 
 describe("auth-error", () => {
-  it("AUTH-ERR-001: displays error heading, message, and back link", () => {
+  it("P-AUTH-ERROR-001: displays error heading, message, and back link", () => {
     render(<AuthCodeError />);
 
     expect(
