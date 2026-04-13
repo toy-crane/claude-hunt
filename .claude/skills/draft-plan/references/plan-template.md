@@ -5,6 +5,16 @@
 | Decision | Choice | Reason |
 |----------|--------|--------|
 
+## Infrastructure Resources
+
+Runtime resources outside application code that this feature needs to exist. Leave empty with "None" if nothing applies.
+
+| Resource | Type | Declared in | Creation Task |
+|----------|------|-------------|---------------|
+|          |      |             |               |
+
+Type examples: Storage bucket · Cron job · Edge function · Env var · OAuth provider · Webhook · Email sender
+
 ## Data Model
 
 ### EntityName
