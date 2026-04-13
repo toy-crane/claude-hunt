@@ -97,19 +97,49 @@ Success Criteria:
 - [ ] Update own profile succeeds
 - [ ] Update another user's profile affects 0 rows
 
+### 12. Auth callback — open-redirect guard and branch routing
+[Context] User returns from an OAuth provider to `/auth/callback` with a `code` and optional `next` query param; Supabase code exchange is mocked
+[Action] Route handler decides where to redirect
+
+Success Criteria:
+- [ ] `?code=X&next=/dashboard` + exchange success → redirect location ends with `/dashboard`
+- [ ] `?code=X&next=https://evil.com` + exchange success → redirect location ends with `/` (non-local `next` is sanitized)
+- [ ] `?code=X` (no `next`) + exchange success → redirect location ends with `/`
+- [ ] `?code=X` + exchange error → redirect to `/auth/auth-code-error`
+- [ ] No `code` param → redirect to `/auth/auth-code-error`
+
+### 13. OAuth login buttons — provider wiring
+[Context] User is on the login page, not currently loading
+[Action] User clicks the GitHub or Google button
+
+Success Criteria:
+- [ ] Clicking GitHub calls Supabase `signInWithOAuth` with `provider: "github"` and `options.redirectTo` ending in `/auth/callback`
+- [ ] Clicking Google calls Supabase `signInWithOAuth` with `provider: "google"` and `options.redirectTo` ending in `/auth/callback`
+
+### 14. Login errors — loading state recovery
+[Context] A login request is in progress and Supabase returns an error
+[Action] The form reacts to the failure
+
+Success Criteria:
+- [ ] On OTP error: the OTP confirmation screen is NOT shown, and the email input + Continue button re-enable
+- [ ] On OAuth error: the GitHub and Google buttons re-enable
+
 ## Scope
 
 ### Included
 - Login form UI states (email magic link, loading states)
+- Login form OAuth button → SDK wiring (what args we pass)
+- Login form SDK error recovery (loading state reset on failure)
 - Home page auth status display
 - Theme hotkey toggle
 - Auth error page
+- Auth callback route — open-redirect guard and branch routing (our own URL logic)
 - Profile auto-creation trigger
 - Profile RLS policies
 
 ### Excluded
-- OAuth redirect flow (external system boundary — cannot be tested without Supabase OAuth providers)
-- Auth callback code exchange (requires real auth code from Supabase)
+- OAuth provider round-trip (external system boundary — cannot be tested without real Supabase OAuth providers)
+- Real auth-code exchange with Supabase (network boundary; we only test our route-handler logic with the Supabase client mocked)
 - Sign out server action (server action with redirect — integration test concern)
 - Email delivery (external service)
 
