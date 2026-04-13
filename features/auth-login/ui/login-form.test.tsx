@@ -41,7 +41,7 @@ describe("login", () => {
     mockClient.auth.signInWithOtp = vi.fn().mockResolvedValue({ error: null });
   });
 
-  it("F-AUTH-LOGIN-001: shows OTP sent confirmation after entering email and clicking Continue", async () => {
+  it("shows OTP sent confirmation after entering email and clicking Continue", async () => {
     const user = userEvent.setup();
     render(<LoginForm />);
 
@@ -62,7 +62,7 @@ describe("login", () => {
     ).toBeInTheDocument();
   });
 
-  it("F-AUTH-LOGIN-002: Try another email resets the form", async () => {
+  it("Try another email resets the form", async () => {
     const user = userEvent.setup();
     render(<LoginForm />);
 
@@ -92,7 +92,7 @@ describe("login", () => {
     ).not.toBeInTheDocument();
   });
 
-  it("F-AUTH-LOGIN-003: all interactive elements disabled during loading", async () => {
+  it("all interactive elements disabled during loading", async () => {
     mockClient.auth.signInWithOtp = vi.fn().mockReturnValue(neverResolve());
 
     const user = userEvent.setup();
@@ -110,7 +110,7 @@ describe("login", () => {
     });
   });
 
-  it("F-AUTH-LOGIN-004: Continue button shows 'Sending...' during loading", async () => {
+  it("Continue button shows 'Sending...' during loading", async () => {
     mockClient.auth.signInWithOtp = vi.fn().mockReturnValue(neverResolve());
 
     const user = userEvent.setup();
@@ -127,7 +127,7 @@ describe("login", () => {
     });
   });
 
-  it("F-AUTH-LOGIN-005: clicking GitHub calls signInWithOAuth with provider=github and /auth/callback redirectTo", async () => {
+  it("clicking GitHub calls signInWithOAuth with provider=github and /auth/callback redirectTo", async () => {
     mockClient.auth.signInWithOAuth = vi
       .fn()
       .mockResolvedValue({ error: null });
@@ -144,7 +144,7 @@ describe("login", () => {
     expect(arg.options.redirectTo).toMatch(CALLBACK_PATH_RE);
   });
 
-  it("F-AUTH-LOGIN-006: clicking Google calls signInWithOAuth with provider=google and /auth/callback redirectTo", async () => {
+  it("clicking Google calls signInWithOAuth with provider=google and /auth/callback redirectTo", async () => {
     mockClient.auth.signInWithOAuth = vi
       .fn()
       .mockResolvedValue({ error: null });
@@ -161,7 +161,7 @@ describe("login", () => {
     expect(arg.options.redirectTo).toMatch(CALLBACK_PATH_RE);
   });
 
-  it("F-AUTH-LOGIN-007: OTP error keeps email form visible and re-enables inputs", async () => {
+  it("OTP error keeps email form visible and re-enables inputs", async () => {
     mockClient.auth.signInWithOtp = vi
       .fn()
       .mockResolvedValue({ error: { message: "rate limited" } });
@@ -189,7 +189,7 @@ describe("login", () => {
     expect(screen.getByRole("button", { name: GOOGLE_RE })).not.toBeDisabled();
   });
 
-  it("F-AUTH-LOGIN-008: OAuth error re-enables GitHub and Google buttons", async () => {
+  it("OAuth error re-enables GitHub and Google buttons", async () => {
     mockClient.auth.signInWithOAuth = vi
       .fn()
       .mockResolvedValue({ error: { message: "provider error" } });
