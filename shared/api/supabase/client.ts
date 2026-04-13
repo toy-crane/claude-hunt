@@ -1,6 +1,6 @@
+import type { Database } from "@shared/api/supabase/types.ts";
 import { env } from "@shared/config/env.ts";
 import { createBrowserClient } from "@supabase/ssr";
-import type { Database } from "@/types/database.types.ts";
 
 export function createClient() {
   return createBrowserClient<Database>(
