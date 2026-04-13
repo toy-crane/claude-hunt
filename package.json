@@ -15,7 +15,7 @@
     "test:db": "supabase test db",
     "test:watch": "vitest",
     "test:coverage": "vitest run --coverage",
-    "gen:types": "supabase gen types typescript --local > types/database.types.ts"
+    "gen:types": "supabase gen types typescript --local > shared/api/supabase/types.ts"
   },
   "dependencies": {
     "@remixicon/react": "^4.9.0",

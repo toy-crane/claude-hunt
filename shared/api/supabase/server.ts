@@ -1,7 +1,7 @@
+import type { Database } from "@shared/api/supabase/types.ts";
 import { env } from "@shared/config/env.ts";
 import { createServerClient } from "@supabase/ssr";
 import { cookies } from "next/headers";
-import type { Database } from "@/types/database.types.ts";
 
 export async function createClient() {
   const cookieStore = await cookies();
