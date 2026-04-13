@@ -37,6 +37,9 @@ Explore the existing code to understand the architecture and related patterns.
 Scan `.claude/skills/` and select every skill that has even a slight connection to this feature.
 When in doubt, include it — builders can ignore what they don't need.
 
+**Always include** (regardless of feature):
+- `test-driven-development` — any task that adds or modifies behavior. Drives tier selection (unit / integration / E2E), RED → GREEN discipline, and test-writing patterns. See also `CLAUDE.md` → Test Infrastructure for project-specific stack and placement rules.
+
 ## Step 5: Fill in the Blanks
 
 Read the above inputs and find items that are needed for implementation but not yet decided.
@@ -88,7 +91,7 @@ The task's **Covers** line names which spec.md scenarios are addressed and wheth
 
 #### Ordering
 
-- Place spec test (*.spec.test.tsx) generation first. If prerequisite work is needed, place it before with a reason
+- Place test file generation first (colocated `<file>.test.tsx`, or `__tests__/` for App Router pages — see `CLAUDE.md` → Test Infrastructure). If prerequisite work is needed, place it before with a reason
 - Order tasks starting with those that have the fewest dependencies
 - Place high-risk tasks early (fail fast)
 - Each task must leave the system in a working state
