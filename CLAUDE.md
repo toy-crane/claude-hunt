@@ -68,9 +68,9 @@ Organize code **by business domain first, technical role second**. Implement fro
 
 ### Slice rules
 
-- **Public API**: every slice exposes its surface via `index.ts`. External code imports from `@features/auth-login` (the barrel), never from `@features/auth-login/ui/login-form` (internal path). Slice-internal tests may use relative imports.
-- **Slice isolation**: cross-slice imports on the same layer are forbidden. `features/A` cannot import `features/B`; `entities/X` cannot import `entities/Y`. Shared logic belongs in `shared/` (promote up, never sideways).
-- **Server actions**: Next.js server actions live in `features/<slice>/api/*.ts` with `'use server'`. Not in `app/`. Route handlers (`route.ts`) remain in `app/` because Next.js routing requires them there.
+- **Public API**: every slice exposes its surface via `index.ts` (barrel). External code uses `@features/auth-login`, never internal paths. Slice-internal tests may use relative imports.
+- **Slice isolation**: cross-slice imports on the same layer are forbidden. Shared logic belongs in `shared/` (promote up, never sideways).
+- **Server actions**: belong in `features/`, not `app/`. Route handlers (`route.ts`) stay in `app/` — Next.js routing requires it.
 
 ### Infrastructure boundary
 
