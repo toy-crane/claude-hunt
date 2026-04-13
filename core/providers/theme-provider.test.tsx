@@ -24,7 +24,7 @@ describe("theme", () => {
     mockResolvedTheme = "light";
   });
 
-  it("S-THEME-HOTKEY-001: pressing 'd' toggles theme from light to dark", async () => {
+  it("pressing 'd' toggles theme from light to dark", async () => {
     const user = userEvent.setup();
     render(
       <ThemeProvider>
@@ -37,7 +37,7 @@ describe("theme", () => {
     expect(mockSetTheme).toHaveBeenCalledWith("dark");
   });
 
-  it("S-THEME-HOTKEY-001: pressing 'd' toggles theme from dark to light", async () => {
+  it("pressing 'd' toggles theme from dark to light", async () => {
     mockResolvedTheme = "dark";
     const user = userEvent.setup();
     render(
@@ -51,7 +51,7 @@ describe("theme", () => {
     expect(mockSetTheme).toHaveBeenCalledWith("light");
   });
 
-  it("S-THEME-HOTKEY-002: pressing 'd' in a focused input does not toggle theme", async () => {
+  it("pressing 'd' in a focused input does not toggle theme", async () => {
     const user = userEvent.setup();
     render(
       <ThemeProvider>

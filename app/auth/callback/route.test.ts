@@ -15,7 +15,7 @@ describe("auth callback", () => {
       .mockResolvedValue({ error: null });
   });
 
-  it("S-AUTH-CALLBACK-001: redirects to origin + next when next is a local path", async () => {
+  it("redirects to origin + next when next is a local path", async () => {
     const { GET } = await import("./route.ts");
     const res = await GET(
       new Request("http://app.test/auth/callback?code=abc&next=/dashboard")
@@ -24,7 +24,7 @@ describe("auth callback", () => {
     expect(res.headers.get("location")).toBe("http://app.test/dashboard");
   });
 
-  it("S-AUTH-CALLBACK-002: sanitizes non-local next param to '/'", async () => {
+  it("sanitizes non-local next param to '/'", async () => {
     const { GET } = await import("./route.ts");
     const res = await GET(
       new Request(
@@ -35,7 +35,7 @@ describe("auth callback", () => {
     expect(res.headers.get("location")).toBe("http://app.test/");
   });
 
-  it("S-AUTH-CALLBACK-003: falls back to '/' when next param is missing", async () => {
+  it("falls back to '/' when next param is missing", async () => {
     const { GET } = await import("./route.ts");
     const res = await GET(
       new Request("http://app.test/auth/callback?code=abc")
@@ -44,7 +44,7 @@ describe("auth callback", () => {
     expect(res.headers.get("location")).toBe("http://app.test/");
   });
 
-  it("S-AUTH-CALLBACK-004: redirects to /auth/auth-code-error when exchange returns an error", async () => {
+  it("redirects to /auth/auth-code-error when exchange returns an error", async () => {
     mockClient.auth.exchangeCodeForSession = vi
       .fn()
       .mockResolvedValue({ error: { message: "invalid_grant" } });
@@ -59,7 +59,7 @@ describe("auth callback", () => {
     );
   });
 
-  it("S-AUTH-CALLBACK-005: redirects to /auth/auth-code-error when code is missing", async () => {
+  it("redirects to /auth/auth-code-error when code is missing", async () => {
     const { GET } = await import("./route.ts");
     const res = await GET(new Request("http://app.test/auth/callback"));
 
