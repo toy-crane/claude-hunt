@@ -76,3 +76,34 @@ examples:
   - input: { title: "Buy milk" }
     expect: { addTodoCalled: true, apiResponse: 201 }
 ```
+
+---
+
+## 3. Choosing the Right Layer (FSD projects)
+
+The layer a scenario belongs to determines where its test lives and how big the test becomes. Match scenario granularity to implementation:
+
+| Scenario granularity | Layer | ID prefix | Why |
+|---|---|---|---|
+| "Click button → API call → UI updates" | features/ | `F-` | Isolated action, fast unit test |
+| "Card shows title + author + vote count" | entities/ | `E-` | Pure render, no action |
+| "Header / sidebar used on many pages" | widgets/ | `W-` | Reusable composition |
+| "Filter + grid + submit all wired on this page" | pages/ | `P-` | Integration — multiple features |
+| "Press 'd' anywhere switches theme" | shared/ | `S-` | App-global behavior |
+| "RLS blocks other-user update" | (outside FSD) | `DB-` | Backend-only, no UI |
+
+### Heuristics
+
+- If a scenario requires mocking 3+ features to test, it's a **page-level** scenario (`P-`), not a feature scenario.
+- If the scenario describes **how a domain object looks** (ProjectCard with badge), it's an **entity** (`E-`), even though it's "UI".
+- If the scenario describes **a user doing something** (submit, upvote, delete), it's a **feature** (`F-`), regardless of which component renders it.
+- If a scenario has **no UI** (DB trigger, RLS policy), it's **not** an FSD layer — route it to pgTAP under `db:`.
+
+### Example split
+
+One user flow "fill out form and submit a project" may decompose into:
+
+- `F-SUBMIT-PROJECT-001` — happy path: fill fields, submit, card appears (feature behavior)
+- `F-SUBMIT-PROJECT-002` — validation: empty title shows error (feature validation)
+- `E-PROJECT-001` — the submitted card renders screenshot, title, tagline (entity rendering)
+- `P-HOME-003` — after submit, the new card appears in the correct sort position on the home page (page integration)
