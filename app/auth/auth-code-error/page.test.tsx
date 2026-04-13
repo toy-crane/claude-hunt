@@ -1,6 +1,6 @@
 import { render, screen } from "@testing-library/react";
 import { vi } from "vitest";
-import AuthCodeError from "@/app/auth/auth-code-error/page.tsx";
+import AuthCodeError from "./page.tsx";
 
 vi.mock("next/link", () => ({
   default: ({

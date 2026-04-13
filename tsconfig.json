@@ -22,7 +22,6 @@
     ],
     "baseUrl": ".",
     "paths": {
-      "@/*": ["./*"],
       "@core/*": ["./core/*"],
       "@features/*": ["./features/*"],
       "@entities/*": ["./entities/*"],

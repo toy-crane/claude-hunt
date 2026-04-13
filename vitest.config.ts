@@ -6,7 +6,6 @@ export default defineConfig({
   plugins: [react()],
   resolve: {
     alias: {
-      "@": resolve(import.meta.dirname, "."),
       "@core": resolve(import.meta.dirname, "./core"),
       "@features": resolve(import.meta.dirname, "./features"),
       "@entities": resolve(import.meta.dirname, "./entities"),
@@ -21,7 +20,7 @@ export default defineConfig({
     exclude: ["**/node_modules/**", ".claude/worktrees/**"],
     coverage: {
       provider: "v8",
-      include: ["app/**", "components/**", "lib/**"],
+      include: ["app/**", "core/**", "features/**", "entities/**", "shared/**"],
       exclude: ["**/*.test.*", "**/*.d.ts"],
     },
   },
