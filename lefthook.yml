@@ -1,0 +1,6 @@
+pre-commit:
+  jobs:
+    - name: ultracite
+      glob: "*.{js,jsx,ts,tsx,mjs,mts,cjs,cts,json,jsonc,css}"
+      run: bunx ultracite fix {staged_files}
+      stage_fixed: true
