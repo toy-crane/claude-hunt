@@ -56,4 +56,24 @@ No reordering was needed; the plan's ordering is already dependency-correct.
 **Decision**: Create `public.projects` table in Task 2 but defer the `projects_with_vote_count` view to Task 3 (after the `votes` table exists).
 **Why**: plan.md Task 2 asks for the view inline in `supabase/schemas/projects.sql`, but the view performs `LEFT JOIN public.votes` — that table is introduced in Task 3. Declaring the view in Task 2 would fail at `supabase db reset`. Moving the view into Task 3 keeps each Task's migration self-applicable and preserves the "vote_count = 0 when no votes exist" acceptance test at its natural location.
 **Harness Signal**: `draft-plan` could check that SQL views/functions declared in a Task only reference tables from the same or earlier Task — a simple dependency sort on SQL objects would catch this before execution.
-**Result**: Pending — will finalize after Task 3 completes.
+**Result**: Success — view created in Task 3 as `supabase/schemas/projects_with_vote_count.sql`; anon-read via the view verified in `votes_test.sql`.
+
+---
+
+## Task 3: `projects_with_vote_count` uses `security_invoker = false`, not `true`
+
+**When**: Step 4, Task 3, view design
+**Decision**: Define `projects_with_vote_count` with `security_invoker = false` (definer semantics, the Postgres default) instead of plan.md's specified `security_invoker = true`. Only project display-safe profile columns (`display_name`, `avatar_url`) through the view; keep `profiles` itself authenticated-only.
+**Why**: spec.md Scenario 1 requires anon visitors to see `author display_name` on cards. With `security_invoker = true`, an anon query on the view would evaluate underlying `profiles` RLS as anon and see zero rows — author names would disappear. `security_invoker = false` lets the view project a narrowly chosen set of profile columns as a controlled public surface, while `profiles` retains its authenticated-only RLS (so PII like `email` and `full_name` stays gated). Writes go directly to base tables, not the view, so owner-only RLS on `projects`/`votes` is unaffected.
+**Harness Signal**: `draft-plan` could check that any view flagged as publicly readable is consistent with its base-table RLS: if the base table isn't readable by the same role as the view's intended audience, either (a) broaden the base table's RLS, (b) drop `security_invoker = true`, or (c) route through a column-filtered intermediate view. The plan skill could prompt to resolve this up front.
+**Result**: Success — pgTAP asserts anon-read via the view; base-table RLS still gates direct access.
+
+---
+
+## Task 3: explicit `schema_paths` order in `supabase/config.toml`
+
+**When**: Step 4, Task 3, diff tool failed with "relation public.votes does not exist"
+**Decision**: Replace the glob `schema_paths = ["./schemas/*.sql"]` with an explicit list that orders `votes.sql` before `projects_with_vote_count.sql`.
+**Why**: Alphabetical sort put `projects_with_vote_count.sql` before `votes.sql`, so the diff tool tried to create a view referencing a table that hadn't been created yet. An explicit order encodes the real dependency. The default glob is safe for single-table schemas but breaks as soon as views (or functions, triggers) reference later-sorting names.
+**Harness Signal**: The `supabase` skill could recommend declaring explicit `schema_paths` whenever a schema defines a view or function that references another schema file, rather than relying on glob order.
+**Result**: Success — `supabase db reset` + `supabase test db` both pass.

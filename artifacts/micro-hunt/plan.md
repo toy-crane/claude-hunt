@@ -188,7 +188,7 @@
 - **Acceptance**:
   - [x] `projects` table exists with all documented columns; FKs to `profiles` (cascade) and `cohorts` (restrict)
   - [x] RLS: public `select`; `insert`/`update`/`delete` only when `auth.uid() = user_id`
-  - [ ] View `projects_with_vote_count` returns `vote_count = 0` when no votes exist (validates LEFT JOIN + coalesce) — moved to Task 3 (depends on votes table, see decisions.md)
+  - [x] View `projects_with_vote_count` returns `vote_count = 0` when no votes exist (validates LEFT JOIN + coalesce) — completed in Task 3 (see decisions.md)
   - [x] Authenticated user can `insert` a project as themselves; blocked when `user_id` spoofs another user
   - [x] Indexes exist on `projects(user_id)` and `projects(cohort_id)`
 - **Verification**:
@@ -210,10 +210,10 @@
   - `supabase/schemas/votes.sql`
   - `entities/vote/model/schema.ts`, `entities/vote/index.ts`
 - **Acceptance**:
-  - [ ] `votes` table exists with unique `(user_id, project_id)` constraint; duplicate insert fails
-  - [ ] RLS: public `select`; only `auth.uid() = user_id` can `insert`/`delete`
-  - [ ] Inserting `vote_count` for a project via `projects_with_vote_count` reflects new row immediately
-  - [ ] Deleting a `projects` row cascades to its votes
+  - [x] `votes` table exists with unique `(user_id, project_id)` constraint; duplicate insert fails
+  - [x] RLS: public `select`; only `auth.uid() = user_id` can `insert`/`delete`
+  - [x] Inserting `vote_count` for a project via `projects_with_vote_count` reflects new row immediately
+  - [x] Deleting a `projects` row cascades to its votes
 - **Verification**:
   - `bun run test:db`
 
