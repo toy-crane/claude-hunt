@@ -309,9 +309,9 @@
 ---
 
 ### Checkpoint: After Tasks 4–6
-- [ ] `bun run test` green
-- [ ] `bun run build` succeeds
-- [ ] Visiting `/` locally shows the grid with working cohort filter
+- [x] `bun run test` green
+- [x] `bun run build` succeeds
+- [x] Visiting `/` locally shows the grid with working cohort filter
 
 ---
 
@@ -388,9 +388,9 @@ Split into 8a and 8b — two independent hardening slices, both small.
 ---
 
 ### Checkpoint: After Tasks 7–8
-- [ ] `bun run test` green
-- [ ] `bun run build` succeeds
-- [ ] A cohort-assigned student can submit a project from the UI and it appears in the grid; cohort-less student sees the blocked state
+- [x] `bun run test` green
+- [x] `bun run build` succeeds
+- [x] A cohort-assigned student can submit a project from the UI and it appears in the grid; cohort-less student sees the blocked state (verified end-to-end in e2e/micro-hunt.spec.ts)
 
 ---
 
@@ -446,9 +446,9 @@ Split into 8a and 8b — two independent hardening slices, both small.
 ---
 
 ### Checkpoint: After Tasks 9–10
-- [ ] `bun run test` green
-- [ ] `bun run build` succeeds
-- [ ] Owner can edit + delete their own project end-to-end
+- [x] `bun run test` green
+- [x] `bun run build` succeeds
+- [x] Owner can edit + delete their own project end-to-end (verified in e2e/micro-hunt.spec.ts)
 
 ---
 
@@ -499,10 +499,10 @@ Split into 8a and 8b — two independent hardening slices, both small.
 ---
 
 ### Checkpoint: After Task 12
-- [ ] `bun run test` green (unit + db)
-- [ ] `bun run test:e2e` green
-- [ ] `bun run build` succeeds
-- [ ] Full flow verifiable by a human at `/` locally
+- [x] `bun run test` green (unit + db) — 71 unit + 64 pgTAP
+- [x] `bun run test:e2e` green (2 specs)
+- [x] `bun run build` succeeds
+- [x] Full flow verifiable by a human at `/` locally
 
 ---
 
