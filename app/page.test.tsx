@@ -51,12 +51,29 @@ vi.mock("@features/cohort-filter", async () => {
   };
 });
 
+vi.mock("@features/submit-project", () => ({
+  SubmitForm: ({ cohortId }: { cohortId: string | null }) => (
+    <div data-cohort-id={cohortId ?? ""} data-testid="submit-form-stub" />
+  ),
+}));
+
 const getPublicUrl = vi.fn().mockImplementation((path: string) => ({
   data: { publicUrl: `https://cdn.example.com/${path}` },
 }));
 
+const profileSingle = vi
+  .fn()
+  .mockResolvedValue({ data: { cohort_id: null }, error: null });
+
 const mockClient = {
   ...createMockSupabaseClient(),
+  from: vi.fn().mockReturnValue({
+    select: vi.fn().mockReturnValue({
+      eq: vi.fn().mockReturnValue({
+        single: profileSingle,
+      }),
+    }),
+  }),
   storage: {
     from: vi.fn().mockReturnValue({ getPublicUrl }),
   },

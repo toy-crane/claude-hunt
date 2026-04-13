@@ -1,4 +1,5 @@
 import { CohortDropdown, fetchCohorts } from "@features/cohort-filter/index.ts";
+import { SubmitForm } from "@features/submit-project/index.ts";
 import { createClient } from "@shared/api/supabase/server.ts";
 import { fetchProjects, ProjectGrid } from "@widgets/project-grid/index.ts";
 
@@ -10,10 +11,24 @@ export default async function Page({ searchParams }: PageProps) {
   const { cohort: cohortParam } = await searchParams;
   const selectedCohortId = cohortParam ?? null;
 
-  const [projects, cohorts, supabase] = await Promise.all([
+  const supabase = await createClient();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+
+  let viewerCohortId: string | null = null;
+  if (user) {
+    const { data: profile } = await supabase
+      .from("profiles")
+      .select("cohort_id")
+      .eq("id", user.id)
+      .single();
+    viewerCohortId = profile?.cohort_id ?? null;
+  }
+
+  const [projects, cohorts] = await Promise.all([
     fetchProjects({ cohortId: selectedCohortId }),
     fetchCohorts(),
-    createClient(),
   ]);
 
   const resolveScreenshotUrl = (path: string) =>
@@ -36,6 +51,19 @@ export default async function Page({ searchParams }: PageProps) {
           />
         </div>
       </header>
+
+      {user ? (
+        <section
+          aria-labelledby="submit-heading"
+          className="flex flex-col gap-4 rounded-md border p-6"
+        >
+          <h2 className="font-heading font-medium text-lg" id="submit-heading">
+            Submit a project
+          </h2>
+          <SubmitForm cohortId={viewerCohortId} />
+        </section>
+      ) : null}
+
       <ProjectGrid
         projects={projects}
         resolveScreenshotUrl={resolveScreenshotUrl}

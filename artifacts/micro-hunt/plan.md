@@ -335,11 +335,11 @@
   - `features/submit-project/index.ts`
   - `app/page.tsx` (mount submit button/dialog for signed-in users with a cohort)
 - **Acceptance**:
-  - [ ] Valid input (title="My App", tagline="A cool tool", url="https://myapp.com", 1 MB PNG) → new card with title "My App" and tagline "A cool tool" appears in the grid after submit
-  - [ ] Empty title (or any required field empty) → submit rejected, inline validation error shown, no row inserted
-  - [ ] 6 MB screenshot → form shows "File must be ≤ 5 MB" (client check) and storage also rejects as defence-in-depth
-  - [ ] `.gif` upload → form shows "Only JPEG, PNG, or WebP allowed" (client check) and MIME filter rejects
-  - [ ] JPEG/PNG/WebP up to 5 MB all succeed (parametrised test)
+  - [x] Valid input (title="My App", tagline="A cool tool", url="https://myapp.com", 1 MB PNG) → new card with title "My App" and tagline "A cool tool" appears in the grid after submit
+  - [x] Empty title (or any required field empty) → submit rejected, inline validation error shown, no row inserted
+  - [x] 6 MB screenshot → form shows "File must be ≤ 5 MB" (client check) and storage also rejects as defence-in-depth
+  - [x] `.gif` upload → form shows "Only JPEG, PNG, or WebP allowed" (client check) and MIME filter rejects
+  - [x] JPEG/PNG/WebP up to 5 MB all succeed (parametrised test)
 - **Verification**:
   - `bun run test:unit -- features/submit-project`
   - `bun run build`
@@ -364,8 +364,8 @@ Split into 8a and 8b — two independent hardening slices, both small.
   - `features/submit-project/api/actions.ts` (early-return error if acting profile has null `cohort_id`)
   - `features/submit-project/api/actions.test.ts` (extend)
 - **Acceptance**:
-  - [ ] Signed-in student with `profile.cohort_id = null` → form shows "Contact your instructor to get assigned to a cohort" and Submit button is `disabled`
-  - [ ] Direct server-action invocation for a cohort-less user rejects with a clear error (defence-in-depth against UI bypass)
+  - [x] Signed-in student with `profile.cohort_id = null` → form shows "Contact your instructor to get assigned to a cohort" and Submit button is `disabled`
+  - [x] Direct server-action invocation for a cohort-less user rejects with a clear error (defence-in-depth against UI bypass)
 - **Verification**:
   - `bun run test:unit -- features/submit-project`
 
