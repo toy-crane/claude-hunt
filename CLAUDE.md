@@ -74,9 +74,9 @@ Organize code **by business domain first, technical role second**. Implement fro
 
 ### Infrastructure boundary
 
-`supabase/` sits **outside** the FSD tree (migrations, schemas, pgTAP tests). Each `entities/<name>/` slice pairs 1:1 with `supabase/schemas/<names>.sql` (singular entity, plural table).
+`supabase/` sits **outside** the FSD tree. Each `entities/<name>/` slice pairs 1:1 with `supabase/schemas/<names>.sql` (singular entity, plural table).
 
-The raw Supabase-generated `Database` type lives at `shared/api/supabase/types.ts`. Domain code must import narrowed types from `@entities/<slice>` (e.g. `Profile` from `@entities/profile`), never the raw file.
+The raw `Database` type lives at `shared/api/supabase/types.ts`. Domain code must import narrowed types from `@entities/<slice>`, never the raw file.
 
 ## Boundary
 
