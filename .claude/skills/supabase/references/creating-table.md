@@ -57,13 +57,36 @@ grant all on table public.posts to service_role;
 - Scope policies to `authenticated` (not `public`)
 - Grants: `anon` = SELECT only, `authenticated` = SELECT/INSERT/UPDATE, `service_role` = ALL
 
-## Step 2: Generate Migration
+## Step 2: Add `updated_at` Auto-Update Trigger (Manual Migration)
+
+`default now()` only sets the **initial** value of `updated_at`. To keep it current on every UPDATE, add a `moddatetime` trigger.
+
+Triggers are not captured by `supabase db diff`, so use the **Manual Migration Path** (see `.claude/rules/supabase-migration.md`):
+
+```bash
+supabase migration new add_posts_updated_at_trigger
+```
+
+Then write into the generated migration file:
+
+```sql
+create extension if not exists moddatetime schema extensions;
+
+create trigger handle_updated_at
+  before update on public.posts
+  for each row
+  execute procedure moddatetime (updated_at);
+```
+
+The `create extension` line is idempotent — keep it in every trigger migration; it's a no-op if already installed.
+
+## Step 3: Generate Schema Migration
 
 ```bash
 supabase db diff -f create_posts
 ```
 
-## Step 3: Review the Generated Migration
+## Step 4: Review the Generated Migration
 
 Open the file in `supabase/migrations/` and check:
 - Only intended changes are present
@@ -72,22 +95,23 @@ Open the file in `supabase/migrations/` and check:
 
 For known caveats of the diff tool, see `declarative-schemas.md`.
 
-## Step 4: Apply
+## Step 5: Apply
 
 ```bash
 supabase migration up
 ```
 
-## Step 5: Write pgTAP Test
+## Step 6: Write pgTAP Test
 
 Create a test file in `supabase/tests/` covering:
 - Table and column existence
 - RLS policies (positive and negative cases)
 - Role-based access (`authenticated`, `anon`)
+- `updated_at` trigger behavior (updating a row bumps `updated_at`)
 
 See `testing.md` for patterns.
 
-## Step 6: Regenerate Types
+## Step 7: Regenerate Types
 
 ```bash
 bun run gen:types
@@ -95,7 +119,7 @@ bun run gen:types
 
 This updates `types/database.types.ts` with the new table. See `type-safe-client.md` for details.
 
-## Step 7: Verify
+## Step 8: Verify
 
 ```bash
 supabase test db

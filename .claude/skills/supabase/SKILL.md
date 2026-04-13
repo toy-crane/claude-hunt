@@ -43,7 +43,7 @@ Run through this checklist when working on auth, RLS, views, or user data:
 
 ## Table Conventions
 
-- Every table MUST have `created_at` and `updated_at` columns (always last)
+- Every table MUST have `created_at` and `updated_at` columns (always last), plus a `moddatetime` trigger on `updated_at` — `default now()` only sets the initial value. See [creating-table.md](references/creating-table.md) Step 2.
 - Use `timestamptz` (never bare `timestamp`)
 - Use `text` (never `varchar(n)`)
 - Use `uuid` for primary keys that reference `auth.users`
