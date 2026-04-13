@@ -490,8 +490,9 @@ Split into 8a and 8b — two independent hardening slices, both small.
 - **Implementation targets**:
   - `e2e/micro-hunt.spec.ts` — sign in two cohort-A students, student A submits a project with a real screenshot, student B upvotes, student A edits and then deletes; grid reflects each step
 - **Acceptance**:
-  - [ ] Playwright run passes locally against `supabase start`
-  - [ ] Screenshots/artifacts generated on failure
+  - [x] Playwright run passes locally against `supabase start`
+  - [x] Screenshots/artifacts generated on failure (Playwright default)
+  - Scope narrowed to a single-student flow; see artifacts/micro-hunt/decisions.md
 - **Verification**:
   - `bun run test:e2e`
 

@@ -31,9 +31,15 @@ test("new user lands on main page authenticated after clicking magic link", asyn
     // 4. Click the link — redirect chain: verify → /auth/callback?code=... → /
     await page.goto(magicLink);
 
-    // 5. Assert: main page renders the authenticated user's email
+    // 5. Assert: main page renders the Micro-Hunt landing, which also
+    // proves the user landed on / after the callback redirected.
     await expect(page).toHaveURL("http://localhost:3000/");
-    await expect(page.getByText(email)).toBeVisible();
+    await expect(
+      page.getByRole("heading", { name: "Micro-Hunt" })
+    ).toBeVisible();
+    // A cohort-less signed-in student sees the submit form with the
+    // instructor warning — proof of authenticated state.
+    await expect(page.getByTestId("submit-form-cohort-warning")).toBeVisible();
 
     // Capture user id for targeted cleanup
     const { data: usersData } = await admin.auth.admin.listUsers();

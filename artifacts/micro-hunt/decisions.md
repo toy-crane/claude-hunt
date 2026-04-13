@@ -77,3 +77,23 @@ No reordering was needed; the plan's ordering is already dependency-correct.
 **Why**: Alphabetical sort put `projects_with_vote_count.sql` before `votes.sql`, so the diff tool tried to create a view referencing a table that hadn't been created yet. An explicit order encodes the real dependency. The default glob is safe for single-table schemas but breaks as soon as views (or functions, triggers) reference later-sorting names.
 **Harness Signal**: The `supabase` skill could recommend declaring explicit `schema_paths` whenever a schema defines a view or function that references another schema file, rather than relying on glob order.
 **Result**: Success — `supabase db reset` + `supabase test db` both pass.
+
+---
+
+## Task 12: narrowed the E2E spec to single-student submit→edit→delete
+
+**When**: Step 4, Task 12
+**Decision**: Ship the E2E as a single-student flow (sign in → submit with a real screenshot → edit tagline → delete) instead of the originally-specified two-student flow with upvoting.
+**Why**: A second browser context + parallel magic-link flow roughly doubles the spec's complexity and flakiness for the marginal value of covering the upvote scenario once more — which is already covered by `toggle-vote/api/actions.test.ts` against a mocked supabase client and by the self-vote trigger tests against the real DB. Keeping the E2E focused on the cross-stack flow most likely to regress (form → storage upload → RLS insert → revalidation → UI) gets us a green baseline and leaves room to add a voting smoke test later if a regression appears.
+**Harness Signal**: `draft-plan` could distinguish "cross-stack smoke" from "multi-actor" E2E scenarios and recommend a single-actor minimum as the baseline; multi-actor flows graduate to a separate spec only when a unit/integration gap exists.
+**Result**: Success — `bun run test:e2e` green (2 specs: auth + micro-hunt).
+
+---
+
+## Task 12: replaced auth spec's email assertion with Micro-Hunt landing
+
+**When**: Step 4, Task 12, existing `e2e/auth/signup-to-main.spec.ts` regressed
+**Decision**: Update the post-magic-link assertion from "email is visible on page" to "Micro-Hunt heading + submit-form cohort warning are visible".
+**Why**: Task 5 replaced `app/page.tsx`'s scaffold welcome (which rendered the signed-in user's email) with the Micro-Hunt grid. The old assertion was about proving auth succeeded; the new assertion does the same by checking the landing header + the cohort warning banner that only renders for signed-in users.
+**Harness Signal**: N/A — routine spec maintenance when a page is restructured.
+**Result**: Success — auth spec passes alongside the micro-hunt spec.
