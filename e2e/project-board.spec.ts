@@ -11,7 +11,10 @@ const EMAIL_LABEL_RE = /email/i;
 const CONTINUE_BTN_RE = /continue/i;
 const MAGIC_LINK_TEXT_RE = /magic link/i;
 const SUBMIT_PROJECT_BTN_RE = /submit project/i;
+const SUBMIT_PROJECT_TRIGGER_RE = /^submit a project$/i;
+const PROJECT_SUBMITTED_TOAST_RE = /project submitted/i;
 const SAVE_CHANGES_BTN_RE = /save changes/i;
+const LOGIN_URL_RE = /\/login$/;
 
 const dirname = path.dirname(fileURLToPath(import.meta.url));
 const SCREENSHOT_FIXTURE = path.resolve(
@@ -66,16 +69,31 @@ test("student submits, edits, and deletes their own project end-to-end", async (
 
     await page.reload();
 
-    // 2. Submit a project
-    await page.getByLabel("Title").fill("E2E Test App");
-    await page
+    // 2. Open the submit dialog from the header trigger
+    await page.getByRole("button", { name: SUBMIT_PROJECT_TRIGGER_RE }).click();
+    const submitDialog = page.getByRole("dialog");
+    await expect(submitDialog).toBeVisible();
+
+    // 3. Fill the form inside the dialog and submit
+    await submitDialog.getByLabel("Title").fill("E2E Test App");
+    await submitDialog
       .getByLabel("Tagline")
       .fill("Built during the project-board e2e spec");
-    await page.getByLabel("Project URL").fill("https://e2e-test.example.com");
-    await page.getByLabel("Screenshot").setInputFiles(SCREENSHOT_FIXTURE);
-    await page.getByRole("button", { name: SUBMIT_PROJECT_BTN_RE }).click();
+    await submitDialog
+      .getByLabel("Project URL")
+      .fill("https://e2e-test.example.com");
+    await submitDialog
+      .getByLabel("Screenshot")
+      .setInputFiles(SCREENSHOT_FIXTURE);
+    await submitDialog
+      .getByRole("button", { name: SUBMIT_PROJECT_BTN_RE })
+      .click();
 
-    // 3. Card appears after submit
+    // 4. Dialog closes, toast confirms, card appears in the grid
+    await expect(submitDialog).toBeHidden({ timeout: 10_000 });
+    await expect(
+      page.getByText(PROJECT_SUBMITTED_TOAST_RE).first()
+    ).toBeVisible({ timeout: 10_000 });
     await expect(page.getByText("E2E Test App")).toBeVisible({
       timeout: 10_000,
     });
@@ -127,4 +145,21 @@ test("student submits, edits, and deletes their own project end-to-end", async (
       });
     }
   }
+});
+
+test("signed-out visitor is redirected to /login from the header submit trigger", async ({
+  page,
+}) => {
+  await page.goto("/");
+
+  // For signed-out visitors the trigger is a link, not a button.
+  const trigger = page.getByRole("link", {
+    name: SUBMIT_PROJECT_TRIGGER_RE,
+  });
+  await expect(trigger).toBeVisible();
+  await expect(trigger).toHaveAttribute("href", "/login");
+
+  await trigger.click();
+  await expect(page).toHaveURL(LOGIN_URL_RE);
+  await expect(page.getByRole("dialog")).toHaveCount(0);
 });
