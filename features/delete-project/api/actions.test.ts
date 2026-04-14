@@ -106,4 +106,22 @@ describe("deleteProject server action", () => {
     expect(result.ok).toBe(true);
     expect(storageRemove).not.toHaveBeenCalled();
   });
+
+  it("still returns ok when storage removal fails (non-blocking cleanup)", async () => {
+    getUser.mockResolvedValue({ data: { user: { id: "u1" } }, error: null });
+    stubDelete({
+      screenshotPath: "u1/shot.webp",
+      deleted: [{ id: "proj-1" }],
+    });
+    storageRemove.mockResolvedValueOnce({
+      data: null,
+      error: { message: "storage down" },
+    });
+
+    const result = await deleteProject("proj-1");
+
+    expect(result.ok).toBe(true);
+    expect(storageRemove).toHaveBeenCalledTimes(1);
+    expect(revalidatePathMock).toHaveBeenCalledWith("/");
+  });
 });
