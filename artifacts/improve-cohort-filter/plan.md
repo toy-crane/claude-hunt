@@ -108,7 +108,7 @@
 
 ---
 
-### Task 2: Project vote counts are served from a denormalized column maintained by a trigger
+### Task 2: Project vote counts are served from a denormalized column maintained by a trigger ✅
 
 - **Covers**: Scenario 2 (full), Scenario 3 (full), Scenario 4 (full), Invariant "vote counts match authoritative state", Invariant "anonymous PII boundary"
 - **Size**: M (5 files + test files)
