@@ -21,8 +21,10 @@ export async function ProjectGridSection({
   viewerUserId,
   isAuthenticated,
 }: ProjectGridSectionProps) {
-  const supabase = await createClient();
-  const projects = await fetchProjects({ cohortId, viewerUserId });
+  const [supabase, projects] = await Promise.all([
+    createClient(),
+    fetchProjects({ cohortId, viewerUserId }),
+  ]);
 
   const resolveScreenshotUrl = (path: string) =>
     supabase.storage.from("project-screenshots").getPublicUrl(path).data
