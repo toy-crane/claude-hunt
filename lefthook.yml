@@ -7,3 +7,8 @@ pre-commit:
     - name: typecheck
       glob: "*.{ts,tsx,mts,cts}"
       run: bun run typecheck
+
+pre-push:
+  jobs:
+    - name: test
+      run: bun run test:unit
