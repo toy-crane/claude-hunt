@@ -7,6 +7,7 @@ import { cn } from "@shared/lib/utils.ts";
 import { Toaster } from "@shared/ui/sonner.tsx";
 
 export const metadata: Metadata = {
+  metadataBase: new URL("https://www.claude-hunt.com"),
   title: {
     default: "claude-hunt",
     template: "%s · claude-hunt",
