@@ -44,7 +44,7 @@ The `.claude/` directory contains the automation harness:
 - **Hooks** — auto-lint on file save, secret detection before commits, test gate on stop, worktree isolation
 - **Rules** — shadcn component guard
 - **Agents** — builder, reviewers (design, react, plan, wireframe, UI quality), code simplifier, skill researcher
-- **Skills** — 19 skills covering Next.js best practices, React patterns, spec writing, wireframing, and more
+- **Skills** — 37 skills covering Next.js best practices, React patterns, spec writing, wireframing, and more
 
 ### Prerequisites
 
