@@ -24,7 +24,7 @@ export function IconElement(): React.ReactElement {
         justifyContent: "center",
         color: "#ffffff",
         fontFamily: MONO_STACK,
-        fontSize: 13,
+        fontSize: 10,
         fontWeight: 700,
         lineHeight: 1,
       }}
