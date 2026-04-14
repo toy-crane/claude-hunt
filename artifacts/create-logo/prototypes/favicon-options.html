@@ -1,0 +1,307 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <title>Favicon options (no terracotta fill)</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <style>
+      :root {
+        --bg: #f4f1ec;
+        --card: #ffffff;
+        --ink: #1a1512;
+        --muted: #736a5f;
+        --border: #e6e1d9;
+        --terracotta: #c15f3c;
+        --cream: #fdf6ee;
+        --tab-light: #e4e1dc;
+        --tab-dark: #2a2520;
+      }
+      * { box-sizing: border-box; }
+      html, body { margin: 0; padding: 0; }
+      body {
+        background: var(--bg);
+        color: var(--ink);
+        font-family: ui-sans-serif, system-ui, -apple-system, sans-serif;
+        padding: 48px 24px 80px;
+      }
+      .wrap { max-width: 1200px; margin: 0 auto; }
+      header { margin-bottom: 40px; }
+      h1 {
+        font-weight: 600; font-size: 26px; margin: 0 0 8px;
+        letter-spacing: -0.01em;
+        font-family: ui-monospace, SFMono-Regular, "JetBrains Mono", Menlo, monospace;
+      }
+      header p { color: var(--muted); margin: 0; font-size: 14px; }
+
+      .grid {
+        display: grid;
+        grid-template-columns: 1fr;
+        gap: 20px;
+      }
+      @media (min-width: 900px) {
+        .grid { grid-template-columns: 1fr 1fr; }
+      }
+
+      .card {
+        background: var(--card);
+        border: 1px solid var(--border);
+        border-radius: 16px;
+        padding: 24px;
+        display: flex; flex-direction: column; gap: 20px;
+      }
+
+      .card-head { display: flex; align-items: baseline; gap: 10px; }
+      .card-head .key {
+        font-family: ui-monospace, monospace;
+        font-size: 11px;
+        background: var(--ink);
+        color: #fff;
+        padding: 2px 8px;
+        border-radius: 4px;
+      }
+      .card-head h2 {
+        margin: 0;
+        font-size: 16px;
+        font-weight: 600;
+        letter-spacing: -0.01em;
+      }
+      .card p {
+        margin: 0;
+        font-size: 13px;
+        color: var(--muted);
+        line-height: 1.5;
+      }
+
+      /* Sizes row */
+      .sizes {
+        display: flex;
+        align-items: flex-end;
+        justify-content: space-between;
+        gap: 16px;
+        padding: 20px 4px 12px;
+        background: var(--cream);
+        border-radius: 10px;
+        border: 1px dashed var(--border);
+      }
+      .size-slot {
+        display: flex; flex-direction: column; align-items: center; gap: 8px;
+      }
+      .size-slot small {
+        font-family: ui-monospace, monospace;
+        font-size: 10px;
+        color: var(--muted);
+      }
+
+      /* Browser-tab context */
+      .tabs {
+        display: flex; gap: 6px;
+        padding: 8px 8px 0;
+      }
+      .tab {
+        background: var(--tab-light);
+        border-radius: 6px 6px 0 0;
+        padding: 7px 10px 9px;
+        display: flex; align-items: center; gap: 6px;
+        max-width: 180px;
+        font-size: 11px;
+        color: var(--ink);
+        border: 1px solid var(--border);
+        border-bottom: none;
+      }
+      .tab.active { background: #fff; }
+      .tab.dark-ctx { background: var(--tab-dark); color: #ccc; border-color: #3b3329; }
+      .tab .label {
+        overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+        flex: 1;
+      }
+
+      /* ======= Glyph primitives ======= */
+      /* Each option exposes .mark--<letter>--<size> via a shared .mark box */
+      .mark {
+        display: flex; align-items: center; justify-content: center;
+        font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, "Liberation Mono", monospace;
+        font-weight: 700;
+        line-height: 1;
+        box-sizing: border-box;
+      }
+
+      /* Option A — dark bg + terracotta '>' */
+      .a { background: #1a1512; color: var(--terracotta); }
+      /* Option B — dark bg + terracotta '_' */
+      .b { background: #1a1512; color: var(--terracotta); }
+      /* Option C — cream bg + terracotta '>' */
+      .c { background: var(--cream); color: var(--terracotta); }
+      /* Option D — transparent + terracotta '>' */
+      .d { background: transparent; color: var(--terracotta); }
+      /* Option E — dark bg + white '>' monochrome */
+      .e { background: #1a1512; color: #ffffff; }
+
+      /* Sizes */
+      .s16 { width: 16px; height: 16px; font-size: 10px; }
+      .s32 { width: 32px; height: 32px; font-size: 20px; }
+      .s64 { width: 64px; height: 64px; font-size: 40px; border-radius: 10px; }
+      .s128 { width: 128px; height: 128px; font-size: 80px; border-radius: 22px; }
+
+      /* small rounded corners at favicon sizes for non-transparent options */
+      .a.s16, .b.s16, .c.s16, .e.s16 { border-radius: 2px; }
+      .a.s32, .b.s32, .c.s32, .e.s32 { border-radius: 4px; }
+
+      /* option D cursor when used at larger sizes needs outline since transparent */
+      .d.s64, .d.s128 { outline: 1px dashed var(--border); outline-offset: -1px; border-radius: 0; }
+
+      .mark-16-shim {
+        /* 16px glyph needs '_' lowered a hair; inline .s16 contents */
+        line-height: 1;
+      }
+
+      .pick {
+        display: inline-block;
+        margin-left: auto;
+        font-family: ui-monospace, monospace;
+        font-size: 11px;
+        background: var(--terracotta);
+        color: #fff;
+        padding: 2px 8px;
+        border-radius: 4px;
+      }
+
+      footer {
+        margin-top: 32px;
+        padding: 16px 20px;
+        background: #fff;
+        border: 1px solid var(--border);
+        border-radius: 12px;
+        font-size: 13px;
+        color: var(--muted);
+        line-height: 1.55;
+      }
+      footer code {
+        background: var(--bg);
+        padding: 1px 6px;
+        border-radius: 3px;
+        color: var(--ink);
+      }
+    </style>
+  </head>
+  <body>
+    <div class="wrap">
+      <header>
+        <h1>favicon options (no terracotta fill)</h1>
+        <p>Each card shows the option at 16 / 32 / 64 / 128 px plus a mock browser tab in light and dark chrome.</p>
+      </header>
+
+      <section class="grid">
+        <!-- Option A -->
+        <article class="card">
+          <div class="card-head">
+            <span class="key">A</span>
+            <h2>Dark bg + terracotta '&gt;'</h2>
+            <span class="pick">recommended</span>
+          </div>
+          <p>Near-black square, terracotta '&gt;' glyph. Reads like a just-opened terminal; color survives as an accent, not a fill.</p>
+
+          <div class="sizes">
+            <div class="size-slot"><div class="mark a s16">&gt;</div><small>16</small></div>
+            <div class="size-slot"><div class="mark a s32">&gt;</div><small>32</small></div>
+            <div class="size-slot"><div class="mark a s64">&gt;</div><small>64</small></div>
+            <div class="size-slot"><div class="mark a s128">&gt;</div><small>128</small></div>
+          </div>
+
+          <div class="tabs">
+            <div class="tab active"><div class="mark a s16">&gt;</div><span class="label">claude-hunt</span></div>
+            <div class="tab dark-ctx"><div class="mark a s16">&gt;</div><span class="label">claude-hunt</span></div>
+          </div>
+        </article>
+
+        <!-- Option B -->
+        <article class="card">
+          <div class="card-head">
+            <span class="key">B</span>
+            <h2>Dark bg + terracotta '_'</h2>
+          </div>
+          <p>Same dark chrome, cursor instead of prompt. Reads as "active terminal" but the glyph is harder to parse at 16 px.</p>
+
+          <div class="sizes">
+            <div class="size-slot"><div class="mark b s16">_</div><small>16</small></div>
+            <div class="size-slot"><div class="mark b s32">_</div><small>32</small></div>
+            <div class="size-slot"><div class="mark b s64">_</div><small>64</small></div>
+            <div class="size-slot"><div class="mark b s128">_</div><small>128</small></div>
+          </div>
+
+          <div class="tabs">
+            <div class="tab active"><div class="mark b s16">_</div><span class="label">claude-hunt</span></div>
+            <div class="tab dark-ctx"><div class="mark b s16">_</div><span class="label">claude-hunt</span></div>
+          </div>
+        </article>
+
+        <!-- Option C -->
+        <article class="card">
+          <div class="card-head">
+            <span class="key">C</span>
+            <h2>Cream bg + terracotta '&gt;'</h2>
+          </div>
+          <p>Warm cream square, terracotta '&gt;'. Softer vibe — feels like a book margin mark. Risk: can blend into light browser chrome.</p>
+
+          <div class="sizes">
+            <div class="size-slot"><div class="mark c s16">&gt;</div><small>16</small></div>
+            <div class="size-slot"><div class="mark c s32">&gt;</div><small>32</small></div>
+            <div class="size-slot"><div class="mark c s64">&gt;</div><small>64</small></div>
+            <div class="size-slot"><div class="mark c s128">&gt;</div><small>128</small></div>
+          </div>
+
+          <div class="tabs">
+            <div class="tab active"><div class="mark c s16">&gt;</div><span class="label">claude-hunt</span></div>
+            <div class="tab dark-ctx"><div class="mark c s16">&gt;</div><span class="label">claude-hunt</span></div>
+          </div>
+        </article>
+
+        <!-- Option D -->
+        <article class="card">
+          <div class="card-head">
+            <span class="key">D</span>
+            <h2>Transparent + terracotta '&gt;'</h2>
+          </div>
+          <p>No square at all — glyph adapts to whatever browser chrome is behind it. Most minimal; risk: disappears on similar-toned chrome.</p>
+
+          <div class="sizes">
+            <div class="size-slot"><div class="mark d s16">&gt;</div><small>16</small></div>
+            <div class="size-slot"><div class="mark d s32">&gt;</div><small>32</small></div>
+            <div class="size-slot"><div class="mark d s64">&gt;</div><small>64</small></div>
+            <div class="size-slot"><div class="mark d s128">&gt;</div><small>128</small></div>
+          </div>
+
+          <div class="tabs">
+            <div class="tab active"><div class="mark d s16">&gt;</div><span class="label">claude-hunt</span></div>
+            <div class="tab dark-ctx"><div class="mark d s16">&gt;</div><span class="label">claude-hunt</span></div>
+          </div>
+        </article>
+
+        <!-- Option E -->
+        <article class="card">
+          <div class="card-head">
+            <span class="key">E</span>
+            <h2>Dark bg + white '&gt;' (monochrome)</h2>
+          </div>
+          <p>Near-black square, white glyph. Highest contrast, most utilitarian — but loses the terracotta entirely; brand is carried by shape only.</p>
+
+          <div class="sizes">
+            <div class="size-slot"><div class="mark e s16">&gt;</div><small>16</small></div>
+            <div class="size-slot"><div class="mark e s32">&gt;</div><small>32</small></div>
+            <div class="size-slot"><div class="mark e s64">&gt;</div><small>64</small></div>
+            <div class="size-slot"><div class="mark e s128">&gt;</div><small>128</small></div>
+          </div>
+
+          <div class="tabs">
+            <div class="tab active"><div class="mark e s16">&gt;</div><span class="label">claude-hunt</span></div>
+            <div class="tab dark-ctx"><div class="mark e s16">&gt;</div><span class="label">claude-hunt</span></div>
+          </div>
+        </article>
+      </section>
+
+      <footer>
+        Once you pick a letter, I'll also apply a login-logo size. Reply with
+        <code>A, 3</code> (for example) = option A favicon + <code>text-4xl</code> login logo.
+      </footer>
+    </div>
+  </body>
+</html>
