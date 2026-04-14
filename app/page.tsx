@@ -1,7 +1,7 @@
 import { CohortDropdown, fetchCohorts } from "@features/cohort-filter/index.ts";
 import { DeleteButton } from "@features/delete-project/index.ts";
 import { EditDialog } from "@features/edit-project/index.ts";
-import { SubmitForm } from "@features/submit-project/index.ts";
+import { SubmitDialog } from "@features/submit-project/index.ts";
 import { VoteButton } from "@features/toggle-vote/index.ts";
 import { createClient } from "@shared/api/supabase/server.ts";
 import { fetchProjects, ProjectGrid } from "@widgets/project-grid/index.ts";
@@ -66,20 +66,12 @@ export default async function Page({ searchParams }: PageProps) {
               selectedCohortId={selectedCohortId}
             />
           </Suspense>
+          <SubmitDialog
+            cohortId={viewerCohortId}
+            isAuthenticated={Boolean(user)}
+          />
         </div>
       </header>
-
-      {user ? (
-        <section
-          aria-labelledby="submit-heading"
-          className="flex flex-col gap-4 rounded-md border p-6"
-        >
-          <h2 className="font-heading font-medium text-lg" id="submit-heading">
-            Submit a project
-          </h2>
-          <SubmitForm cohortId={viewerCohortId} />
-        </section>
-      ) : null}
 
       <ProjectGrid
         projects={projects}

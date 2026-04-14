@@ -52,8 +52,20 @@ vi.mock("@features/cohort-filter", async () => {
 });
 
 vi.mock("@features/submit-project", () => ({
-  SubmitForm: ({ cohortId }: { cohortId: string | null }) => (
-    <div data-cohort-id={cohortId ?? ""} data-testid="submit-form-stub" />
+  SubmitDialog: ({
+    cohortId,
+    isAuthenticated,
+  }: {
+    cohortId: string | null;
+    isAuthenticated: boolean;
+  }) => (
+    <div
+      data-authenticated={isAuthenticated ? "yes" : "no"}
+      data-cohort-id={cohortId ?? ""}
+      data-testid="submit-dialog-stub"
+    >
+      Submit a project
+    </div>
   ),
 }));
 
@@ -175,5 +187,55 @@ describe("home page", () => {
     expect(fetchProjectsMock).toHaveBeenCalledWith(
       expect.objectContaining({ cohortId: null })
     );
+  });
+
+  it("renders the SubmitDialog trigger for signed-out visitors and skips the inline submit section", async () => {
+    fetchProjectsMock.mockResolvedValue([]);
+    profileSingle.mockResolvedValue({ data: null, error: null });
+
+    await renderPage();
+
+    const trigger = screen.getByTestId("submit-dialog-stub");
+    expect(trigger).toHaveAttribute("data-authenticated", "no");
+    expect(trigger).toHaveAttribute("data-cohort-id", "");
+    expect(screen.queryByRole("heading", { level: 2 })).not.toBeInTheDocument();
+  });
+
+  it("renders the SubmitDialog trigger for signed-in students with a cohort", async () => {
+    fetchProjectsMock.mockResolvedValue([]);
+    vi.mocked(mockClient.auth.getUser).mockResolvedValueOnce({
+      data: { user: { id: "user-1" } },
+      error: null,
+    });
+    profileSingle.mockResolvedValue({
+      data: { cohort_id: "cohort-1" },
+      error: null,
+    });
+
+    await renderPage();
+
+    const trigger = screen.getByTestId("submit-dialog-stub");
+    expect(trigger).toHaveAttribute("data-authenticated", "yes");
+    expect(trigger).toHaveAttribute("data-cohort-id", "cohort-1");
+    expect(screen.queryByRole("heading", { level: 2 })).not.toBeInTheDocument();
+  });
+
+  it("renders the SubmitDialog trigger for signed-in students without a cohort", async () => {
+    fetchProjectsMock.mockResolvedValue([]);
+    vi.mocked(mockClient.auth.getUser).mockResolvedValueOnce({
+      data: { user: { id: "user-2" } },
+      error: null,
+    });
+    profileSingle.mockResolvedValue({
+      data: { cohort_id: null },
+      error: null,
+    });
+
+    await renderPage();
+
+    const trigger = screen.getByTestId("submit-dialog-stub");
+    expect(trigger).toHaveAttribute("data-authenticated", "yes");
+    expect(trigger).toHaveAttribute("data-cohort-id", "");
+    expect(screen.queryByRole("heading", { level: 2 })).not.toBeInTheDocument();
   });
 });
