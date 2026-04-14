@@ -13,6 +13,10 @@ export const metadata: Metadata = {
     template: "%s · claude-hunt",
   },
   description: "Discover what the cohort is building.",
+  robots: {
+    index: true,
+    follow: true,
+  },
   openGraph: {
     title: "claude-hunt",
     description: "Discover what the cohort is building.",

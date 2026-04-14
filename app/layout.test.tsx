@@ -61,4 +61,13 @@ describe("app/layout metadata", () => {
     expect(base).toBeInstanceOf(URL);
     expect((base as URL).origin).toBe("https://www.claude-hunt.com");
   });
+
+  it("allows search engines to index and follow via robots directives", () => {
+    const robots = metadata.robots as
+      | { index?: boolean; follow?: boolean }
+      | null
+      | undefined;
+    expect(robots?.index).toBe(true);
+    expect(robots?.follow).toBe(true);
+  });
 });
