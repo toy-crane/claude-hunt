@@ -69,6 +69,10 @@ vi.mock("@features/submit-project", () => ({
   ),
 }));
 
+vi.mock("@widgets/header", () => ({
+  Header: () => <div data-testid="site-header-stub" />,
+}));
+
 const getPublicUrl = vi.fn().mockImplementation((path: string) => ({
   data: { publicUrl: `https://cdn.example.com/${path}` },
 }));
