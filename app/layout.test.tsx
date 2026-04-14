@@ -8,7 +8,7 @@ vi.mock("next/font/google", () => {
     variable: "--font-stub",
     style: { fontFamily: "stub" },
   });
-  return { Noto_Sans: stub, Geist_Mono: stub };
+  return { Inter: stub, Geist_Mono: stub, JetBrains_Mono: stub };
 });
 
 // ThemeProvider touches next-themes; not the subject of this test.
