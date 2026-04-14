@@ -4,6 +4,7 @@ import { EditDialog } from "@features/edit-project/index.ts";
 import { SubmitDialog } from "@features/submit-project/index.ts";
 import { VoteButton } from "@features/toggle-vote/index.ts";
 import { createClient } from "@shared/api/supabase/server.ts";
+import { Separator } from "@shared/ui/separator.tsx";
 import { Header } from "@widgets/header/index.ts";
 import { fetchProjects, ProjectGrid } from "@widgets/project-grid/index.ts";
 import { Suspense } from "react";
@@ -51,15 +52,26 @@ export default async function Page({ searchParams }: PageProps) {
   return (
     <>
       <Header />
-      <main className="mx-auto flex min-h-svh w-full max-w-6xl flex-col gap-8 p-6">
-        <header className="flex flex-wrap items-end justify-between gap-4">
-          <div className="flex flex-col gap-2">
-            <h1 className="font-heading font-medium text-2xl">Project Board</h1>
-            <p className="text-muted-foreground text-sm">
-              Projects built by cohort students. Upvote your favourites.
-            </p>
+      <main className="mx-auto flex min-h-svh w-full max-w-6xl flex-col gap-6 p-6">
+        <section className="flex flex-col gap-4">
+          <div className="flex flex-wrap items-start justify-between gap-4">
+            <div className="flex flex-col gap-2">
+              <h1 className="font-heading font-medium text-2xl">
+                Project Board
+              </h1>
+              <p className="text-muted-foreground text-sm">
+                Projects built by cohort students. Upvote your favourites.
+              </p>
+            </div>
+            <SubmitDialog
+              cohortId={viewerCohortId}
+              isAuthenticated={Boolean(user)}
+            />
           </div>
-          <div className="flex items-center gap-2">
+
+          <Separator />
+
+          <div className="flex items-center justify-end gap-2">
             <span aria-hidden="true" className="text-muted-foreground text-xs">
               Filter by cohort
             </span>
@@ -69,12 +81,8 @@ export default async function Page({ searchParams }: PageProps) {
                 selectedCohortId={selectedCohortId}
               />
             </Suspense>
-            <SubmitDialog
-              cohortId={viewerCohortId}
-              isAuthenticated={Boolean(user)}
-            />
           </div>
-        </header>
+        </section>
 
         <ProjectGrid
           projects={projects}
