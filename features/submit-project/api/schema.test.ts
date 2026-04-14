@@ -6,7 +6,7 @@ import {
 } from "./schema.ts";
 
 const ALLOWED_MIME_ERROR = /JPEG, PNG, or WebP/;
-const SIZE_ERROR = /5 MB/;
+const SIZE_ERROR = /25 MB/;
 
 function makeFile(name: string, type: string, bytes: number): File {
   const buffer = new Uint8Array(bytes);
@@ -72,10 +72,20 @@ describe("validateScreenshotFile", () => {
     expect(result.error).toMatch(ALLOWED_MIME_ERROR);
   });
 
-  it("rejects files larger than 5 MB", () => {
+  it("rejects files larger than 25 MB", () => {
     const file = makeFile("big.png", "image/png", MAX_SCREENSHOT_BYTES + 1);
     const result = validateScreenshotFile(file);
     expect(result.ok).toBe(false);
     expect(result.error).toMatch(SIZE_ERROR);
+    expect(result.error).toBe("File must be 25 MB or smaller");
+  });
+
+  it("accepts a 24 MB JPEG (just under the cap)", () => {
+    const file = makeFile("photo.jpg", "image/jpeg", 24 * 1024 * 1024);
+    expect(validateScreenshotFile(file).ok).toBe(true);
+  });
+
+  it("sets MAX_SCREENSHOT_BYTES to 25 MiB", () => {
+    expect(MAX_SCREENSHOT_BYTES).toBe(25 * 1024 * 1024);
   });
 });

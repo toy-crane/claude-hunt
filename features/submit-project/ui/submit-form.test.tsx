@@ -114,7 +114,7 @@ describe("SubmitForm", () => {
 
   it("surfaces an upload error without calling the server action", async () => {
     uploadScreenshot.mockResolvedValue({
-      error: "File must be 5 MB or smaller",
+      error: "File must be 25 MB or smaller",
     });
     const onSuccess = vi.fn();
 
@@ -123,8 +123,31 @@ describe("SubmitForm", () => {
 
     expect(
       await screen.findByTestId("submit-form-field-error")
-    ).toHaveTextContent("5 MB");
+    ).toHaveTextContent("File must be 25 MB or smaller");
     expect(submitProject).not.toHaveBeenCalled();
     expect(onSuccess).not.toHaveBeenCalled();
+  });
+
+  it("preserves title, tagline, and URL values after a size rejection", async () => {
+    uploadScreenshot.mockResolvedValue({
+      error: "File must be 25 MB or smaller",
+    });
+
+    render(<SubmitForm cohortId="cohort-1" />);
+    await fillAndSubmit();
+
+    expect(
+      await screen.findByTestId("submit-form-field-error")
+    ).toHaveTextContent("25 MB");
+
+    expect((screen.getByLabelText("Title") as HTMLInputElement).value).toBe(
+      "My App"
+    );
+    expect(
+      (screen.getByLabelText("Tagline") as HTMLTextAreaElement).value
+    ).toBe("A cool tool");
+    expect(
+      (screen.getByLabelText("Project URL") as HTMLInputElement).value
+    ).toBe("https://myapp.com");
   });
 });
