@@ -6,6 +6,7 @@ import { GitHubIcon } from "@shared/ui/icons/github.tsx";
 import { GoogleIcon } from "@shared/ui/icons/google.tsx";
 import { Input } from "@shared/ui/input.tsx";
 import { Label } from "@shared/ui/label.tsx";
+import { Logo } from "@shared/ui/logo.tsx";
 import Link from "next/link";
 import { useState } from "react";
 
@@ -51,9 +52,7 @@ export function LoginForm() {
     <section className="flex min-h-screen items-center justify-center bg-zinc-50 px-4 py-16 md:py-32 dark:bg-transparent">
       <form className="w-full max-w-sm" onSubmit={handleEmailLogin}>
         <div>
-          <Link aria-label="go home" href="/">
-            <span className="font-bold text-xl">Claude Hunt</span>
-          </Link>
+          <Logo blink className="text-xl" />
           <h1 className="mt-4 mb-1 font-semibold text-xl">Welcome back</h1>
           <p className="text-muted-foreground text-sm">
             Sign in to your account to continue

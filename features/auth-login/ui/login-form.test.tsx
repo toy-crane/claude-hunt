@@ -41,6 +41,27 @@ describe("login", () => {
     mockClient.auth.signInWithOtp = vi.fn().mockResolvedValue({ error: null });
   });
 
+  it("shows the claude-hunt logo and not the legacy 'Claude Hunt' text", () => {
+    const { container } = render(<LoginForm />);
+    // New CLI-style wordmark is present
+    expect(screen.getByText("claude-hunt")).toBeInTheDocument();
+    // Legacy exact-case title-case string must be gone
+    expect(container.textContent).not.toContain("Claude Hunt");
+  });
+
+  it("exposes the logo as a link to / with aria-label 'claude-hunt home'", () => {
+    render(<LoginForm />);
+    const link = screen.getByRole("link", { name: "claude-hunt home" });
+    expect(link).toHaveAttribute("href", "/");
+  });
+
+  it("animates the login logo cursor (blink is allowed only on the login hero)", () => {
+    render(<LoginForm />);
+    const cursor = screen.getByText("_");
+    expect(cursor.style.animationName).toBe("logo-cursor-blink");
+    expect(cursor.style.animationDuration).toBe("1s");
+  });
+
   it("shows OTP sent confirmation after entering email and clicking Continue", async () => {
     const user = userEvent.setup();
     render(<LoginForm />);
