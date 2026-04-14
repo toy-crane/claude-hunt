@@ -2,6 +2,8 @@
 
 A Next.js app with shadcn/ui, powered by a Claude Code harness for TDD-driven development.
 
+Production: https://www.claude-hunt.com
+
 ## Getting Started
 
 ```bash
