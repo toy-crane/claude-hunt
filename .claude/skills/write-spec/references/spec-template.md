@@ -12,18 +12,18 @@ Explain in 1-2 sentences the problem this feature solves and the observable chan
 ## Scenarios
 
 ### 1. Scenario Title
-**Given** initial state of the user or system
-**When** the user takes an action
-**Then** an observable result occurs
+- **Given** — initial state of the user or system
+- **When** — the user takes an action
+- **Then** — an observable result occurs
 
 Success Criteria:
 - [ ] Concrete input → observable output (in UI, API response, or persisted state)
 - [ ] Concrete input → observable output
 
 ### 2. Scenario Title
-**Given** ...
-**When** ...
-**Then** ...
+- **Given** — ...
+- **When** — ...
+- **Then** — ...
 
 Success Criteria:
 - [ ] ...
