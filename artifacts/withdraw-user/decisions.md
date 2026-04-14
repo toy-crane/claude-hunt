@@ -16,6 +16,14 @@
 **Harness Signal**: N/A — order derives directly from plan.md's Dependencies fields.
 **Result**: Pending
 
+## SUPABASE_SECRET_KEY — read via `process.env`, not `env.ts`
+
+**When**: Step 4, Task 2 (after first `bun run build` failure)
+**Decision**: Instead of adding `SUPABASE_SECRET_KEY` to the server block of `shared/config/env.ts` (which would fail the build if the key is missing at boot), read it lazily via `process.env.SUPABASE_SECRET_KEY` inside `createAdminClient()` with a runtime check.
+**Why**: `.env.local` in this repo does not set `SUPABASE_SECRET_KEY` (see `.env.example` comment: "Not validated at app boot; safe to leave unset in production"). Adding it to t3-env causes the production build to crash during static page collection for `/auth/callback`. The key is only needed when an admin action actually runs, so lazy-reading matches the existing pattern in `e2e/helpers/supabase-admin.ts` and avoids breaking the boot path for environments that don't need admin privileges.
+**Harness Signal**: plan.md listed "SUPABASE_SECRET_KEY (server)" in Infrastructure Resources as declared in `env.ts`, but the skill (or plan step) did not flag that t3-env validates at import time and would fail the build. Consider having `draft-plan` surface "which env tier (client/server/lazy runtime-only) should hold each new key" when an Infrastructure Resource is added.
+**Result**: Success — build passes; admin action fails fast with a clear error if the key is missing.
+
 ## Settings form — remove "Read-only" helper text
 
 **When**: Step 4, Task 1

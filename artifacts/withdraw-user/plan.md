@@ -92,7 +92,7 @@ Storage bucket `project-screenshots` is **not** cascade-linked; screenshots for 
 
 ---
 
-### Task 2: Withdraw server action + service-role admin client
+### Task 2: Withdraw server action + service-role admin client ✅
 
 - **Covers**: Scenario 5 (full); Scenario 2 (partial — server-side happy path, no UI integration)
 - **Size**: M (4 files)
