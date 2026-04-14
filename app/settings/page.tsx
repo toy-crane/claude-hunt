@@ -65,15 +65,12 @@ export default async function SettingsPage() {
         </h2>
         <Card>
           <CardContent>
-            <div className="flex items-center justify-between gap-3">
-              <span className="font-medium text-sm">Log out</span>
-              <form action={signOut}>
-                <Button type="submit" variant="outline">
-                  <RiLogoutBoxRLine data-icon="inline-start" />
-                  <span>Log out</span>
-                </Button>
-              </form>
-            </div>
+            <form action={signOut}>
+              <Button type="submit" variant="outline">
+                <RiLogoutBoxRLine data-icon="inline-start" />
+                <span>Log out</span>
+              </Button>
+            </form>
           </CardContent>
         </Card>
       </section>
@@ -90,7 +87,7 @@ export default async function SettingsPage() {
         </h2>
         <Card>
           <CardContent>
-            <div className="flex items-start justify-between gap-3">
+            <div className="flex items-center justify-between gap-3">
               <div className="flex flex-col gap-1">
                 <span className="font-medium text-sm">Delete account</span>
                 <p className="text-muted-foreground text-xs">

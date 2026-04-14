@@ -173,7 +173,6 @@ describe("<WithdrawDialog />", () => {
       expect(mocks.withdrawAccount).toHaveBeenCalledTimes(1);
     });
     expect(mocks.routerReplace).toHaveBeenCalledWith("/");
-    expect(mocks.routerRefresh).toHaveBeenCalledTimes(1);
   });
 
   it("surfaces an error and keeps the dialog open on failure", async () => {

@@ -47,7 +47,6 @@ export function WithdrawDialog({ email }: WithdrawDialogProps) {
       const result = await withdrawAccount();
       if (result.ok) {
         router.replace("/");
-        router.refresh();
         return;
       }
       setError(result.error);
