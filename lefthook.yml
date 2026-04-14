@@ -4,3 +4,11 @@ pre-commit:
       glob: "*.{js,jsx,ts,tsx,mjs,mts,cjs,cts,json,jsonc,css}"
       run: bunx ultracite fix {staged_files}
       stage_fixed: true
+    - name: typecheck
+      glob: "*.{ts,tsx,mts,cts}"
+      run: bun run typecheck
+
+pre-push:
+  jobs:
+    - name: test
+      run: bun run test:unit

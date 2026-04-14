@@ -52,6 +52,7 @@ describe("app/layout metadata", () => {
   });
 
   it("uses 'summary_large_image' twitter card so the OG image renders full-bleed", () => {
-    expect(metadata.twitter?.card).toBe("summary_large_image");
+    const twitter = metadata.twitter as { card?: string } | null | undefined;
+    expect(twitter?.card).toBe("summary_large_image");
   });
 });
