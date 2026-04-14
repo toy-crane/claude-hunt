@@ -2,7 +2,7 @@ import { z } from "zod";
 
 export const MAX_TITLE_LENGTH = 80;
 export const MAX_TAGLINE_LENGTH = 140;
-export const MAX_SCREENSHOT_BYTES = 5 * 1024 * 1024; // 5 MiB
+export const MAX_SCREENSHOT_BYTES = 25 * 1024 * 1024; // 25 MiB
 export const ALLOWED_SCREENSHOT_MIME_TYPES = [
   "image/jpeg",
   "image/png",
@@ -51,7 +51,7 @@ export interface ValidateScreenshotResult {
 /** Fast client-side check before the storage upload call. */
 export function validateScreenshotFile(file: File): ValidateScreenshotResult {
   if (file.size > MAX_SCREENSHOT_BYTES) {
-    return { ok: false, error: "File must be 5 MB or smaller" };
+    return { ok: false, error: "File must be 25 MB or smaller" };
   }
   if (
     !ALLOWED_SCREENSHOT_MIME_TYPES.includes(file.type as AllowedScreenshotMime)

@@ -148,7 +148,7 @@ export function SubmitForm({
             required
             type="file"
           />
-          <FieldDescription>JPEG, PNG, or WebP up to 5 MB.</FieldDescription>
+          <FieldDescription>JPEG, PNG, or WebP up to 25 MB.</FieldDescription>
         </Field>
       </FieldGroup>
 
