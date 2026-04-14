@@ -1,4 +1,4 @@
-import type { Cohort } from "@entities/cohort/index.ts";
+import type { Cohort } from "@entities/cohort";
 import { fireEvent, render, screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { beforeEach, describe, expect, it, vi } from "vitest";
@@ -33,7 +33,7 @@ vi.mock("@shared/api/supabase/client.ts", () => ({
   createClient: () => ({ auth: { signOut: signOutMock } }),
 }));
 
-const { OnboardingForm } = await import("./onboarding-form.tsx");
+const { OnboardingForm } = await import("./onboarding-form");
 
 const COHORT_A_ID = "a1b2c3d4-5678-4abc-9def-0123456789ab";
 const COHORT_B_ID = "b1b2c3d4-5678-4abc-9def-0123456789ab";

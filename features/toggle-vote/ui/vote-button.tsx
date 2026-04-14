@@ -1,11 +1,11 @@
 "use client";
 
 import { RiThumbUpFill, RiThumbUpLine } from "@remixicon/react";
-import { cn } from "@shared/lib/utils.ts";
-import { Button } from "@shared/ui/button.tsx";
+import { cn } from "@shared/lib/utils";
+import { Button } from "@shared/ui/button";
 import Link from "next/link";
 import { useState, useTransition } from "react";
-import { toggleVote } from "../api/actions.ts";
+import { toggleVote } from "../api/actions";
 
 export interface VoteButtonProps {
   /** True when a signed-in viewer has already voted. */

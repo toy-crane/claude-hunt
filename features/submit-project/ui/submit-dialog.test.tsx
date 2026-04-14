@@ -35,7 +35,7 @@ vi.mock("./submit-form.tsx", () => ({
   ),
 }));
 
-const { SubmitDialog } = await import("./submit-dialog.tsx");
+const { SubmitDialog } = await import("./submit-dialog");
 
 describe("SubmitDialog", () => {
   beforeEach(() => {

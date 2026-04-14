@@ -1,13 +1,13 @@
 "use client";
 
-import type { Cohort } from "@entities/cohort/index.ts";
+import type { Cohort } from "@entities/cohort";
 import {
   Select,
   SelectContent,
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from "@shared/ui/select.tsx";
+} from "@shared/ui/select";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { useTransition } from "react";
 

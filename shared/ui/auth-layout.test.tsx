@@ -1,6 +1,6 @@
 import { render, screen } from "@testing-library/react";
 import { vi } from "vitest";
-import { AuthLayout } from "./auth-layout.tsx";
+import { AuthLayout } from "./auth-layout";
 
 vi.mock("next/link", () => ({
   default: ({

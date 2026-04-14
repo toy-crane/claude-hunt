@@ -3,7 +3,7 @@ import {
   MAX_SCREENSHOT_BYTES,
   submitProjectInputSchema,
   validateScreenshotFile,
-} from "./schema.ts";
+} from "./schema";
 
 const ALLOWED_MIME_ERROR = /JPEG, PNG, or WebP/;
 const SIZE_ERROR = /25 MB/;

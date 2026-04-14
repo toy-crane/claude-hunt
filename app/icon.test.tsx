@@ -1,6 +1,6 @@
 import { render } from "@testing-library/react";
 import { vi } from "vitest";
-import Icon, { contentType, IconElement, size } from "./icon.tsx";
+import Icon, { contentType, IconElement, size } from "./icon";
 
 // Stub next/og — the real ImageResponse requires an edge runtime.
 vi.mock("next/og", () => ({

@@ -1,4 +1,4 @@
-import { LoginForm } from "@features/auth-login/index.ts";
+import { LoginForm } from "@features/auth-login";
 import { Suspense } from "react";
 
 export default function LoginPage() {

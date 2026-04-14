@@ -1,6 +1,6 @@
 import { cache } from "react";
 
-import { createClient } from "./server.ts";
+import { createClient } from "./server";
 
 export interface Viewer {
   avatarUrl: string | null;

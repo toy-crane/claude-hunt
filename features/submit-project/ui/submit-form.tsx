@@ -1,19 +1,19 @@
 "use client";
 
-import { Button } from "@shared/ui/button.tsx";
+import { Button } from "@shared/ui/button";
 import {
   Field,
   FieldDescription,
   FieldGroup,
   FieldLabel,
-} from "@shared/ui/field.tsx";
-import { Input } from "@shared/ui/input.tsx";
-import { Spinner } from "@shared/ui/spinner.tsx";
-import { Textarea } from "@shared/ui/textarea.tsx";
+} from "@shared/ui/field";
+import { Input } from "@shared/ui/input";
+import { Spinner } from "@shared/ui/spinner";
+import { Textarea } from "@shared/ui/textarea";
 import { useId, useState } from "react";
-import { submitProject } from "../api/actions.ts";
-import { MAX_TAGLINE_LENGTH, MAX_TITLE_LENGTH } from "../api/schema.ts";
-import { uploadScreenshot } from "../lib/upload-screenshot.ts";
+import { submitProject } from "../api/actions";
+import { MAX_TAGLINE_LENGTH, MAX_TITLE_LENGTH } from "../api/schema";
+import { uploadScreenshot } from "../lib/upload-screenshot";
 
 export interface SubmitFormProps {
   /**

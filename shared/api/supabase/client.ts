@@ -1,5 +1,5 @@
-import type { Database } from "@shared/api/supabase/types.ts";
-import { env } from "@shared/config/env.ts";
+import type { Database } from "@shared/api/supabase/types";
+import { env } from "@shared/config/env";
 import { createBrowserClient } from "@supabase/ssr";
 
 export function createClient() {

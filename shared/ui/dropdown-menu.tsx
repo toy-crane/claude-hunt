@@ -1,7 +1,7 @@
 "use client";
 
 import { RiArrowRightSLine, RiCheckLine } from "@remixicon/react";
-import { cn } from "@shared/lib/utils.ts";
+import { cn } from "@shared/lib/utils";
 import { DropdownMenu as DropdownMenuPrimitive } from "radix-ui";
 import type * as React from "react";
 

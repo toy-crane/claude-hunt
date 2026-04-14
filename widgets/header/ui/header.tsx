@@ -1,9 +1,9 @@
-import { fetchViewer } from "@shared/api/supabase/viewer.ts";
-import { Button } from "@shared/ui/button.tsx";
-import { Logo } from "@shared/ui/logo.tsx";
+import { fetchViewer } from "@shared/api/supabase/viewer";
+import { Button } from "@shared/ui/button";
+import { Logo } from "@shared/ui/logo";
 import Link from "next/link";
 
-import { HeaderMenu } from "./header-menu.tsx";
+import { HeaderMenu } from "./header-menu";
 
 export async function Header() {
   const viewer = await fetchViewer();

@@ -1,8 +1,8 @@
 "use server";
 
-import { createClient } from "@shared/api/supabase/server.ts";
+import { createClient } from "@shared/api/supabase/server";
 import { revalidatePath } from "next/cache";
-import { type OnboardingInput, onboardingInputSchema } from "./schema.ts";
+import { type OnboardingInput, onboardingInputSchema } from "./schema";
 
 export interface CompleteOnboardingResult {
   error?: string;

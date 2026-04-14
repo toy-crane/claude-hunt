@@ -1,8 +1,8 @@
 "use server";
 
-import { createClient } from "@shared/api/supabase/server.ts";
+import { createClient } from "@shared/api/supabase/server";
 import { revalidatePath } from "next/cache";
-import { type SubmitProjectInput, submitProjectInputSchema } from "./schema.ts";
+import { type SubmitProjectInput, submitProjectInputSchema } from "./schema";
 
 export interface SubmitProjectResult {
   error?: string;

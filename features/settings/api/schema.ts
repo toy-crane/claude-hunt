@@ -2,7 +2,7 @@
 // barrel so reusing the rules doesn't drag in the client-side
 // `OnboardingForm` (which touches env validation at import time and
 // breaks node-side tests).
-import { onboardingInputSchema } from "@features/onboarding/api/schema.ts";
+import { onboardingInputSchema } from "@features/onboarding/api/schema";
 
 /**
  * Reuse onboarding's display-name rules so the two forms stay in

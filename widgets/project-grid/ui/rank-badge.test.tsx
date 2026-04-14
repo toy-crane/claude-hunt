@@ -1,6 +1,6 @@
 import { render, screen } from "@testing-library/react";
 import { describe, expect, it } from "vitest";
-import { RankBadge } from "./rank-badge.tsx";
+import { RankBadge } from "./rank-badge";
 
 describe("RankBadge", () => {
   it.each([

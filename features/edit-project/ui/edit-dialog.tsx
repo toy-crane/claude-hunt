@@ -1,12 +1,12 @@
 "use client";
 
-import type { Project } from "@entities/project/index.ts";
+import type { Project } from "@entities/project";
 import {
   MAX_TAGLINE_LENGTH,
   MAX_TITLE_LENGTH,
   uploadScreenshot,
-} from "@features/submit-project/index.ts";
-import { Button } from "@shared/ui/button.tsx";
+} from "@features/submit-project";
+import { Button } from "@shared/ui/button";
 import {
   Dialog,
   DialogContent,
@@ -15,13 +15,13 @@ import {
   DialogHeader,
   DialogTitle,
   DialogTrigger,
-} from "@shared/ui/dialog.tsx";
-import { Field, FieldGroup, FieldLabel } from "@shared/ui/field.tsx";
-import { Input } from "@shared/ui/input.tsx";
-import { Spinner } from "@shared/ui/spinner.tsx";
-import { Textarea } from "@shared/ui/textarea.tsx";
+} from "@shared/ui/dialog";
+import { Field, FieldGroup, FieldLabel } from "@shared/ui/field";
+import { Input } from "@shared/ui/input";
+import { Spinner } from "@shared/ui/spinner";
+import { Textarea } from "@shared/ui/textarea";
 import { useId, useState } from "react";
-import { editProject } from "../api/actions.ts";
+import { editProject } from "../api/actions";
 
 export interface EditDialogProps {
   project: Pick<Project, "id" | "title" | "tagline" | "project_url">;

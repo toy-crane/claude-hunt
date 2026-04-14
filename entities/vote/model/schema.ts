@@ -2,7 +2,7 @@ import type {
   Tables,
   TablesInsert,
   TablesUpdate,
-} from "@shared/api/supabase/types.ts";
+} from "@shared/api/supabase/types";
 
 export type Vote = Tables<"votes">;
 export type VoteInsert = TablesInsert<"votes">;

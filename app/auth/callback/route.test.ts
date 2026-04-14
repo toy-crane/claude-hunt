@@ -1,4 +1,4 @@
-import { createMockSupabaseClient } from "@shared/lib/test-utils.tsx";
+import { createMockSupabaseClient } from "@shared/lib/test-utils";
 import { vi } from "vitest";
 
 const mockClient = createMockSupabaseClient();
@@ -16,7 +16,7 @@ describe("auth callback", () => {
   });
 
   it("redirects to origin + next when next is a local path", async () => {
-    const { GET } = await import("./route.ts");
+    const { GET } = await import("./route");
     const res = await GET(
       new Request("http://app.test/auth/callback?code=abc&next=/dashboard")
     );
@@ -25,7 +25,7 @@ describe("auth callback", () => {
   });
 
   it("sanitizes non-local next param to '/'", async () => {
-    const { GET } = await import("./route.ts");
+    const { GET } = await import("./route");
     const res = await GET(
       new Request(
         "http://app.test/auth/callback?code=abc&next=https://evil.com"
@@ -36,7 +36,7 @@ describe("auth callback", () => {
   });
 
   it("falls back to '/' when next param is missing", async () => {
-    const { GET } = await import("./route.ts");
+    const { GET } = await import("./route");
     const res = await GET(
       new Request("http://app.test/auth/callback?code=abc")
     );
@@ -49,7 +49,7 @@ describe("auth callback", () => {
       .fn()
       .mockResolvedValue({ error: { message: "invalid_grant" } });
 
-    const { GET } = await import("./route.ts");
+    const { GET } = await import("./route");
     const res = await GET(
       new Request("http://app.test/auth/callback?code=abc&next=/dashboard")
     );
@@ -60,7 +60,7 @@ describe("auth callback", () => {
   });
 
   it("redirects to /auth/auth-code-error when code is missing", async () => {
-    const { GET } = await import("./route.ts");
+    const { GET } = await import("./route");
     const res = await GET(new Request("http://app.test/auth/callback"));
 
     expect(res.headers.get("location")).toBe(

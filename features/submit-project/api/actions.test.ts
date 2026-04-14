@@ -19,7 +19,7 @@ vi.mock("@shared/api/supabase/server", () => ({
   createClient: vi.fn().mockResolvedValue(mockClient),
 }));
 
-const { submitProject } = await import("./actions.ts");
+const { submitProject } = await import("./actions");
 
 const validInput = {
   title: "My App",

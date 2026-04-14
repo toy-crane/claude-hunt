@@ -1,7 +1,7 @@
 "use server";
 
-import { createAdminClient } from "@shared/api/supabase/admin.ts";
-import { createClient } from "@shared/api/supabase/server.ts";
+import { createAdminClient } from "@shared/api/supabase/admin";
+import { createClient } from "@shared/api/supabase/server";
 import { revalidatePath } from "next/cache";
 
 export type WithdrawAccountResult = { ok: true } | { error: string; ok: false };

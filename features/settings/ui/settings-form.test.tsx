@@ -25,7 +25,7 @@ vi.mock("sonner", () => ({
   toast: { success: mocks.toastSuccess },
 }));
 
-import { SettingsForm } from "./settings-form.tsx";
+import { SettingsForm } from "./settings-form";
 
 function renderForm(
   props?: Partial<{ email: string; initialDisplayName: string }>

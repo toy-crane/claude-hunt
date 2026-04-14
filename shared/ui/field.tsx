@@ -1,8 +1,8 @@
 "use client";
 
-import { cn } from "@shared/lib/utils.ts";
-import { Label } from "@shared/ui/label.tsx";
-import { Separator } from "@shared/ui/separator.tsx";
+import { cn } from "@shared/lib/utils";
+import { Label } from "@shared/ui/label";
+import { Separator } from "@shared/ui/separator";
 import { cva, type VariantProps } from "class-variance-authority";
 import { useMemo } from "react";
 

@@ -1,7 +1,7 @@
-import type { ProjectWithVoteCount } from "@entities/vote/index.ts";
+import type { ProjectWithVoteCount } from "@entities/vote";
 import { render, screen } from "@testing-library/react";
 import { describe, expect, it } from "vitest";
-import { ProjectGrid } from "./project-grid.tsx";
+import { ProjectGrid } from "./project-grid";
 
 function buildProject(
   overrides: Partial<ProjectWithVoteCount> & { id: string; title: string }

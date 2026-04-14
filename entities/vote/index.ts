@@ -3,4 +3,4 @@ export type {
   Vote,
   VoteInsert,
   VoteUpdate,
-} from "./model/schema.ts";
+} from "./model/schema";

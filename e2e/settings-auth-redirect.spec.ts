@@ -1,9 +1,6 @@
 import { expect, test } from "@playwright/test";
-import { fetchMagicLink } from "./helpers/mailpit.ts";
-import {
-  createAdminClient,
-  uniqueTestEmail,
-} from "./helpers/supabase-admin.ts";
+import { fetchMagicLink } from "./helpers/mailpit";
+import { createAdminClient, uniqueTestEmail } from "./helpers/supabase-admin";
 
 const EMAIL_LABEL_RE = /email/i;
 const CONTINUE_BTN_RE = /continue/i;

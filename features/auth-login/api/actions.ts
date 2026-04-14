@@ -1,6 +1,6 @@
 "use server";
 
-import { createClient } from "@shared/api/supabase/server.ts";
+import { createClient } from "@shared/api/supabase/server";
 import { redirect } from "next/navigation";
 
 export async function signOut() {

@@ -1,7 +1,7 @@
 import "server-only";
 
-import type { Database } from "@shared/api/supabase/types.ts";
-import { env } from "@shared/config/env.ts";
+import type { Database } from "@shared/api/supabase/types";
+import { env } from "@shared/config/env";
 import { createClient } from "@supabase/supabase-js";
 
 /**

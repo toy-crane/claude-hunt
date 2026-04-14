@@ -1,5 +1,5 @@
-import type { Cohort } from "@entities/cohort/index.ts";
-import { createClient } from "@shared/api/supabase/server.ts";
+import type { Cohort } from "@entities/cohort";
+import { createClient } from "@shared/api/supabase/server";
 import { cache } from "react";
 
 /**

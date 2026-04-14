@@ -1,4 +1,4 @@
-import { Skeleton } from "@shared/ui/skeleton.tsx";
+import { Skeleton } from "@shared/ui/skeleton";
 
 interface ProjectGridSkeletonProps {
   /** Number of placeholder cards to render. Defaults to 6 (fills a 3-col grid). */

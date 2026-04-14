@@ -38,7 +38,7 @@ vi.mock("next/link", () => ({
   ),
 }));
 
-import { HeaderMenu } from "./header-menu.tsx";
+import { HeaderMenu } from "./header-menu";
 
 describe("<HeaderMenu />", () => {
   beforeEach(() => {

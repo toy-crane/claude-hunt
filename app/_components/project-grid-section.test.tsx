@@ -1,5 +1,5 @@
 import { render, screen } from "@testing-library/react";
-import type { ProjectGridRow } from "@widgets/project-grid/index.ts";
+import type { ProjectGridRow } from "@widgets/project-grid";
 import { vi } from "vitest";
 
 // Lightweight stubs for feature components that this section slots in.
@@ -99,7 +99,7 @@ async function renderSection(
     isAuthenticated?: boolean;
   } = {}
 ) {
-  const { ProjectGridSection } = await import("./project-grid-section.tsx");
+  const { ProjectGridSection } = await import("./project-grid-section");
   const jsx = await ProjectGridSection({
     cohortId: opts.cohortId ?? null,
     viewerUserId: opts.viewerUserId ?? null,

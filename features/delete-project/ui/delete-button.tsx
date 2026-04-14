@@ -1,6 +1,6 @@
 "use client";
 
-import { Button } from "@shared/ui/button.tsx";
+import { Button } from "@shared/ui/button";
 import {
   Dialog,
   DialogContent,
@@ -9,9 +9,9 @@ import {
   DialogHeader,
   DialogTitle,
   DialogTrigger,
-} from "@shared/ui/dialog.tsx";
+} from "@shared/ui/dialog";
 import { useState } from "react";
-import { deleteProject } from "../api/actions.ts";
+import { deleteProject } from "../api/actions";
 
 export interface DeleteButtonProps {
   projectId: string;

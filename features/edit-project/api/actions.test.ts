@@ -21,7 +21,7 @@ vi.mock("@shared/api/supabase/server", () => ({
   createClient: vi.fn().mockResolvedValue(mockClient),
 }));
 
-const { editProject } = await import("./actions.ts");
+const { editProject } = await import("./actions");
 
 const validInput = {
   projectId: "11111111-1111-1111-1111-111111111111",

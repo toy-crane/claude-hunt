@@ -1,6 +1,6 @@
 "use client";
 
-import { Button } from "@shared/ui/button.tsx";
+import { Button } from "@shared/ui/button";
 import {
   Dialog,
   DialogContent,
@@ -9,14 +9,14 @@ import {
   DialogHeader,
   DialogTitle,
   DialogTrigger,
-} from "@shared/ui/dialog.tsx";
-import { Field, FieldLabel } from "@shared/ui/field.tsx";
-import { Input } from "@shared/ui/input.tsx";
-import { Spinner } from "@shared/ui/spinner.tsx";
+} from "@shared/ui/dialog";
+import { Field, FieldLabel } from "@shared/ui/field";
+import { Input } from "@shared/ui/input";
+import { Spinner } from "@shared/ui/spinner";
 import { useRouter } from "next/navigation";
 import { useId, useState, useTransition } from "react";
 
-import { withdrawAccount } from "../api/actions.ts";
+import { withdrawAccount } from "../api/actions";
 
 export interface WithdrawDialogProps {
   email: string;

@@ -1,5 +1,5 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
-import { downscaleImage } from "./downscale.ts";
+import { downscaleImage } from "./downscale";
 
 interface CanvasCall {
   convertToBlob: (options?: {

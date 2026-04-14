@@ -1,6 +1,6 @@
-import type { ProjectWithVoteCount } from "@entities/vote/index.ts";
-import { EmptyState } from "./empty-state.tsx";
-import { ProjectCard } from "./project-card.tsx";
+import type { ProjectWithVoteCount } from "@entities/vote";
+import { EmptyState } from "./empty-state";
+import { ProjectCard } from "./project-card";
 
 export interface ProjectGridProps {
   projects: ProjectWithVoteCount[];

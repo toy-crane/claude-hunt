@@ -1,6 +1,6 @@
 "use client";
 
-import { Button } from "@shared/ui/button.tsx";
+import { Button } from "@shared/ui/button";
 import {
   Dialog,
   DialogContent,
@@ -8,11 +8,11 @@ import {
   DialogHeader,
   DialogTitle,
   DialogTrigger,
-} from "@shared/ui/dialog.tsx";
+} from "@shared/ui/dialog";
 import Link from "next/link";
 import { useState } from "react";
 import { toast } from "sonner";
-import { SubmitForm } from "./submit-form.tsx";
+import { SubmitForm } from "./submit-form";
 
 export interface SubmitDialogProps {
   /**

@@ -2,9 +2,9 @@ import type { Metadata } from "next";
 import { Geist_Mono, Inter, JetBrains_Mono } from "next/font/google";
 
 import "./globals.css";
-import { ThemeProvider } from "@core/providers/theme-provider.tsx";
-import { cn } from "@shared/lib/utils.ts";
-import { Toaster } from "@shared/ui/sonner.tsx";
+import { ThemeProvider } from "@core/providers/theme-provider";
+import { cn } from "@shared/lib/utils";
+import { Toaster } from "@shared/ui/sonner";
 
 const fontHeading = JetBrains_Mono({
   subsets: ["latin"],

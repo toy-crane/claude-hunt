@@ -1,6 +1,6 @@
-import type { ProjectWithVoteCount } from "@entities/vote/index.ts";
+import type { ProjectWithVoteCount } from "@entities/vote";
 import { RiThumbUpLine } from "@remixicon/react";
-import { RankBadge } from "./rank-badge.tsx";
+import { RankBadge } from "./rank-badge";
 
 export interface ProjectCardProps {
   project: ProjectWithVoteCount;

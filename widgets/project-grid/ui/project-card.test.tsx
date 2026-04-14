@@ -1,7 +1,7 @@
-import type { ProjectWithVoteCount } from "@entities/vote/index.ts";
+import type { ProjectWithVoteCount } from "@entities/vote";
 import { render, screen } from "@testing-library/react";
 import { describe, expect, it } from "vitest";
-import { ProjectCard } from "./project-card.tsx";
+import { ProjectCard } from "./project-card";
 
 function buildProject(
   overrides: Partial<ProjectWithVoteCount> = {}

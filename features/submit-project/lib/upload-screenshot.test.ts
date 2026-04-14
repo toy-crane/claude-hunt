@@ -14,7 +14,7 @@ vi.mock("@shared/lib/image/index.ts", () => ({
   downscaleImage,
 }));
 
-const { uploadScreenshot } = await import("./upload-screenshot.ts");
+const { uploadScreenshot } = await import("./upload-screenshot");
 
 const MIME_ERROR_REGEX = /JPEG, PNG, or WebP/;
 const USER_SCOPED_WEBP_PATH_REGEX = /^user-1\/.+\.webp$/;

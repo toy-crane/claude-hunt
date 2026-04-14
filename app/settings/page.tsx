@@ -1,8 +1,8 @@
-import { SettingsForm } from "@features/settings/index.ts";
-import { WithdrawDialog } from "@features/withdraw-user/index.ts";
+import { SettingsForm } from "@features/settings";
+import { WithdrawDialog } from "@features/withdraw-user";
 import { RiArrowLeftLine } from "@remixicon/react";
-import { fetchViewer } from "@shared/api/supabase/viewer.ts";
-import { Card, CardContent } from "@shared/ui/card.tsx";
+import { fetchViewer } from "@shared/api/supabase/viewer";
+import { Card, CardContent } from "@shared/ui/card";
 import type { Metadata } from "next";
 import Link from "next/link";
 import { redirect } from "next/navigation";

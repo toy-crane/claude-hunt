@@ -1,5 +1,5 @@
-import type { Cohort } from "@entities/cohort/index.ts";
-import { createMockSupabaseClient } from "@shared/lib/test-utils.tsx";
+import type { Cohort } from "@entities/cohort";
+import { createMockSupabaseClient } from "@shared/lib/test-utils";
 import { render, screen } from "@testing-library/react";
 import { vi } from "vitest";
 
@@ -125,7 +125,7 @@ const cohorts: Cohort[] = [
 
 async function renderPage(search: Record<string, string> = {}) {
   fetchCohortsMock.mockResolvedValue(cohorts);
-  const Page = (await import("./page.tsx")).default;
+  const Page = (await import("./page")).default;
   const jsx = await Page({ searchParams: Promise.resolve(search) });
   render(jsx);
 }
