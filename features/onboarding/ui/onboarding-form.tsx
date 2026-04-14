@@ -169,7 +169,7 @@ export function OnboardingForm({ cohorts, initialNext }: OnboardingFormProps) {
                 <SelectContent>
                   {cohorts.map((cohort) => (
                     <SelectItem key={cohort.id} value={cohort.id}>
-                      {cohort.name}
+                      {cohort.label}
                     </SelectItem>
                   ))}
                 </SelectContent>
