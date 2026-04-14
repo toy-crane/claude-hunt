@@ -15,13 +15,25 @@
   "linter": {
     "rules": {
       "correctness": {
-        // next/font/google, next/server, react, @supabase/ssr etc.
-        // cannot be statically resolved by Biome (virtual/bundled modules)
-        "noUnresolvedImports": "warn",
+        // Biome's noUnresolvedImports is still a nursery rule and produces
+        // false positives for packages that rely on `package.json` `exports`
+        // conditions or virtual/bundled modules — e.g. `react` (Suspense,
+        // hooks), `next/font/google`, `next/server`, `@supabase/ssr`.
+        // See https://github.com/biomejs/biome/issues/9143 and #6464.
+        // `tsc` (wired into the pre-commit `typecheck` job) already performs
+        // the same check accurately via `.d.ts`, so this rule is redundant
+        // here and only blocks commits with false positives.
+        "noUnresolvedImports": "off",
         // Biome 2.4.7 misreads FSD path aliases like @shared/config as
         // scoped NPM packages. tsc + bundler resolution already protect
         // against typos; this rule is redundant here.
-        "noUndeclaredDependencies": "off"
+        "noUndeclaredDependencies": "off",
+        // ultracite/biome/type-aware promotes this to error, forcing
+        // `@features/foo/index.ts`-style imports. Ecosystem convention is
+        // implicit extensions (`from "@features/foo"`), which
+        // moduleResolution:"bundler" + Next.js/Vite resolve fine. Turning
+        // the rule off lets us drop verbose explicit suffixes repo-wide.
+        "useImportExtensions": "off"
       },
       "performance": {
         // FSD's Public API convention requires each slice to expose
