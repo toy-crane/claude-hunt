@@ -53,8 +53,7 @@ export function LoginForm() {
       <form className="w-full max-w-sm" onSubmit={handleEmailLogin}>
         <div>
           <Logo blink className="text-3xl" />
-          <h1 className="mt-4 mb-1 font-semibold text-xl">Welcome back</h1>
-          <p className="text-muted-foreground text-sm">
+          <p className="mt-4 text-muted-foreground text-sm">
             Sign in to your account to continue
           </p>
         </div>
