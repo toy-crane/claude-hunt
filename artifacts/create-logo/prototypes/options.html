@@ -1,0 +1,309 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <title>Claude Hunt — Logo Direction Prototypes</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <style>
+      :root {
+        --bg: #faf9f7;
+        --ink: #1a1a1a;
+        --muted: #6b6b6b;
+        --border: #e6e1d9;
+        --terracotta: #da7756;
+        --terracotta-deep: #c15f3c;
+      }
+      * { box-sizing: border-box; }
+      html, body { margin: 0; padding: 0; }
+      body {
+        background: var(--bg);
+        color: var(--ink);
+        font-family: ui-serif, Georgia, Cambria, "Times New Roman", Times, serif;
+        padding: 48px 24px 80px;
+      }
+      .wrap { max-width: 1100px; margin: 0 auto; }
+      header { margin-bottom: 40px; }
+      h1 { font-weight: 600; font-size: 28px; margin: 0 0 8px; letter-spacing: -0.01em; }
+      header p { color: var(--muted); margin: 0; font-size: 15px; font-family: system-ui, -apple-system, sans-serif; }
+      .legend {
+        background: #fff;
+        border: 1px solid var(--border);
+        border-radius: 12px;
+        padding: 16px 20px;
+        margin-top: 20px;
+        font-size: 13px;
+        font-family: system-ui, -apple-system, sans-serif;
+        color: var(--muted);
+        display: flex; gap: 24px; flex-wrap: wrap;
+      }
+      .swatch { display: inline-flex; align-items: center; gap: 8px; }
+      .swatch i {
+        display: inline-block; width: 14px; height: 14px;
+        border-radius: 3px; border: 1px solid rgba(0,0,0,0.08);
+      }
+
+      .grid {
+        display: grid;
+        grid-template-columns: 1fr;
+        gap: 24px;
+      }
+      @media (min-width: 860px) {
+        .grid { grid-template-columns: 1fr 1fr 1fr; }
+      }
+
+      .card {
+        background: #fff;
+        border: 1px solid var(--border);
+        border-radius: 16px;
+        padding: 28px 24px;
+        display: flex; flex-direction: column; gap: 16px;
+      }
+      .card h2 {
+        margin: 0; font-size: 18px; font-weight: 600; letter-spacing: -0.01em;
+      }
+      .card .tag {
+        font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+        font-size: 11px; color: var(--muted);
+        text-transform: uppercase; letter-spacing: 0.08em;
+      }
+      .card p.desc {
+        margin: 0; font-size: 13px; line-height: 1.55;
+        color: var(--muted);
+        font-family: system-ui, -apple-system, sans-serif;
+      }
+
+      .stage {
+        background: #fffdf9;
+        border: 1px dashed var(--border);
+        border-radius: 12px;
+        display: flex; align-items: center; justify-content: center;
+        padding: 32px 16px;
+        min-height: 160px;
+      }
+      .stage.dark {
+        background: #1a1512;
+        border-color: #2a241f;
+      }
+
+      .row { display: flex; align-items: center; gap: 14px; }
+      .row.center { justify-content: center; }
+
+      .wordmark {
+        font-family: ui-serif, Georgia, Cambria, "Times New Roman", Times, serif;
+        font-weight: 500;
+        font-size: 28px;
+        letter-spacing: -0.01em;
+        color: var(--ink);
+      }
+      .wordmark.light { color: #f4efe8; }
+      .wordmark .accent { color: var(--terracotta-deep); }
+
+      /* Usage strip */
+      .usages {
+        display: grid; grid-template-columns: 1fr 1fr; gap: 12px;
+      }
+      .usage {
+        border: 1px solid var(--border);
+        border-radius: 10px;
+        padding: 12px;
+        display: flex; align-items: center; gap: 10px;
+        background: #fffdf9;
+      }
+      .usage small {
+        font-family: ui-monospace, monospace;
+        font-size: 10px; color: var(--muted);
+        letter-spacing: 0.04em;
+      }
+      .usage.dark { background: #1a1512; border-color: #2a241f; color: #f4efe8; }
+      .usage.dark small { color: #8a8278; }
+
+      .favicon-box {
+        width: 32px; height: 32px; border-radius: 6px;
+        background: #fff; border: 1px solid var(--border);
+        display: flex; align-items: center; justify-content: center;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="wrap">
+      <header>
+        <h1>Claude Hunt — Logo Direction Prototypes</h1>
+        <p>Three visual directions to pick from. All share Claude-style warmth (terracotta) and humanistic serif type.</p>
+        <div class="legend">
+          <span class="swatch"><i style="background:#da7756"></i>Terracotta <code>#da7756</code></span>
+          <span class="swatch"><i style="background:#c15f3c"></i>Crail <code>#c15f3c</code></span>
+          <span class="swatch"><i style="background:#1a1a1a"></i>Ink <code>#1a1a1a</code></span>
+          <span class="swatch"><i style="background:#faf9f7;border:1px solid #ccc"></i>Warm white <code>#faf9f7</code></span>
+        </div>
+      </header>
+
+      <section class="grid">
+        <!-- =============================================== -->
+        <!-- OPTION 1: Claude-style starburst + hunt motif   -->
+        <!-- =============================================== -->
+        <article class="card">
+          <div>
+            <div class="tag">Option 1</div>
+            <h2>Radiating mark + crosshair</h2>
+          </div>
+          <p class="desc">
+            A Claude-style starburst whose center becomes a crosshair / viewfinder — "radiating ideas" meets "finding great projects".
+          </p>
+
+          <div class="stage">
+            <div class="row">
+              <!-- symbol -->
+              <svg width="56" height="56" viewBox="0 0 64 64" fill="none" xmlns="http://www.w3.org/2000/svg" aria-label="Claude Hunt symbol">
+                <!-- 8 radiating petals (starburst) -->
+                <g fill="#c15f3c">
+                  <path d="M32 4 C 34 18, 34 18, 32 24 C 30 18, 30 18, 32 4 Z" />
+                  <path d="M32 60 C 30 46, 30 46, 32 40 C 34 46, 34 46, 32 60 Z" />
+                  <path d="M4 32 C 18 30, 18 30, 24 32 C 18 34, 18 34, 4 32 Z" />
+                  <path d="M60 32 C 46 34, 46 34, 40 32 C 46 30, 46 30, 60 32 Z" />
+                  <path d="M12 12 C 22 20, 22 20, 26 26 C 20 22, 20 22, 12 12 Z" />
+                  <path d="M52 52 C 42 44, 42 44, 38 38 C 44 42, 44 42, 52 52 Z" />
+                  <path d="M12 52 C 20 42, 20 42, 26 38 C 22 44, 22 44, 12 52 Z" />
+                  <path d="M52 12 C 44 22, 44 22, 38 26 C 42 20, 42 20, 52 12 Z" />
+                </g>
+                <!-- center crosshair ring -->
+                <circle cx="32" cy="32" r="5.5" stroke="#c15f3c" stroke-width="1.75" fill="none" />
+                <circle cx="32" cy="32" r="1.4" fill="#c15f3c" />
+              </svg>
+              <span class="wordmark">Claude <span class="accent">Hunt</span></span>
+            </div>
+          </div>
+
+          <div class="usages">
+            <div class="usage">
+              <div class="favicon-box">
+                <svg width="22" height="22" viewBox="0 0 64 64" fill="none">
+                  <g fill="#c15f3c">
+                    <path d="M32 4 C 34 18, 34 18, 32 24 C 30 18, 30 18, 32 4 Z" />
+                    <path d="M32 60 C 30 46, 30 46, 32 40 C 34 46, 34 46, 32 60 Z" />
+                    <path d="M4 32 C 18 30, 18 30, 24 32 C 18 34, 18 34, 4 32 Z" />
+                    <path d="M60 32 C 46 34, 46 34, 40 32 C 46 30, 46 30, 60 32 Z" />
+                    <path d="M12 12 C 22 20, 22 20, 26 26 C 20 22, 20 22, 12 12 Z" />
+                    <path d="M52 52 C 42 44, 42 44, 38 38 C 44 42, 44 42, 52 52 Z" />
+                    <path d="M12 52 C 20 42, 20 42, 26 38 C 22 44, 22 44, 12 52 Z" />
+                    <path d="M52 12 C 44 22, 44 22, 38 26 C 42 20, 42 20, 52 12 Z" />
+                  </g>
+                  <circle cx="32" cy="32" r="5.5" stroke="#c15f3c" stroke-width="2" fill="none" />
+                </svg>
+              </div>
+              <small>favicon 32</small>
+            </div>
+            <div class="usage dark">
+              <svg width="24" height="24" viewBox="0 0 64 64" fill="none">
+                <g fill="#e88a67">
+                  <path d="M32 4 C 34 18, 34 18, 32 24 C 30 18, 30 18, 32 4 Z" />
+                  <path d="M32 60 C 30 46, 30 46, 32 40 C 34 46, 34 46, 32 60 Z" />
+                  <path d="M4 32 C 18 30, 18 30, 24 32 C 18 34, 18 34, 4 32 Z" />
+                  <path d="M60 32 C 46 34, 46 34, 40 32 C 46 30, 46 30, 60 32 Z" />
+                  <path d="M12 12 C 22 20, 22 20, 26 26 C 20 22, 20 22, 12 12 Z" />
+                  <path d="M52 52 C 42 44, 42 44, 38 38 C 44 42, 44 42, 52 52 Z" />
+                  <path d="M12 52 C 20 42, 20 42, 26 38 C 22 44, 22 44, 12 52 Z" />
+                  <path d="M52 12 C 44 22, 44 22, 38 26 C 42 20, 42 20, 52 12 Z" />
+                </g>
+                <circle cx="32" cy="32" r="5.5" stroke="#e88a67" stroke-width="2" fill="none" />
+              </svg>
+              <small>dark mode</small>
+            </div>
+          </div>
+        </article>
+
+        <!-- =============================================== -->
+        <!-- OPTION 2: Monogram CH mark                       -->
+        <!-- =============================================== -->
+        <article class="card">
+          <div>
+            <div class="tag">Option 2</div>
+            <h2>Serif monogram "C·H"</h2>
+          </div>
+          <p class="desc">
+            A humanistic serif monogram — the "C" and "H" interlock inside a warm terracotta circle. Clean, bookish, distinctive at small sizes.
+          </p>
+
+          <div class="stage">
+            <div class="row">
+              <svg width="56" height="56" viewBox="0 0 64 64" fill="none" xmlns="http://www.w3.org/2000/svg" aria-label="Claude Hunt monogram">
+                <circle cx="32" cy="32" r="28" fill="#c15f3c" />
+                <text x="32" y="42"
+                      text-anchor="middle"
+                      font-family="ui-serif, Georgia, 'Times New Roman', serif"
+                      font-size="30"
+                      font-weight="500"
+                      fill="#fdf6ee"
+                      letter-spacing="-1">ch</text>
+              </svg>
+              <span class="wordmark">Claude Hunt</span>
+            </div>
+          </div>
+
+          <div class="usages">
+            <div class="usage">
+              <div class="favicon-box">
+                <svg width="22" height="22" viewBox="0 0 64 64">
+                  <circle cx="32" cy="32" r="28" fill="#c15f3c" />
+                  <text x="32" y="42" text-anchor="middle"
+                        font-family="ui-serif, Georgia, serif" font-size="30"
+                        font-weight="500" fill="#fdf6ee">ch</text>
+                </svg>
+              </div>
+              <small>favicon 32</small>
+            </div>
+            <div class="usage dark">
+              <svg width="24" height="24" viewBox="0 0 64 64">
+                <circle cx="32" cy="32" r="28" fill="#e88a67" />
+                <text x="32" y="42" text-anchor="middle"
+                      font-family="ui-serif, Georgia, serif" font-size="30"
+                      font-weight="500" fill="#1a1512">ch</text>
+              </svg>
+              <small>dark mode</small>
+            </div>
+          </div>
+        </article>
+
+        <!-- =============================================== -->
+        <!-- OPTION 3: Wordmark only                          -->
+        <!-- =============================================== -->
+        <article class="card">
+          <div>
+            <div class="tag">Option 3</div>
+            <h2>Wordmark only</h2>
+          </div>
+          <p class="desc">
+            No symbol — just a humanistic serif wordmark with a terracotta accent on "Hunt". Simplest to ship, reads everywhere.
+          </p>
+
+          <div class="stage">
+            <div class="row center">
+              <span class="wordmark" style="font-size: 34px;">
+                Claude <span class="accent" style="font-style: italic;">Hunt</span>
+              </span>
+            </div>
+          </div>
+
+          <div class="usages">
+            <div class="usage">
+              <div class="favicon-box">
+                <svg width="22" height="22" viewBox="0 0 64 64">
+                  <rect width="64" height="64" rx="14" fill="#c15f3c" />
+                  <text x="32" y="44" text-anchor="middle"
+                        font-family="ui-serif, Georgia, serif" font-size="36"
+                        font-weight="500" font-style="italic" fill="#fdf6ee">H</text>
+                </svg>
+              </div>
+              <small>favicon (H only)</small>
+            </div>
+            <div class="usage dark">
+              <span class="wordmark light" style="font-size: 14px;">
+                Claude <span style="color:#e88a67; font-style:italic;">Hunt</span>
+              </span>
+              <small>dark mode</small>
+            </div>
+          </div>
+        </article>
+      </section>
+    </div>
+  </body>
+</html>

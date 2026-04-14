@@ -1,0 +1,339 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <title>Claude Hunt — Claude Code style</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <style>
+      :root {
+        --bg: #faf9f7;
+        --ink: #1a1a1a;
+        --muted: #6b6b6b;
+        --border: #e6e1d9;
+        --terracotta: #da7756;
+        --terracotta-deep: #c15f3c;
+        --term-bg: #1a1512;
+        --term-bg-2: #211c18;
+        --term-line: #2e2822;
+        --term-fg: #e8ded0;
+        --term-muted: #8a8075;
+      }
+      * { box-sizing: border-box; }
+      html, body { margin: 0; padding: 0; }
+      body {
+        background: var(--bg);
+        color: var(--ink);
+        font-family: ui-serif, Georgia, Cambria, "Times New Roman", Times, serif;
+        padding: 48px 24px 80px;
+      }
+      .wrap { max-width: 1100px; margin: 0 auto; }
+      header { margin-bottom: 40px; }
+      h1 { font-weight: 600; font-size: 28px; margin: 0 0 8px; letter-spacing: -0.01em; }
+      header p { color: var(--muted); margin: 0; font-size: 15px; font-family: system-ui, -apple-system, sans-serif; }
+
+      .grid {
+        display: grid;
+        grid-template-columns: 1fr;
+        gap: 24px;
+      }
+      @media (min-width: 860px) {
+        .grid { grid-template-columns: 1fr 1fr; }
+      }
+
+      .card {
+        background: #fff;
+        border: 1px solid var(--border);
+        border-radius: 16px;
+        padding: 28px 24px;
+        display: flex; flex-direction: column; gap: 16px;
+      }
+      .card h2 {
+        margin: 0; font-size: 18px; font-weight: 600; letter-spacing: -0.01em;
+      }
+      .card .tag {
+        font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+        font-size: 11px; color: var(--muted);
+        text-transform: uppercase; letter-spacing: 0.08em;
+      }
+      .card p.desc {
+        margin: 0; font-size: 13px; line-height: 1.55;
+        color: var(--muted);
+        font-family: system-ui, -apple-system, sans-serif;
+      }
+
+      /* Terminal-styled stage */
+      .term {
+        background: var(--term-bg);
+        border-radius: 12px;
+        border: 1px solid var(--term-line);
+        padding: 0;
+        overflow: hidden;
+        font-family: ui-monospace, SFMono-Regular, "JetBrains Mono", Menlo, Consolas, monospace;
+        color: var(--term-fg);
+      }
+      .term-bar {
+        display: flex; align-items: center; gap: 6px;
+        padding: 10px 12px;
+        background: var(--term-bg-2);
+        border-bottom: 1px solid var(--term-line);
+      }
+      .dot { width: 10px; height: 10px; border-radius: 50%; }
+      .dot.r { background: #ff5f56; }
+      .dot.y { background: #ffbd2e; }
+      .dot.g { background: #27c93f; }
+      .term-title {
+        margin-left: 10px; font-size: 11px; color: var(--term-muted);
+        letter-spacing: 0.04em;
+      }
+      .term-body {
+        padding: 20px 20px 22px;
+        font-size: 14px;
+        line-height: 1.55;
+      }
+      .term-body pre {
+        margin: 0;
+        font-family: inherit;
+        white-space: pre;
+        color: var(--terracotta);
+      }
+      .term-body .prompt { color: var(--term-muted); }
+      .term-body .cmd { color: var(--term-fg); }
+      .term-body .accent { color: var(--terracotta); }
+      .term-body .muted { color: var(--term-muted); }
+
+      /* Light stage for in-app usage */
+      .stage {
+        background: #fffdf9;
+        border: 1px dashed var(--border);
+        border-radius: 12px;
+        padding: 22px 18px;
+        display: flex; align-items: center; justify-content: center;
+        gap: 12px;
+      }
+      .mono-wordmark {
+        font-family: ui-monospace, SFMono-Regular, "JetBrains Mono", Menlo, monospace;
+        font-weight: 500;
+        font-size: 22px;
+        letter-spacing: -0.01em;
+        color: var(--ink);
+      }
+      .mono-wordmark .asterisk { color: var(--terracotta-deep); margin-right: 4px; }
+      .mono-wordmark .muted { color: var(--muted); }
+
+      .usages {
+        display: grid; grid-template-columns: 1fr 1fr; gap: 12px;
+      }
+      .usage {
+        border: 1px solid var(--border);
+        border-radius: 10px;
+        padding: 12px;
+        display: flex; align-items: center; gap: 10px;
+        background: #fffdf9;
+        font-family: ui-monospace, monospace; font-size: 12px;
+      }
+      .usage.dark { background: var(--term-bg); border-color: var(--term-line); color: var(--term-fg); }
+      .usage small { font-size: 10px; color: var(--muted); letter-spacing: 0.04em; }
+      .usage.dark small { color: var(--term-muted); }
+
+      .favicon-box {
+        width: 32px; height: 32px; border-radius: 6px;
+        background: #fff; border: 1px solid var(--border);
+        display: flex; align-items: center; justify-content: center;
+        font-family: ui-monospace, monospace; color: var(--terracotta-deep);
+        font-weight: 700;
+        font-size: 20px; line-height: 1;
+      }
+      .favicon-box.dark { background: var(--term-bg); border-color: var(--term-line); color: var(--terracotta); }
+      .favicon-box.filled { background: var(--terracotta-deep); color: #fff; }
+    </style>
+  </head>
+  <body>
+    <div class="wrap">
+      <header>
+        <h1>Claude Hunt — Claude Code style</h1>
+        <p>Terminal-native: monospace wordmark, terracotta asterisk (<code>✳</code>), ASCII-art flavor. Four variants to pick from.</p>
+      </header>
+
+      <section class="grid">
+
+        <!-- =============================================== -->
+        <!-- A: Asterisk + mono wordmark                      -->
+        <!-- =============================================== -->
+        <article class="card">
+          <div>
+            <div class="tag">Variant A</div>
+            <h2>✳ claude-hunt</h2>
+          </div>
+          <p class="desc">
+            The simplest Claude Code signature: a terracotta asterisk followed by a lowercase kebab-case monospace wordmark. Reads like a CLI tool.
+          </p>
+
+          <div class="term">
+            <div class="term-bar">
+              <span class="dot r"></span><span class="dot y"></span><span class="dot g"></span>
+              <span class="term-title">~</span>
+            </div>
+            <div class="term-body">
+              <span class="accent" style="font-size:20px; font-weight:600;">✳</span>
+              <span class="cmd" style="font-size:20px; font-weight:500;"> claude-hunt</span>
+              <div class="muted" style="margin-top:10px; font-size:12px;">Discover what the cohort is building.</div>
+            </div>
+          </div>
+
+          <div class="stage">
+            <span class="mono-wordmark"><span class="asterisk">✳</span>claude-hunt</span>
+          </div>
+
+          <div class="usages">
+            <div class="usage">
+              <div class="favicon-box">✳</div>
+              <small>favicon</small>
+            </div>
+            <div class="usage dark">
+              <div class="favicon-box dark">✳</div>
+              <small>dark mode</small>
+            </div>
+          </div>
+        </article>
+
+        <!-- =============================================== -->
+        <!-- B: Bracketed command style                       -->
+        <!-- =============================================== -->
+        <article class="card">
+          <div>
+            <div class="tag">Variant B</div>
+            <h2>[claude · hunt]</h2>
+          </div>
+          <p class="desc">
+            Square brackets frame the name like a shell prompt or a running process. The middot replaces the hyphen for a lighter typographic feel.
+          </p>
+
+          <div class="term">
+            <div class="term-bar">
+              <span class="dot r"></span><span class="dot y"></span><span class="dot g"></span>
+              <span class="term-title">~</span>
+            </div>
+            <div class="term-body">
+              <span class="muted">$</span>
+              <span class="accent" style="font-size:20px; font-weight:600;"> [</span><span class="cmd" style="font-size:20px; font-weight:500;">claude</span><span class="accent" style="font-size:20px;"> · </span><span class="cmd" style="font-size:20px; font-weight:500;">hunt</span><span class="accent" style="font-size:20px; font-weight:600;">]</span>
+            </div>
+          </div>
+
+          <div class="stage">
+            <span class="mono-wordmark">
+              <span class="asterisk">[</span>claude <span class="asterisk">·</span> hunt<span class="asterisk">]</span>
+            </span>
+          </div>
+
+          <div class="usages">
+            <div class="usage">
+              <div class="favicon-box" style="font-size:14px; letter-spacing:-0.05em;">[·]</div>
+              <small>favicon</small>
+            </div>
+            <div class="usage dark">
+              <div class="favicon-box dark" style="font-size:14px; letter-spacing:-0.05em;">[·]</div>
+              <small>dark mode</small>
+            </div>
+          </div>
+        </article>
+
+        <!-- =============================================== -->
+        <!-- C: ASCII-art banner                              -->
+        <!-- =============================================== -->
+        <article class="card">
+          <div>
+            <div class="tag">Variant C</div>
+            <h2>ASCII banner</h2>
+          </div>
+          <p class="desc">
+            A filled ASCII banner in the style of Claude Code's startup screen. Great for landing hero and an on-boot splash; reduces to the asterisk mark at small sizes.
+          </p>
+
+          <div class="term">
+            <div class="term-bar">
+              <span class="dot r"></span><span class="dot y"></span><span class="dot g"></span>
+              <span class="term-title">claude-hunt · v0.1.0</span>
+            </div>
+            <div class="term-body">
+<pre>
+ ██████ ██       █████  ██    ██ ██████  ███████
+██      ██      ██   ██ ██    ██ ██   ██ ██
+██      ██      ███████ ██    ██ ██   ██ █████
+██      ██      ██   ██ ██    ██ ██   ██ ██
+ ██████ ███████ ██   ██  ██████  ██████  ███████
+
+██   ██ ██    ██ ███    ██ ████████
+██   ██ ██    ██ ████   ██    ██
+███████ ██    ██ ██ ██  ██    ██
+██   ██ ██    ██ ██  ██ ██    ██
+██   ██  ██████  ██   ████    ██
+</pre>
+              <div class="muted" style="margin-top:12px; font-size:12px;">
+                <span class="accent">✳</span> ready &nbsp;·&nbsp; type <span class="cmd">/help</span> for commands
+              </div>
+            </div>
+          </div>
+
+          <div class="usages">
+            <div class="usage">
+              <div class="favicon-box filled">✳</div>
+              <small>compact favicon</small>
+            </div>
+            <div class="usage dark">
+              <div class="favicon-box dark">✳</div>
+              <small>dark mode</small>
+            </div>
+          </div>
+        </article>
+
+        <!-- =============================================== -->
+        <!-- D: Prompt caret style                            -->
+        <!-- =============================================== -->
+        <article class="card">
+          <div>
+            <div class="tag">Variant D</div>
+            <h2>&gt; claude-hunt_</h2>
+          </div>
+          <p class="desc">
+            A prompt caret (<code>&gt;</code>) and a blinking underscore cursor — literal CLI feel. Communicates "you're at the prompt; the hunt starts here."
+          </p>
+
+          <style>
+            @keyframes blink { 0%, 49% { opacity: 1; } 50%, 100% { opacity: 0; } }
+            .caret { color: var(--terracotta); animation: blink 1s steps(1) infinite; }
+          </style>
+
+          <div class="term">
+            <div class="term-bar">
+              <span class="dot r"></span><span class="dot y"></span><span class="dot g"></span>
+              <span class="term-title">~</span>
+            </div>
+            <div class="term-body">
+              <span class="accent" style="font-size:20px; font-weight:600;">&gt;</span>
+              <span class="cmd" style="font-size:20px; font-weight:500;"> claude-hunt</span><span class="caret" style="font-size:20px;">_</span>
+              <div class="muted" style="margin-top:10px; font-size:12px;">Press <span class="cmd">Enter</span> to browse projects.</div>
+            </div>
+          </div>
+
+          <div class="stage">
+            <span class="mono-wordmark">
+              <span class="asterisk">&gt;</span> claude-hunt<span class="caret">_</span>
+            </span>
+          </div>
+
+          <div class="usages">
+            <div class="usage">
+              <div class="favicon-box" style="font-size:16px;">&gt;_</div>
+              <small>favicon</small>
+            </div>
+            <div class="usage dark">
+              <div class="favicon-box dark" style="font-size:16px;">&gt;_</div>
+              <small>dark mode</small>
+            </div>
+          </div>
+        </article>
+
+      </section>
+    </div>
+  </body>
+</html>

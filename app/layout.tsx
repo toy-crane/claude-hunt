@@ -1,9 +1,29 @@
+import type { Metadata } from "next";
 import { Geist_Mono, Noto_Sans } from "next/font/google";
 
 import "./globals.css";
 import { ThemeProvider } from "@core/providers/theme-provider.tsx";
 import { cn } from "@shared/lib/utils.ts";
 import { Toaster } from "@shared/ui/sonner.tsx";
+
+export const metadata: Metadata = {
+  title: {
+    default: "claude-hunt",
+    template: "%s · claude-hunt",
+  },
+  description: "Discover what the cohort is building.",
+  openGraph: {
+    title: "claude-hunt",
+    description: "Discover what the cohort is building.",
+    type: "website",
+    siteName: "claude-hunt",
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: "claude-hunt",
+    description: "Discover what the cohort is building.",
+  },
+};
 
 const notoSans = Noto_Sans({ subsets: ["latin"], variable: "--font-sans" });
 
