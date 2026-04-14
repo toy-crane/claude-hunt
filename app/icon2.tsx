@@ -19,6 +19,7 @@ export function IconElement(): React.ReactElement {
         background: INK,
         width: "100%",
         height: "100%",
+        borderRadius: 3,
         display: "flex",
         alignItems: "center",
         justifyContent: "center",
