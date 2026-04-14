@@ -21,7 +21,18 @@ vi.mock("next/link", () => ({
   ),
 }));
 
-const mockClient = createMockSupabaseClient();
+const profileSingle = vi.fn().mockResolvedValue({ data: null, error: null });
+
+const mockClient = {
+  ...createMockSupabaseClient(),
+  from: vi.fn().mockReturnValue({
+    select: vi.fn().mockReturnValue({
+      eq: vi.fn().mockReturnValue({
+        single: profileSingle,
+      }),
+    }),
+  }),
+};
 
 vi.mock("@shared/api/supabase/server", () => ({
   createClient: vi.fn().mockResolvedValue(mockClient),
@@ -68,5 +79,45 @@ describe("<Header />", () => {
     expect(
       screen.queryByRole("button", { name: ACCOUNT_MENU_LABEL })
     ).not.toBeInTheDocument();
+  });
+
+  it("renders the avatar menu and omits the Log in button when signed in", async () => {
+    vi.mocked(mockClient.auth.getUser).mockResolvedValueOnce({
+      data: { user: { id: "user-1" } },
+      error: null,
+    });
+    profileSingle.mockResolvedValueOnce({
+      data: { display_name: "Alice", avatar_url: null },
+      error: null,
+    });
+
+    const { Header } = await import("./header.tsx");
+    const jsx = await Header();
+    render(jsx);
+
+    expect(
+      screen.getByRole("button", { name: ACCOUNT_MENU_LABEL })
+    ).toBeInTheDocument();
+    expect(
+      screen.queryByRole("link", { name: LOGIN_LABEL })
+    ).not.toBeInTheDocument();
+  });
+
+  it("shows the first character of the display name inside the avatar fallback", async () => {
+    vi.mocked(mockClient.auth.getUser).mockResolvedValueOnce({
+      data: { user: { id: "user-1" } },
+      error: null,
+    });
+    profileSingle.mockResolvedValueOnce({
+      data: { display_name: "Alice", avatar_url: null },
+      error: null,
+    });
+
+    const { Header } = await import("./header.tsx");
+    const jsx = await Header();
+    render(jsx);
+
+    const fallback = screen.getByTestId("header-avatar-fallback");
+    expect(fallback).toHaveTextContent("A");
   });
 });
