@@ -1,4 +1,4 @@
-# Micro-Hunt Execution Decisions
+# Project Board Execution Decisions
 
 Running log of Team Lead judgment calls during `/execute-plan`. See
 `.claude/skills/execute-plan/references/decisions-template.md` for format.
@@ -9,7 +9,7 @@ Running log of Team Lead judgment calls during `/execute-plan`. See
 
 **When**: Step 2
 **Decision**: Use `ui-quality-reviewer`, `design-reviewer`, and `react-reviewer`. Skip `wireframe-reviewer`.
-**Why**: No `wireframe.html` exists in `artifacts/micro-hunt/`, so wireframe-vs-impl comparison is not applicable. The plan has heavy UI work (Tasks 5, 6, 7, 9, 10, 11) composed of shadcn components inside React Server Components + client islands, so the other three reviewers all apply.
+**Why**: No `wireframe.html` exists in `artifacts/project-board/`, so wireframe-vs-impl comparison is not applicable. The plan has heavy UI work (Tasks 5, 6, 7, 9, 10, 11) composed of shadcn components inside React Server Components + client islands, so the other three reviewers all apply.
 **Harness Signal**: N/A — the rule in `SKILL.md` Step 2 already captures this ("when wireframe.html exists" / "when UI present" / "when UI components present" / "when React/Next.js present").
 **Result**: Success — all three reviewers delivered actionable findings; no reviewer was a false positive.
 
@@ -86,17 +86,17 @@ No reordering was needed; the plan's ordering is already dependency-correct.
 **Decision**: Ship the E2E as a single-student flow (sign in → submit with a real screenshot → edit tagline → delete) instead of the originally-specified two-student flow with upvoting.
 **Why**: A second browser context + parallel magic-link flow roughly doubles the spec's complexity and flakiness for the marginal value of covering the upvote scenario once more — which is already covered by `toggle-vote/api/actions.test.ts` against a mocked supabase client and by the self-vote trigger tests against the real DB. Keeping the E2E focused on the cross-stack flow most likely to regress (form → storage upload → RLS insert → revalidation → UI) gets us a green baseline and leaves room to add a voting smoke test later if a regression appears.
 **Harness Signal**: `draft-plan` could distinguish "cross-stack smoke" from "multi-actor" E2E scenarios and recommend a single-actor minimum as the baseline; multi-actor flows graduate to a separate spec only when a unit/integration gap exists.
-**Result**: Success — `bun run test:e2e` green (2 specs: auth + micro-hunt).
+**Result**: Success — `bun run test:e2e` green (2 specs: auth + project-board).
 
 ---
 
-## Task 12: replaced auth spec's email assertion with Micro-Hunt landing
+## Task 12: replaced auth spec's email assertion with Project Board landing
 
 **When**: Step 4, Task 12, existing `e2e/auth/signup-to-main.spec.ts` regressed
-**Decision**: Update the post-magic-link assertion from "email is visible on page" to "Micro-Hunt heading + submit-form cohort warning are visible".
-**Why**: Task 5 replaced `app/page.tsx`'s scaffold welcome (which rendered the signed-in user's email) with the Micro-Hunt grid. The old assertion was about proving auth succeeded; the new assertion does the same by checking the landing header + the cohort warning banner that only renders for signed-in users.
+**Decision**: Update the post-magic-link assertion from "email is visible on page" to "Project Board heading + submit-form cohort warning are visible".
+**Why**: Task 5 replaced `app/page.tsx`'s scaffold welcome (which rendered the signed-in user's email) with the Project Board grid. The old assertion was about proving auth succeeded; the new assertion does the same by checking the landing header + the cohort warning banner that only renders for signed-in users.
 **Harness Signal**: N/A — routine spec maintenance when a page is restructured.
-**Result**: Success — auth spec passes alongside the micro-hunt spec.
+**Result**: Success — auth spec passes alongside the project-board spec.
 
 ---
 

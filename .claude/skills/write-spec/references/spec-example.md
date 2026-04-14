@@ -1,5 +1,5 @@
 ## Overview
-Allow users to submit their own project to Micro-Hunt so other users can discover and upvote it.
+Allow users to submit their own project to Project Board so other users can discover and upvote it.
 
 ## Scope
 

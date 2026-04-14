@@ -1,4 +1,4 @@
-# Micro-Hunt: Cohort Project Showcase
+# Project Board: Cohort Project Showcase
 
 ## Problem Statement
 

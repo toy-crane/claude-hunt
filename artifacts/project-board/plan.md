@@ -1,4 +1,4 @@
-# Micro-Hunt Implementation Plan
+# Project Board Implementation Plan
 
 ## Architecture Decisions
 
@@ -139,7 +139,7 @@
 | `features/toggle-vote/ui/vote-button.tsx` | New | 11 |
 | `features/toggle-vote/ui/vote-button.test.tsx` | New | 11 |
 | `features/toggle-vote/index.ts` | New | 11 |
-| `e2e/micro-hunt.spec.ts` | New | 12 |
+| `e2e/project-board.spec.ts` | New | 12 |
 
 ## Tasks
 
@@ -390,7 +390,7 @@ Split into 8a and 8b — two independent hardening slices, both small.
 ### Checkpoint: After Tasks 7–8
 - [x] `bun run test` green
 - [x] `bun run build` succeeds
-- [x] A cohort-assigned student can submit a project from the UI and it appears in the grid; cohort-less student sees the blocked state (verified end-to-end in e2e/micro-hunt.spec.ts)
+- [x] A cohort-assigned student can submit a project from the UI and it appears in the grid; cohort-less student sees the blocked state (verified end-to-end in e2e/project-board.spec.ts)
 
 ---
 
@@ -448,7 +448,7 @@ Split into 8a and 8b — two independent hardening slices, both small.
 ### Checkpoint: After Tasks 9–10
 - [x] `bun run test` green
 - [x] `bun run build` succeeds
-- [x] Owner can edit + delete their own project end-to-end (verified in e2e/micro-hunt.spec.ts)
+- [x] Owner can edit + delete their own project end-to-end (verified in e2e/project-board.spec.ts)
 
 ---
 
@@ -488,11 +488,11 @@ Split into 8a and 8b — two independent hardening slices, both small.
   - `browser-testing-with-devtools`
   - `e2e/helpers/*` (existing Supabase + mailpit helpers)
 - **Implementation targets**:
-  - `e2e/micro-hunt.spec.ts` — sign in two cohort-A students, student A submits a project with a real screenshot, student B upvotes, student A edits and then deletes; grid reflects each step
+  - `e2e/project-board.spec.ts` — sign in two cohort-A students, student A submits a project with a real screenshot, student B upvotes, student A edits and then deletes; grid reflects each step
 - **Acceptance**:
   - [x] Playwright run passes locally against `supabase start`
   - [x] Screenshots/artifacts generated on failure (Playwright default)
-  - Scope narrowed to a single-student flow; see artifacts/micro-hunt/decisions.md
+  - Scope narrowed to a single-student flow; see artifacts/project-board/decisions.md
 - **Verification**:
   - `bun run test:e2e`
 
