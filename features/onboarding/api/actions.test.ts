@@ -26,7 +26,9 @@ const validInput = {
   cohortId: COHORT_UUID,
 };
 
-function stubProfileUpsert(options: { upsertError?: { message: string } }) {
+function stubProfileUpsert(options: {
+  upsertError?: { code?: string; message: string };
+}) {
   const upsert = vi.fn().mockResolvedValue({
     data: null,
     error: options.upsertError ?? null,
@@ -142,5 +144,41 @@ describe("completeOnboarding server action", () => {
 
     expect(result.ok).toBe(false);
     expect(result.error).toBe("permission denied");
+  });
+
+  it("maps the display-name unique violation to 'already taken'", async () => {
+    getUser.mockResolvedValue({
+      data: { user: { id: "u1", email: "u1@example.com" } },
+      error: null,
+    });
+    stubProfileUpsert({
+      upsertError: {
+        code: "23505",
+        message:
+          'duplicate key value violates unique constraint "profiles_display_name_ci_unique"',
+      },
+    });
+
+    const result = await completeOnboarding(validInput);
+
+    expect(result.ok).toBe(false);
+    expect(result.error).toBe("That display name is already taken");
+  });
+
+  it("does NOT remap unrelated 23505 errors (other unique constraints pass through)", async () => {
+    getUser.mockResolvedValue({
+      data: { user: { id: "u1", email: "u1@example.com" } },
+      error: null,
+    });
+    const rawMessage =
+      'duplicate key value violates unique constraint "some_other_unique"';
+    stubProfileUpsert({
+      upsertError: { code: "23505", message: rawMessage },
+    });
+
+    const result = await completeOnboarding(validInput);
+
+    expect(result.ok).toBe(false);
+    expect(result.error).toBe(rawMessage);
   });
 });
