@@ -22,7 +22,7 @@ export function AuthLayout({ title, description, children }: AuthLayoutProps) {
     <section className="flex min-h-screen items-center justify-center bg-zinc-50 px-4 py-16 md:py-32 dark:bg-transparent">
       <div className="w-full max-w-sm">
         <div>
-          <Logo blink className="text-4xl" />
+          <Logo blink className="text-3xl" />
           <h1 className="mt-8 font-semibold text-2xl tracking-tight">
             {title}
           </h1>
