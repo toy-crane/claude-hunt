@@ -4,6 +4,7 @@ import { EditDialog } from "@features/edit-project/index.ts";
 import { SubmitDialog } from "@features/submit-project/index.ts";
 import { VoteButton } from "@features/toggle-vote/index.ts";
 import { createClient } from "@shared/api/supabase/server.ts";
+import { Header } from "@widgets/header/index.ts";
 import { fetchProjects, ProjectGrid } from "@widgets/project-grid/index.ts";
 import { Suspense } from "react";
 
@@ -48,65 +49,68 @@ export default async function Page({ searchParams }: PageProps) {
       .publicUrl;
 
   return (
-    <main className="mx-auto flex min-h-svh w-full max-w-6xl flex-col gap-8 p-6">
-      <header className="flex flex-wrap items-end justify-between gap-4">
-        <div className="flex flex-col gap-2">
-          <h1 className="font-heading font-medium text-2xl">Project Board</h1>
-          <p className="text-muted-foreground text-sm">
-            Projects built by cohort students. Upvote your favourites.
-          </p>
-        </div>
-        <div className="flex items-center gap-2">
-          <span aria-hidden="true" className="text-muted-foreground text-xs">
-            Filter by cohort
-          </span>
-          <Suspense fallback={null}>
-            <CohortDropdown
-              cohorts={cohorts}
-              selectedCohortId={selectedCohortId}
+    <>
+      <Header />
+      <main className="mx-auto flex min-h-svh w-full max-w-6xl flex-col gap-8 p-6">
+        <header className="flex flex-wrap items-end justify-between gap-4">
+          <div className="flex flex-col gap-2">
+            <h1 className="font-heading font-medium text-2xl">Project Board</h1>
+            <p className="text-muted-foreground text-sm">
+              Projects built by cohort students. Upvote your favourites.
+            </p>
+          </div>
+          <div className="flex items-center gap-2">
+            <span aria-hidden="true" className="text-muted-foreground text-xs">
+              Filter by cohort
+            </span>
+            <Suspense fallback={null}>
+              <CohortDropdown
+                cohorts={cohorts}
+                selectedCohortId={selectedCohortId}
+              />
+            </Suspense>
+            <SubmitDialog
+              cohortId={viewerCohortId}
+              isAuthenticated={Boolean(user)}
             />
-          </Suspense>
-          <SubmitDialog
-            cohortId={viewerCohortId}
-            isAuthenticated={Boolean(user)}
-          />
-        </div>
-      </header>
+          </div>
+        </header>
 
-      <ProjectGrid
-        projects={projects}
-        renderOwnerActions={(project) => (
-          <>
-            <EditDialog
-              project={{
-                id: project.id ?? "",
-                title: project.title ?? "",
-                tagline: project.tagline ?? "",
-                project_url: project.project_url ?? "",
-              }}
-            />
-            <DeleteButton
+        <ProjectGrid
+          projects={projects}
+          renderOwnerActions={(project) => (
+            <>
+              <EditDialog
+                project={{
+                  id: project.id ?? "",
+                  title: project.title ?? "",
+                  tagline: project.tagline ?? "",
+                  project_url: project.project_url ?? "",
+                }}
+              />
+              <DeleteButton
+                projectId={project.id ?? ""}
+                projectTitle={project.title ?? ""}
+              />
+            </>
+          )}
+          renderVoteButton={(project) => (
+            <VoteButton
+              alreadyVoted={
+                "viewer_has_voted" in project
+                  ? Boolean(project.viewer_has_voted)
+                  : false
+              }
+              isAuthenticated={Boolean(user)}
+              ownedByViewer={user?.id != null && project.user_id === user.id}
               projectId={project.id ?? ""}
-              projectTitle={project.title ?? ""}
+              voteCount={project.vote_count ?? 0}
             />
-          </>
-        )}
-        renderVoteButton={(project) => (
-          <VoteButton
-            alreadyVoted={
-              "viewer_has_voted" in project
-                ? Boolean(project.viewer_has_voted)
-                : false
-            }
-            isAuthenticated={Boolean(user)}
-            ownedByViewer={user?.id != null && project.user_id === user.id}
-            projectId={project.id ?? ""}
-            voteCount={project.vote_count ?? 0}
-          />
-        )}
-        resolveScreenshotUrl={resolveScreenshotUrl}
-        viewerUserId={user?.id ?? null}
-      />
-    </main>
+          )}
+          resolveScreenshotUrl={resolveScreenshotUrl}
+          viewerUserId={user?.id ?? null}
+        />
+      </main>
+    </>
   );
 }
