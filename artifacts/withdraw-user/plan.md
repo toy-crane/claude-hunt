@@ -156,7 +156,7 @@ Storage bucket `project-screenshots` is **not** cascade-linked; screenshots for 
 
 ---
 
-### Task 4: End-to-end verification of withdrawal (real Supabase)
+### Task 4: End-to-end verification of withdrawal (real Supabase) ✅ (spec authored, run deferred — see decisions.md)
 
 - **Covers**: Scenario 2 (remaining end-to-end acceptance); Scenario 5 (full-stack redirect verification)
 - **Size**: S (1 file)

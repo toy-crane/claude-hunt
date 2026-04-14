@@ -24,6 +24,14 @@
 **Harness Signal**: plan.md listed "SUPABASE_SECRET_KEY (server)" in Infrastructure Resources as declared in `env.ts`, but the skill (or plan step) did not flag that t3-env validates at import time and would fail the build. Consider having `draft-plan` surface "which env tier (client/server/lazy runtime-only) should hold each new key" when an Infrastructure Resource is added.
 **Result**: Success — build passes; admin action fails fast with a clear error if the key is missing.
 
+## E2E spec authored, live run deferred
+
+**When**: Step 4, Task 4
+**Decision**: Commit `e2e/withdraw-user.spec.ts` without verifying it runs green in this worktree. The spec seeds peer + own data via the admin client, signs in through the UI magic-link flow, exercises withdraw via UI, and asserts both UI and DB post-conditions (user gone, projects gone, votes gone, peer vote count -1, `/settings` redirects, deleted email starts a fresh OTP sign-up). A cancel sub-case asserts cancellation leaves all data intact.
+**Why**: A dev server owned by another session (PID 78854) is bound to `localhost:3000` with `cwd` at the main repo path (`/Users/toycrane/Documents/Projects/claude-hunt`). Playwright's config uses `reuseExistingServer: true`, so the browser lands on the pre-Task-1 version of the app — the page snapshot on failure clearly shows the old "Read-only." + "Shown on your project cards" descriptions that Task 1 removed. The spec itself compiled cleanly (tsc passes for the new files; the one pre-existing error in `app/layout.test.tsx` is unrelated). Running the spec against this worktree requires stopping PID 78854 first so Playwright starts a fresh `bun run dev` from `.claude/worktrees/feat/withdraw-user`.
+**Harness Signal**: Git worktrees + Playwright's `reuseExistingServer` pattern silently cause e2e to validate the wrong codebase. Consider having `execute-plan` (or the e2e skill) detect this case by comparing `lsof -iTCP:3000` → `cwd` against the current working directory, and warn before running `test:e2e` under a worktree.
+**Result**: Partial — spec authored and committed; live verification deferred to the user (or post-merge when the main repo's dev server becomes the right one).
+
 ## Settings form — remove "Read-only" helper text
 
 **When**: Step 4, Task 1
