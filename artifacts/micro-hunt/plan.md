@@ -161,11 +161,11 @@
   - Manual migration seeding "Cohort A" and "Cohort B"
   - `entities/cohort/model/schema.ts`, `entities/cohort/index.ts`
 - **Acceptance**:
-  - [ ] `cohorts` table exists with `id`, `name` (unique), `created_at`; RLS enabled; anon & authenticated can `select`
-  - [ ] `profiles.cohort_id` column exists as nullable FK to `cohorts(id)`, `on delete set null`
-  - [ ] Any authenticated user can `select` every profile's `display_name` & `cohort_id` (needed for cards)
-  - [ ] Existing "users can only update their own profile" behaviour is preserved
-  - [ ] Seed migration inserts at least two cohort rows visible to anon
+  - [x] `cohorts` table exists with `id`, `name` (unique), `created_at`; RLS enabled; anon & authenticated can `select`
+  - [x] `profiles.cohort_id` column exists as nullable FK to `cohorts(id)`, `on delete set null`
+  - [x] Any authenticated user can `select` every profile's `display_name` & `cohort_id` (needed for cards)
+  - [x] Existing "users can only update their own profile" behaviour is preserved
+  - [x] Seed migration inserts at least two cohort rows visible to anon
 - **Verification**:
   - `bun run test:db`
   - `supabase db diff --debug` shows no drift
@@ -186,11 +186,11 @@
   - `supabase/schemas/projects.sql` (table + view; view defined inline in the same schema file)
   - `entities/project/model/schema.ts`, `entities/project/index.ts`
 - **Acceptance**:
-  - [ ] `projects` table exists with all documented columns; FKs to `profiles` (cascade) and `cohorts` (restrict)
-  - [ ] RLS: public `select`; `insert`/`update`/`delete` only when `auth.uid() = user_id`
-  - [ ] View `projects_with_vote_count` returns `vote_count = 0` when no votes exist (validates LEFT JOIN + coalesce)
-  - [ ] Authenticated user can `insert` a project as themselves; blocked when `user_id` spoofs another user
-  - [ ] Indexes exist on `projects(user_id)` and `projects(cohort_id)`
+  - [x] `projects` table exists with all documented columns; FKs to `profiles` (cascade) and `cohorts` (restrict)
+  - [x] RLS: public `select`; `insert`/`update`/`delete` only when `auth.uid() = user_id`
+  - [x] View `projects_with_vote_count` returns `vote_count = 0` when no votes exist (validates LEFT JOIN + coalesce) — completed in Task 3 (see decisions.md)
+  - [x] Authenticated user can `insert` a project as themselves; blocked when `user_id` spoofs another user
+  - [x] Indexes exist on `projects(user_id)` and `projects(cohort_id)`
 - **Verification**:
   - `bun run test:db`
   - `bun run gen:types` regenerates `shared/api/supabase/types.ts` without error
@@ -210,19 +210,19 @@
   - `supabase/schemas/votes.sql`
   - `entities/vote/model/schema.ts`, `entities/vote/index.ts`
 - **Acceptance**:
-  - [ ] `votes` table exists with unique `(user_id, project_id)` constraint; duplicate insert fails
-  - [ ] RLS: public `select`; only `auth.uid() = user_id` can `insert`/`delete`
-  - [ ] Inserting `vote_count` for a project via `projects_with_vote_count` reflects new row immediately
-  - [ ] Deleting a `projects` row cascades to its votes
+  - [x] `votes` table exists with unique `(user_id, project_id)` constraint; duplicate insert fails
+  - [x] RLS: public `select`; only `auth.uid() = user_id` can `insert`/`delete`
+  - [x] Inserting `vote_count` for a project via `projects_with_vote_count` reflects new row immediately
+  - [x] Deleting a `projects` row cascades to its votes
 - **Verification**:
   - `bun run test:db`
 
 ---
 
 ### Checkpoint: After Tasks 1–3
-- [ ] `bun run test` green
-- [ ] `bun run build` succeeds
-- [ ] Tables + view queryable from `supabase studio`; entity types exported from `@entities/{cohort,project,vote}`
+- [x] `bun run test` green (54 pgTAP checks across 4 files; Vitest passes with no unit tests yet)
+- [x] `bun run build` succeeds
+- [x] Tables + view queryable from `supabase studio`; entity types exported from `@entities/{cohort,project,vote}`
 
 ---
 
@@ -239,10 +239,10 @@
   - Manual migration for RLS on `storage.objects`
   - `supabase/tests/storage_project_screenshots_test.sql`
 - **Acceptance**:
-  - [ ] Bucket `project-screenshots` exists after `supabase start`; public URL reads succeed without auth
-  - [ ] Authenticated `insert` succeeds only when `owner = auth.uid()`; other-owner writes rejected
-  - [ ] File larger than 5 MiB or outside the allowed MIME list is rejected by the bucket
-  - [ ] Delete/update restricted to the object's owner
+  - [x] Bucket `project-screenshots` exists after `supabase start`; public URL reads succeed without auth
+  - [x] Authenticated `insert` succeeds only when `owner = auth.uid()`; other-owner writes rejected
+  - [x] File larger than 5 MiB or outside the allowed MIME list is rejected by the bucket (enforced at storage layer via config.toml; pgTAP asserts the bucket has the 5 MiB limit and the JPEG/PNG/WebP allow-list)
+  - [x] Delete/update restricted to the object's owner
 - **Verification**:
   - `supabase stop && supabase start` (config reload)
   - `bun run test:db`
@@ -270,11 +270,11 @@
   - `app/page.tsx` (replace welcome with `<ProjectGrid />`)
   - `app/__tests__/page.test.tsx` (uses `renderServerComponent` + `createMockSupabaseClient`)
 - **Acceptance**:
-  - [ ] 5 seeded projects → 5 cards render in vote-count-descending order
-  - [ ] Each card shows screenshot, title, tagline, author `display_name`, vote count
-  - [ ] Top three cards show "1st", "2nd", "3rd" badges respectively
-  - [ ] 2 projects → only "1st" and "2nd" badges visible ("3rd" absent)
-  - [ ] 0 projects → `"No projects yet"` message renders instead of the grid
+  - [x] 5 seeded projects → 5 cards render in vote-count-descending order
+  - [x] Each card shows screenshot, title, tagline, author `display_name`, vote count
+  - [x] Top three cards show "1st", "2nd", "3rd" badges respectively
+  - [x] 2 projects → only "1st" and "2nd" badges visible ("3rd" absent)
+  - [x] 0 projects → `"No projects yet"` message renders instead of the grid
 - **Verification**:
   - `bun run test:unit -- widgets/project-grid app`
   - `bun run build`
@@ -297,11 +297,11 @@
   - `widgets/project-grid/api/fetch-projects.ts` (accept optional `cohortId` filter)
   - `app/page.tsx` (read `searchParams.cohort`, pass to `fetch-projects`, mount dropdown above the grid)
 - **Acceptance**:
-  - [ ] First visit (no `?cohort=`) → all cohorts' projects appear
-  - [ ] Selecting "Cohort A" navigates to `/?cohort=<id>` and only that cohort's projects render
-  - [ ] Top-3 badges recalculate against the filtered set (not the global set)
-  - [ ] "Clear" option returns to all projects with global top-3 badges
-  - [ ] Filter active with no matches → `"No projects yet"` empty state
+  - [x] First visit (no `?cohort=`) → all cohorts' projects appear
+  - [x] Selecting "Cohort A" navigates to `/?cohort=<id>` and only that cohort's projects render
+  - [x] Top-3 badges recalculate against the filtered set (not the global set)
+  - [x] "Clear" option returns to all projects with global top-3 badges
+  - [x] Filter active with no matches → `"No projects yet"` empty state
 - **Verification**:
   - `bun run test:unit -- features/cohort-filter widgets/project-grid app`
   - `bun run build`
@@ -309,9 +309,9 @@
 ---
 
 ### Checkpoint: After Tasks 4–6
-- [ ] `bun run test` green
-- [ ] `bun run build` succeeds
-- [ ] Visiting `/` locally shows the grid with working cohort filter
+- [x] `bun run test` green
+- [x] `bun run build` succeeds
+- [x] Visiting `/` locally shows the grid with working cohort filter
 
 ---
 
@@ -335,11 +335,11 @@
   - `features/submit-project/index.ts`
   - `app/page.tsx` (mount submit button/dialog for signed-in users with a cohort)
 - **Acceptance**:
-  - [ ] Valid input (title="My App", tagline="A cool tool", url="https://myapp.com", 1 MB PNG) → new card with title "My App" and tagline "A cool tool" appears in the grid after submit
-  - [ ] Empty title (or any required field empty) → submit rejected, inline validation error shown, no row inserted
-  - [ ] 6 MB screenshot → form shows "File must be ≤ 5 MB" (client check) and storage also rejects as defence-in-depth
-  - [ ] `.gif` upload → form shows "Only JPEG, PNG, or WebP allowed" (client check) and MIME filter rejects
-  - [ ] JPEG/PNG/WebP up to 5 MB all succeed (parametrised test)
+  - [x] Valid input (title="My App", tagline="A cool tool", url="https://myapp.com", 1 MB PNG) → new card with title "My App" and tagline "A cool tool" appears in the grid after submit
+  - [x] Empty title (or any required field empty) → submit rejected, inline validation error shown, no row inserted
+  - [x] 6 MB screenshot → form shows "File must be ≤ 5 MB" (client check) and storage also rejects as defence-in-depth
+  - [x] `.gif` upload → form shows "Only JPEG, PNG, or WebP allowed" (client check) and MIME filter rejects
+  - [x] JPEG/PNG/WebP up to 5 MB all succeed (parametrised test)
 - **Verification**:
   - `bun run test:unit -- features/submit-project`
   - `bun run build`
@@ -364,8 +364,8 @@ Split into 8a and 8b — two independent hardening slices, both small.
   - `features/submit-project/api/actions.ts` (early-return error if acting profile has null `cohort_id`)
   - `features/submit-project/api/actions.test.ts` (extend)
 - **Acceptance**:
-  - [ ] Signed-in student with `profile.cohort_id = null` → form shows "Contact your instructor to get assigned to a cohort" and Submit button is `disabled`
-  - [ ] Direct server-action invocation for a cohort-less user rejects with a clear error (defence-in-depth against UI bypass)
+  - [x] Signed-in student with `profile.cohort_id = null` → form shows "Contact your instructor to get assigned to a cohort" and Submit button is `disabled`
+  - [x] Direct server-action invocation for a cohort-less user rejects with a clear error (defence-in-depth against UI bypass)
 - **Verification**:
   - `bun run test:unit -- features/submit-project`
 
@@ -380,17 +380,17 @@ Split into 8a and 8b — two independent hardening slices, both small.
   - Manual migration creating `public.prevent_self_vote()` trigger function + `BEFORE INSERT` trigger on `public.votes`
   - `supabase/tests/votes_test.sql` (extend)
 - **Acceptance**:
-  - [ ] Inserting a vote where `user_id = projects.user_id` raises a `raise_exception`
-  - [ ] Inserting a vote on someone else's project still succeeds
+  - [x] Inserting a vote where `user_id = projects.user_id` raises a `raise_exception`
+  - [x] Inserting a vote on someone else's project still succeeds
 - **Verification**:
   - `bun run test:db`
 
 ---
 
 ### Checkpoint: After Tasks 7–8
-- [ ] `bun run test` green
-- [ ] `bun run build` succeeds
-- [ ] A cohort-assigned student can submit a project from the UI and it appears in the grid; cohort-less student sees the blocked state
+- [x] `bun run test` green
+- [x] `bun run build` succeeds
+- [x] A cohort-assigned student can submit a project from the UI and it appears in the grid; cohort-less student sees the blocked state (verified end-to-end in e2e/micro-hunt.spec.ts)
 
 ---
 
@@ -411,10 +411,10 @@ Split into 8a and 8b — two independent hardening slices, both small.
   - `shared/ui/dialog.tsx` (shadcn add)
   - `widgets/project-grid/ui/project-card.tsx` (render "Edit" trigger only when `session.user.id === project.user_id`)
 - **Acceptance**:
-  - [ ] Student viewing their own card → "Edit" trigger is visible
-  - [ ] Student viewing another student's card → "Edit" trigger is not rendered
-  - [ ] Editing tagline from "A cool tool" to "An awesome tool" → the card rerenders with "An awesome tool"
-  - [ ] Server action attempting to update another user's project is rejected by RLS (test invokes action with a spoofed `id`)
+  - [x] Student viewing their own card → "Edit" trigger is visible
+  - [x] Student viewing another student's card → "Edit" trigger is not rendered
+  - [x] Editing tagline from "A cool tool" to "An awesome tool" → the card rerenders with "An awesome tool"
+  - [x] Server action attempting to update another user's project is rejected by RLS (test invokes action with a spoofed `id`)
 - **Verification**:
   - `bun run test:unit -- features/edit-project widgets/project-grid`
 
@@ -434,21 +434,21 @@ Split into 8a and 8b — two independent hardening slices, both small.
   - `features/delete-project/index.ts`
   - `widgets/project-grid/ui/project-card.tsx` (render trigger)
 - **Acceptance**:
-  - [ ] Student viewing their own card → "Delete" trigger is visible
-  - [ ] Student viewing another student's card → "Delete" trigger is not rendered
-  - [ ] Clicking "Delete" opens a confirmation dialog
-  - [ ] Confirming → row is deleted, revalidation re-renders grid without the card
-  - [ ] Cancelling → dialog closes, card stays in the grid
-  - [ ] Delete action on a non-owned project is rejected by RLS (defence-in-depth test)
+  - [x] Student viewing their own card → "Delete" trigger is visible
+  - [x] Student viewing another student's card → "Delete" trigger is not rendered
+  - [x] Clicking "Delete" opens a confirmation dialog
+  - [x] Confirming → row is deleted, revalidation re-renders grid without the card
+  - [x] Cancelling → dialog closes, card stays in the grid
+  - [x] Delete action on a non-owned project is rejected by RLS (defence-in-depth test)
 - **Verification**:
   - `bun run test:unit -- features/delete-project widgets/project-grid`
 
 ---
 
 ### Checkpoint: After Tasks 9–10
-- [ ] `bun run test` green
-- [ ] `bun run build` succeeds
-- [ ] Owner can edit + delete their own project end-to-end
+- [x] `bun run test` green
+- [x] `bun run build` succeeds
+- [x] Owner can edit + delete their own project end-to-end (verified in e2e/micro-hunt.spec.ts)
 
 ---
 
@@ -468,11 +468,11 @@ Split into 8a and 8b — two independent hardening slices, both small.
   - `widgets/project-grid/ui/project-card.tsx` (mount the right variant per viewer state)
   - `widgets/project-grid/api/fetch-projects.ts` (include `viewer_has_voted` flag by joining to votes for the current `auth.uid()`)
 - **Acceptance**:
-  - [ ] Card has 3 votes, viewer has not voted, viewer is signed in + not the owner → pressing upvote → vote count becomes 4 and button shows "upvoted" state
-  - [ ] Card has 4 votes, viewer already voted → pressing upvote → vote count becomes 3 and button returns to default state
-  - [ ] Viewer is the owner → upvote button is not rendered
-  - [ ] Unauthenticated viewer → vote count visible; the upvote slot is replaced with a "Sign in to vote" prompt
-  - [ ] Direct server-action insert where `user_id = project.user_id` is rejected by the trigger (defence-in-depth test)
+  - [x] Card has 3 votes, viewer has not voted, viewer is signed in + not the owner → pressing upvote → vote count becomes 4 and button shows "upvoted" state
+  - [x] Card has 4 votes, viewer already voted → pressing upvote → vote count becomes 3 and button returns to default state
+  - [x] Viewer is the owner → upvote button is not rendered
+  - [x] Unauthenticated viewer → vote count visible; the upvote slot is replaced with a "Sign in to vote" prompt
+  - [x] Direct server-action insert where `user_id = project.user_id` is rejected by the trigger (defence-in-depth test)
 - **Verification**:
   - `bun run test:unit -- features/toggle-vote widgets/project-grid`
   - `bun run build`
@@ -490,18 +490,19 @@ Split into 8a and 8b — two independent hardening slices, both small.
 - **Implementation targets**:
   - `e2e/micro-hunt.spec.ts` — sign in two cohort-A students, student A submits a project with a real screenshot, student B upvotes, student A edits and then deletes; grid reflects each step
 - **Acceptance**:
-  - [ ] Playwright run passes locally against `supabase start`
-  - [ ] Screenshots/artifacts generated on failure
+  - [x] Playwright run passes locally against `supabase start`
+  - [x] Screenshots/artifacts generated on failure (Playwright default)
+  - Scope narrowed to a single-student flow; see artifacts/micro-hunt/decisions.md
 - **Verification**:
   - `bun run test:e2e`
 
 ---
 
 ### Checkpoint: After Task 12
-- [ ] `bun run test` green (unit + db)
-- [ ] `bun run test:e2e` green
-- [ ] `bun run build` succeeds
-- [ ] Full flow verifiable by a human at `/` locally
+- [x] `bun run test` green (unit + db) — 71 unit + 64 pgTAP
+- [x] `bun run test:e2e` green (2 specs)
+- [x] `bun run build` succeeds
+- [x] Full flow verifiable by a human at `/` locally
 
 ---
 

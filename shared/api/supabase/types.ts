@@ -34,9 +34,28 @@ export type Database = {
   }
   public: {
     Tables: {
+      cohorts: {
+        Row: {
+          created_at: string
+          id: string
+          name: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          name: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          name?: string
+        }
+        Relationships: []
+      }
       profiles: {
         Row: {
           avatar_url: string | null
+          cohort_id: string | null
           created_at: string
           display_name: string | null
           email: string
@@ -46,6 +65,7 @@ export type Database = {
         }
         Insert: {
           avatar_url?: string | null
+          cohort_id?: string | null
           created_at?: string
           display_name?: string | null
           email: string
@@ -55,6 +75,7 @@ export type Database = {
         }
         Update: {
           avatar_url?: string | null
+          cohort_id?: string | null
           created_at?: string
           display_name?: string | null
           email?: string
@@ -62,11 +83,145 @@ export type Database = {
           id?: string
           updated_at?: string
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "profiles_cohort_id_fkey"
+            columns: ["cohort_id"]
+            isOneToOne: false
+            referencedRelation: "cohorts"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      projects: {
+        Row: {
+          cohort_id: string
+          created_at: string
+          id: string
+          project_url: string
+          screenshot_path: string
+          tagline: string
+          title: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          cohort_id: string
+          created_at?: string
+          id?: string
+          project_url: string
+          screenshot_path: string
+          tagline: string
+          title: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          cohort_id?: string
+          created_at?: string
+          id?: string
+          project_url?: string
+          screenshot_path?: string
+          tagline?: string
+          title?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "projects_cohort_id_fkey"
+            columns: ["cohort_id"]
+            isOneToOne: false
+            referencedRelation: "cohorts"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "projects_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      votes: {
+        Row: {
+          created_at: string
+          id: string
+          project_id: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          project_id: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          project_id?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "votes_project_id_fkey"
+            columns: ["project_id"]
+            isOneToOne: false
+            referencedRelation: "projects"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "votes_project_id_fkey"
+            columns: ["project_id"]
+            isOneToOne: false
+            referencedRelation: "projects_with_vote_count"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "votes_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
       }
     }
     Views: {
-      [_ in never]: never
+      projects_with_vote_count: {
+        Row: {
+          author_avatar_url: string | null
+          author_display_name: string | null
+          cohort_id: string | null
+          cohort_name: string | null
+          created_at: string | null
+          id: string | null
+          project_url: string | null
+          screenshot_path: string | null
+          tagline: string | null
+          title: string | null
+          updated_at: string | null
+          user_id: string | null
+          vote_count: number | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "projects_cohort_id_fkey"
+            columns: ["cohort_id"]
+            isOneToOne: false
+            referencedRelation: "cohorts"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "projects_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
     }
     Functions: {
       [_ in never]: never

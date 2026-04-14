@@ -1,49 +1,117 @@
-import { signOut } from "@features/auth-login/index.ts";
+import { CohortDropdown, fetchCohorts } from "@features/cohort-filter/index.ts";
+import { DeleteButton } from "@features/delete-project/index.ts";
+import { EditDialog } from "@features/edit-project/index.ts";
+import { SubmitForm } from "@features/submit-project/index.ts";
+import { VoteButton } from "@features/toggle-vote/index.ts";
 import { createClient } from "@shared/api/supabase/server.ts";
-import { Button } from "@shared/ui/button.tsx";
-import Link from "next/link";
+import { fetchProjects, ProjectGrid } from "@widgets/project-grid/index.ts";
 
-export default async function Page() {
+interface PageProps {
+  searchParams: Promise<{ cohort?: string }>;
+}
+
+export default async function Page({ searchParams }: PageProps) {
+  const { cohort: cohortParam } = await searchParams;
+  const selectedCohortId = cohortParam ?? null;
+
   const supabase = await createClient();
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
-  const isLoggedIn = !!user;
+
+  // Stage 1: auth + cohorts in parallel (cohorts do not depend on the
+  // viewer; getUser returns quickly from the session cookie).
+  const [
+    {
+      data: { user },
+    },
+    cohorts,
+  ] = await Promise.all([supabase.auth.getUser(), fetchCohorts()]);
+
+  // Stage 2: projects (+ viewer's votes merged inside) and profile's
+  // cohort_id lookup in parallel. Both depend on `user`, neither on
+  // each other.
+  const [projects, profileResult] = await Promise.all([
+    fetchProjects({
+      cohortId: selectedCohortId,
+      viewerUserId: user?.id ?? null,
+    }),
+    user
+      ? supabase.from("profiles").select("cohort_id").eq("id", user.id).single()
+      : Promise.resolve({
+          data: null as { cohort_id: string | null } | null,
+          error: null,
+        }),
+  ]);
+  const viewerCohortId = profileResult.data?.cohort_id ?? null;
+
+  const resolveScreenshotUrl = (path: string) =>
+    supabase.storage.from("project-screenshots").getPublicUrl(path).data
+      .publicUrl;
 
   return (
-    <div className="flex min-h-svh p-6">
-      <div className="flex min-w-0 max-w-md flex-col gap-4 text-sm leading-loose">
-        <div>
-          <h1 className="font-medium">Project ready!</h1>
-          <p>You may now add components and start building.</p>
-          <p>We&apos;ve already added the button component for you.</p>
-          {isLoggedIn && user && (
-            <div className="mt-2 rounded-md border p-3">
-              <p className="text-muted-foreground text-xs">Signed in as</p>
-              <p className="font-medium">{user.email}</p>
-              <p className="text-muted-foreground text-xs capitalize">
-                via {user.app_metadata?.provider}
-              </p>
-            </div>
-          )}
-          <div className="mt-2 flex gap-2">
-            {isLoggedIn ? (
-              <form action={signOut}>
-                <Button type="submit" variant="outline">
-                  Sign out
-                </Button>
-              </form>
-            ) : (
-              <Button asChild>
-                <Link href="/login">Sign in</Link>
-              </Button>
-            )}
-          </div>
+    <main className="mx-auto flex min-h-svh w-full max-w-6xl flex-col gap-8 p-6">
+      <header className="flex flex-wrap items-end justify-between gap-4">
+        <div className="flex flex-col gap-2">
+          <h1 className="font-heading font-medium text-2xl">Micro-Hunt</h1>
+          <p className="text-muted-foreground text-sm">
+            Projects built by cohort students. Upvote your favourites.
+          </p>
         </div>
-        <div className="font-mono text-muted-foreground text-xs">
-          (Press <kbd>d</kbd> to toggle dark mode)
+        <div className="flex items-center gap-2">
+          <span aria-hidden="true" className="text-muted-foreground text-xs">
+            Filter by cohort
+          </span>
+          <CohortDropdown
+            cohorts={cohorts}
+            selectedCohortId={selectedCohortId}
+          />
         </div>
-      </div>
-    </div>
+      </header>
+
+      {user ? (
+        <section
+          aria-labelledby="submit-heading"
+          className="flex flex-col gap-4 rounded-md border p-6"
+        >
+          <h2 className="font-heading font-medium text-lg" id="submit-heading">
+            Submit a project
+          </h2>
+          <SubmitForm cohortId={viewerCohortId} />
+        </section>
+      ) : null}
+
+      <ProjectGrid
+        projects={projects}
+        renderOwnerActions={(project) => (
+          <>
+            <EditDialog
+              project={{
+                id: project.id ?? "",
+                title: project.title ?? "",
+                tagline: project.tagline ?? "",
+                project_url: project.project_url ?? "",
+              }}
+            />
+            <DeleteButton
+              projectId={project.id ?? ""}
+              projectTitle={project.title ?? ""}
+            />
+          </>
+        )}
+        renderVoteButton={(project) => (
+          <VoteButton
+            alreadyVoted={
+              "viewer_has_voted" in project
+                ? Boolean(project.viewer_has_voted)
+                : false
+            }
+            isAuthenticated={Boolean(user)}
+            ownedByViewer={user?.id != null && project.user_id === user.id}
+            projectId={project.id ?? ""}
+            voteCount={project.vote_count ?? 0}
+          />
+        )}
+        resolveScreenshotUrl={resolveScreenshotUrl}
+        viewerUserId={user?.id ?? null}
+      />
+    </main>
   );
 }

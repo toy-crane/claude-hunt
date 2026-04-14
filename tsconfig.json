@@ -23,6 +23,7 @@
     "paths": {
       "@core/*": ["./core/*"],
       "@features/*": ["./features/*"],
+      "@widgets/*": ["./widgets/*"],
       "@entities/*": ["./entities/*"],
       "@shared/*": ["./shared/*"]
     }

@@ -38,19 +38,23 @@ This creates a timestamped file in `supabase/migrations/` with the incremental S
 
 ## Schema File Ordering
 
-Schema files are applied in **lexicographic order** by default. This matters for foreign keys — the parent table must be created first.
+Schema files are applied in **lexicographic order** by default. This matters whenever one file depends on a table declared in another:
 
-For explicit ordering, declare paths in `config.toml`:
+- Foreign keys — the parent table must be created first.
+- **Views or functions** that reference tables defined in a different schema file. `supabase db diff` will fail with `relation "<schema>.<table>" does not exist` when the referencing file sorts before the referenced file.
+
+When any cross-file dependency exists, declare explicit paths in `config.toml` — do **not** rely on the default `./schemas/*.sql` glob:
 
 ```toml
 [db.migrations]
 schema_paths = [
   "./schemas/users.sql",
-  "./schemas/*.sql",
+  "./schemas/posts.sql",
+  "./schemas/posts_with_counts.sql",  # view — must apply after posts
 ]
 ```
 
-Glob patterns are evaluated, deduplicated, and sorted lexicographically.
+Glob patterns are evaluated, deduplicated, and sorted lexicographically, so a bare glob is only safe when every schema file is self-contained.
 
 ## Rolling Back
 
