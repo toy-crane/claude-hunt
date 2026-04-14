@@ -1,9 +1,7 @@
-import { signOut } from "@features/auth-login/index.ts";
 import { SettingsForm } from "@features/settings/index.ts";
 import { WithdrawDialog } from "@features/withdraw-user/index.ts";
-import { RiArrowLeftLine, RiLogoutBoxRLine } from "@remixicon/react";
+import { RiArrowLeftLine } from "@remixicon/react";
 import { fetchViewer } from "@shared/api/supabase/viewer.ts";
-import { Button } from "@shared/ui/button.tsx";
 import { Card, CardContent } from "@shared/ui/card.tsx";
 import type { Metadata } from "next";
 import Link from "next/link";
@@ -49,28 +47,6 @@ export default async function SettingsPage() {
               email={viewer.email}
               initialDisplayName={viewer.displayName ?? ""}
             />
-          </CardContent>
-        </Card>
-      </section>
-
-      <section
-        aria-labelledby="settings-account-heading"
-        className="flex flex-col gap-3"
-      >
-        <h2
-          className="px-1 font-medium text-muted-foreground text-xs"
-          id="settings-account-heading"
-        >
-          Account
-        </h2>
-        <Card>
-          <CardContent>
-            <form action={signOut}>
-              <Button type="submit" variant="outline">
-                <RiLogoutBoxRLine data-icon="inline-start" />
-                <span>Log out</span>
-              </Button>
-            </form>
           </CardContent>
         </Card>
       </section>
