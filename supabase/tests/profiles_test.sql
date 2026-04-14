@@ -7,7 +7,7 @@
 --   by the onboarding flow (feat/onboarding-process)
 
 BEGIN;
-SELECT plan(26);
+SELECT plan(31);
 
 -- 1. Table exists
 SELECT has_table('public', 'profiles', 'profiles table should exist');
@@ -228,6 +228,80 @@ SELECT cmp_ok(
   '<=',
   1::numeric,
   'Freshly inserted profile has updated_at within 1 second of created_at'
+);
+
+-- =========================================================================
+-- 27-31. display_name uniqueness (case-insensitive, trim-aware)
+-- =========================================================================
+-- These tests rely on a unique functional index
+-- `profiles_display_name_ci_unique` on `lower(btrim(display_name))`.
+
+-- 27. The unique index exists on public.profiles
+RESET role;
+SELECT has_index(
+  'public', 'profiles', 'profiles_display_name_ci_unique',
+  'profiles should have a case-insensitive unique index on display_name'
+);
+
+-- Seed two fresh users; the handle_new_user trigger auto-creates profiles
+-- rows with display_name = NULL (see test #15).
+INSERT INTO auth.users (id, email, raw_user_meta_data, raw_app_meta_data, aud, role, instance_id, created_at, updated_at)
+VALUES
+  ('00000000-0000-0000-0000-000000000050',
+    'unique-a@example.com',
+    '{}'::jsonb,
+    '{"provider": "email"}'::jsonb,
+    'authenticated',
+    'authenticated',
+    '00000000-0000-0000-0000-000000000000',
+    now(),
+    now()
+  ),
+  ('00000000-0000-0000-0000-000000000051',
+    'unique-b@example.com',
+    '{}'::jsonb,
+    '{"provider": "email"}'::jsonb,
+    'authenticated',
+    'authenticated',
+    '00000000-0000-0000-0000-000000000000',
+    now(),
+    now()
+  );
+
+-- User A claims 'Alice' (this is the reference value the next two tests try to collide with)
+UPDATE public.profiles
+  SET display_name = 'Alice'
+  WHERE id = '00000000-0000-0000-0000-000000000050';
+
+-- 28. Case-variant of an existing name is rejected
+SELECT throws_ok(
+  $$UPDATE public.profiles SET display_name = 'alice' WHERE id = '00000000-0000-0000-0000-000000000051'$$,
+  '23505',
+  NULL,
+  'Case-variant of an existing display_name should violate the unique index'
+);
+
+-- 29. Whitespace-padded variant is rejected (proves the btrim() half of the rule)
+SELECT throws_ok(
+  $$UPDATE public.profiles SET display_name = '  Alice  ' WHERE id = '00000000-0000-0000-0000-000000000051'$$,
+  '23505',
+  NULL,
+  'Whitespace-padded variant should violate the unique index after btrim'
+);
+
+-- 30. Multiple NULL display_names coexist (NULLs are distinct under a unique index)
+SELECT cmp_ok(
+  (SELECT count(*)::int FROM public.profiles WHERE display_name IS NULL),
+  '>=',
+  2,
+  'Multiple profiles with NULL display_name coexist under the unique index'
+);
+
+-- 31. Self-update to a case-variant of own current display_name succeeds
+--     (Scenario 4: saving your own name with different casing is not a conflict)
+SELECT lives_ok(
+  $$UPDATE public.profiles SET display_name = 'ALICE' WHERE id = '00000000-0000-0000-0000-000000000050'$$,
+  'User can update their own profile to a case-variant of its own current display_name'
 );
 
 SELECT * FROM finish();
