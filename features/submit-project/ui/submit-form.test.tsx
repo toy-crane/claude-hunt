@@ -128,6 +128,53 @@ describe("SubmitForm", () => {
     expect(onSuccess).not.toHaveBeenCalled();
   });
 
+  it("surfaces the decode-failure error without calling the server action", async () => {
+    uploadScreenshot.mockResolvedValue({
+      error: "Could not process this image. Try a different file.",
+    });
+
+    render(<SubmitForm cohortId="cohort-1" />);
+    await fillAndSubmit();
+
+    expect(
+      await screen.findByTestId("submit-form-field-error")
+    ).toHaveTextContent("Could not process this image. Try a different file.");
+    expect(submitProject).not.toHaveBeenCalled();
+  });
+
+  it("lets the user retry after a decode failure without a page refresh", async () => {
+    uploadScreenshot
+      .mockResolvedValueOnce({
+        error: "Could not process this image. Try a different file.",
+      })
+      .mockResolvedValueOnce({ path: "user-1/retry.webp" });
+    submitProject.mockResolvedValue({ ok: true, projectId: "p-retry" });
+
+    render(<SubmitForm cohortId="cohort-1" />);
+
+    await fillAndSubmit();
+    expect(
+      await screen.findByTestId("submit-form-field-error")
+    ).toHaveTextContent("Could not process this image");
+    expect(submitProject).not.toHaveBeenCalled();
+
+    const form = (screen.getByLabelText("Title") as HTMLInputElement).form;
+    if (!form) {
+      throw new Error("form not found");
+    }
+    fireEvent.submit(form);
+
+    await vi.waitFor(() => {
+      expect(submitProject).toHaveBeenCalledWith({
+        title: "My App",
+        tagline: "A cool tool",
+        projectUrl: "https://myapp.com",
+        screenshotPath: "user-1/retry.webp",
+      });
+    });
+    expect(uploadScreenshot).toHaveBeenCalledTimes(2);
+  });
+
   it("preserves title, tagline, and URL values after a size rejection", async () => {
     uploadScreenshot.mockResolvedValue({
       error: "File must be 25 MB or smaller",

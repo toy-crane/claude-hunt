@@ -1,4 +1,5 @@
 import { createClient } from "@shared/api/supabase/client.ts";
+import { downscaleImage } from "@shared/lib/image/index.ts";
 import { validateScreenshotFile } from "../api/schema.ts";
 
 export interface UploadScreenshotResult {
@@ -9,11 +10,16 @@ export interface UploadScreenshotResult {
 /**
  * Uploads a screenshot directly from the browser to the
  * `project-screenshots` bucket using the user's authenticated session.
- * Object path is `<user_id>/<uuid>.<ext>` so ownership is derivable and
- * collisions can't occur across users.
+ *
+ * Pipeline:
+ *   1. Client-side size + MIME validation (before decode).
+ *   2. Client-side downscale + re-encode to WebP (longest side ≤ 1920 px).
+ *   3. Storage upload under `<user_id>/<uuid>.webp` so ownership is
+ *      derivable and collisions can't occur across users.
  *
  * Returns the stored object path on success, or a user-facing error
- * message on failure (validation + storage errors both surface here).
+ * message on failure (validation, decode, or storage errors all
+ * surface here).
  */
 export async function uploadScreenshot(
   file: File
@@ -22,6 +28,12 @@ export async function uploadScreenshot(
   if (!check.ok) {
     return { error: check.error };
   }
+
+  const downscale = await downscaleImage(file);
+  if (!downscale.ok) {
+    return { error: downscale.error };
+  }
+  const outputFile = downscale.file;
 
   const supabase = createClient();
   const {
@@ -32,15 +44,12 @@ export async function uploadScreenshot(
     return { error: "You must be signed in to upload a screenshot" };
   }
 
-  const extension = file.name.includes(".")
-    ? file.name.slice(file.name.lastIndexOf("."))
-    : "";
-  const path = `${user.id}/${crypto.randomUUID()}${extension}`;
+  const path = `${user.id}/${crypto.randomUUID()}.webp`;
 
   const { error } = await supabase.storage
     .from("project-screenshots")
-    .upload(path, file, {
-      contentType: file.type,
+    .upload(path, outputFile, {
+      contentType: outputFile.type,
       upsert: false,
     });
 
