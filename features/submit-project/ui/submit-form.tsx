@@ -1,6 +1,5 @@
 "use client";
 
-import { Alert, AlertDescription, AlertTitle } from "@shared/ui/alert.tsx";
 import { Button } from "@shared/ui/button.tsx";
 import {
   Field,
@@ -18,9 +17,13 @@ import { uploadScreenshot } from "../lib/upload-screenshot.ts";
 
 export interface SubmitFormProps {
   /**
-   * `cohort_id` of the signed-in student's profile. `null` means they
-   * haven't been assigned yet — the form shows a guidance banner and
-   * disables submit.
+   * `cohort_id` of the signed-in student's profile. At runtime the
+   * onboarding gate (`proxy.ts` + `/onboarding` route) guarantees this
+   * is non-null for any user who reaches the form — but the prop type
+   * stays nullable because `SubmitDialog` passes `null` through in the
+   * unauthenticated branch (that branch never actually renders
+   * `<SubmitForm>`, but the type must still compile). The server
+   * action keeps its own defensive null-check.
    */
   cohortId: string | null;
   /**
@@ -31,7 +34,10 @@ export interface SubmitFormProps {
   onSuccess?: () => void;
 }
 
-export function SubmitForm({ cohortId, onSuccess }: SubmitFormProps) {
+export function SubmitForm({
+  cohortId: _cohortId,
+  onSuccess,
+}: SubmitFormProps) {
   const titleId = useId();
   const taglineId = useId();
   const urlId = useId();
@@ -39,16 +45,11 @@ export function SubmitForm({ cohortId, onSuccess }: SubmitFormProps) {
   const [fieldError, setFieldError] = useState<string | null>(null);
   const [submitError, setSubmitError] = useState<string | null>(null);
   const [submitting, setSubmitting] = useState(false);
-  const blocked = cohortId === null;
 
   async function handleSubmit(event: React.FormEvent<HTMLFormElement>) {
     event.preventDefault();
     setFieldError(null);
     setSubmitError(null);
-
-    if (blocked) {
-      return;
-    }
 
     const form = event.currentTarget;
     const elements = form.elements;
@@ -99,21 +100,11 @@ export function SubmitForm({ cohortId, onSuccess }: SubmitFormProps) {
       className="flex flex-col gap-4"
       onSubmit={handleSubmit}
     >
-      {blocked ? (
-        <Alert data-testid="submit-form-cohort-warning">
-          <AlertTitle>Cohort assignment needed</AlertTitle>
-          <AlertDescription>
-            Contact your instructor to get assigned to a cohort before
-            submitting a project.
-          </AlertDescription>
-        </Alert>
-      ) : null}
-
       <FieldGroup>
         <Field>
           <FieldLabel htmlFor={titleId}>Title</FieldLabel>
           <Input
-            disabled={blocked || submitting}
+            disabled={submitting}
             id={titleId}
             maxLength={MAX_TITLE_LENGTH}
             name="title"
@@ -125,7 +116,7 @@ export function SubmitForm({ cohortId, onSuccess }: SubmitFormProps) {
         <Field>
           <FieldLabel htmlFor={taglineId}>Tagline</FieldLabel>
           <Textarea
-            disabled={blocked || submitting}
+            disabled={submitting}
             id={taglineId}
             maxLength={MAX_TAGLINE_LENGTH}
             name="tagline"
@@ -138,7 +129,7 @@ export function SubmitForm({ cohortId, onSuccess }: SubmitFormProps) {
         <Field>
           <FieldLabel htmlFor={urlId}>Project URL</FieldLabel>
           <Input
-            disabled={blocked || submitting}
+            disabled={submitting}
             id={urlId}
             name="projectUrl"
             placeholder="https://myapp.com"
@@ -151,7 +142,7 @@ export function SubmitForm({ cohortId, onSuccess }: SubmitFormProps) {
           <FieldLabel htmlFor={screenshotId}>Screenshot</FieldLabel>
           <Input
             accept="image/jpeg,image/png,image/webp"
-            disabled={blocked || submitting}
+            disabled={submitting}
             id={screenshotId}
             name="screenshot"
             required
@@ -180,7 +171,7 @@ export function SubmitForm({ cohortId, onSuccess }: SubmitFormProps) {
         </p>
       ) : null}
 
-      <Button disabled={blocked || submitting} type="submit">
+      <Button disabled={submitting} type="submit">
         {submitting ? <Spinner data-icon="inline-start" /> : null}
         {submitting ? "Submitting..." : "Submit project"}
       </Button>

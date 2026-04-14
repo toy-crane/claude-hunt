@@ -58,13 +58,13 @@ Success Criteria:
 - [ ] Screenshot in any format other than JPEG, PNG, or WebP (e.g. .gif) → an error message about supported formats appears
 - [ ] Accepted screenshot formats: JPEG, PNG, WebP up to 5 MB
 
-### 4. Block submission for students without a cohort
-**Given** a signed-in student whose profile has no cohort assigned
-**When** the student opens the submission form
-**Then** the form is shown but the Submit action is unavailable, with guidance to contact the instructor
+### 4. Block submission for students without a cohort — OBSOLETE
 
-Success Criteria:
-- [ ] Profile has no cohort assignment → form displays "Contact your instructor to get assigned to a cohort" and the Submit button is disabled
+**Obsoleted by `artifacts/onboarding-process/spec.md` scenario 1 on
+2026-04-14.** A signed-in student without a cohort can no longer reach
+this page — the onboarding gate (middleware + `/onboarding` route)
+redirects them to complete onboarding first. The submission form no
+longer renders the "Contact your instructor" banner.
 
 ### 5. Manage own project (edit and delete)
 **Given** a signed-in student is viewing a project they submitted
