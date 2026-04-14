@@ -26,9 +26,7 @@ vi.mock("@supabase/ssr", () => ({
   createServerClient: vi.fn().mockReturnValue(mockClient),
 }));
 
-const { middleware, config, isOnboardingBypassPath } = await import(
-  "./middleware.ts"
-);
+const { proxy, config, isOnboardingBypassPath } = await import("./proxy.ts");
 
 function buildRequest(path: string) {
   return new NextRequest(new URL(path, "http://app.test"));
@@ -39,11 +37,11 @@ beforeEach(() => {
   profileSingle.mockReset();
 });
 
-describe("middleware — onboarding gate", () => {
+describe("proxy — onboarding gate", () => {
   it("passes through unauthenticated requests (public browsing allowed)", async () => {
     getUser.mockResolvedValue({ data: { user: null }, error: null });
 
-    const res = await middleware(buildRequest("/"));
+    const res = await proxy(buildRequest("/"));
 
     expect(res.headers.get("location")).toBeNull();
   });
@@ -55,7 +53,7 @@ describe("middleware — onboarding gate", () => {
       error: null,
     });
 
-    const res = await middleware(buildRequest("/"));
+    const res = await proxy(buildRequest("/"));
 
     expect(res.headers.get("location")).toBeNull();
   });
@@ -64,7 +62,7 @@ describe("middleware — onboarding gate", () => {
     getUser.mockResolvedValue({ data: { user: { id: "u1" } }, error: null });
     profileSingle.mockResolvedValue({ data: { cohort_id: null }, error: null });
 
-    const res = await middleware(buildRequest("/"));
+    const res = await proxy(buildRequest("/"));
 
     expect(res.headers.get("location")).toBe(
       "http://app.test/onboarding?next=%2F"
@@ -75,7 +73,7 @@ describe("middleware — onboarding gate", () => {
     getUser.mockResolvedValue({ data: { user: { id: "u1" } }, error: null });
     profileSingle.mockResolvedValue({ data: { cohort_id: null }, error: null });
 
-    const res = await middleware(buildRequest("/anything?x=1"));
+    const res = await proxy(buildRequest("/anything?x=1"));
 
     expect(res.headers.get("location")).toBe(
       "http://app.test/onboarding?next=%2Fanything%3Fx%3D1"
@@ -86,7 +84,7 @@ describe("middleware — onboarding gate", () => {
     getUser.mockResolvedValue({ data: { user: { id: "u1" } }, error: null });
     profileSingle.mockResolvedValue({ data: { cohort_id: null }, error: null });
 
-    const res = await middleware(buildRequest("/onboarding"));
+    const res = await proxy(buildRequest("/onboarding"));
 
     expect(res.headers.get("location")).toBeNull();
   });
@@ -95,7 +93,7 @@ describe("middleware — onboarding gate", () => {
     getUser.mockResolvedValue({ data: { user: { id: "u1" } }, error: null });
     profileSingle.mockResolvedValue({ data: { cohort_id: null }, error: null });
 
-    const res = await middleware(buildRequest("/login"));
+    const res = await proxy(buildRequest("/login"));
 
     expect(res.headers.get("location")).toBeNull();
   });
@@ -104,7 +102,7 @@ describe("middleware — onboarding gate", () => {
     getUser.mockResolvedValue({ data: { user: { id: "u1" } }, error: null });
     profileSingle.mockResolvedValue({ data: { cohort_id: null }, error: null });
 
-    const res = await middleware(buildRequest("/auth/callback?code=abc"));
+    const res = await proxy(buildRequest("/auth/callback?code=abc"));
 
     expect(res.headers.get("location")).toBeNull();
   });
@@ -114,7 +112,7 @@ describe("middleware — onboarding gate", () => {
     getUser.mockResolvedValue({ data: { user: { id: "u1" } }, error: null });
     profileSingle.mockResolvedValue({ data: { cohort_id: null }, error: null });
 
-    const res = await middleware(buildRequest("/"));
+    const res = await proxy(buildRequest("/"));
 
     expect(res.headers.get("location")).toBe(
       "http://app.test/onboarding?next=%2F"
@@ -127,7 +125,7 @@ describe("middleware — onboarding gate", () => {
 // matcher misconfiguration is caught without standing up Next.js.
 const MATCHER_RE = new RegExp(`^${config.matcher[0]}$`);
 
-describe("middleware matcher config", () => {
+describe("proxy matcher config", () => {
   it("matches regular app routes (so middleware runs)", () => {
     expect(MATCHER_RE.test("/")).toBe(true);
     expect(MATCHER_RE.test("/onboarding")).toBe(true);
