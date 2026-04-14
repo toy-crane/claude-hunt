@@ -8,50 +8,32 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@shared/ui/select";
-import { usePathname, useRouter, useSearchParams } from "next/navigation";
-import { useTransition } from "react";
 
 const ALL_COHORTS = "__all__";
 
 export interface CohortDropdownProps {
   cohorts: Cohort[];
-  selectedCohortId: string | null;
+  /** Called with the new cohort id, or null when "All cohorts" is selected. */
+  onValueChange: (cohortId: string | null) => void;
+  /** The currently selected cohort id, or null for "All cohorts". */
+  value: string | null;
 }
 
 /**
- * Client-side cohort filter. Reads/writes the `cohort` URL search param
- * so the filter state is shareable and survives reloads. The "All
- * cohorts" option clears the param entirely (natural default).
+ * Controlled cohort filter dropdown. State and URL sync are owned by the
+ * parent — this component only renders the selection UI and fires callbacks.
  */
 export function CohortDropdown({
   cohorts,
-  selectedCohortId,
+  value,
+  onValueChange,
 }: CohortDropdownProps) {
-  const router = useRouter();
-  const pathname = usePathname();
-  const searchParams = useSearchParams();
-  const [isPending, startTransition] = useTransition();
-
   const handleChange = (next: string) => {
-    const params = new URLSearchParams(searchParams?.toString() ?? "");
-    if (next === ALL_COHORTS) {
-      params.delete("cohort");
-    } else {
-      params.set("cohort", next);
-    }
-    const qs = params.toString();
-    const href = qs ? `${pathname}?${qs}` : pathname;
-    startTransition(() => {
-      router.replace(href);
-    });
+    onValueChange(next === ALL_COHORTS ? null : next);
   };
 
   return (
-    <Select
-      disabled={isPending}
-      onValueChange={handleChange}
-      value={selectedCohortId ?? ALL_COHORTS}
-    >
+    <Select onValueChange={handleChange} value={value ?? ALL_COHORTS}>
       <SelectTrigger
         aria-label="Filter by cohort"
         className="w-[200px]"

@@ -1,4 +1,4 @@
-import { fetchCohorts } from "@features/cohort-filter";
+import { fetchCohorts } from "@features/cohort-filter/server";
 import { OnboardingForm } from "@features/onboarding";
 import { createClient } from "@shared/api/supabase/server";
 import { redirect } from "next/navigation";

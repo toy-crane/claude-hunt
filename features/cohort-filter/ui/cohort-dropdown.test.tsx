@@ -4,16 +4,6 @@ import userEvent from "@testing-library/user-event";
 import { vi } from "vitest";
 import { CohortDropdown } from "./cohort-dropdown";
 
-const replaceMock = vi.fn();
-const pathnameMock = vi.fn().mockReturnValue("/");
-const searchParamsMock = vi.fn().mockReturnValue(new URLSearchParams());
-
-vi.mock("next/navigation", () => ({
-  useRouter: () => ({ replace: replaceMock }),
-  usePathname: () => pathnameMock(),
-  useSearchParams: () => searchParamsMock(),
-}));
-
 const cohorts: Cohort[] = [
   {
     id: "a1",
@@ -32,45 +22,57 @@ const cohorts: Cohort[] = [
 ];
 
 describe("CohortDropdown", () => {
-  beforeEach(() => {
-    replaceMock.mockClear();
-    searchParamsMock.mockReturnValue(new URLSearchParams());
-  });
-
-  it("shows 'All cohorts' when no cohort is selected", () => {
-    render(<CohortDropdown cohorts={cohorts} selectedCohortId={null} />);
+  it("shows 'All cohorts' when value is null", () => {
+    render(
+      <CohortDropdown cohorts={cohorts} onValueChange={vi.fn()} value={null} />
+    );
     expect(screen.getByTestId("cohort-dropdown")).toHaveTextContent(
       "All cohorts"
     );
   });
 
-  it("shows the selected cohort's label when one is active", () => {
-    render(<CohortDropdown cohorts={cohorts} selectedCohortId="a1" />);
+  it("shows the selected cohort's label when a cohort id is provided", () => {
+    render(
+      <CohortDropdown cohorts={cohorts} onValueChange={vi.fn()} value="a1" />
+    );
     expect(screen.getByTestId("cohort-dropdown")).toHaveTextContent(
       "LG전자 1기"
     );
   });
 
-  it("navigates with ?cohort=<id> when a cohort is selected", async () => {
+  it("calls onValueChange with the cohort id when a cohort is selected", async () => {
+    const onValueChange = vi.fn();
     const user = userEvent.setup();
-    render(<CohortDropdown cohorts={cohorts} selectedCohortId={null} />);
+    render(
+      <CohortDropdown
+        cohorts={cohorts}
+        onValueChange={onValueChange}
+        value={null}
+      />
+    );
 
     await user.click(screen.getByTestId("cohort-dropdown"));
     await user.click(await screen.findByRole("option", { name: "LG전자 1기" }));
 
-    expect(replaceMock).toHaveBeenCalledWith("/?cohort=a1");
+    expect(onValueChange).toHaveBeenCalledWith("a1");
   });
 
-  it("clears the cohort param when 'All cohorts' is selected", async () => {
-    searchParamsMock.mockReturnValue(new URLSearchParams("cohort=a1"));
+  it("calls onValueChange with null when 'All cohorts' is selected", async () => {
+    const onValueChange = vi.fn();
     const user = userEvent.setup();
-    render(<CohortDropdown cohorts={cohorts} selectedCohortId="a1" />);
+    render(
+      <CohortDropdown
+        cohorts={cohorts}
+        onValueChange={onValueChange}
+        value="a1"
+      />
+    );
 
     await user.click(screen.getByTestId("cohort-dropdown"));
     await user.click(
       await screen.findByRole("option", { name: "All cohorts" })
     );
 
-    expect(replaceMock).toHaveBeenCalledWith("/");
+    expect(onValueChange).toHaveBeenCalledWith(null);
   });
 });
