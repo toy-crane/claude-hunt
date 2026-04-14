@@ -7,7 +7,7 @@
 --   by the onboarding flow (feat/onboarding-process)
 
 BEGIN;
-SELECT plan(22);
+SELECT plan(26);
 
 -- 1. Table exists
 SELECT has_table('public', 'profiles', 'profiles table should exist');
@@ -175,6 +175,59 @@ SELECT results_eq(
   ) SELECT count(*)::int FROM updated$$,
   ARRAY[0],
   'Authenticated user cannot update other profiles'
+);
+
+-- 21. handle_updated_at trigger exists on profiles
+RESET role;
+SELECT has_trigger(
+  'public', 'profiles', 'handle_updated_at',
+  'handle_updated_at trigger should exist on profiles'
+);
+
+-- 22. Update advances updated_at beyond its prior value.
+--     pgTAP runs in a single transaction, so now() is constant. We force a
+--     past updated_at with the trigger disabled, then re-enable and do a
+--     real update to prove the trigger fires and overwrites.
+ALTER TABLE public.profiles DISABLE TRIGGER handle_updated_at;
+UPDATE public.profiles
+  SET updated_at = '2020-01-01T00:00:00Z'::timestamptz
+  WHERE id = '00000000-0000-0000-0000-000000000001';
+ALTER TABLE public.profiles ENABLE TRIGGER handle_updated_at;
+
+UPDATE public.profiles
+  SET display_name = 'Updated After Trigger'
+  WHERE id = '00000000-0000-0000-0000-000000000001';
+
+SELECT cmp_ok(
+  (SELECT updated_at FROM public.profiles
+     WHERE id = '00000000-0000-0000-0000-000000000001'),
+  '>',
+  '2020-01-01T00:00:00Z'::timestamptz,
+  'Updating a profile advances updated_at beyond its prior value'
+);
+
+-- 23. Caller-supplied updated_at is overridden by the trigger.
+UPDATE public.profiles
+  SET updated_at = '2000-01-01T00:00:00Z'::timestamptz
+  WHERE id = '00000000-0000-0000-0000-000000000001';
+
+SELECT cmp_ok(
+  (SELECT updated_at FROM public.profiles
+     WHERE id = '00000000-0000-0000-0000-000000000001'),
+  '>',
+  '2000-01-01T00:00:00Z'::timestamptz,
+  'Caller-supplied past updated_at is overridden by the trigger'
+);
+
+-- 24. Freshly inserted profile has updated_at within 1 second of created_at.
+--     (Profile 099 was auto-created via handle_new_user earlier in this test.)
+SELECT cmp_ok(
+  (SELECT EXTRACT(EPOCH FROM (updated_at - created_at))::numeric
+     FROM public.profiles
+     WHERE id = '00000000-0000-0000-0000-000000000099'),
+  '<=',
+  1::numeric,
+  'Freshly inserted profile has updated_at within 1 second of created_at'
 );
 
 SELECT * FROM finish();
