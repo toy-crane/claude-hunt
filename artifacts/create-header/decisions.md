@@ -6,7 +6,7 @@
 **Decision**: Run `wireframe-reviewer`, `ui-quality-reviewer`, `design-reviewer`, and `react-reviewer` in parallel after all tasks complete.
 **Why**: Feature ships UI changes (Header widget + Settings page + Project Board relayout). A wireframe exists, so `wireframe-reviewer` applies. `ui-quality-reviewer` covers layout quality; `design-reviewer` validates shadcn token usage; `react-reviewer` validates Next.js / RSC boundaries and Vercel React best practices (Header is RSC composing a client island, server actions, `revalidatePath`).
 **Harness Signal**: N/A
-**Result**: Pending
+**Result**: Success — first pass surfaced 1 FAIL each from react-reviewer and design-reviewer + a handful of warnings/notes. After fixes, both re-reviews passed. wireframe-reviewer and ui-quality-reviewer passed first pass (ui-quality raised fixable warnings only).
 
 ## Reviewer feedback — accepted fixes
 
@@ -26,7 +26,7 @@ Rejected (logged):
 
 **Why**: FAIL-tier items are non-negotiable — duplicate network calls and missing form-state data attributes both degrade real user experience. Advisory items clash with approved wireframe choices; changing them would undo work the user signed off on.
 **Harness Signal**: When RSC + client-island pairs both need session data, the default instinct should be "cache the fetch helper" rather than "fetch twice". A plan-reviewer check would be: "if multiple server components in the same tree call `getUser()`, flag it and propose `React.cache()` or prop drilling." Worth adding to the plan-reviewer prompt.
-**Result**: Pending — re-running react-reviewer and design-reviewer after the fixes.
+**Result**: Success — re-runs of react-reviewer and design-reviewer both returned PASS on every affected file. One remaining LOW advisory from react-reviewer (`createClient()` built just for `getPublicUrl` in `app/page.tsx`) predates this feature; logged without action.
 
 ## LoginForm now honors `?next=<path>`
 
@@ -34,7 +34,7 @@ Rejected (logged):
 **Decision**: Teach `features/auth-login/ui/login-form.tsx` to read `next` from `useSearchParams()` and append it to the OAuth `redirectTo` / OTP `emailRedirectTo` as `?next=<path>`. Wrap `<LoginForm />` in a `<Suspense>` boundary at `app/login/page.tsx` so Next.js' CSR bailout doesn't fail the build.
 **Why**: Scenario-4 Success Criterion "After signing in from that redirect, visitor lands on `/settings`" requires the magic-link callback to know where to send the user. The callback at `app/auth/callback/route.ts` already honors `next`, but the login form was stripping it. Fixing it inside this feature keeps the spec-level criterion testable via Playwright, which was the whole point of the `?next=/settings` redirect chain.
 **Harness Signal**: `/draft-plan` exploration noticed the callback handled `next` but missed that the login form discarded it before emitting the email. A plan-reviewer check could cross-reference spec redirect flows against the login form's handling of query params. Worth flagging as a reviewer prompt: "every redirect chain in the spec must have a provably symmetric reverse path."
-**Result**: Pending — Playwright covers this end-to-end; Vitest covers form mock wiring.
+**Result**: Success — Vitest exercises both the empty-next and non-empty-next paths via the mocked `useSearchParams`; `app/login/page.tsx` correctly wraps `<LoginForm />` in `<Suspense>` so the `useSearchParams` CSR bailout doesn't break the build. Playwright covers the end-to-end round-trip (requires local Supabase + Mailpit to execute).
 
 ## Task execution order
 
@@ -42,4 +42,4 @@ Rejected (logged):
 **Decision**: Execute in plan order (1 → 2 → 3 → 4 → 5 → Checkpoint 1 → 6 → 7 → 8a → 8b → 9 → Checkpoint 2 → 10). One commit per task.
 **Why**: plan.md's tasks are already dependency-ordered. Task 1 (shadcn install) must precede anything that renders `<Avatar>` / `<DropdownMenu>`. Task 2 establishes `<Header />` scaffold that Task 3 extends. Task 4 and Task 5 both close scenario-3 but are independent (dropdown theme vs. hotkey removal) — Task 4 first because it delivers user-visible behavior; Task 5 is cleanup. Task 6 extends the dropdown once Task 4's scaffold exists. Task 7 creates the `/settings` shell that Task 8b/Task 9 modify. Task 10 is last by design (Risk flagged in plan review: keeping Task 2 minimal avoids merge conflicts with Task 10's relayout).
 **Harness Signal**: N/A
-**Result**: Pending
+**Result**: Success — all 10 tasks (1, 2, 3, 4, 5, 6, 7, 8a, 8b, 9, 10) landed in one commit each. No reordering or merging required mid-flight. The Task-2-defers-to-Task-10 split held: Task 2 touched only the top of `<main>` and Task 10 relayouted the Project Board section without conflict.
