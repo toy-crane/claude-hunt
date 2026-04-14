@@ -1,6 +1,9 @@
+import { signOut } from "@features/auth-login/index.ts";
 import { SettingsForm } from "@features/settings/index.ts";
-import { RiArrowLeftLine } from "@remixicon/react";
+import { RiArrowLeftLine, RiLogoutBoxRLine } from "@remixicon/react";
 import { createClient } from "@shared/api/supabase/server.ts";
+import { Button } from "@shared/ui/button.tsx";
+import { Separator } from "@shared/ui/separator.tsx";
 import Link from "next/link";
 import { redirect } from "next/navigation";
 
@@ -40,6 +43,15 @@ export default async function SettingsPage() {
       <h1 className="font-heading font-medium text-2xl">Settings</h1>
 
       <SettingsForm email={email} initialDisplayName={initialDisplayName} />
+
+      <Separator />
+
+      <form action={signOut}>
+        <Button type="submit" variant="outline">
+          <RiLogoutBoxRLine />
+          <span>Log out</span>
+        </Button>
+      </form>
     </main>
   );
 }
