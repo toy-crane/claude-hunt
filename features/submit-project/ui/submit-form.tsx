@@ -23,16 +23,21 @@ export interface SubmitFormProps {
    * disables submit.
    */
   cohortId: string | null;
+  /**
+   * Called once after the server action returns `ok: true`. The parent
+   * owns post-success UI (closing a dialog, showing a toast, etc.) —
+   * the form itself no longer renders a success message.
+   */
+  onSuccess?: () => void;
 }
 
-export function SubmitForm({ cohortId }: SubmitFormProps) {
+export function SubmitForm({ cohortId, onSuccess }: SubmitFormProps) {
   const titleId = useId();
   const taglineId = useId();
   const urlId = useId();
   const screenshotId = useId();
   const [fieldError, setFieldError] = useState<string | null>(null);
   const [submitError, setSubmitError] = useState<string | null>(null);
-  const [success, setSuccess] = useState(false);
   const [submitting, setSubmitting] = useState(false);
   const blocked = cohortId === null;
 
@@ -40,7 +45,6 @@ export function SubmitForm({ cohortId }: SubmitFormProps) {
     event.preventDefault();
     setFieldError(null);
     setSubmitError(null);
-    setSuccess(false);
 
     if (blocked) {
       return;
@@ -82,8 +86,8 @@ export function SubmitForm({ cohortId }: SubmitFormProps) {
         setSubmitError(result.error ?? "Could not submit project");
         return;
       }
-      setSuccess(true);
       form.reset();
+      onSuccess?.();
     } finally {
       setSubmitting(false);
     }
@@ -173,11 +177,6 @@ export function SubmitForm({ cohortId }: SubmitFormProps) {
           role="alert"
         >
           {submitError}
-        </p>
-      ) : null}
-      {success ? (
-        <p className="text-primary text-xs" role="status">
-          Project submitted!
         </p>
       ) : null}
 
