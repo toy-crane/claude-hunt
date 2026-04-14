@@ -2,7 +2,6 @@ import { render, screen, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
-const READ_ONLY_LABEL = /read-only/i;
 const SAVE_LABEL = /^save$/i;
 const SAVING_LABEL = /saving/i;
 const REQUIRED_MESSAGE = /display name is required/i;
@@ -53,13 +52,26 @@ describe("<SettingsForm />", () => {
     expect(input.value).toBe("Alice");
   });
 
-  it("renders the email input disabled and labelled read-only", () => {
+  it("renders the email input disabled with the viewer's email", () => {
     renderForm();
 
     const email = screen.getByLabelText("Email") as HTMLInputElement;
     expect(email).toBeDisabled();
     expect(email.value).toBe("alice@example.com");
-    expect(screen.getByText(READ_ONLY_LABEL)).toBeInTheDocument();
+  });
+
+  it("renders the Email field before the Display name field", () => {
+    renderForm();
+
+    const inputs = Array.from(
+      document.querySelectorAll<HTMLInputElement>("input")
+    );
+    const emailIndex = inputs.findIndex((el) => el.type === "email");
+    const displayNameIndex = inputs.findIndex(
+      (el) => el.getAttribute("name") === "displayName"
+    );
+    expect(emailIndex).toBeGreaterThanOrEqual(0);
+    expect(displayNameIndex).toBeGreaterThan(emailIndex);
   });
 
   it("has no Save control attached to the email field", () => {

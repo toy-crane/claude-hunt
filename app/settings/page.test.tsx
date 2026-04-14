@@ -1,9 +1,15 @@
-import { render, screen } from "@testing-library/react";
+import { render, screen, within } from "@testing-library/react";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
 const BACK_HOME_LABEL = /back to home/i;
 const SETTINGS_HEADING = /^settings$/i;
 const LOG_OUT_LABEL = /^log out$/i;
+const WITHDRAW_LABEL = /^withdraw$/i;
+const DELETE_ACCOUNT_HEADING = /^delete account$/i;
+const DANGER_WARNING =
+  /permanently remove your profile, projects, and votes\. this cannot be undone\./i;
+const ACCOUNT_REGION = /^account$/i;
+const DANGER_ZONE_REGION = /^danger zone$/i;
 
 vi.mock("next/link", () => ({
   default: ({
@@ -26,7 +32,7 @@ const redirectMock = vi.fn((url: string) => {
 
 vi.mock("next/navigation", () => ({
   redirect: redirectMock,
-  useRouter: () => ({ refresh: vi.fn() }),
+  useRouter: () => ({ refresh: vi.fn(), replace: vi.fn() }),
 }));
 
 vi.mock("sonner", () => ({
@@ -79,7 +85,7 @@ describe("settings page", () => {
     expect(redirectMock).toHaveBeenCalledWith("/login?next=/settings");
   });
 
-  it("renders the heading, display name, email, and back-to-home link for signed-in users", async () => {
+  it("renders the Settings heading and a Back to home link for signed-in users", async () => {
     fetchViewerMock.mockResolvedValue({
       id: "user-1",
       email: "alice@example.com",
@@ -93,21 +99,15 @@ describe("settings page", () => {
     render(jsx);
 
     expect(
-      screen.getByRole("heading", { name: SETTINGS_HEADING })
+      screen.getByRole("heading", { level: 1, name: SETTINGS_HEADING })
     ).toBeInTheDocument();
-    expect(
-      (screen.getByLabelText("Display name") as HTMLInputElement).value
-    ).toBe("Alice");
-    const email = screen.getByLabelText("Email") as HTMLInputElement;
-    expect(email.value).toBe("alice@example.com");
-    expect(email).toBeDisabled();
     expect(screen.getByRole("link", { name: BACK_HOME_LABEL })).toHaveAttribute(
       "href",
       "/"
     );
   });
 
-  it("renders a Log out button submitting the signOut server action", async () => {
+  it("renders Profile, Account, and Danger Zone section headings in order", async () => {
     fetchViewerMock.mockResolvedValue({
       id: "user-1",
       email: "alice@example.com",
@@ -120,8 +120,54 @@ describe("settings page", () => {
     const jsx = await Page();
     render(jsx);
 
-    const button = screen.getByRole("button", { name: LOG_OUT_LABEL });
-    expect(button).toBeInTheDocument();
-    expect(button.closest("form")).not.toBeNull();
+    const sectionHeadings = screen
+      .getAllByRole("heading", { level: 2 })
+      .map((h) => h.textContent?.trim());
+    expect(sectionHeadings).toEqual(["Profile", "Account", "Danger Zone"]);
+  });
+
+  it("renders the Log out button inside the Account section", async () => {
+    fetchViewerMock.mockResolvedValue({
+      id: "user-1",
+      email: "alice@example.com",
+      displayName: "Alice",
+      avatarUrl: null,
+      cohortId: null,
+    });
+
+    const Page = (await import("./page.tsx")).default;
+    const jsx = await Page();
+    render(jsx);
+
+    const accountSection = screen.getByRole("region", { name: ACCOUNT_REGION });
+    const logOut = within(accountSection).getByRole("button", {
+      name: LOG_OUT_LABEL,
+    });
+    expect(logOut.closest("form")).not.toBeNull();
+  });
+
+  it("renders the Delete account row with a Withdraw button and warning text in Danger Zone", async () => {
+    fetchViewerMock.mockResolvedValue({
+      id: "user-1",
+      email: "alice@example.com",
+      displayName: "Alice",
+      avatarUrl: null,
+      cohortId: null,
+    });
+
+    const Page = (await import("./page.tsx")).default;
+    const jsx = await Page();
+    render(jsx);
+
+    const dangerSection = screen.getByRole("region", {
+      name: DANGER_ZONE_REGION,
+    });
+    expect(
+      within(dangerSection).getByText(DELETE_ACCOUNT_HEADING)
+    ).toBeInTheDocument();
+    expect(within(dangerSection).getByText(DANGER_WARNING)).toBeInTheDocument();
+    expect(
+      within(dangerSection).getByRole("button", { name: WITHDRAW_LABEL })
+    ).toBeInTheDocument();
   });
 });
