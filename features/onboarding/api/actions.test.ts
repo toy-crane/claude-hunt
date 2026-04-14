@@ -26,19 +26,18 @@ const validInput = {
   cohortId: COHORT_UUID,
 };
 
-function stubProfileUpdate(options: { updateError?: { message: string } }) {
-  const eq = vi.fn().mockResolvedValue({
+function stubProfileUpsert(options: { upsertError?: { message: string } }) {
+  const upsert = vi.fn().mockResolvedValue({
     data: null,
-    error: options.updateError ?? null,
+    error: options.upsertError ?? null,
   });
-  const update = vi.fn().mockReturnValue({ eq });
   from.mockImplementation((table: string) => {
     if (table === "profiles") {
-      return { update };
+      return { upsert };
     }
     throw new Error(`Unexpected table ${table}`);
   });
-  return { update, eq };
+  return { upsert };
 }
 
 beforeEach(() => {
@@ -59,11 +58,11 @@ describe("completeOnboarding server action", () => {
 
   it("does not touch the database when the caller is signed out", async () => {
     getUser.mockResolvedValue({ data: { user: null }, error: null });
-    const { update } = stubProfileUpdate({});
+    const { upsert } = stubProfileUpsert({});
 
     await completeOnboarding(validInput);
 
-    expect(update).not.toHaveBeenCalled();
+    expect(upsert).not.toHaveBeenCalled();
   });
 
   it("rejects empty display name without touching the db", async () => {
@@ -107,12 +106,12 @@ describe("completeOnboarding server action", () => {
     expect(result.error).toBe("Please select a cohort");
   });
 
-  it("updates the caller's own profile with trimmed display name and cohort id", async () => {
+  it("upserts the caller's own profile with trimmed display name and cohort id", async () => {
     getUser.mockResolvedValue({
-      data: { user: { id: "u1" } },
+      data: { user: { id: "u1", email: "u1@example.com" } },
       error: null,
     });
-    const { update, eq } = stubProfileUpdate({});
+    const { upsert } = stubProfileUpsert({});
 
     const result = await completeOnboarding({
       displayName: "  Alice  ",
@@ -120,20 +119,24 @@ describe("completeOnboarding server action", () => {
     });
 
     expect(result.ok).toBe(true);
-    expect(update).toHaveBeenCalledTimes(1);
-    expect(update).toHaveBeenCalledWith({
-      display_name: "Alice",
-      cohort_id: COHORT_UUID,
-    });
-    expect(eq).toHaveBeenCalledWith("id", "u1");
+    expect(upsert).toHaveBeenCalledTimes(1);
+    expect(upsert).toHaveBeenCalledWith(
+      {
+        id: "u1",
+        email: "u1@example.com",
+        display_name: "Alice",
+        cohort_id: COHORT_UUID,
+      },
+      { onConflict: "id" }
+    );
   });
 
-  it("surfaces a Supabase update error back to the caller", async () => {
+  it("surfaces a Supabase upsert error back to the caller", async () => {
     getUser.mockResolvedValue({
-      data: { user: { id: "u1" } },
+      data: { user: { id: "u1", email: "u1@example.com" } },
       error: null,
     });
-    stubProfileUpdate({ updateError: { message: "permission denied" } });
+    stubProfileUpsert({ upsertError: { message: "permission denied" } });
 
     const result = await completeOnboarding(validInput);
 

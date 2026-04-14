@@ -35,16 +35,23 @@ export async function completeOnboarding(
     return { ok: false, error: "You must be signed in to continue" };
   }
 
-  const { error: updateError } = await supabase
-    .from("profiles")
-    .update({
+  // Upsert (not update) so the action still succeeds when the profile
+  // row is missing — e.g. after a local `supabase db reset` that wipes
+  // public.profiles but leaves auth.users intact, or any scenario where
+  // the handle_new_user trigger did not fire. RLS restricts the insert
+  // path to the signed-in user's own id.
+  const { error: upsertError } = await supabase.from("profiles").upsert(
+    {
+      id: user.id,
+      email: user.email ?? "",
       display_name: input.displayName,
       cohort_id: input.cohortId,
-    })
-    .eq("id", user.id);
+    },
+    { onConflict: "id" }
+  );
 
-  if (updateError) {
-    return { ok: false, error: updateError.message };
+  if (upsertError) {
+    return { ok: false, error: upsertError.message };
   }
 
   revalidatePath("/");
