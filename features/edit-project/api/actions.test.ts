@@ -9,7 +9,13 @@ vi.mock("next/cache", () => ({
 
 const getUser = vi.fn();
 const from = vi.fn();
-const mockClient = { auth: { getUser }, from };
+const storageRemove = vi.fn().mockResolvedValue({ data: [], error: null });
+const storageFrom = vi.fn().mockReturnValue({ remove: storageRemove });
+const mockClient = {
+  auth: { getUser },
+  from,
+  storage: { from: storageFrom },
+};
 
 vi.mock("@shared/api/supabase/server", () => ({
   createClient: vi.fn().mockResolvedValue(mockClient),
@@ -26,22 +32,37 @@ const validInput = {
 
 beforeEach(() => {
   revalidatePathMock.mockClear();
+  storageFrom.mockClear();
+  storageRemove.mockClear();
+  storageRemove.mockResolvedValue({ data: [], error: null });
   getUser.mockReset();
   from.mockReset();
 });
 
-function stubUpdateResult(options: {
-  rows?: Array<{ id: string }>;
-  error?: { message: string };
+function stubFrom(options: {
+  currentScreenshotPath?: string | null;
+  updateRows?: Array<{ id: string }>;
+  updateError?: { message: string };
 }) {
-  const select = vi.fn().mockResolvedValue({
-    data: options.rows ?? [],
-    error: options.error ?? null,
+  const maybeSingle = vi.fn().mockResolvedValue({
+    data:
+      options.currentScreenshotPath === undefined
+        ? null
+        : { screenshot_path: options.currentScreenshotPath },
+    error: null,
   });
-  const eq = vi.fn().mockReturnValue({ select });
-  const update = vi.fn().mockReturnValue({ eq });
-  from.mockReturnValue({ update });
-  return { update, eq, select };
+  const selectEq = vi.fn().mockReturnValue({ maybeSingle });
+  const select = vi.fn().mockReturnValue({ eq: selectEq });
+
+  const updateSelect = vi.fn().mockResolvedValue({
+    data: options.updateRows ?? [],
+    error: options.updateError ?? null,
+  });
+  const updateEq = vi.fn().mockReturnValue({ select: updateSelect });
+  const update = vi.fn().mockReturnValue({ eq: updateEq });
+
+  from.mockReturnValue({ select, update });
+  return { select, update, updateEq, updateSelect };
 }
 
 describe("editProject server action", () => {
@@ -55,8 +76,8 @@ describe("editProject server action", () => {
 
   it("updates the project and revalidates the home page on success", async () => {
     getUser.mockResolvedValue({ data: { user: { id: "u1" } }, error: null });
-    const { update, eq } = stubUpdateResult({
-      rows: [{ id: validInput.projectId }],
+    const { update, updateEq } = stubFrom({
+      updateRows: [{ id: validInput.projectId }],
     });
 
     const result = await editProject(validInput);
@@ -69,13 +90,13 @@ describe("editProject server action", () => {
         project_url: "https://edited.example.com",
       })
     );
-    expect(eq).toHaveBeenCalledWith("id", validInput.projectId);
+    expect(updateEq).toHaveBeenCalledWith("id", validInput.projectId);
     expect(revalidatePathMock).toHaveBeenCalledWith("/");
   });
 
   it("reports forbidden when RLS returns zero rows (spoofed projectId)", async () => {
     getUser.mockResolvedValue({ data: { user: { id: "u1" } }, error: null });
-    stubUpdateResult({ rows: [] });
+    stubFrom({ updateRows: [] });
 
     const result = await editProject(validInput);
 
@@ -85,17 +106,86 @@ describe("editProject server action", () => {
 
   it("includes screenshot_path in the update when supplied", async () => {
     getUser.mockResolvedValue({ data: { user: { id: "u1" } }, error: null });
-    const { update } = stubUpdateResult({
-      rows: [{ id: validInput.projectId }],
+    const { update } = stubFrom({
+      currentScreenshotPath: "u1/old-shot.webp",
+      updateRows: [{ id: validInput.projectId }],
     });
 
     await editProject({
       ...validInput,
-      screenshotPath: "u1/new-shot.png",
+      screenshotPath: "u1/new-shot.webp",
     });
 
     expect(update).toHaveBeenCalledWith(
-      expect.objectContaining({ screenshot_path: "u1/new-shot.png" })
+      expect.objectContaining({ screenshot_path: "u1/new-shot.webp" })
     );
+  });
+
+  it("removes the previous screenshot from storage after a successful replace", async () => {
+    getUser.mockResolvedValue({ data: { user: { id: "u1" } }, error: null });
+    stubFrom({
+      currentScreenshotPath: "u1/old-shot.webp",
+      updateRows: [{ id: validInput.projectId }],
+    });
+
+    const result = await editProject({
+      ...validInput,
+      screenshotPath: "u1/new-shot.webp",
+    });
+
+    expect(result.ok).toBe(true);
+    expect(storageFrom).toHaveBeenCalledWith("project-screenshots");
+    expect(storageRemove).toHaveBeenCalledTimes(1);
+    expect(storageRemove).toHaveBeenCalledWith(["u1/old-shot.webp"]);
+  });
+
+  it("does not touch storage when the screenshot is not replaced", async () => {
+    getUser.mockResolvedValue({ data: { user: { id: "u1" } }, error: null });
+    stubFrom({
+      updateRows: [{ id: validInput.projectId }],
+    });
+
+    const result = await editProject(validInput);
+
+    expect(result.ok).toBe(true);
+    expect(storageRemove).not.toHaveBeenCalled();
+  });
+
+  it("does not remove storage when RLS rejects the update (owner-gated)", async () => {
+    getUser.mockResolvedValue({ data: { user: { id: "u1" } }, error: null });
+    stubFrom({
+      currentScreenshotPath: "u1/old-shot.webp",
+      updateRows: [],
+    });
+
+    const result = await editProject({
+      ...validInput,
+      screenshotPath: "u1/new-shot.webp",
+    });
+
+    expect(result.ok).toBe(false);
+    expect(result.error).toMatch(PERMISSION_ERROR_REGEX);
+    expect(storageRemove).not.toHaveBeenCalled();
+  });
+
+  it("still returns ok when storage removal fails (non-blocking cleanup)", async () => {
+    getUser.mockResolvedValue({ data: { user: { id: "u1" } }, error: null });
+    stubFrom({
+      currentScreenshotPath: "u1/old-shot.webp",
+      updateRows: [{ id: validInput.projectId }],
+    });
+    storageRemove.mockResolvedValueOnce({
+      data: null,
+      error: { message: "storage down" },
+    });
+
+    const result = await editProject({
+      ...validInput,
+      screenshotPath: "u1/new-shot.webp",
+    });
+
+    expect(result.ok).toBe(true);
+    expect(storageRemove).toHaveBeenCalledTimes(1);
+    expect(revalidatePathMock).toHaveBeenCalledWith("/");
   });
 });
