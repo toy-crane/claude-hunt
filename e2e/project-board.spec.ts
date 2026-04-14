@@ -228,12 +228,55 @@ test("student submits, edits, and deletes their own project end-to-end", async (
     expect(edited.naturalHeight).toBeLessThanOrEqual(MAX_IMAGE_DIMENSION);
     expect(edited.contentType).toBe("image/webp");
 
+    // The superseded screenshot must stop serving at its previous URL.
+    if (!submittedSrc) {
+      throw new Error("Expected submittedSrc to be set");
+    }
+    await expect(async () => {
+      const response = await page.request.fetch(submittedSrc, {
+        method: "HEAD",
+      });
+      expect(response.status()).toBeGreaterThanOrEqual(400);
+    }).toPass({ timeout: 10_000 });
+
+    const editedSrc = await editedImg.getAttribute("src");
+    if (!editedSrc) {
+      throw new Error("Expected editedSrc to be set");
+    }
+
+    // Metadata-only edit: change the title without touching the file
+    // input. The stored image must be untouched and still serve.
+    await page.getByTestId("edit-project-trigger").click();
+    const metaDialog = page.getByRole("dialog");
+    await metaDialog.getByLabel("Title").fill("E2E Test App (renamed)");
+    await metaDialog.getByRole("button", { name: SAVE_CHANGES_BTN_RE }).click();
+    await expect(
+      page.getByTestId("project-card").getByText("E2E Test App (renamed)")
+    ).toBeVisible({ timeout: 15_000 });
+
+    const afterMetaImg = page
+      .getByTestId("project-card")
+      .first()
+      .locator("img")
+      .first();
+    await expect(afterMetaImg).toHaveAttribute("src", editedSrc);
+    const stillServing = await page.request.fetch(editedSrc, {
+      method: "HEAD",
+    });
+    expect(stillServing.status()).toBe(200);
+
     // Delete the project.
     await page.getByTestId("delete-project-trigger").click();
     await page.getByTestId("delete-project-confirm").click();
     await expect(page.getByTestId("project-card")).toHaveCount(0, {
       timeout: 10_000,
     });
+
+    // The deleted project's screenshot must stop serving as well.
+    await expect(async () => {
+      const response = await page.request.fetch(editedSrc, { method: "HEAD" });
+      expect(response.status()).toBeGreaterThanOrEqual(400);
+    }).toPass({ timeout: 10_000 });
   } finally {
     await student?.cleanup();
   }
