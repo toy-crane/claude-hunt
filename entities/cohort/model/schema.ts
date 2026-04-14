@@ -2,7 +2,7 @@ import type {
   Tables,
   TablesInsert,
   TablesUpdate,
-} from "@shared/api/supabase/types.ts";
+} from "@shared/api/supabase/types";
 
 export type Cohort = Tables<"cohorts">;
 export type CohortInsert = TablesInsert<"cohorts">;

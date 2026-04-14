@@ -1,2 +1,2 @@
-export { updateDisplayName } from "./api/actions.ts";
-export { SettingsForm } from "./ui/settings-form.tsx";
+export { updateDisplayName } from "./api/actions";
+export { SettingsForm } from "./ui/settings-form";

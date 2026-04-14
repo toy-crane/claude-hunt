@@ -1,11 +1,11 @@
-import { CohortDropdown, fetchCohorts } from "@features/cohort-filter/index.ts";
-import { SubmitDialog } from "@features/submit-project/index.ts";
-import { fetchViewer } from "@shared/api/supabase/viewer.ts";
-import { Separator } from "@shared/ui/separator.tsx";
-import { Header } from "@widgets/header/index.ts";
-import { ProjectGridSkeleton } from "@widgets/project-grid/index.ts";
+import { CohortDropdown, fetchCohorts } from "@features/cohort-filter";
+import { SubmitDialog } from "@features/submit-project";
+import { fetchViewer } from "@shared/api/supabase/viewer";
+import { Separator } from "@shared/ui/separator";
+import { Header } from "@widgets/header";
+import { ProjectGridSkeleton } from "@widgets/project-grid";
 import { Suspense } from "react";
-import { ProjectGridSection } from "./_components/project-grid-section.tsx";
+import { ProjectGridSection } from "./_components/project-grid-section";
 
 interface PageProps {
   searchParams: Promise<{ cohort?: string }>;

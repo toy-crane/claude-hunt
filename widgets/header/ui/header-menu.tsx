@@ -1,6 +1,6 @@
 "use client";
 
-import { signOut } from "@features/auth-login/index.ts";
+import { signOut } from "@features/auth-login";
 import {
   RiComputerLine,
   RiLogoutBoxRLine,
@@ -9,7 +9,7 @@ import {
   RiSunLine,
   RiUserLine,
 } from "@remixicon/react";
-import { Avatar, AvatarFallback, AvatarImage } from "@shared/ui/avatar.tsx";
+import { Avatar, AvatarFallback, AvatarImage } from "@shared/ui/avatar";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -19,7 +19,7 @@ import {
   DropdownMenuRadioItem,
   DropdownMenuSeparator,
   DropdownMenuTrigger,
-} from "@shared/ui/dropdown-menu.tsx";
+} from "@shared/ui/dropdown-menu";
 import Link from "next/link";
 import { useTheme } from "next-themes";
 

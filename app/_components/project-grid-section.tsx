@@ -1,8 +1,8 @@
-import { DeleteButton } from "@features/delete-project/index.ts";
-import { EditDialog } from "@features/edit-project/index.ts";
-import { VoteButton } from "@features/toggle-vote/index.ts";
-import { createClient } from "@shared/api/supabase/server.ts";
-import { fetchProjects, ProjectGrid } from "@widgets/project-grid/index.ts";
+import { DeleteButton } from "@features/delete-project";
+import { EditDialog } from "@features/edit-project";
+import { VoteButton } from "@features/toggle-vote";
+import { createClient } from "@shared/api/supabase/server";
+import { fetchProjects, ProjectGrid } from "@widgets/project-grid";
 
 export interface ProjectGridSectionProps {
   cohortId: string | null;

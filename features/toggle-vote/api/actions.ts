@@ -1,6 +1,6 @@
 "use server";
 
-import { createClient } from "@shared/api/supabase/server.ts";
+import { createClient } from "@shared/api/supabase/server";
 import { revalidatePath } from "next/cache";
 
 export interface ToggleVoteResult {

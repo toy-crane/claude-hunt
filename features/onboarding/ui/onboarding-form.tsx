@@ -1,30 +1,30 @@
 "use client";
 
-import type { Cohort } from "@entities/cohort/index.ts";
-import { createClient } from "@shared/api/supabase/client.ts";
-import { Alert, AlertDescription, AlertTitle } from "@shared/ui/alert.tsx";
-import { AuthLayout } from "@shared/ui/auth-layout.tsx";
-import { Button } from "@shared/ui/button.tsx";
+import type { Cohort } from "@entities/cohort";
+import { createClient } from "@shared/api/supabase/client";
+import { Alert, AlertDescription, AlertTitle } from "@shared/ui/alert";
+import { AuthLayout } from "@shared/ui/auth-layout";
+import { Button } from "@shared/ui/button";
 import {
   Field,
   FieldDescription,
   FieldGroup,
   FieldLabel,
-} from "@shared/ui/field.tsx";
-import { Input } from "@shared/ui/input.tsx";
+} from "@shared/ui/field";
+import { Input } from "@shared/ui/input";
 import {
   Select,
   SelectContent,
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from "@shared/ui/select.tsx";
-import { Separator } from "@shared/ui/separator.tsx";
-import { Spinner } from "@shared/ui/spinner.tsx";
+} from "@shared/ui/select";
+import { Separator } from "@shared/ui/separator";
+import { Spinner } from "@shared/ui/spinner";
 import { useRouter } from "next/navigation";
 import { useId, useState, useTransition } from "react";
-import { completeOnboarding } from "../api/actions.ts";
-import { MAX_DISPLAY_NAME_LENGTH } from "../api/schema.ts";
+import { completeOnboarding } from "../api/actions";
+import { MAX_DISPLAY_NAME_LENGTH } from "../api/schema";
 
 export interface OnboardingFormProps {
   cohorts: Cohort[];

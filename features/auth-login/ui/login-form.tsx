@@ -1,12 +1,12 @@
 "use client";
 
-import { createClient } from "@shared/api/supabase/client.ts";
-import { AuthLayout } from "@shared/ui/auth-layout.tsx";
-import { Button } from "@shared/ui/button.tsx";
-import { GitHubIcon } from "@shared/ui/icons/github.tsx";
-import { GoogleIcon } from "@shared/ui/icons/google.tsx";
-import { Input } from "@shared/ui/input.tsx";
-import { Label } from "@shared/ui/label.tsx";
+import { createClient } from "@shared/api/supabase/client";
+import { AuthLayout } from "@shared/ui/auth-layout";
+import { Button } from "@shared/ui/button";
+import { GitHubIcon } from "@shared/ui/icons/github";
+import { GoogleIcon } from "@shared/ui/icons/google";
+import { Input } from "@shared/ui/input";
+import { Label } from "@shared/ui/label";
 import Link from "next/link";
 import { useSearchParams } from "next/navigation";
 import { useState } from "react";

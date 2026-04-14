@@ -2,7 +2,7 @@ import {
   createAdminClient,
   E2E_EMAIL_DOMAIN,
   E2E_EMAIL_PREFIX,
-} from "./helpers/supabase-admin.ts";
+} from "./helpers/supabase-admin";
 
 export default async function globalTeardown() {
   const admin = createAdminClient();

@@ -12,7 +12,7 @@ vi.mock("../api/actions.ts", () => ({
   submitProject,
 }));
 
-const { SubmitForm } = await import("./submit-form.tsx");
+const { SubmitForm } = await import("./submit-form");
 
 function makePng(name = "shot.png", size = 1024) {
   return new File([new Uint8Array(size)], name, { type: "image/png" });

@@ -1,8 +1,8 @@
-import type { Cohort } from "@entities/cohort/index.ts";
+import type { Cohort } from "@entities/cohort";
 import { render, screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { vi } from "vitest";
-import { CohortDropdown } from "./cohort-dropdown.tsx";
+import { CohortDropdown } from "./cohort-dropdown";
 
 const replaceMock = vi.fn();
 const pathnameMock = vi.fn().mockReturnValue("/");

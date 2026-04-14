@@ -1,6 +1,6 @@
 import { render } from "@testing-library/react";
 import { vi } from "vitest";
-import Icon2, { contentType, IconElement, size } from "./icon2.tsx";
+import Icon2, { contentType, IconElement, size } from "./icon2";
 
 vi.mock("next/og", () => ({
   ImageResponse: class {

@@ -1,6 +1,6 @@
 "use client";
 
-import { cn } from "@shared/lib/utils.ts";
+import { cn } from "@shared/lib/utils";
 import { Avatar as AvatarPrimitive } from "radix-ui";
 import type * as React from "react";
 

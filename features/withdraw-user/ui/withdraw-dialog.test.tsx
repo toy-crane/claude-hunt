@@ -29,7 +29,7 @@ vi.mock("next/navigation", () => ({
   }),
 }));
 
-import { WithdrawDialog } from "./withdraw-dialog.tsx";
+import { WithdrawDialog } from "./withdraw-dialog";
 
 function renderDialog(email = "alice@example.com") {
   return render(<WithdrawDialog email={email} />);

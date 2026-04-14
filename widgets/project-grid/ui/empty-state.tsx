@@ -3,7 +3,7 @@ import {
   EmptyDescription,
   EmptyHeader,
   EmptyTitle,
-} from "@shared/ui/empty.tsx";
+} from "@shared/ui/empty";
 
 export function EmptyState() {
   return (

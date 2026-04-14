@@ -31,7 +31,7 @@ vi.mock("@shared/api/supabase/admin", () => ({
   createAdminClient: vi.fn().mockReturnValue(adminClient),
 }));
 
-const { withdrawAccount } = await import("./actions.ts");
+const { withdrawAccount } = await import("./actions");
 
 function stubProjects(
   rows: Array<{ screenshot_path: string | null }>,

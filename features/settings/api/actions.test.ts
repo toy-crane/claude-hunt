@@ -1,4 +1,4 @@
-import { createMockSupabaseClient } from "@shared/lib/test-utils.tsx";
+import { createMockSupabaseClient } from "@shared/lib/test-utils";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
 const updateMock = vi.fn().mockResolvedValue({ error: null });
@@ -34,7 +34,7 @@ describe("updateDisplayName", () => {
   });
 
   it("updates the profile row and revalidates / on a valid input", async () => {
-    const { updateDisplayName } = await import("./actions.ts");
+    const { updateDisplayName } = await import("./actions");
 
     const result = await updateDisplayName("Alice K.");
 
@@ -46,7 +46,7 @@ describe("updateDisplayName", () => {
   });
 
   it("trims whitespace before persisting", async () => {
-    const { updateDisplayName } = await import("./actions.ts");
+    const { updateDisplayName } = await import("./actions");
 
     const result = await updateDisplayName("  Alice K.  ");
 
@@ -55,7 +55,7 @@ describe("updateDisplayName", () => {
   });
 
   it("rejects an empty display name without calling update", async () => {
-    const { updateDisplayName } = await import("./actions.ts");
+    const { updateDisplayName } = await import("./actions");
 
     const result = await updateDisplayName("");
 
@@ -67,7 +67,7 @@ describe("updateDisplayName", () => {
   });
 
   it("rejects whitespace-only display names with the same required message", async () => {
-    const { updateDisplayName } = await import("./actions.ts");
+    const { updateDisplayName } = await import("./actions");
 
     const result = await updateDisplayName("   ");
 
@@ -79,7 +79,7 @@ describe("updateDisplayName", () => {
   });
 
   it("rejects display names longer than 50 characters", async () => {
-    const { updateDisplayName } = await import("./actions.ts");
+    const { updateDisplayName } = await import("./actions");
 
     const result = await updateDisplayName("A".repeat(51));
 
@@ -98,7 +98,7 @@ describe("updateDisplayName", () => {
       data: { user: null },
       error: null,
     });
-    const { updateDisplayName } = await import("./actions.ts");
+    const { updateDisplayName } = await import("./actions");
 
     const result = await updateDisplayName("Alice");
 
@@ -114,7 +114,7 @@ describe("updateDisplayName", () => {
           'duplicate key value violates unique constraint "profiles_display_name_ci_unique"',
       },
     });
-    const { updateDisplayName } = await import("./actions.ts");
+    const { updateDisplayName } = await import("./actions");
 
     const result = await updateDisplayName("Bob");
 
@@ -133,7 +133,7 @@ describe("updateDisplayName", () => {
     eqMock.mockResolvedValue({
       error: { code: "23505", message: rawMessage },
     });
-    const { updateDisplayName } = await import("./actions.ts");
+    const { updateDisplayName } = await import("./actions");
 
     const result = await updateDisplayName("Bob");
 
@@ -147,7 +147,7 @@ describe("updateDisplayName", () => {
     // When the user saves their current display name, the unique index
     // sees no conflict (own row's own value) and the DB returns no error.
     eqMock.mockResolvedValue({ error: null });
-    const { updateDisplayName } = await import("./actions.ts");
+    const { updateDisplayName } = await import("./actions");
 
     const result = await updateDisplayName("Alice");
 

@@ -1,6 +1,6 @@
 import { render, screen } from "@testing-library/react";
 import { describe, expect, it } from "vitest";
-import { ProjectGridSkeleton } from "./project-grid-skeleton.tsx";
+import { ProjectGridSkeleton } from "./project-grid-skeleton";
 
 describe("ProjectGridSkeleton", () => {
   it("renders 6 skeleton cards by default", () => {

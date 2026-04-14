@@ -81,7 +81,7 @@ describe("settings page", () => {
   it("redirects unauthenticated visitors to /login?next=/settings", async () => {
     fetchViewerMock.mockResolvedValue(null);
 
-    const Page = (await import("./page.tsx")).default;
+    const Page = (await import("./page")).default;
 
     await expect(Page()).rejects.toThrow("redirect:/login?next=/settings");
     expect(redirectMock).toHaveBeenCalledWith("/login?next=/settings");
@@ -96,7 +96,7 @@ describe("settings page", () => {
       cohortId: null,
     });
 
-    const Page = (await import("./page.tsx")).default;
+    const Page = (await import("./page")).default;
     const jsx = await Page();
     render(jsx);
 
@@ -118,7 +118,7 @@ describe("settings page", () => {
       cohortId: null,
     });
 
-    const Page = (await import("./page.tsx")).default;
+    const Page = (await import("./page")).default;
     const jsx = await Page();
     render(jsx);
 
@@ -137,7 +137,7 @@ describe("settings page", () => {
       cohortId: null,
     });
 
-    const Page = (await import("./page.tsx")).default;
+    const Page = (await import("./page")).default;
     const jsx = await Page();
     render(jsx);
 

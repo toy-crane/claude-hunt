@@ -5,7 +5,7 @@ import OpenGraphImage, {
   contentType,
   OgElement,
   size,
-} from "./opengraph-image.tsx";
+} from "./opengraph-image";
 
 vi.mock("next/og", () => ({
   ImageResponse: class {

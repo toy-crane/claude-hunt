@@ -1,14 +1,14 @@
 "use client";
 
-import { Button } from "@shared/ui/button.tsx";
-import { Field, FieldGroup, FieldLabel } from "@shared/ui/field.tsx";
-import { Input } from "@shared/ui/input.tsx";
-import { Spinner } from "@shared/ui/spinner.tsx";
+import { Button } from "@shared/ui/button";
+import { Field, FieldGroup, FieldLabel } from "@shared/ui/field";
+import { Input } from "@shared/ui/input";
+import { Spinner } from "@shared/ui/spinner";
 import { useRouter } from "next/navigation";
 import { useId, useState, useTransition } from "react";
 import { toast } from "sonner";
 
-import { updateDisplayName } from "../api/actions.ts";
+import { updateDisplayName } from "../api/actions";
 
 export interface SettingsFormProps {
   email: string;

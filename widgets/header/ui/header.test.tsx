@@ -41,7 +41,7 @@ describe("<Header />", () => {
 
   it("renders the claude-hunt logo linking to /", async () => {
     fetchViewerMock.mockResolvedValue(null);
-    const { Header } = await import("./header.tsx");
+    const { Header } = await import("./header");
     const jsx = await Header();
     render(jsx);
 
@@ -52,7 +52,7 @@ describe("<Header />", () => {
   it("renders a Log in button navigating to /login when signed out", async () => {
     fetchViewerMock.mockResolvedValue(null);
 
-    const { Header } = await import("./header.tsx");
+    const { Header } = await import("./header");
     const jsx = await Header();
     render(jsx);
 
@@ -63,7 +63,7 @@ describe("<Header />", () => {
   it("does not render an avatar for signed-out visitors", async () => {
     fetchViewerMock.mockResolvedValue(null);
 
-    const { Header } = await import("./header.tsx");
+    const { Header } = await import("./header");
     const jsx = await Header();
     render(jsx);
 
@@ -81,7 +81,7 @@ describe("<Header />", () => {
       cohortId: null,
     });
 
-    const { Header } = await import("./header.tsx");
+    const { Header } = await import("./header");
     const jsx = await Header();
     render(jsx);
 
@@ -102,7 +102,7 @@ describe("<Header />", () => {
       cohortId: null,
     });
 
-    const { Header } = await import("./header.tsx");
+    const { Header } = await import("./header");
     const jsx = await Header();
     render(jsx);
 

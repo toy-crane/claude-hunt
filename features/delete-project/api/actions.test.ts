@@ -21,7 +21,7 @@ vi.mock("@shared/api/supabase/server", () => ({
   createClient: vi.fn().mockResolvedValue(mockClient),
 }));
 
-const { deleteProject } = await import("./actions.ts");
+const { deleteProject } = await import("./actions");
 
 beforeEach(() => {
   revalidatePathMock.mockClear();

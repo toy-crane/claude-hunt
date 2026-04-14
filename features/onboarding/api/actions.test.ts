@@ -19,7 +19,7 @@ vi.mock("@shared/api/supabase/server", () => ({
   createClient: vi.fn().mockResolvedValue(mockClient),
 }));
 
-const { completeOnboarding } = await import("./actions.ts");
+const { completeOnboarding } = await import("./actions");
 
 const validInput = {
   displayName: "Alice",

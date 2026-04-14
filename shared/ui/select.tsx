@@ -5,7 +5,7 @@ import {
   RiArrowUpSLine,
   RiCheckLine,
 } from "@remixicon/react";
-import { cn } from "@shared/lib/utils.ts";
+import { cn } from "@shared/lib/utils";
 import { Select as SelectPrimitive } from "radix-ui";
 import type * as React from "react";
 

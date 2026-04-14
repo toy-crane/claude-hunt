@@ -1,4 +1,4 @@
-import type { Cohort } from "@entities/cohort/index.ts";
+import type { Cohort } from "@entities/cohort";
 import { render, screen } from "@testing-library/react";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
@@ -69,7 +69,7 @@ const cohorts: Cohort[] = [
 ];
 
 async function renderPage(search: Record<string, string> = {}) {
-  const Page = (await import("./page.tsx")).default;
+  const Page = (await import("./page")).default;
   const jsx = await Page({ searchParams: Promise.resolve(search) });
   render(jsx);
 }

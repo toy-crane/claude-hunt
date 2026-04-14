@@ -1,6 +1,6 @@
-export type { SubmitProjectResult } from "./api/actions.ts";
-export { submitProject } from "./api/actions.ts";
-export type { SubmitProjectInput } from "./api/schema.ts";
+export type { SubmitProjectResult } from "./api/actions";
+export { submitProject } from "./api/actions";
+export type { SubmitProjectInput } from "./api/schema";
 export {
   ALLOWED_SCREENSHOT_MIME_TYPES,
   MAX_SCREENSHOT_BYTES,
@@ -8,9 +8,9 @@ export {
   MAX_TITLE_LENGTH,
   submitProjectInputSchema,
   validateScreenshotFile,
-} from "./api/schema.ts";
-export { uploadScreenshot } from "./lib/upload-screenshot.ts";
-export type { SubmitDialogProps } from "./ui/submit-dialog.tsx";
-export { SubmitDialog } from "./ui/submit-dialog.tsx";
-export type { SubmitFormProps } from "./ui/submit-form.tsx";
-export { SubmitForm } from "./ui/submit-form.tsx";
+} from "./api/schema";
+export { uploadScreenshot } from "./lib/upload-screenshot";
+export type { SubmitDialogProps } from "./ui/submit-dialog";
+export { SubmitDialog } from "./ui/submit-dialog";
+export type { SubmitFormProps } from "./ui/submit-form";
+export { SubmitForm } from "./ui/submit-form";

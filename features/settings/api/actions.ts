@@ -1,9 +1,9 @@
 "use server";
 
-import { createClient } from "@shared/api/supabase/server.ts";
+import { createClient } from "@shared/api/supabase/server";
 import { revalidatePath } from "next/cache";
 
-import { displayNameSchema } from "./schema.ts";
+import { displayNameSchema } from "./schema";
 
 export type UpdateDisplayNameResult =
   | { ok: true }

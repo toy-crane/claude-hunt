@@ -1,1 +1,1 @@
-export { type DownscaleResult, downscaleImage } from "./downscale.ts";
+export { type DownscaleResult, downscaleImage } from "./downscale";

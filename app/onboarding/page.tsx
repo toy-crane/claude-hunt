@@ -1,6 +1,6 @@
-import { fetchCohorts } from "@features/cohort-filter/index.ts";
-import { OnboardingForm } from "@features/onboarding/index.ts";
-import { createClient } from "@shared/api/supabase/server.ts";
+import { fetchCohorts } from "@features/cohort-filter";
+import { OnboardingForm } from "@features/onboarding";
+import { createClient } from "@shared/api/supabase/server";
 import { redirect } from "next/navigation";
 
 interface OnboardingPageProps {

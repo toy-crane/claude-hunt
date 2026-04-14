@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { onboardingInputSchema } from "./schema.ts";
+import { onboardingInputSchema } from "./schema";
 
 const validUuid = "a1b2c3d4-5678-4abc-9def-0123456789ab";
 

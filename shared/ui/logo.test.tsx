@@ -1,6 +1,6 @@
 import { render, screen } from "@testing-library/react";
 import { vi } from "vitest";
-import { Logo } from "./logo.tsx";
+import { Logo } from "./logo";
 
 vi.mock("next/link", () => ({
   default: ({

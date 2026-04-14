@@ -16,7 +16,7 @@ vi.mock("@core/providers/theme-provider.tsx", () => ({
   ThemeProvider: ({ children }: { children: React.ReactNode }) => children,
 }));
 
-const { metadata } = await import("./layout.tsx");
+const { metadata } = await import("./layout");
 
 describe("app/layout metadata", () => {
   it("sets the default title to 'claude-hunt'", () => {

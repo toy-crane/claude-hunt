@@ -26,7 +26,7 @@ vi.mock("@supabase/ssr", () => ({
   createServerClient: vi.fn().mockReturnValue(mockClient),
 }));
 
-const { proxy, config, isOnboardingBypassPath } = await import("./proxy.ts");
+const { proxy, config, isOnboardingBypassPath } = await import("./proxy");
 
 function buildRequest(path: string) {
   return new NextRequest(new URL(path, "http://app.test"));

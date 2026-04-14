@@ -1,4 +1,4 @@
-import { cn } from "@shared/lib/utils.ts";
+import { cn } from "@shared/lib/utils";
 
 const RANK_LABEL: Record<1 | 2 | 3, string> = {
   1: "1st",

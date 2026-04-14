@@ -1,5 +1,5 @@
-import type { ProjectWithVoteCount } from "@entities/vote/index.ts";
-import { createClient } from "@shared/api/supabase/server.ts";
+import type { ProjectWithVoteCount } from "@entities/vote";
+import { createClient } from "@shared/api/supabase/server";
 
 export interface FetchProjectsOptions {
   cohortId?: string | null;

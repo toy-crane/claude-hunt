@@ -1,6 +1,6 @@
-import { createClient } from "@shared/api/supabase/client.ts";
-import { downscaleImage } from "@shared/lib/image/index.ts";
-import { validateScreenshotFile } from "../api/schema.ts";
+import { createClient } from "@shared/api/supabase/client";
+import { downscaleImage } from "@shared/lib/image";
+import { validateScreenshotFile } from "../api/schema";
 
 export interface UploadScreenshotResult {
   error?: string;
