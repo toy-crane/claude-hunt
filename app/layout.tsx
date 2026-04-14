@@ -1,10 +1,15 @@
 import type { Metadata } from "next";
-import { Geist_Mono, Noto_Sans } from "next/font/google";
+import { Geist_Mono, Inter, JetBrains_Mono } from "next/font/google";
 
 import "./globals.css";
 import { ThemeProvider } from "@core/providers/theme-provider.tsx";
 import { cn } from "@shared/lib/utils.ts";
 import { Toaster } from "@shared/ui/sonner.tsx";
+
+const fontHeading = JetBrains_Mono({
+  subsets: ["latin"],
+  variable: "--font-heading",
+});
 
 export const metadata: Metadata = {
   metadataBase: new URL("https://www.claude-hunt.com"),
@@ -34,7 +39,7 @@ export const metadata: Metadata = {
   },
 };
 
-const notoSans = Noto_Sans({ subsets: ["latin"], variable: "--font-sans" });
+const inter = Inter({ subsets: ["latin"], variable: "--font-sans" });
 
 const fontMono = Geist_Mono({
   subsets: ["latin"],
@@ -52,7 +57,8 @@ export default function RootLayout({
         "antialiased",
         fontMono.variable,
         "font-sans",
-        notoSans.variable
+        inter.variable,
+        fontHeading.variable
       )}
       lang="en"
       suppressHydrationWarning
