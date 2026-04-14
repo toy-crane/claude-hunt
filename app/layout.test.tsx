@@ -55,4 +55,10 @@ describe("app/layout metadata", () => {
     const twitter = metadata.twitter as { card?: string } | null | undefined;
     expect(twitter?.card).toBe("summary_large_image");
   });
+
+  it("sets metadataBase to the production origin so OG/Twitter image URLs resolve absolute", () => {
+    const base = metadata.metadataBase;
+    expect(base).toBeInstanceOf(URL);
+    expect((base as URL).origin).toBe("https://www.claude-hunt.com");
+  });
 });
