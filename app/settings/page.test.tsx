@@ -3,12 +3,10 @@ import { beforeEach, describe, expect, it, vi } from "vitest";
 
 const BACK_HOME_LABEL = /back to home/i;
 const SETTINGS_HEADING = /^settings$/i;
-const LOG_OUT_LABEL = /^log out$/i;
 const WITHDRAW_LABEL = /^withdraw$/i;
 const DELETE_ACCOUNT_HEADING = /^delete account$/i;
 const DANGER_WARNING =
   /permanently remove your profile, projects, and votes\. this cannot be undone\./i;
-const ACCOUNT_REGION = /^account$/i;
 const DANGER_ZONE_REGION = /^danger zone$/i;
 
 vi.mock("next/link", () => ({
@@ -43,10 +41,6 @@ const fetchViewerMock = vi.fn();
 
 vi.mock("@shared/api/supabase/viewer", () => ({
   fetchViewer: (...args: unknown[]) => fetchViewerMock(...args),
-}));
-
-vi.mock("@features/auth-login", () => ({
-  signOut: vi.fn(),
 }));
 
 vi.mock("@features/withdraw-user", () => ({
@@ -115,7 +109,7 @@ describe("settings page", () => {
     );
   });
 
-  it("renders Profile, Account, and Danger Zone section headings in order", async () => {
+  it("renders Profile and Danger Zone section headings in order", async () => {
     fetchViewerMock.mockResolvedValue({
       id: "user-1",
       email: "alice@example.com",
@@ -131,27 +125,7 @@ describe("settings page", () => {
     const sectionHeadings = screen
       .getAllByRole("heading", { level: 2 })
       .map((h) => h.textContent?.trim());
-    expect(sectionHeadings).toEqual(["Profile", "Account", "Danger Zone"]);
-  });
-
-  it("renders the Log out button inside the Account section", async () => {
-    fetchViewerMock.mockResolvedValue({
-      id: "user-1",
-      email: "alice@example.com",
-      displayName: "Alice",
-      avatarUrl: null,
-      cohortId: null,
-    });
-
-    const Page = (await import("./page.tsx")).default;
-    const jsx = await Page();
-    render(jsx);
-
-    const accountSection = screen.getByRole("region", { name: ACCOUNT_REGION });
-    const logOut = within(accountSection).getByRole("button", {
-      name: LOG_OUT_LABEL,
-    });
-    expect(logOut.closest("form")).not.toBeNull();
+    expect(sectionHeadings).toEqual(["Profile", "Danger Zone"]);
   });
 
   it("renders the Delete account row with a Withdraw button and warning text in Danger Zone", async () => {
