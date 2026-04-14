@@ -17,6 +17,9 @@ export const metadata: Metadata = {
     index: true,
     follow: true,
   },
+  alternates: {
+    canonical: "/",
+  },
   openGraph: {
     title: "claude-hunt",
     description: "Discover what the cohort is building.",

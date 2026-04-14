@@ -70,4 +70,8 @@ describe("app/layout metadata", () => {
     expect(robots?.index).toBe(true);
     expect(robots?.follow).toBe(true);
   });
+
+  it("declares a canonical URL pointing to site root so query-string variants collapse", () => {
+    expect(metadata.alternates?.canonical).toBe("/");
+  });
 });
