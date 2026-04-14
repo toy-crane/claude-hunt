@@ -1,12 +1,12 @@
 "use client";
 
 import { createClient } from "@shared/api/supabase/client.ts";
+import { AuthLayout } from "@shared/ui/auth-layout.tsx";
 import { Button } from "@shared/ui/button.tsx";
 import { GitHubIcon } from "@shared/ui/icons/github.tsx";
 import { GoogleIcon } from "@shared/ui/icons/google.tsx";
 import { Input } from "@shared/ui/input.tsx";
 import { Label } from "@shared/ui/label.tsx";
-import { Logo } from "@shared/ui/logo.tsx";
 import Link from "next/link";
 import { useState } from "react";
 
@@ -49,16 +49,12 @@ export function LoginForm() {
   }
 
   return (
-    <section className="flex min-h-screen items-center justify-center bg-zinc-50 px-4 py-16 md:py-32 dark:bg-transparent">
-      <form className="w-full max-w-sm" onSubmit={handleEmailLogin}>
-        <div>
-          <Logo blink className="text-3xl" />
-          <p className="mt-2 text-muted-foreground text-sm">
-            Sign in to your account to continue
-          </p>
-        </div>
-
-        <div className="mt-6 grid grid-cols-2 gap-3">
+    <AuthLayout
+      description="Sign in to your account to continue"
+      title="Welcome back"
+    >
+      <form onSubmit={handleEmailLogin}>
+        <div className="grid grid-cols-2 gap-3">
           <Button
             disabled={loading !== null}
             onClick={() => handleOAuthLogin("github")}
@@ -139,6 +135,6 @@ export function LoginForm() {
           .
         </p>
       </form>
-    </section>
+    </AuthLayout>
   );
 }

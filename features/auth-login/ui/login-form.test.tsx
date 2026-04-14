@@ -55,11 +55,51 @@ describe("login", () => {
     expect(link).toHaveAttribute("href", "/");
   });
 
-  it("animates the login logo cursor (blink is allowed only on the login hero)", () => {
+  it("animates the login logo cursor", () => {
     render(<LoginForm />);
     const cursor = screen.getByText("_");
     expect(cursor.style.animationName).toBe("logo-cursor-blink");
     expect(cursor.style.animationDuration).toBe("1s");
+  });
+
+  it("renders exactly one h1 with 'Welcome back' as the page heading", () => {
+    const { container } = render(<LoginForm />);
+    const headings = container.querySelectorAll("h1");
+    expect(headings).toHaveLength(1);
+    expect(headings[0].textContent).toBe("Welcome back");
+  });
+
+  it("renders the subtitle 'Sign in to your account to continue' after the h1", () => {
+    const { container } = render(<LoginForm />);
+    const heading = screen.getByRole("heading", { level: 1 });
+    const subtitle = screen.getByText("Sign in to your account to continue");
+    const all = Array.from(container.querySelectorAll("*"));
+    expect(all.indexOf(subtitle)).toBeGreaterThan(all.indexOf(heading));
+  });
+
+  it("renders the shared page-shell classes (unified with /onboarding)", () => {
+    const { container } = render(<LoginForm />);
+    const section = container.querySelector("section");
+    expect(section).not.toBeNull();
+    for (const cls of [
+      "flex",
+      "min-h-screen",
+      "items-center",
+      "justify-center",
+      "bg-zinc-50",
+      "px-4",
+      "py-16",
+      "md:py-32",
+      "dark:bg-transparent",
+    ]) {
+      expect(section?.className).toContain(cls);
+    }
+  });
+
+  it("has exactly one claude-hunt Logo on /login (single source of header truth)", () => {
+    render(<LoginForm />);
+    const logos = screen.getAllByRole("link", { name: "claude-hunt home" });
+    expect(logos).toHaveLength(1);
   });
 
   it("shows OTP sent confirmation after entering email and clicking Continue", async () => {

@@ -58,7 +58,7 @@ Success Criteria:
 
 ## Invariants
 - **Name consistency**: no rendered page displays the old "Claude Hunt" string. Every visible product-name reference is `claude-hunt`. (Stored data is excluded per Scope.)
-- **Motion restraint**: the blinking cursor is confined to the login hero. No other surface animates the cursor, so the animation never appears twice on the same screen.
+- **Motion policy**: the blinking cursor appears on every screen that uses the Logo as its page hero. Today that is `/login` and `/onboarding` (see `artifacts/fit-login-onboarding/spec.md`, which supersedes an earlier "login-only" version of this rule). Non-hero Logo placements remain static.
 - **No collateral theme changes**: buttons, input styles, focus rings, body fonts, and any other existing visual element is unchanged by this feature.
 
 ## Dependencies

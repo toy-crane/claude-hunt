@@ -3,6 +3,7 @@
 import type { Cohort } from "@entities/cohort/index.ts";
 import { createClient } from "@shared/api/supabase/client.ts";
 import { Alert, AlertDescription, AlertTitle } from "@shared/ui/alert.tsx";
+import { AuthLayout } from "@shared/ui/auth-layout.tsx";
 import { Button } from "@shared/ui/button.tsx";
 import {
   Field,
@@ -106,23 +107,15 @@ export function OnboardingForm({ cohorts, initialNext }: OnboardingFormProps) {
   const submitDisabled = isPending || isSigningOut || noCohorts;
 
   return (
-    <section className="flex min-h-screen items-center justify-center bg-zinc-50 px-4 py-16 md:py-32 dark:bg-transparent">
+    <AuthLayout
+      description="Pick a cohort and set your display name to start submitting projects."
+      title="Set up your profile"
+    >
       <form
         aria-label="Complete onboarding"
-        className="flex w-full max-w-sm flex-col gap-6"
+        className="flex flex-col gap-6"
         onSubmit={handleSubmit}
       >
-        <div>
-          <span className="font-bold text-xl">Claude Hunt</span>
-          <h1 className="mt-4 mb-1 font-semibold text-xl">
-            Welcome! Let&apos;s set up your profile
-          </h1>
-          <p className="text-muted-foreground text-sm">
-            Pick a cohort and set your display name to start submitting
-            projects.
-          </p>
-        </div>
-
         <FieldGroup>
           <Field>
             <FieldLabel htmlFor={displayNameId}>Display name</FieldLabel>
@@ -229,6 +222,6 @@ export function OnboardingForm({ cohorts, initialNext }: OnboardingFormProps) {
           Sign out
         </Button>
       </form>
-    </section>
+    </AuthLayout>
   );
 }
