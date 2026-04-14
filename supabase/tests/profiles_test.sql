@@ -3,9 +3,11 @@
 --   RLS: authenticated can see ALL profiles (for card author names)
 --   RLS: anon cannot see profiles         (tests #12-13)
 --   RLS update own / block others         (tests #20-21)
+--   display_name is NOT auto-populated by the trigger — set exclusively
+--   by the onboarding flow (feat/onboarding-process)
 
 BEGIN;
-SELECT plan(21);
+SELECT plan(22);
 
 -- 1. Table exists
 SELECT has_table('public', 'profiles', 'profiles table should exist');
@@ -98,10 +100,16 @@ SELECT lives_ok(
   'Inserting into auth.users should succeed'
 );
 
+SELECT is(
+  (SELECT display_name FROM profiles WHERE id = '00000000-0000-0000-0000-000000000099'),
+  NULL,
+  'Trigger should NOT populate display_name — onboarding is the sole writer'
+);
+
 SELECT results_eq(
-  $$SELECT display_name FROM profiles WHERE id = '00000000-0000-0000-0000-000000000099'$$,
+  $$SELECT full_name FROM profiles WHERE id = '00000000-0000-0000-0000-000000000099'$$,
   ARRAY['Test User'::text],
-  'Trigger should create profile with display_name = full_name'
+  'Trigger should still populate full_name from OAuth full_name metadata'
 );
 
 -- 15-16. Trigger fallback to 'name' metadata key
