@@ -1,3 +1,7 @@
+## Site
+
+- Production URL: `https://www.claude-hunt.com`
+
 ## Workflow Phases
 
 Define → Plan → Build → Verify → Review → Ship
