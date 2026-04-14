@@ -1,8 +1,12 @@
--- pgTAP tests for RLS on storage.objects in the `project-screenshots`
--- bucket. Bucket config itself (public, 5 MiB, JPEG/PNG/WebP) lives in
--- supabase/config.toml and is verified implicitly by the E2E upload
--- flow (Task 12) and by supabase start loading the config without
--- error.
+-- pgTAP tests for the `project-screenshots` storage bucket: row settings
+-- and RLS on storage.objects.
+--
+-- BUCKET SOURCE OF TRUTH:
+--   supabase/migrations/20260414085808_create_project_screenshots_bucket.sql
+--   is the canonical definition of this bucket for any non-local environment.
+--   supabase/config.toml mirrors the same values for local development only.
+--   Tests #1-4 below verify that the migration's declared values are actually
+--   present after `supabase db reset`.
 
 BEGIN;
 SELECT plan(8);
