@@ -2,7 +2,6 @@ import type { ProjectWithVoteCount } from "@entities/vote";
 import { createClient } from "@shared/api/supabase/server";
 
 export interface FetchProjectsOptions {
-  cohortId?: string | null;
   /**
    * When set, a parallel query pulls the viewer's votes so each returned
    * row can expose a `viewer_has_voted` flag. Null means anonymous.
@@ -26,15 +25,11 @@ export async function fetchProjects(
   options: FetchProjectsOptions = {}
 ): Promise<ProjectGridRow[]> {
   const supabase = await createClient();
-  let projectsQuery = supabase
+  const projectsQuery = supabase
     .from("projects_with_vote_count")
     .select("*")
     .order("vote_count", { ascending: false })
     .order("created_at", { ascending: false });
-
-  if (options.cohortId) {
-    projectsQuery = projectsQuery.eq("cohort_id", options.cohortId);
-  }
 
   // Fire both queries concurrently — the votes query is independent of
   // the projects query and both hit the same Postgres backend.

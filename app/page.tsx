@@ -1,11 +1,11 @@
-import { CohortDropdown, fetchCohorts } from "@features/cohort-filter";
+import { fetchCohorts } from "@features/cohort-filter/server";
 import { SubmitDialog } from "@features/submit-project";
+import { createClient } from "@shared/api/supabase/server";
 import { fetchViewer } from "@shared/api/supabase/viewer";
 import { Separator } from "@shared/ui/separator";
 import { Header } from "@widgets/header";
-import { ProjectGridSkeleton } from "@widgets/project-grid";
-import { Suspense } from "react";
-import { ProjectGridSection } from "./_components/project-grid-section";
+import { fetchProjects } from "@widgets/project-grid/server";
+import { ProjectBoard } from "./_components/project-board";
 
 interface PageProps {
   searchParams: Promise<{ cohort?: string }>;
@@ -16,6 +16,20 @@ export default async function Page({ searchParams }: PageProps) {
   const selectedCohortId = cohortParam ?? null;
 
   const [viewer, cohorts] = await Promise.all([fetchViewer(), fetchCohorts()]);
+
+  const [supabase, projects] = await Promise.all([
+    createClient(),
+    fetchProjects({ viewerUserId: viewer?.id ?? null }),
+  ]);
+
+  const projectsWithScreenshots = projects.map((project) => ({
+    ...project,
+    screenshotUrl: project.screenshot_path
+      ? supabase.storage
+          .from("project-screenshots")
+          .getPublicUrl(project.screenshot_path).data.publicUrl
+      : "",
+  }));
 
   return (
     <>
@@ -40,30 +54,15 @@ export default async function Page({ searchParams }: PageProps) {
           </div>
 
           <Separator />
-
-          <div className="flex items-center justify-end gap-2">
-            <span aria-hidden="true" className="text-muted-foreground text-xs">
-              Filter by cohort
-            </span>
-            <Suspense fallback={null}>
-              <CohortDropdown
-                cohorts={cohorts}
-                selectedCohortId={selectedCohortId}
-              />
-            </Suspense>
-          </div>
         </section>
 
-        <Suspense
-          fallback={<ProjectGridSkeleton />}
-          key={selectedCohortId ?? "all"}
-        >
-          <ProjectGridSection
-            cohortId={selectedCohortId}
-            isAuthenticated={Boolean(viewer)}
-            viewerUserId={viewer?.id ?? null}
-          />
-        </Suspense>
+        <ProjectBoard
+          cohorts={cohorts}
+          initialCohortId={selectedCohortId}
+          isAuthenticated={Boolean(viewer)}
+          projects={projectsWithScreenshots}
+          viewerUserId={viewer?.id ?? null}
+        />
       </main>
     </>
   );

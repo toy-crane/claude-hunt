@@ -14,6 +14,10 @@ const SAVE_CHANGES_BTN_RE = /save changes/i;
 const LOGIN_URL_RE = /\/login$/;
 const SUPABASE_STORAGE_URL_RE =
   /\/storage\/v1\/object\/(?:public\/)?project-screenshots\//;
+const PROJECT_LIST_URL_RE = /\/rest\/v1\/projects_with_vote_count/;
+const ALL_COHORTS_RE = /all cohorts/i;
+const VOTE_BTN_RE = /vote/i;
+const DIGITS_RE = /\d+/;
 
 const dirname = path.dirname(fileURLToPath(import.meta.url));
 const SCREENSHOT_FIXTURE = path.resolve(
@@ -374,6 +378,109 @@ test("edit upload failure keeps the original screenshot on the card", async ({
       const current = await img.getAttribute("src");
       expect(current).toBe(originalSrc);
     }).toPass({ timeout: 10_000 });
+  } finally {
+    await student?.cleanup();
+  }
+});
+
+test("switching cohorts fires no project-list network requests after initial load", async ({
+  page,
+}) => {
+  const requestsAfterReady: string[] = [];
+  let ready = false;
+  page.on("request", (req) => {
+    if (ready && PROJECT_LIST_URL_RE.test(req.url())) {
+      requestsAfterReady.push(req.url());
+    }
+  });
+
+  await page.goto("/");
+  await expect(page.getByTestId("cohort-dropdown")).toBeVisible();
+  ready = true;
+
+  const trigger = page.getByTestId("cohort-dropdown");
+  await trigger.click();
+  const firstCohort = page.getByRole("option").nth(1);
+  await firstCohort.click();
+  await trigger.click();
+  await page.getByRole("option", { name: ALL_COHORTS_RE }).click();
+
+  expect(requestsAfterReady).toEqual([]);
+});
+
+test("deep-linked cohort URL renders the filtered grid on first paint", async ({
+  page,
+}) => {
+  const admin = createAdminClient();
+  const { data: cohort } = await admin
+    .from("cohorts")
+    .select("id, label")
+    .eq("name", "LGE-1")
+    .single();
+  if (!cohort) {
+    throw new Error("LGE-1 seed missing — run supabase db reset first");
+  }
+
+  await page.goto(`/?cohort=${cohort.id}`);
+  await expect(page.getByTestId("cohort-dropdown")).toHaveText(
+    new RegExp(cohort.label)
+  );
+});
+
+test("voted project keeps its count and indicator across cohort filter toggles", async ({
+  page,
+}) => {
+  const admin = createAdminClient();
+  let student: AuthedStudent | undefined;
+
+  try {
+    student = await signInStudentWithCohort(page, admin);
+
+    await page.getByRole("button", { name: SUBMIT_PROJECT_TRIGGER_RE }).click();
+    const dialog = page.getByRole("dialog");
+    await dialog.getByLabel("Title").fill("Vote Persist Test");
+    await dialog.getByLabel("Tagline").fill("Filter persistence check");
+    await dialog
+      .getByLabel("Project URL")
+      .fill("https://vote-persist.example.com");
+    await dialog
+      .getByLabel("Screenshot")
+      .setInputFiles(SMALL_SCREENSHOT_FIXTURE);
+    await dialog.getByRole("button", { name: SUBMIT_PROJECT_BTN_RE }).click();
+    await expect(dialog).toBeHidden({ timeout: 15_000 });
+
+    const card = page
+      .getByTestId("project-card")
+      .filter({ hasText: "Vote Persist Test" })
+      .first();
+    const voteBtn = card.getByRole("button", { name: VOTE_BTN_RE });
+    const before = Number((await voteBtn.textContent())?.match(DIGITS_RE)?.[0]);
+    await voteBtn.click();
+    await expect(voteBtn).toHaveAttribute("aria-pressed", "true");
+
+    const { data: cohort } = await admin
+      .from("cohorts")
+      .select("id")
+      .eq("name", "LGE-1")
+      .single();
+    if (!cohort) {
+      throw new Error("LGE-1 seed missing");
+    }
+
+    const dropdown = page.getByTestId("cohort-dropdown");
+    await dropdown.click();
+    await page.getByRole("option", { name: ALL_COHORTS_RE }).click();
+    await dropdown.click();
+    await page.getByRole("option").nth(1).click();
+
+    const afterCard = page
+      .getByTestId("project-card")
+      .filter({ hasText: "Vote Persist Test" })
+      .first();
+    const afterBtn = afterCard.getByRole("button", { name: VOTE_BTN_RE });
+    await expect(afterBtn).toHaveAttribute("aria-pressed", "true");
+    const after = Number((await afterBtn.textContent())?.match(DIGITS_RE)?.[0]);
+    expect(after).toBe(before + 1);
   } finally {
     await student?.cleanup();
   }

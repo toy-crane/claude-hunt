@@ -14,15 +14,9 @@ vi.mock("next/navigation", () => ({
 }));
 
 const fetchCohortsMock = vi.fn<() => Promise<Cohort[]>>();
-vi.mock("@features/cohort-filter", async () => {
-  const actual = await vi.importActual<
-    typeof import("@features/cohort-filter")
-  >("@features/cohort-filter");
-  return {
-    ...actual,
-    fetchCohorts: fetchCohortsMock,
-  };
-});
+vi.mock("@features/cohort-filter/server", () => ({
+  fetchCohorts: fetchCohortsMock,
+}));
 
 vi.mock("@features/onboarding", () => ({
   OnboardingForm: ({

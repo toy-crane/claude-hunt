@@ -1,6 +1,7 @@
 import type { Cohort } from "@entities/cohort";
 import { createMockSupabaseClient } from "@shared/lib/test-utils";
 import { render, screen } from "@testing-library/react";
+import type { ProjectGridRow } from "@widgets/project-grid";
 import { vi } from "vitest";
 
 vi.mock("next/link", () => ({
@@ -24,34 +25,32 @@ vi.mock("next/navigation", () => ({
   useSearchParams: () => new URLSearchParams(),
 }));
 
-// ProjectGridSection is an async RSC; mock it so the page unit test
-// stays synchronous and doesn't require a real Supabase connection.
-const sectionMock = vi.fn(
+// ProjectBoard is a client component; stub it so we can assert the props
+// passed from the server page without rendering the grid tree.
+const boardMock = vi.fn(
   (_props: {
-    cohortId: string | null;
-    viewerUserId: string | null;
+    cohorts: Cohort[];
+    initialCohortId: string | null;
     isAuthenticated: boolean;
-  }) => <div data-testid="project-grid-section-stub" />
+    projects: unknown[];
+    viewerUserId: string | null;
+  }) => <div data-testid="project-board-stub" />
 );
-vi.mock("./_components/project-grid-section.tsx", () => ({
-  ProjectGridSection: (props: {
-    cohortId: string | null;
-    viewerUserId: string | null;
+vi.mock("./_components/project-board", () => ({
+  ProjectBoard: (props: {
+    cohorts: Cohort[];
+    initialCohortId: string | null;
     isAuthenticated: boolean;
-  }) => sectionMock(props),
+    projects: unknown[];
+    viewerUserId: string | null;
+  }) => boardMock(props),
 }));
 
 const fetchCohortsMock = vi.fn<() => Promise<Cohort[]>>();
 
-vi.mock("@features/cohort-filter", async () => {
-  const actual = await vi.importActual<
-    typeof import("@features/cohort-filter")
-  >("@features/cohort-filter");
-  return {
-    ...actual,
-    fetchCohorts: fetchCohortsMock,
-  };
-});
+vi.mock("@features/cohort-filter/server", () => ({
+  fetchCohorts: fetchCohortsMock,
+}));
 
 vi.mock("@features/submit-project", () => ({
   SubmitDialog: ({
@@ -75,17 +74,11 @@ vi.mock("@widgets/header", () => ({
   Header: () => <div data-testid="site-header-stub" />,
 }));
 
-// Skeleton: rendered as a Suspense fallback — stub it so the unit test
-// doesn't need any CSS / animation infrastructure.
-vi.mock("@widgets/project-grid", async () => {
-  const actual = await vi.importActual<typeof import("@widgets/project-grid")>(
-    "@widgets/project-grid"
-  );
-  return {
-    ...actual,
-    ProjectGridSkeleton: () => <div data-testid="project-grid-skeleton-stub" />,
-  };
-});
+const fetchProjectsMock = vi.fn<() => Promise<ProjectGridRow[]>>();
+
+vi.mock("@widgets/project-grid/server", () => ({
+  fetchProjects: fetchProjectsMock,
+}));
 
 const profileSingle = vi
   .fn()
@@ -100,6 +93,13 @@ const mockClient = {
       }),
     }),
   }),
+  storage: {
+    from: vi.fn().mockReturnValue({
+      getPublicUrl: (path: string) => ({
+        data: { publicUrl: `https://cdn.example.com/${path}` },
+      }),
+    }),
+  },
 };
 
 vi.mock("@shared/api/supabase/server", () => ({
@@ -125,6 +125,7 @@ const cohorts: Cohort[] = [
 
 async function renderPage(search: Record<string, string> = {}) {
   fetchCohortsMock.mockResolvedValue(cohorts);
+  fetchProjectsMock.mockResolvedValue([]);
   const Page = (await import("./page")).default;
   const jsx = await Page({ searchParams: Promise.resolve(search) });
   render(jsx);
@@ -135,18 +136,59 @@ describe("home page", () => {
     vi.clearAllMocks();
   });
 
-  it("passes the cohort searchParam to ProjectGridSection as cohortId", async () => {
+  it("passes the cohort searchParam to ProjectBoard as initialCohortId", async () => {
     await renderPage({ cohort: "a1" });
-    expect(sectionMock).toHaveBeenCalledWith(
-      expect.objectContaining({ cohortId: "a1" })
+    expect(boardMock).toHaveBeenCalledWith(
+      expect.objectContaining({ initialCohortId: "a1" })
     );
   });
 
-  it("passes null cohortId to ProjectGridSection when no cohort param is set", async () => {
+  it("passes null initialCohortId to ProjectBoard when no cohort param is set", async () => {
     await renderPage();
-    expect(sectionMock).toHaveBeenCalledWith(
-      expect.objectContaining({ cohortId: null })
+    expect(boardMock).toHaveBeenCalledWith(
+      expect.objectContaining({ initialCohortId: null })
     );
+  });
+
+  it("fetches projects once without a cohort filter on the server", async () => {
+    await renderPage({ cohort: "a1" });
+    expect(fetchProjectsMock).toHaveBeenCalledTimes(1);
+    expect(fetchProjectsMock).toHaveBeenCalledWith(
+      expect.objectContaining({ viewerUserId: null })
+    );
+    // Server must NOT narrow the query by cohort — the client filters.
+    expect(fetchProjectsMock).not.toHaveBeenCalledWith(
+      expect.objectContaining({ cohortId: expect.anything() })
+    );
+  });
+
+  it("resolves screenshotUrl server-side for each project", async () => {
+    fetchProjectsMock.mockResolvedValueOnce([
+      {
+        id: "p1",
+        title: "A",
+        user_id: "u1",
+        cohort_id: "a1",
+        cohort_name: "LGE-1",
+        tagline: "t",
+        project_url: "https://example.com",
+        screenshot_path: "u1/p1.png",
+        created_at: "2026-04-14T00:00:00Z",
+        updated_at: "2026-04-14T00:00:00Z",
+        vote_count: 0,
+        author_display_name: "A",
+        author_avatar_url: null,
+        viewer_has_voted: false,
+      },
+    ] as ProjectGridRow[]);
+
+    await renderPage();
+
+    const call = boardMock.mock.calls[0][0];
+    expect(call.projects[0]).toMatchObject({
+      id: "p1",
+      screenshotUrl: "https://cdn.example.com/u1/p1.png",
+    });
   });
 
   it("renders the SubmitDialog trigger for signed-out visitors", async () => {
