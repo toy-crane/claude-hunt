@@ -19,7 +19,9 @@ export function Logo({ blink = false, className }: LogoProps) {
       )}
       href="/"
     >
-      <span className={ACCENT}>&gt;</span>
+      <span aria-hidden="true" className={ACCENT}>
+        &gt;
+      </span>
       <span>claude-hunt</span>
       <span
         aria-hidden="true"
