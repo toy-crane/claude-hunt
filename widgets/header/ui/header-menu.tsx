@@ -1,8 +1,11 @@
 "use client";
 
+import { signOut } from "@features/auth-login/index.ts";
 import {
   RiComputerLine,
+  RiLogoutBoxRLine,
   RiMoonLine,
+  RiSettings3Line,
   RiSunLine,
   RiUserLine,
 } from "@remixicon/react";
@@ -10,12 +13,14 @@ import { Avatar, AvatarFallback, AvatarImage } from "@shared/ui/avatar.tsx";
 import {
   DropdownMenu,
   DropdownMenuContent,
-  DropdownMenuGroup,
+  DropdownMenuItem,
   DropdownMenuLabel,
   DropdownMenuRadioGroup,
   DropdownMenuRadioItem,
+  DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@shared/ui/dropdown-menu.tsx";
+import Link from "next/link";
 import { useTheme } from "next-themes";
 
 interface HeaderMenuProps {
@@ -64,9 +69,21 @@ export function HeaderMenu({ displayName, avatarUrl }: HeaderMenuProps) {
             <span>System</span>
           </DropdownMenuRadioItem>
         </DropdownMenuRadioGroup>
-        <DropdownMenuGroup>
-          {/* Populated in Task 6 (Settings + Log out). */}
-        </DropdownMenuGroup>
+        <DropdownMenuSeparator />
+        <DropdownMenuItem asChild>
+          <Link href="/settings">
+            <RiSettings3Line />
+            <span>Settings</span>
+          </Link>
+        </DropdownMenuItem>
+        <form action={signOut}>
+          <DropdownMenuItem asChild>
+            <button className="w-full" type="submit">
+              <RiLogoutBoxRLine />
+              <span>Log out</span>
+            </button>
+          </DropdownMenuItem>
+        </form>
       </DropdownMenuContent>
     </DropdownMenu>
   );
