@@ -6,7 +6,15 @@
 **Decision**: Run `design-reviewer` and `react-reviewer` at Step 5 in parallel (static code review). Defer `wireframe-reviewer` and `ui-quality-reviewer` to a manual pass because the `/onboarding` screen only renders for signed-in users whose `profiles.cohort_id` is null, and seeding that auth state for a headless browser reviewer is more work than the review is worth at this stage. Unit tests in `features/onboarding/ui/onboarding-form.test.tsx` already verify the rendered tree matches the wireframe's three screens (base, validation errors, no-cohorts empty state).
 **Why**: Visual reviewers need screenshots. Screenshots need a specific auth state that the reviewer agents can't provision alone. The risk is low: the wireframe was structural (layout, hierarchy, empty-state shape), and the implementation is built on shadcn primitives shared with the rest of the app — visual drift is unlikely.
 **Harness Signal**: SKILL.md says "wireframe-reviewer — when wireframe.html exists AND there are UI change tasks". In practice there's an unstated third precondition: the UI must be reachable by a stateless fetch. Skill should document the auth-state prerequisite and suggest when to defer.
-**Result**: Pending
+**Result**: Success — design-reviewer + react-reviewer both completed; feedback applied in commit `refactor(onboarding): apply reviewer feedback`. Visual review deferred as planned.
+
+## Accepted feedback at Step 5
+
+**When**: Step 5, reviewer feedback triage
+**Decision**: Applied four items (try/finally on signOut, parallel page.tsx queries, drop empty Suspense, add "or" Separator). Deferred three items: (a) `bg-zinc-50` → `bg-muted` token, (b) error-text → `FieldDescription` + `data-invalid` pattern, (c) header margin stacking → `flex flex-col gap-*`.
+**Why**: The deferred items would each require a parallel edit to existing unchanged code (`features/auth-login/ui/login-form.tsx` uses the exact same `bg-zinc-50` pattern; `features/submit-project/ui/submit-form.tsx` uses the same bare `<p className="text-destructive text-xs">` for errors). Changing only the onboarding form would create inconsistency inside the repo. The larger refactor is a separate, project-wide task — scope discipline.
+**Harness Signal**: `design-reviewer` should either (a) also inspect the baseline code it's being compared to and flag pre-existing violations as context, or (b) have a "same as project baseline" verdict so repeated patterns don't get treated as new regressions. Otherwise every new feature keeps re-triggering the same "must fix" on decisions inherited from existing scaffolding.
+**Result**: Success — applied items land cleanly; deferred items documented as a separate follow-up (project-wide token sweep + error-rendering convention update).
 
 ## Task order: 1 → 2 → 3 → 4 → 5 → 6 (strict linear)
 
