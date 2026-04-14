@@ -1,0 +1,528 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Wireframe: fit-login-onboarding</title>
+<script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
+<script src="https://unpkg.com/lucide@latest"></script>
+<style>
+  :root {
+    --w-bg: #f5f5f5;
+    --w-border: #ccc;
+    --w-text: #555;
+    --w-muted: #aaa;
+    --w-fill: #eee;
+  }
+
+  * {
+    font-family: ui-monospace, SFMono-Regular, "SF Mono", Menlo, Consolas, monospace;
+    color: var(--w-text);
+  }
+
+  body { background: var(--w-bg); }
+
+  /* Screen nav */
+  nav { position: sticky; top: 0; z-index: 40; background: var(--w-bg); border-bottom: 1px solid var(--w-border); }
+  nav button { cursor: pointer; font-size: 13px; }
+  nav button:hover { background: var(--w-fill); border-radius: 4px; }
+  nav button.active { font-weight: bold; border-bottom: 2px solid var(--w-text); }
+
+  .screen { display: none; }
+  .screen.active { display: block; }
+
+  /* Viewport toggle */
+  .vp-toggle button {
+    font-size: 12px; padding: 2px 8px;
+    border: 1px solid var(--w-border); cursor: pointer; background: white;
+  }
+  .vp-toggle button:first-child { border-radius: 4px 0 0 4px; }
+  .vp-toggle button:last-child { border-radius: 0 4px 4px 0; border-left: none; }
+  .vp-toggle button.active { background: var(--w-text); color: white; }
+
+  /* Mobile viewport frame */
+  body.viewport-mobile .screen-content {
+    max-width: 375px !important;
+    margin: 24px auto !important;
+    border: 2px solid var(--w-border);
+    border-radius: 24px;
+    min-height: 667px;
+    background: white;
+    box-shadow: 0 4px 24px rgba(0,0,0,0.08);
+    padding: 32px 16px !important;
+  }
+
+  /* Screen Notes */
+  .screen-notes {
+    background: #fffde7;
+    border-left: 3px solid #ffd54f;
+    padding: 12px 16px;
+    margin-top: 24px;
+    font-size: 13px;
+    border-radius: 0 4px 4px 0;
+  }
+  .screen-notes summary {
+    cursor: pointer;
+    font-weight: bold;
+    font-size: 12px;
+    color: #b0a050;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+  }
+  .screen-notes p { margin: 6px 0 2px; color: #777; }
+  .screen-notes ul { margin: 4px 0 0 16px; padding: 0; color: #777; }
+  .screen-notes li { margin: 2px 0; }
+
+  /* Logo cursor blink — mirrors shared/ui/logo.tsx motion */
+  @keyframes w-cursor-blink {
+    0%, 50% { opacity: 1; }
+    50.01%, 100% { opacity: 0; }
+  }
+  .w-cursor-blink {
+    animation: w-cursor-blink 1s steps(1) infinite;
+  }
+
+  /* Page-shell mimic (auth/onboarding share this) */
+  .w-page-shell {
+    background: var(--w-bg);
+    min-height: 100%;
+    padding: 64px 16px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+  .w-form-block {
+    width: 100%;
+    max-width: 384px;   /* mirrors Tailwind max-w-sm */
+    background: white;
+    border: 1px dashed var(--w-border);
+    border-radius: 8px;
+    padding: 24px;
+  }
+
+  /* Wireframe form primitives */
+  .w-input, .w-select {
+    width: 100%;
+    border: 1px solid var(--w-border);
+    background: var(--w-fill);
+    padding: 8px 10px;
+    font-size: 13px;
+    border-radius: 4px;
+    color: var(--w-muted);
+  }
+  .w-btn {
+    display: inline-flex; align-items: center; justify-content: center;
+    gap: 6px;
+    width: 100%;
+    border: 1px solid var(--w-border);
+    background: white;
+    padding: 8px 10px;
+    font-size: 13px;
+    border-radius: 4px;
+    cursor: pointer;
+  }
+  .w-btn-primary {
+    background: var(--w-text);
+    color: white;
+    border-color: var(--w-text);
+  }
+  .w-label { font-size: 12px; color: var(--w-text); }
+  .w-help  { font-size: 11px; color: var(--w-muted); }
+  .w-err   { font-size: 11px; color: #b4443a; }
+  .w-divider {
+    display: grid; grid-template-columns: 1fr auto 1fr; align-items: center; gap: 12px;
+  }
+  .w-divider hr { border: none; border-top: 1px dashed var(--w-border); }
+  .w-divider span { font-size: 11px; color: var(--w-muted); }
+
+  /* Accent (terracotta) — only for Logo's > and _  */
+  .w-accent { color: #c15f3c; }
+</style>
+</head>
+<body class="p-0 m-0 viewport-mobile">
+
+<nav class="flex items-center gap-4 px-6 py-2">
+  <span class="text-xs" style="color:var(--w-muted)">wireframe · fit-login-onboarding</span>
+  <button id="nav-0" onclick="show(0)" class="px-2 py-1">Login</button>
+  <button id="nav-1" onclick="show(1)" class="px-2 py-1">Login · OTP sent</button>
+  <button id="nav-2" onclick="show(2)" class="px-2 py-1">Onboarding</button>
+  <button id="nav-3" onclick="show(3)" class="px-2 py-1">Onboarding · no cohorts</button>
+  <button id="nav-4" onclick="show(4)" class="px-2 py-1">Side-by-side</button>
+  <div class="vp-toggle flex ml-auto">
+    <button id="vp-desktop" onclick="setViewport('desktop')">Desktop</button>
+    <button id="vp-mobile" onclick="setViewport('mobile')" class="active">Mobile</button>
+  </div>
+</nav>
+
+<!-- ════════════════════════════════════════════════════════════ -->
+<!-- SCREEN 0 · LOGIN (unified header)                             -->
+<!-- ════════════════════════════════════════════════════════════ -->
+<div id="screen-0" class="screen" data-scenario="scenario-1, scenario-3, scenario-4, scenario-5">
+  <div class="screen-content @container max-w-6xl mx-auto p-6">
+
+    <h2 class="text-lg font-bold mb-5" style="color:var(--w-muted); border-bottom:1px solid var(--w-border); padding-bottom:8px;">
+      /login
+    </h2>
+
+    <div class="w-page-shell">
+      <form class="w-form-block">
+
+        <!-- HEADER BLOCK ─────────────────────────────────────── -->
+        <div>
+          <!-- Logo · text-3xl -->
+          <div class="text-3xl font-semibold tracking-tight">
+            <span class="w-accent">&gt;</span><span> claude-hunt</span><span class="w-accent w-cursor-blink">_</span>
+          </div>
+
+          <!-- mt-8 (32px) — Logo → h1 -->
+          <h1 class="mt-8 text-2xl font-semibold tracking-tight" style="color:#111">
+            Welcome back
+          </h1>
+
+          <!-- mt-1 (4px) — h1 → subtitle -->
+          <p class="mt-1 text-sm" style="color:var(--w-muted)">
+            Sign in to your account to continue
+          </p>
+        </div>
+
+        <!-- mt-8 (32px) — header → form -->
+        <div class="mt-8 grid grid-cols-2 gap-3">
+          <button type="button" class="w-btn">
+            <i data-lucide="github" class="w-4 h-4"></i>
+            <span>GitHub</span>
+          </button>
+          <button type="button" class="w-btn">
+            <i data-lucide="chrome" class="w-4 h-4"></i>
+            <span>Google</span>
+          </button>
+        </div>
+
+        <!-- my-6 (24px) — separator -->
+        <div class="my-6 w-divider">
+          <hr><span>Or continue with</span><hr>
+        </div>
+
+        <!-- Email field group · gap-2 (8px) label→input -->
+        <div class="flex flex-col gap-2">
+          <label class="w-label" for="w-email">Email</label>
+          <input id="w-email" class="w-input" placeholder="you@example.com" />
+        </div>
+
+        <!-- mt-4 (16px) — input → submit -->
+        <button type="submit" class="w-btn w-btn-primary mt-4">Continue</button>
+
+        <!-- mt-6 (24px) — footer copy -->
+        <p class="mt-6 text-center text-xs" style="color:var(--w-muted)">
+          By continuing, you agree to our <u>Terms</u> and <u>Privacy Policy</u>.
+        </p>
+      </form>
+    </div>
+
+    <div class="screen-notes">
+      <details open>
+        <summary>Notes · Scenario 1 · Login header pattern</summary>
+        <p>Entry: unauthenticated visitor opens <code>/login</code>.</p>
+        <ul>
+          <li><b>Order</b>: Logo → h1 → subtitle → form (shared with onboarding)</li>
+          <li><b>Rhythm</b>: mt-8 Logo→h1, mt-1 h1→subtitle, mt-8 header→form, gap-6 between form sections, gap-2 label→input</li>
+          <li><b>Motion</b>: underscore cursor blinks (preserved on login)</li>
+          <li><b>Transition</b>: OAuth click → /auth/callback; Email submit → OTP-sent screen (Login · OTP sent)</li>
+        </ul>
+      </details>
+    </div>
+
+  </div>
+</div>
+
+<!-- ════════════════════════════════════════════════════════════ -->
+<!-- SCREEN 1 · LOGIN · OTP SENT                                   -->
+<!-- ════════════════════════════════════════════════════════════ -->
+<div id="screen-1" class="screen" data-scenario="scenario-1, scenario-5">
+  <div class="screen-content @container max-w-6xl mx-auto p-6">
+
+    <h2 class="text-lg font-bold mb-5" style="color:var(--w-muted); border-bottom:1px solid var(--w-border); padding-bottom:8px;">
+      /login · OTP sent (existing auth spec · scenarios 1–2)
+    </h2>
+
+    <div class="w-page-shell">
+      <form class="w-form-block">
+
+        <div>
+          <div class="text-3xl font-semibold tracking-tight">
+            <span class="w-accent">&gt;</span><span> claude-hunt</span><span class="w-accent w-cursor-blink">_</span>
+          </div>
+          <h1 class="mt-8 text-2xl font-semibold tracking-tight" style="color:#111">
+            Welcome back
+          </h1>
+          <p class="mt-1 text-sm" style="color:var(--w-muted)">
+            Sign in to your account to continue
+          </p>
+        </div>
+
+        <div class="mt-8 grid grid-cols-2 gap-3">
+          <button type="button" class="w-btn" disabled style="opacity:.5">
+            <i data-lucide="github" class="w-4 h-4"></i><span>GitHub</span>
+          </button>
+          <button type="button" class="w-btn" disabled style="opacity:.5">
+            <i data-lucide="chrome" class="w-4 h-4"></i><span>Google</span>
+          </button>
+        </div>
+
+        <div class="my-6 w-divider"><hr><span>Or continue with</span><hr></div>
+
+        <!-- OTP confirmation replaces email field -->
+        <div class="flex flex-col gap-3 text-center">
+          <p class="text-sm">We sent a magic link to <b>test@example.com</b>. Check your email to sign in.</p>
+          <button type="button" class="text-xs underline" style="background:none;border:none;cursor:pointer">Try another email</button>
+        </div>
+
+        <p class="mt-6 text-center text-xs" style="color:var(--w-muted)">
+          By continuing, you agree to our <u>Terms</u> and <u>Privacy Policy</u>.
+        </p>
+      </form>
+    </div>
+
+    <div class="screen-notes">
+      <details open>
+        <summary>Notes · regression guard · existing auth spec</summary>
+        <p>Entry: user submits a valid email from the Login screen.</p>
+        <ul>
+          <li><b>No layout drift</b>: Logo / h1 / subtitle header stays identical; only the field region swaps to the OTP confirmation block</li>
+          <li><b>OAuth buttons disable</b>: prevents double-submit while OTP state is active (auth spec scenarios 3 & 14)</li>
+          <li><b>Transition</b>: "Try another email" → returns to Login base</li>
+        </ul>
+      </details>
+    </div>
+
+  </div>
+</div>
+
+<!-- ════════════════════════════════════════════════════════════ -->
+<!-- SCREEN 2 · ONBOARDING (unified header)                        -->
+<!-- ════════════════════════════════════════════════════════════ -->
+<div id="screen-2" class="screen" data-scenario="scenario-2, scenario-3, scenario-4, scenario-5">
+  <div class="screen-content @container max-w-6xl mx-auto p-6">
+
+    <h2 class="text-lg font-bold mb-5" style="color:var(--w-muted); border-bottom:1px solid var(--w-border); padding-bottom:8px;">
+      /onboarding
+    </h2>
+
+    <div class="w-page-shell">
+      <form class="w-form-block" aria-label="Complete onboarding">
+
+        <!-- HEADER BLOCK ─── identical rhythm to /login ───── -->
+        <div>
+          <!-- Logo · text-3xl · same size & blink as login -->
+          <div class="text-3xl font-semibold tracking-tight">
+            <span class="w-accent">&gt;</span><span> claude-hunt</span><span class="w-accent w-cursor-blink">_</span>
+          </div>
+
+          <h1 class="mt-8 text-2xl font-semibold tracking-tight" style="color:#111">
+            Set up your profile
+          </h1>
+
+          <p class="mt-1 text-sm" style="color:var(--w-muted)">
+            Pick a cohort and set your display name to start submitting projects.
+          </p>
+        </div>
+
+        <!-- mt-8 — header → form -->
+        <div class="mt-8 flex flex-col gap-6">
+
+          <div class="flex flex-col gap-2">
+            <label class="w-label" for="w-display-name">Display name</label>
+            <input id="w-display-name" class="w-input" placeholder="Type your display name" />
+            <p class="w-help">Shown on your project cards. 1–50 characters.</p>
+          </div>
+
+          <div class="flex flex-col gap-2">
+            <label class="w-label" for="w-cohort">Cohort</label>
+            <div class="w-select flex items-center justify-between">
+              <span>Select a cohort</span>
+              <i data-lucide="chevron-down" class="w-4 h-4"></i>
+            </div>
+          </div>
+
+          <button type="submit" class="w-btn w-btn-primary">Continue</button>
+
+          <div class="w-divider"><hr><span>or</span><hr></div>
+
+          <button type="button" class="w-btn">Sign out</button>
+        </div>
+
+      </form>
+    </div>
+
+    <div class="screen-notes">
+      <details open>
+        <summary>Notes · Scenario 2 · Onboarding header pattern</summary>
+        <p>Entry: signed-in user with no <code>cohort_id</code> lands on <code>/onboarding</code>.</p>
+        <ul>
+          <li><b>Order matches /login</b>: Logo → h1 → subtitle → form controls</li>
+          <li><b>Rhythm matches /login</b>: mt-8 Logo→h1, mt-1 h1→subtitle, mt-8 header→form, gap-6 between form sections</li>
+          <li><b>Motion</b>: underscore cursor blinks (new — supersedes create-logo's login-only invariant)</li>
+          <li><b>Plain "Claude Hunt" span is removed</b>; single Logo is the only brand wordmark</li>
+          <li><b>Transition</b>: valid submit → originally requested next URL (or /); "Sign out" → /login</li>
+        </ul>
+      </details>
+    </div>
+
+  </div>
+</div>
+
+<!-- ════════════════════════════════════════════════════════════ -->
+<!-- SCREEN 3 · ONBOARDING · NO COHORTS                            -->
+<!-- ════════════════════════════════════════════════════════════ -->
+<div id="screen-3" class="screen" data-scenario="scenario-2, scenario-5">
+  <div class="screen-content @container max-w-6xl mx-auto p-6">
+
+    <h2 class="text-lg font-bold mb-5" style="color:var(--w-muted); border-bottom:1px solid var(--w-border); padding-bottom:8px;">
+      /onboarding · no cohorts (existing onboarding spec · scenario 5)
+    </h2>
+
+    <div class="w-page-shell">
+      <form class="w-form-block" aria-label="Complete onboarding">
+
+        <div>
+          <div class="text-3xl font-semibold tracking-tight">
+            <span class="w-accent">&gt;</span><span> claude-hunt</span><span class="w-accent w-cursor-blink">_</span>
+          </div>
+          <h1 class="mt-8 text-2xl font-semibold tracking-tight" style="color:#111">
+            Set up your profile
+          </h1>
+          <p class="mt-1 text-sm" style="color:var(--w-muted)">
+            Pick a cohort and set your display name to start submitting projects.
+          </p>
+        </div>
+
+        <div class="mt-8 flex flex-col gap-6">
+
+          <div class="flex flex-col gap-2">
+            <label class="w-label" for="w-display-name-2">Display name</label>
+            <input id="w-display-name-2" class="w-input" placeholder="Type your display name" />
+            <p class="w-help">Shown on your project cards. 1–50 characters.</p>
+          </div>
+
+          <!-- Cohort selector replaced by alert -->
+          <div style="border:1px dashed var(--w-border); border-radius:6px; padding:12px; background:var(--w-fill);">
+            <p class="text-sm" style="color:var(--w-text)"><b>No cohorts are available yet.</b></p>
+            <p class="w-help">Please contact your instructor to get assigned to a cohort.</p>
+          </div>
+
+          <button type="submit" class="w-btn w-btn-primary" disabled style="opacity:.5">Continue</button>
+
+          <div class="w-divider"><hr><span>or</span><hr></div>
+
+          <button type="button" class="w-btn">Sign out</button>
+        </div>
+
+      </form>
+    </div>
+
+    <div class="screen-notes">
+      <details open>
+        <summary>Notes · regression guard · existing onboarding spec</summary>
+        <p>Entry: zero cohorts seeded — user cannot complete onboarding but must not be trapped.</p>
+        <ul>
+          <li><b>Header unchanged</b>: same Logo/h1/subtitle rhythm regardless of cohort availability</li>
+          <li><b>Cohort selector is replaced</b> by an explanatory alert (never disabled-but-visible)</li>
+          <li><b>Submit disabled</b>; Sign out remains reachable (not trapped)</li>
+        </ul>
+      </details>
+    </div>
+
+  </div>
+</div>
+
+<!-- ════════════════════════════════════════════════════════════ -->
+<!-- SCREEN 4 · SIDE-BY-SIDE (header rhythm comparison)            -->
+<!-- ════════════════════════════════════════════════════════════ -->
+<div id="screen-4" class="screen" data-scenario="scenario-3, scenario-4">
+  <div class="screen-content @container max-w-6xl mx-auto p-6">
+
+    <h2 class="text-lg font-bold mb-5" style="color:var(--w-muted); border-bottom:1px solid var(--w-border); padding-bottom:8px;">
+      Side-by-side · shared shell + rhythm verification
+    </h2>
+
+    <div class="grid grid-cols-1 @md:grid-cols-2 gap-6" style="background:var(--w-bg); padding:32px 16px;">
+
+      <!-- LEFT · /login header ─────────────────────── -->
+      <div class="w-form-block">
+        <p class="text-xs mb-4" style="color:var(--w-muted)">/login</p>
+        <div>
+          <div class="text-3xl font-semibold tracking-tight">
+            <span class="w-accent">&gt;</span><span> claude-hunt</span><span class="w-accent w-cursor-blink">_</span>
+          </div>
+          <h1 class="mt-8 text-2xl font-semibold tracking-tight" style="color:#111">Welcome back</h1>
+          <p class="mt-1 text-sm" style="color:var(--w-muted)">Sign in to your account to continue</p>
+        </div>
+        <div class="mt-8 grid grid-cols-2 gap-3">
+          <button type="button" class="w-btn"><i data-lucide="github" class="w-4 h-4"></i><span>GitHub</span></button>
+          <button type="button" class="w-btn"><i data-lucide="chrome" class="w-4 h-4"></i><span>Google</span></button>
+        </div>
+      </div>
+
+      <!-- RIGHT · /onboarding header ───────────────── -->
+      <div class="w-form-block">
+        <p class="text-xs mb-4" style="color:var(--w-muted)">/onboarding</p>
+        <div>
+          <div class="text-3xl font-semibold tracking-tight">
+            <span class="w-accent">&gt;</span><span> claude-hunt</span><span class="w-accent w-cursor-blink">_</span>
+          </div>
+          <h1 class="mt-8 text-2xl font-semibold tracking-tight" style="color:#111">Set up your profile</h1>
+          <p class="mt-1 text-sm" style="color:var(--w-muted)">Pick a cohort and set your display name to start submitting projects.</p>
+        </div>
+        <div class="mt-8 flex flex-col gap-2">
+          <label class="w-label" for="w-dn-side">Display name</label>
+          <input id="w-dn-side" class="w-input" placeholder="Type your display name" />
+        </div>
+      </div>
+
+    </div>
+
+    <div class="screen-notes">
+      <details open>
+        <summary>Notes · Scenarios 3 & 4 · shared shell + header rhythm</summary>
+        <p>Visual verification: both screens must share identical outer shell and header rhythm.</p>
+        <ul>
+          <li><b>Shell</b>: same bg, same max-w-sm form width, same vertical/horizontal padding</li>
+          <li><b>Header rhythm</b>: Logo (text-3xl) → h1 (text-2xl, mt-8) → subtitle (text-sm muted, mt-1) → form (mt-8)</li>
+          <li><b>Motion</b>: underscore blinks at the same 1s cadence on both</li>
+          <li><b>Divergence allowed</b>: only inside the form body (controls, copy, buttons)</li>
+        </ul>
+      </details>
+    </div>
+
+  </div>
+</div>
+
+<script>
+var currentScreen = 0;
+var screenIds = [];
+
+function show(id) {
+  document.querySelectorAll('.screen').forEach(function(s) { s.classList.remove('active'); });
+  document.getElementById('screen-' + id).classList.add('active');
+  document.querySelectorAll('nav button[id^="nav-"]').forEach(function(b) { b.classList.remove('active'); });
+  document.getElementById('nav-' + id).classList.add('active');
+  currentScreen = screenIds.indexOf(id);
+}
+
+function setViewport(mode) {
+  document.body.classList.remove('viewport-mobile', 'viewport-desktop');
+  document.body.classList.add('viewport-' + mode);
+  document.querySelectorAll('.vp-toggle button').forEach(function(b) { b.classList.remove('active'); });
+  document.getElementById('vp-' + mode).classList.add('active');
+}
+
+document.addEventListener('DOMContentLoaded', function() {
+  document.querySelectorAll('nav button[id^="nav-"]').forEach(function(b) {
+    screenIds.push(parseInt(b.id.replace('nav-', '')));
+  });
+  var first = document.querySelector('nav button[id^="nav-"]');
+  if (first) first.click();
+  lucide.createIcons();
+});
+</script>
+</body>
+</html>
