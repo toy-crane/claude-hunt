@@ -13,7 +13,8 @@ vi.mock("next/og", () => ({
   },
 }));
 
-const TERRACOTTA_RGB = "rgb(193, 95, 60)";
+const INK_RGB = "rgb(26, 21, 18)";
+const WHITE_RGB = "rgb(255, 255, 255)";
 
 describe("app/icon2 (16x16 compact favicon)", () => {
   it("exports 16x16 size and PNG content type", () => {
@@ -21,11 +22,12 @@ describe("app/icon2 (16x16 compact favicon)", () => {
     expect(contentType).toBe("image/png");
   });
 
-  it("renders only the '_' glyph — no '>' prefix at this size", () => {
+  it("renders the '>' prompt glyph in white on an ink-colored square (monochrome)", () => {
     const { container } = render(IconElement());
-    expect(container.textContent).toContain("_");
-    expect(container.textContent).not.toContain(">");
-    expect(container.innerHTML).toContain(TERRACOTTA_RGB);
+    expect(container.textContent).toContain(">");
+    expect(container.textContent).not.toContain("_");
+    expect(container.innerHTML).toContain(INK_RGB);
+    expect(container.innerHTML).toContain(WHITE_RGB);
   });
 
   it("default export resolves without throwing", () => {
