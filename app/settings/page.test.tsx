@@ -49,6 +49,14 @@ vi.mock("@features/auth-login", () => ({
   signOut: vi.fn(),
 }));
 
+vi.mock("@features/withdraw-user", () => ({
+  WithdrawDialog: ({ email }: { email: string }) => (
+    <div data-email={email} data-testid="withdraw-dialog-stub">
+      <button type="button">Withdraw</button>
+    </div>
+  ),
+}));
+
 vi.mock("@features/settings", () => ({
   SettingsForm: ({
     email,

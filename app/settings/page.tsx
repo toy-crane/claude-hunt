@@ -1,5 +1,6 @@
 import { signOut } from "@features/auth-login/index.ts";
 import { SettingsForm } from "@features/settings/index.ts";
+import { WithdrawDialog } from "@features/withdraw-user/index.ts";
 import { RiArrowLeftLine, RiLogoutBoxRLine } from "@remixicon/react";
 import { fetchViewer } from "@shared/api/supabase/viewer.ts";
 import { Button } from "@shared/ui/button.tsx";
@@ -97,9 +98,7 @@ export default async function SettingsPage() {
                   cannot be undone.
                 </p>
               </div>
-              <Button type="button" variant="destructive">
-                Withdraw
-              </Button>
+              <WithdrawDialog email={viewer.email} />
             </div>
           </CardContent>
         </Card>

@@ -126,7 +126,7 @@ Storage bucket `project-screenshots` is **not** cascade-linked; screenshots for 
 
 ---
 
-### Task 3: Withdraw dialog UI wired to server action
+### Task 3: Withdraw dialog UI wired to server action ✅
 
 - **Covers**: Scenarios 2 (UI integration), 3 (full), 4 (full)
 - **Size**: M (4 files)
