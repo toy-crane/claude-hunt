@@ -47,10 +47,10 @@ async function signInStudentWithCohort(
   const { data: cohort, error: cohortError } = await admin
     .from("cohorts")
     .select("id")
-    .eq("name", "Cohort A")
+    .eq("name", "LGE-1")
     .single();
   if (cohortError || !cohort) {
-    throw new Error("Cohort A seed missing — run supabase db reset first");
+    throw new Error("LGE-1 seed missing — run supabase db reset first");
   }
 
   await page.goto("/login");

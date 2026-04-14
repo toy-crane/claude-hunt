@@ -101,7 +101,7 @@ function buildProject(
   return {
     user_id: "user-1",
     cohort_id: "cohort-1",
-    cohort_name: "Cohort A",
+    cohort_name: "LGE-1",
     tagline: `${overrides.title} tagline`,
     project_url: "https://example.com",
     screenshot_path: `user-1/${overrides.id}.png`,
@@ -115,8 +115,20 @@ function buildProject(
 }
 
 const cohorts: Cohort[] = [
-  { id: "a1", name: "Cohort A", created_at: "2026-04-14T00:00:00Z" },
-  { id: "b2", name: "Cohort B", created_at: "2026-04-14T00:00:00Z" },
+  {
+    id: "a1",
+    name: "LGE-1",
+    label: "LG전자 1기",
+    created_at: "2026-04-14T00:00:00Z",
+    updated_at: "2026-04-14T00:00:00Z",
+  },
+  {
+    id: "b2",
+    name: "LGE-2",
+    label: "LG전자 2기",
+    created_at: "2026-04-14T00:00:00Z",
+    updated_at: "2026-04-14T00:00:00Z",
+  },
 ];
 
 async function renderPage(search: Record<string, string> = {}) {
