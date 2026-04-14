@@ -2,21 +2,43 @@ import { render, screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
-import { HeaderMenu } from "./header-menu.tsx";
-
 const ACCOUNT_MENU_LABEL = /open account menu/i;
 const FALLBACK_ICON_LABEL = /account/i;
 const THEME_LABEL = /^theme$/i;
 const LIGHT_LABEL = /^light$/i;
 const DARK_LABEL = /^dark$/i;
 const SYSTEM_LABEL = /^system$/i;
+const SETTINGS_LABEL = /^settings$/i;
+const LOG_OUT_LABEL = /^log out$/i;
 
 const setThemeMock = vi.fn();
+const signOutMock = vi.fn();
 let currentTheme: string | undefined = "system";
 
 vi.mock("next-themes", () => ({
   useTheme: () => ({ theme: currentTheme, setTheme: setThemeMock }),
 }));
+
+vi.mock("@features/auth-login", () => ({
+  signOut: (...args: unknown[]) => signOutMock(...args),
+}));
+
+vi.mock("next/link", () => ({
+  default: ({
+    children,
+    href,
+    ...props
+  }: {
+    children: React.ReactNode;
+    href: string;
+  }) => (
+    <a href={href} {...props}>
+      {children}
+    </a>
+  ),
+}));
+
+import { HeaderMenu } from "./header-menu.tsx";
 
 describe("<HeaderMenu />", () => {
   beforeEach(() => {
@@ -134,5 +156,52 @@ describe("<HeaderMenu />", () => {
 
     await user.keyboard("{Escape}");
     expect(screen.queryByText(THEME_LABEL)).not.toBeInTheDocument();
+  });
+
+  it("renders a Settings menu item linking to /settings after a separator", async () => {
+    const user = userEvent.setup();
+    render(<HeaderMenu avatarUrl={null} displayName="Alice" />);
+
+    await user.click(screen.getByRole("button", { name: ACCOUNT_MENU_LABEL }));
+
+    const settings = screen.getByRole("menuitem", { name: SETTINGS_LABEL });
+    expect(settings).toHaveAttribute("href", "/settings");
+    expect(screen.getByRole("separator")).toBeInTheDocument();
+  });
+
+  it("renders a Log out menu item at the end of the dropdown", async () => {
+    const user = userEvent.setup();
+    render(<HeaderMenu avatarUrl={null} displayName="Alice" />);
+
+    await user.click(screen.getByRole("button", { name: ACCOUNT_MENU_LABEL }));
+
+    expect(
+      screen.getByRole("menuitem", { name: LOG_OUT_LABEL })
+    ).toBeInTheDocument();
+  });
+
+  it("renders dropdown items in the order Theme label → Light / Dark / System → separator → Settings → Log out", async () => {
+    const user = userEvent.setup();
+    render(<HeaderMenu avatarUrl={null} displayName="Alice" />);
+
+    await user.click(screen.getByRole("button", { name: ACCOUNT_MENU_LABEL }));
+
+    const menu = screen.getByRole("menu");
+    const text = menu.textContent ?? "";
+    const positions = [
+      text.indexOf("Theme"),
+      text.indexOf("Light"),
+      text.indexOf("Dark"),
+      text.indexOf("System"),
+      text.indexOf("Settings"),
+      text.indexOf("Log out"),
+    ];
+
+    for (const position of positions) {
+      expect(position).toBeGreaterThanOrEqual(0);
+    }
+    for (let i = 1; i < positions.length; i += 1) {
+      expect(positions[i]).toBeGreaterThan(positions[i - 1]);
+    }
   });
 });

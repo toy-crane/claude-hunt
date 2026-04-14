@@ -38,6 +38,14 @@ vi.mock("@shared/api/supabase/server", () => ({
   createClient: vi.fn().mockResolvedValue(mockClient),
 }));
 
+vi.mock("@features/auth-login", () => ({
+  signOut: vi.fn(),
+}));
+
+vi.mock("next-themes", () => ({
+  useTheme: () => ({ theme: "system", setTheme: vi.fn() }),
+}));
+
 describe("<Header />", () => {
   beforeEach(() => {
     vi.clearAllMocks();
