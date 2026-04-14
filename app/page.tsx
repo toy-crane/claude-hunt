@@ -5,6 +5,7 @@ import { SubmitForm } from "@features/submit-project/index.ts";
 import { VoteButton } from "@features/toggle-vote/index.ts";
 import { createClient } from "@shared/api/supabase/server.ts";
 import { fetchProjects, ProjectGrid } from "@widgets/project-grid/index.ts";
+import { Suspense } from "react";
 
 interface PageProps {
   searchParams: Promise<{ cohort?: string }>;
@@ -59,10 +60,12 @@ export default async function Page({ searchParams }: PageProps) {
           <span aria-hidden="true" className="text-muted-foreground text-xs">
             Filter by cohort
           </span>
-          <CohortDropdown
-            cohorts={cohorts}
-            selectedCohortId={selectedCohortId}
-          />
+          <Suspense fallback={null}>
+            <CohortDropdown
+              cohorts={cohorts}
+              selectedCohortId={selectedCohortId}
+            />
+          </Suspense>
         </div>
       </header>
 
