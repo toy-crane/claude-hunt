@@ -1,12 +1,7 @@
 "use client";
 
 import { Button } from "@shared/ui/button.tsx";
-import {
-  Field,
-  FieldDescription,
-  FieldGroup,
-  FieldLabel,
-} from "@shared/ui/field.tsx";
+import { Field, FieldGroup, FieldLabel } from "@shared/ui/field.tsx";
 import { Input } from "@shared/ui/input.tsx";
 import { Spinner } from "@shared/ui/spinner.tsx";
 import { useRouter } from "next/navigation";
@@ -49,6 +44,18 @@ export function SettingsForm({ initialDisplayName, email }: SettingsFormProps) {
       onSubmit={handleSubmit}
     >
       <FieldGroup>
+        <Field data-disabled="">
+          <FieldLabel htmlFor={emailId}>Email</FieldLabel>
+          <Input
+            disabled
+            id={emailId}
+            name="email"
+            readOnly
+            type="email"
+            value={email}
+          />
+        </Field>
+
         <Field data-invalid={error === null ? undefined : ""}>
           <FieldLabel htmlFor={displayNameId}>Display name</FieldLabel>
           <Input
@@ -59,9 +66,6 @@ export function SettingsForm({ initialDisplayName, email }: SettingsFormProps) {
             onChange={(event) => setDisplayName(event.target.value)}
             value={displayName}
           />
-          <FieldDescription>
-            Shown on your project cards. Up to 50 characters.
-          </FieldDescription>
           {error ? (
             <p
               className="text-destructive text-xs"
@@ -74,27 +78,12 @@ export function SettingsForm({ initialDisplayName, email }: SettingsFormProps) {
         </Field>
       </FieldGroup>
 
-      <div>
+      <div className="flex justify-end">
         <Button disabled={isPending} type="submit">
           {isPending ? <Spinner data-icon="inline-start" /> : null}
           {isPending ? "Saving..." : "Save"}
         </Button>
       </div>
-
-      <FieldGroup>
-        <Field data-disabled="">
-          <FieldLabel htmlFor={emailId}>Email</FieldLabel>
-          <Input
-            disabled
-            id={emailId}
-            name="email"
-            readOnly
-            type="email"
-            value={email}
-          />
-          <FieldDescription>Read-only.</FieldDescription>
-        </Field>
-      </FieldGroup>
     </form>
   );
 }
