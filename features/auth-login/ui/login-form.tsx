@@ -8,6 +8,7 @@ import { GoogleIcon } from "@shared/ui/icons/google.tsx";
 import { Input } from "@shared/ui/input.tsx";
 import { Label } from "@shared/ui/label.tsx";
 import Link from "next/link";
+import { useSearchParams } from "next/navigation";
 import { useState } from "react";
 
 export function LoginForm() {
@@ -15,13 +16,23 @@ export function LoginForm() {
   const [loading, setLoading] = useState<string | null>(null);
   const [otpSent, setOtpSent] = useState(false);
   const supabase = createClient();
+  const searchParams = useSearchParams();
+
+  function buildCallbackUrl() {
+    const base = `${window.location.origin}/auth/callback`;
+    const next = searchParams.get("next");
+    if (next?.startsWith("/")) {
+      return `${base}?next=${encodeURIComponent(next)}`;
+    }
+    return base;
+  }
 
   async function handleOAuthLogin(provider: "github" | "google") {
     setLoading(provider);
     const { error } = await supabase.auth.signInWithOAuth({
       provider,
       options: {
-        redirectTo: `${window.location.origin}/auth/callback`,
+        redirectTo: buildCallbackUrl(),
       },
     });
     if (error) {
@@ -36,7 +47,7 @@ export function LoginForm() {
     const { error } = await supabase.auth.signInWithOtp({
       email,
       options: {
-        emailRedirectTo: `${window.location.origin}/auth/callback`,
+        emailRedirectTo: buildCallbackUrl(),
       },
     });
     if (error) {

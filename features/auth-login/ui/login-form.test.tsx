@@ -25,6 +25,10 @@ vi.mock("@shared/api/supabase/client", () => ({
   createClient: () => mockClient,
 }));
 
+vi.mock("next/navigation", () => ({
+  useSearchParams: () => new URLSearchParams(),
+}));
+
 const GITHUB_RE = /GitHub/i;
 const GOOGLE_RE = /Google/i;
 const SENDING_RE = /Sending/i;
