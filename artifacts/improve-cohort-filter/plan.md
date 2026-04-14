@@ -71,7 +71,7 @@
 
 ## Tasks
 
-### Task 1: Project grid shows a skeleton immediately when a cohort is selected
+### Task 1: Project grid shows a skeleton immediately when a cohort is selected ✅
 
 - **Covers**: Scenario 1 (full), Scenario 5 (full), Invariant "some loading indication is always visible within 100ms"
 - **Size**: M (5 files + test files)

@@ -4,12 +4,12 @@
 --   Ownership spoof rejected
 
 BEGIN;
-SELECT plan(18);
+SELECT plan(19);
 
 -- 1. Table exists
 SELECT has_table('public', 'projects', 'projects table should exist');
 
--- 2-9. Columns exist
+-- 2-10. Columns exist
 SELECT has_column('public', 'projects', 'id', 'projects should have id column');
 SELECT has_column('public', 'projects', 'user_id', 'projects should have user_id column');
 SELECT has_column('public', 'projects', 'cohort_id', 'projects should have cohort_id column');
@@ -18,6 +18,7 @@ SELECT has_column('public', 'projects', 'tagline', 'projects should have tagline
 SELECT has_column('public', 'projects', 'project_url', 'projects should have project_url column');
 SELECT has_column('public', 'projects', 'screenshot_path', 'projects should have screenshot_path column');
 SELECT has_column('public', 'projects', 'created_at', 'projects should have created_at column');
+SELECT has_column('public', 'projects', 'vote_count', 'projects should have vote_count column');
 
 -- 10. RLS enabled
 SELECT is(
