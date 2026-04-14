@@ -51,7 +51,7 @@ export default async function Page({ searchParams }: PageProps) {
     <main className="mx-auto flex min-h-svh w-full max-w-6xl flex-col gap-8 p-6">
       <header className="flex flex-wrap items-end justify-between gap-4">
         <div className="flex flex-col gap-2">
-          <h1 className="font-heading font-medium text-2xl">Micro-Hunt</h1>
+          <h1 className="font-heading font-medium text-2xl">Project Board</h1>
           <p className="text-muted-foreground text-sm">
             Projects built by cohort students. Upvote your favourites.
           </p>

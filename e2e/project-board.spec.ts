@@ -70,7 +70,7 @@ test("student submits, edits, and deletes their own project end-to-end", async (
     await page.getByLabel("Title").fill("E2E Test App");
     await page
       .getByLabel("Tagline")
-      .fill("Built during the micro-hunt e2e spec");
+      .fill("Built during the project-board e2e spec");
     await page.getByLabel("Project URL").fill("https://e2e-test.example.com");
     await page.getByLabel("Screenshot").setInputFiles(SCREENSHOT_FIXTURE);
     await page.getByRole("button", { name: SUBMIT_PROJECT_BTN_RE }).click();
@@ -80,7 +80,7 @@ test("student submits, edits, and deletes their own project end-to-end", async (
       timeout: 10_000,
     });
     await expect(
-      page.getByText("Built during the micro-hunt e2e spec")
+      page.getByText("Built during the project-board e2e spec")
     ).toBeVisible();
 
     // Capture project id for guaranteed teardown
