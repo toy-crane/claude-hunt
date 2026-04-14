@@ -127,3 +127,14 @@
     @apply font-sans;
   }
 }
+
+@keyframes logo-cursor-blink {
+  0%,
+  49% {
+    opacity: 1;
+  }
+  50%,
+  100% {
+    opacity: 0;
+  }
+}
