@@ -10,5 +10,7 @@ export {
   validateScreenshotFile,
 } from "./api/schema.ts";
 export { uploadScreenshot } from "./lib/upload-screenshot.ts";
+export type { SubmitDialogProps } from "./ui/submit-dialog.tsx";
+export { SubmitDialog } from "./ui/submit-dialog.tsx";
 export type { SubmitFormProps } from "./ui/submit-form.tsx";
 export { SubmitForm } from "./ui/submit-form.tsx";
