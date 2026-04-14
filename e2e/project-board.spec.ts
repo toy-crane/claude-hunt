@@ -1,6 +1,6 @@
 import path from "node:path";
 import { fileURLToPath } from "node:url";
-import { expect, test } from "@playwright/test";
+import { expect, type Page, test } from "@playwright/test";
 import { fetchMagicLink } from "./helpers/mailpit.ts";
 import {
   createAdminClient,
@@ -15,66 +15,158 @@ const SUBMIT_PROJECT_TRIGGER_RE = /^submit a project$/i;
 const PROJECT_SUBMITTED_TOAST_RE = /project submitted/i;
 const SAVE_CHANGES_BTN_RE = /save changes/i;
 const LOGIN_URL_RE = /\/login$/;
+const SUPABASE_STORAGE_URL_RE =
+  /\/storage\/v1\/object\/(?:public\/)?project-screenshots\//;
 
 const dirname = path.dirname(fileURLToPath(import.meta.url));
 const SCREENSHOT_FIXTURE = path.resolve(
   dirname,
   "fixtures",
-  "test-screenshot.png"
+  "large-screenshot.jpg"
 );
+const SMALL_SCREENSHOT_FIXTURE = path.resolve(
+  dirname,
+  "fixtures",
+  "small-screenshot.png"
+);
+
+const MAX_IMAGE_DIMENSION = 1920;
+const MAX_STORED_BYTES = 1_000_000;
+
+interface AuthedStudent {
+  cleanup: () => Promise<void>;
+  userId: string;
+}
+
+async function signInStudentWithCohort(
+  page: Page,
+  admin: ReturnType<typeof createAdminClient>
+): Promise<AuthedStudent> {
+  const email = uniqueTestEmail();
+
+  const { data: cohort, error: cohortError } = await admin
+    .from("cohorts")
+    .select("id")
+    .eq("name", "Cohort A")
+    .single();
+  if (cohortError || !cohort) {
+    throw new Error("Cohort A seed missing — run supabase db reset first");
+  }
+
+  await page.goto("/login");
+  await page.getByLabel(EMAIL_LABEL_RE).fill(email);
+  await page.getByRole("button", { name: CONTINUE_BTN_RE }).click();
+  await expect(page.getByText(MAGIC_LINK_TEXT_RE)).toBeVisible();
+
+  const magicLink = await fetchMagicLink(email);
+  await page.goto(magicLink);
+  // New users land on /onboarding until cohort + display name are set.
+  // Wait for that settle, then resolve the user id, set both via
+  // admin, and navigate home ourselves.
+  await page.waitForLoadState("networkidle");
+
+  const { data: usersData } = await admin.auth.admin.listUsers();
+  const userId = usersData.users.find((u) => u.email === email)?.id;
+  if (!userId) {
+    throw new Error("Could not resolve user id after magic-link sign-in");
+  }
+  await admin
+    .from("profiles")
+    .update({ cohort_id: cohort.id, display_name: "E2E Student" })
+    .eq("id", userId);
+
+  await page.goto("/");
+  await expect(page).toHaveURL("http://localhost:3000/");
+
+  const cleanup = async () => {
+    const { data: projects } = await admin
+      .from("projects")
+      .select("id")
+      .eq("user_id", userId);
+    if (projects?.length) {
+      await admin
+        .from("projects")
+        .delete()
+        .in(
+          "id",
+          projects.map((p) => p.id)
+        )
+        .then(
+          () => undefined,
+          () => undefined
+        );
+    }
+    await admin.auth.admin.deleteUser(userId).catch(() => {
+      /* global teardown will sweep */
+    });
+  };
+
+  return { userId, cleanup };
+}
+
+interface StoredImageCheck {
+  contentLength: number | null;
+  contentType: string | null;
+  naturalHeight: number;
+  naturalWidth: number;
+}
+
+async function inspectStoredScreenshot(
+  page: Page,
+  imgLocator: ReturnType<Page["locator"]>
+): Promise<StoredImageCheck> {
+  await expect(imgLocator).toBeVisible();
+  const src = await imgLocator.getAttribute("src");
+  if (!src) {
+    throw new Error("Screenshot <img> has no src");
+  }
+
+  await imgLocator.evaluate((el) => {
+    const img = el as HTMLImageElement;
+    return img.complete
+      ? Promise.resolve()
+      : new Promise<void>((resolve, reject) => {
+          img.addEventListener("load", () => resolve(), { once: true });
+          img.addEventListener("error", () => reject(new Error("load")), {
+            once: true,
+          });
+        });
+  });
+
+  const dims = await imgLocator.evaluate((el) => {
+    const img = el as HTMLImageElement;
+    return { naturalWidth: img.naturalWidth, naturalHeight: img.naturalHeight };
+  });
+
+  const response = await page.request.fetch(src, { method: "HEAD" });
+  const headers = response.headers();
+  const contentType = headers["content-type"] ?? null;
+  const contentLengthHeader = headers["content-length"];
+  const contentLength = contentLengthHeader
+    ? Number.parseInt(contentLengthHeader, 10)
+    : null;
+
+  return {
+    naturalWidth: dims.naturalWidth,
+    naturalHeight: dims.naturalHeight,
+    contentType,
+    contentLength,
+  };
+}
 
 test("student submits, edits, and deletes their own project end-to-end", async ({
   page,
 }) => {
   const admin = createAdminClient();
-  const email = uniqueTestEmail();
-  let userId: string | undefined;
-  let projectId: string | undefined;
+  let student: AuthedStudent | undefined;
 
   try {
-    // Find Cohort A (seeded via migration)
-    const { data: cohort, error: cohortError } = await admin
-      .from("cohorts")
-      .select("id")
-      .eq("name", "Cohort A")
-      .single();
-    if (cohortError || !cohort) {
-      throw new Error("Cohort A seed missing — run supabase db reset first");
-    }
+    student = await signInStudentWithCohort(page, admin);
 
-    // 1. Sign in via magic link
-    await page.goto("/login");
-    await page.getByLabel(EMAIL_LABEL_RE).fill(email);
-    await page.getByRole("button", { name: CONTINUE_BTN_RE }).click();
-    await expect(page.getByText(MAGIC_LINK_TEXT_RE)).toBeVisible();
-
-    const magicLink = await fetchMagicLink(email);
-    await page.goto(magicLink);
-    await expect(page).toHaveURL("http://localhost:3000/");
-
-    // Capture the new user and assign them to Cohort A so the submit
-    // form unlocks.
-    const { data: usersData } = await admin.auth.admin.listUsers();
-    userId = usersData.users.find((u) => u.email === email)?.id;
-    if (!userId) {
-      throw new Error("Could not resolve user id after magic-link sign-in");
-    }
-    await admin
-      .from("profiles")
-      .update({
-        cohort_id: cohort.id,
-        display_name: "E2E Student",
-      })
-      .eq("id", userId);
-
-    await page.reload();
-
-    // 2. Open the submit dialog from the header trigger
+    // Submit with the large (12 MiB / 4032×3024) fixture.
     await page.getByRole("button", { name: SUBMIT_PROJECT_TRIGGER_RE }).click();
     const submitDialog = page.getByRole("dialog");
     await expect(submitDialog).toBeVisible();
-
-    // 3. Fill the form inside the dialog and submit
     await submitDialog.getByLabel("Title").fill("E2E Test App");
     await submitDialog
       .getByLabel("Tagline")
@@ -89,61 +181,161 @@ test("student submits, edits, and deletes their own project end-to-end", async (
       .getByRole("button", { name: SUBMIT_PROJECT_BTN_RE })
       .click();
 
-    // 4. Dialog closes, toast confirms, card appears in the grid
-    await expect(submitDialog).toBeHidden({ timeout: 10_000 });
+    await expect(submitDialog).toBeHidden({ timeout: 30_000 });
     await expect(
       page.getByText(PROJECT_SUBMITTED_TOAST_RE).first()
     ).toBeVisible({ timeout: 10_000 });
     await expect(page.getByText("E2E Test App")).toBeVisible({
       timeout: 10_000,
     });
-    await expect(
-      page.getByText("Built during the project-board e2e spec")
-    ).toBeVisible();
 
-    // Capture project id for guaranteed teardown
-    const { data: proj } = await admin
-      .from("projects")
-      .select("id")
-      .eq("user_id", userId)
-      .limit(1)
-      .maybeSingle();
-    projectId = proj?.id;
+    // The stored screenshot must satisfy the feature's invariants:
+    // longest side ≤ 1920 px, image/webp, < 1 MB.
+    const submitCard = page.getByTestId("project-card").first();
+    const submitImg = submitCard.locator("img").first();
+    const submitted = await inspectStoredScreenshot(page, submitImg);
+    expect(submitted.naturalWidth).toBeLessThanOrEqual(MAX_IMAGE_DIMENSION);
+    expect(submitted.naturalHeight).toBeLessThanOrEqual(MAX_IMAGE_DIMENSION);
+    expect(submitted.contentType).toBe("image/webp");
+    if (submitted.contentLength !== null) {
+      expect(submitted.contentLength).toBeLessThan(MAX_STORED_BYTES);
+    }
+    const submittedSrc = await submitImg.getAttribute("src");
 
-    // 4. Edit the tagline (scope queries to the dialog so they don't
-    // collide with the submit form still mounted on the page)
+    // Edit: replace the screenshot with the same large fixture and
+    // update the tagline, then re-check the invariants on the new URL.
     await page.getByTestId("edit-project-trigger").click();
     const editDialog = page.getByRole("dialog");
     await editDialog.getByLabel("Tagline").fill("Updated during the e2e spec");
+    await editDialog
+      .getByLabel("Screenshot (optional)")
+      .setInputFiles(SCREENSHOT_FIXTURE);
     await editDialog.getByRole("button", { name: SAVE_CHANGES_BTN_RE }).click();
     await expect(
       page.getByTestId("project-card").getByText("Updated during the e2e spec")
-    ).toBeVisible({ timeout: 10_000 });
+    ).toBeVisible({ timeout: 15_000 });
 
-    // 5. Delete the project
+    const editedImg = page
+      .getByTestId("project-card")
+      .first()
+      .locator("img")
+      .first();
+    await expect(editedImg).not.toHaveAttribute("src", submittedSrc ?? "", {
+      timeout: 10_000,
+    });
+    const edited = await inspectStoredScreenshot(page, editedImg);
+    expect(edited.naturalWidth).toBeLessThanOrEqual(MAX_IMAGE_DIMENSION);
+    expect(edited.naturalHeight).toBeLessThanOrEqual(MAX_IMAGE_DIMENSION);
+    expect(edited.contentType).toBe("image/webp");
+
+    // Delete the project.
     await page.getByTestId("delete-project-trigger").click();
     await page.getByTestId("delete-project-confirm").click();
-    // Wait for the card to leave the grid. The dialog title also contains
-    // "E2E Test App" briefly, so scope to the project-card testid.
     await expect(page.getByTestId("project-card")).toHaveCount(0, {
       timeout: 10_000,
     });
   } finally {
-    if (projectId) {
-      await admin
-        .from("projects")
-        .delete()
-        .eq("id", projectId)
-        .then(
-          () => undefined,
-          () => undefined
-        );
-    }
-    if (userId) {
-      await admin.auth.admin.deleteUser(userId).catch(() => {
-        /* cleaned by global teardown if this fails */
-      });
-    }
+    await student?.cleanup();
+  }
+});
+
+test("small sources are still served as WebP", async ({ page }) => {
+  const admin = createAdminClient();
+  let student: AuthedStudent | undefined;
+
+  try {
+    student = await signInStudentWithCohort(page, admin);
+
+    await page.getByRole("button", { name: SUBMIT_PROJECT_TRIGGER_RE }).click();
+    const dialog = page.getByRole("dialog");
+    await dialog.getByLabel("Title").fill("Small Image Test");
+    await dialog.getByLabel("Tagline").fill("An 800x600 source");
+    await dialog.getByLabel("Project URL").fill("https://small.example.com");
+    await dialog
+      .getByLabel("Screenshot")
+      .setInputFiles(SMALL_SCREENSHOT_FIXTURE);
+    await dialog.getByRole("button", { name: SUBMIT_PROJECT_BTN_RE }).click();
+
+    await expect(dialog).toBeHidden({ timeout: 15_000 });
+    await expect(page.getByText("Small Image Test")).toBeVisible({
+      timeout: 10_000,
+    });
+
+    const img = page.getByTestId("project-card").first().locator("img").first();
+    const stored = await inspectStoredScreenshot(page, img);
+    expect(stored.contentType).toBe("image/webp");
+    expect(stored.naturalWidth).toBeGreaterThan(0);
+    expect(stored.naturalHeight).toBeGreaterThan(0);
+    expect(stored.naturalWidth).toBeLessThanOrEqual(MAX_IMAGE_DIMENSION);
+    expect(stored.naturalHeight).toBeLessThanOrEqual(MAX_IMAGE_DIMENSION);
+  } finally {
+    await student?.cleanup();
+  }
+});
+
+test("edit upload failure keeps the original screenshot on the card", async ({
+  page,
+}) => {
+  const admin = createAdminClient();
+  let student: AuthedStudent | undefined;
+
+  try {
+    student = await signInStudentWithCohort(page, admin);
+
+    // Seed the project with a successful submit using the small fixture.
+    await page.getByRole("button", { name: SUBMIT_PROJECT_TRIGGER_RE }).click();
+    const submitDialog = page.getByRole("dialog");
+    await submitDialog.getByLabel("Title").fill("Edit Failure Test");
+    await submitDialog
+      .getByLabel("Tagline")
+      .fill("Will attempt a failing edit");
+    await submitDialog
+      .getByLabel("Project URL")
+      .fill("https://edit-fail.example.com");
+    await submitDialog
+      .getByLabel("Screenshot")
+      .setInputFiles(SMALL_SCREENSHOT_FIXTURE);
+    await submitDialog
+      .getByRole("button", { name: SUBMIT_PROJECT_BTN_RE })
+      .click();
+    await expect(submitDialog).toBeHidden({ timeout: 15_000 });
+    await expect(page.getByText("Edit Failure Test")).toBeVisible({
+      timeout: 10_000,
+    });
+
+    const img = page.getByTestId("project-card").first().locator("img").first();
+    const originalSrc = await img.getAttribute("src");
+    expect(originalSrc).not.toBeNull();
+
+    // Intercept the next storage upload and force a 500 so the edit
+    // cannot replace the screenshot.
+    await page.route(SUPABASE_STORAGE_URL_RE, async (route) => {
+      if (route.request().method() === "POST") {
+        await route.fulfill({
+          status: 500,
+          contentType: "application/json",
+          body: JSON.stringify({ message: "simulated storage failure" }),
+        });
+        return;
+      }
+      await route.continue();
+    });
+
+    await page.getByTestId("edit-project-trigger").click();
+    const editDialog = page.getByRole("dialog");
+    await editDialog
+      .getByLabel("Screenshot (optional)")
+      .setInputFiles(SCREENSHOT_FIXTURE);
+    await editDialog.getByRole("button", { name: SAVE_CHANGES_BTN_RE }).click();
+
+    // Regardless of whether the dialog surfaces an error or stays open,
+    // the card's screenshot URL must not change after the failed upload.
+    await expect(async () => {
+      const current = await img.getAttribute("src");
+      expect(current).toBe(originalSrc);
+    }).toPass({ timeout: 10_000 });
+  } finally {
+    await student?.cleanup();
   }
 });
 
@@ -152,7 +344,6 @@ test("signed-out visitor is redirected to /login from the header submit trigger"
 }) => {
   await page.goto("/");
 
-  // For signed-out visitors the trigger is a link, not a button.
   const trigger = page.getByRole("link", {
     name: SUBMIT_PROJECT_TRIGGER_RE,
   });
