@@ -63,7 +63,7 @@ export function CohortDropdown({
         <SelectItem value={ALL_COHORTS}>All cohorts</SelectItem>
         {cohorts.map((cohort) => (
           <SelectItem key={cohort.id} value={cohort.id}>
-            {cohort.name}
+            {cohort.label}
           </SelectItem>
         ))}
       </SelectContent>

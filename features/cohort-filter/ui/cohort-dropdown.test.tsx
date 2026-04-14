@@ -17,13 +17,17 @@ vi.mock("next/navigation", () => ({
 const cohorts: Cohort[] = [
   {
     id: "a1",
-    name: "Cohort A",
+    name: "LGE-1",
+    label: "LG전자 1기",
     created_at: "2026-04-14T00:00:00Z",
+    updated_at: "2026-04-14T00:00:00Z",
   },
   {
     id: "b2",
-    name: "Cohort B",
+    name: "LGE-2",
+    label: "LG전자 2기",
     created_at: "2026-04-14T00:00:00Z",
+    updated_at: "2026-04-14T00:00:00Z",
   },
 ];
 
@@ -40,9 +44,11 @@ describe("CohortDropdown", () => {
     );
   });
 
-  it("shows the selected cohort's name when one is active", () => {
+  it("shows the selected cohort's label when one is active", () => {
     render(<CohortDropdown cohorts={cohorts} selectedCohortId="a1" />);
-    expect(screen.getByTestId("cohort-dropdown")).toHaveTextContent("Cohort A");
+    expect(screen.getByTestId("cohort-dropdown")).toHaveTextContent(
+      "LG전자 1기"
+    );
   });
 
   it("navigates with ?cohort=<id> when a cohort is selected", async () => {
@@ -50,7 +56,7 @@ describe("CohortDropdown", () => {
     render(<CohortDropdown cohorts={cohorts} selectedCohortId={null} />);
 
     await user.click(screen.getByTestId("cohort-dropdown"));
-    await user.click(await screen.findByRole("option", { name: "Cohort A" }));
+    await user.click(await screen.findByRole("option", { name: "LG전자 1기" }));
 
     expect(replaceMock).toHaveBeenCalledWith("/?cohort=a1");
   });

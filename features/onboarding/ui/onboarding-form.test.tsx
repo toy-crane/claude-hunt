@@ -38,8 +38,20 @@ const { OnboardingForm } = await import("./onboarding-form.tsx");
 const COHORT_A_ID = "a1b2c3d4-5678-4abc-9def-0123456789ab";
 const COHORT_B_ID = "b1b2c3d4-5678-4abc-9def-0123456789ab";
 const cohorts: Cohort[] = [
-  { id: COHORT_A_ID, name: "Cohort A", created_at: "2026-04-14T00:00:00Z" },
-  { id: COHORT_B_ID, name: "Cohort B", created_at: "2026-04-14T00:00:00Z" },
+  {
+    id: COHORT_A_ID,
+    name: "LGE-1",
+    label: "LG전자 1기",
+    created_at: "2026-04-14T00:00:00Z",
+    updated_at: "2026-04-14T00:00:00Z",
+  },
+  {
+    id: COHORT_B_ID,
+    name: "LGE-2",
+    label: "LG전자 2기",
+    created_at: "2026-04-14T00:00:00Z",
+    updated_at: "2026-04-14T00:00:00Z",
+  },
 ];
 
 async function pickCohort(name: string) {
@@ -190,7 +202,7 @@ describe("OnboardingForm", () => {
     render(<OnboardingForm cohorts={cohorts} initialNext="/dashboard" />);
 
     typeDisplayName("  Alice  ");
-    await pickCohort("Cohort A");
+    await pickCohort("LG전자 1기");
     await submit();
 
     await vi.waitFor(() => {
@@ -212,7 +224,7 @@ describe("OnboardingForm", () => {
     render(<OnboardingForm cohorts={cohorts} initialNext="/" />);
 
     typeDisplayName("Alice");
-    await pickCohort("Cohort B");
+    await pickCohort("LG전자 2기");
     await submit();
 
     expect(
