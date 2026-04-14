@@ -36,10 +36,12 @@ create extension if not exists moddatetime schema extensions;
 create trigger handle_updated_at
   before update on public.<table>
   for each row
-  execute procedure moddatetime (updated_at);
+  execute procedure extensions.moddatetime (updated_at);
 ```
 
 The `create extension` line is idempotent and safe to repeat in every trigger migration.
+
+Always call the function as `extensions.moddatetime(...)`. Bare `moddatetime(...)` works locally but breaks `supabase db push` on the remote DB.
 
 ## Strictly Prohibited
 
@@ -47,3 +49,4 @@ The `create extension` line is idempotent and safe to repeat in every trigger mi
 - Adding `updated_at` without the corresponding `moddatetime` trigger migration
 - Using bare `timestamp` instead of `timestamptz`
 - Placing `created_at` / `updated_at` anywhere except the last two columns
+- Calling the trigger function as bare `moddatetime(...)` instead of `extensions.moddatetime(...)`

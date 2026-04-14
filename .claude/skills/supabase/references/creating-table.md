@@ -75,10 +75,12 @@ create extension if not exists moddatetime schema extensions;
 create trigger handle_updated_at
   before update on public.posts
   for each row
-  execute procedure moddatetime (updated_at);
+  execute procedure extensions.moddatetime (updated_at);
 ```
 
 The `create extension` line is idempotent — keep it in every trigger migration; it's a no-op if already installed.
+
+Call the function as `extensions.moddatetime(...)`. Bare `moddatetime(...)` works locally but fails on remote `supabase db push`.
 
 ## Step 3: Generate Schema Migration
 
