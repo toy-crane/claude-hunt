@@ -105,4 +105,53 @@ describe("updateDisplayName", () => {
     expect(result.ok).toBe(false);
     expect(updateMock).not.toHaveBeenCalled();
   });
+
+  it("maps the display-name unique violation to 'already taken'", async () => {
+    eqMock.mockResolvedValue({
+      error: {
+        code: "23505",
+        message:
+          'duplicate key value violates unique constraint "profiles_display_name_ci_unique"',
+      },
+    });
+    const { updateDisplayName } = await import("./actions.ts");
+
+    const result = await updateDisplayName("Bob");
+
+    expect(result).toEqual({
+      ok: false,
+      error: {
+        field: "displayName",
+        message: "That display name is already taken",
+      },
+    });
+  });
+
+  it("does NOT remap unrelated 23505 errors (other unique constraints pass through)", async () => {
+    const rawMessage =
+      'duplicate key value violates unique constraint "some_other_unique"';
+    eqMock.mockResolvedValue({
+      error: { code: "23505", message: rawMessage },
+    });
+    const { updateDisplayName } = await import("./actions.ts");
+
+    const result = await updateDisplayName("Bob");
+
+    expect(result).toEqual({
+      ok: false,
+      error: { field: "displayName", message: rawMessage },
+    });
+  });
+
+  it("self-save succeeds when the DB accepts the no-op update (Scenario 4)", async () => {
+    // When the user saves their current display name, the unique index
+    // sees no conflict (own row's own value) and the DB returns no error.
+    eqMock.mockResolvedValue({ error: null });
+    const { updateDisplayName } = await import("./actions.ts");
+
+    const result = await updateDisplayName("Alice");
+
+    expect(result).toEqual({ ok: true });
+    expect(updateMock).toHaveBeenCalledWith({ display_name: "Alice" });
+  });
 });
