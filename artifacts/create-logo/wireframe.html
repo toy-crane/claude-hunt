@@ -1,0 +1,396 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Wireframe: create-logo</title>
+<script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
+<script src="https://unpkg.com/lucide@latest"></script>
+<style>
+  :root {
+    --w-bg: #f5f5f5;
+    --w-border: #ccc;
+    --w-text: #555;
+    --w-muted: #aaa;
+    --w-fill: #eee;
+  }
+
+  * {
+    font-family: ui-monospace, SFMono-Regular, "SF Mono", Menlo, Consolas, monospace;
+    color: var(--w-text);
+  }
+
+  body { background: var(--w-bg); }
+
+  nav { position: sticky; top: 0; z-index: 40; background: var(--w-bg); border-bottom: 1px solid var(--w-border); }
+  nav button { cursor: pointer; font-size: 13px; }
+  nav button:hover { background: var(--w-fill); border-radius: 4px; }
+  nav button.active { font-weight: bold; border-bottom: 2px solid var(--w-text); }
+
+  .screen { display: none; }
+  .screen.active { display: block; }
+
+  .vp-toggle button {
+    font-size: 12px; padding: 2px 8px;
+    border: 1px solid var(--w-border); cursor: pointer; background: white;
+  }
+  .vp-toggle button:first-child { border-radius: 4px 0 0 4px; }
+  .vp-toggle button:last-child { border-radius: 0 4px 4px 0; border-left: none; }
+  .vp-toggle button.active { background: var(--w-text); color: white; }
+
+  body.viewport-mobile .screen-content {
+    max-width: 375px !important;
+    margin: 24px auto !important;
+    border: 2px solid var(--w-border);
+    border-radius: 24px;
+    min-height: 667px;
+    background: white;
+    box-shadow: 0 4px 24px rgba(0,0,0,0.08);
+    padding: 32px 16px !important;
+  }
+
+  .screen-notes {
+    background: #fffde7;
+    border-left: 3px solid #ffd54f;
+    padding: 12px 16px;
+    margin-top: 24px;
+    font-size: 13px;
+    border-radius: 0 4px 4px 0;
+  }
+  .screen-notes summary {
+    cursor: pointer;
+    font-weight: bold;
+    font-size: 12px;
+    color: #b0a050;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+  }
+  .screen-notes p { margin: 6px 0 2px; color: #777; }
+  .screen-notes ul { margin: 4px 0 0 16px; padding: 0; color: #777; }
+  .screen-notes li { margin: 2px 0; }
+
+  /* Wireframe custom helpers */
+  .w-box {
+    border: 1px dashed var(--w-border);
+    background: white;
+  }
+  .w-filled {
+    background: var(--w-fill);
+    border: 1px solid var(--w-border);
+  }
+  .w-placeholder {
+    background: repeating-linear-gradient(
+      45deg,
+      var(--w-fill),
+      var(--w-fill) 6px,
+      white 6px,
+      white 12px
+    );
+    border: 1px dashed var(--w-border);
+  }
+  .w-logo-mark {
+    display: inline-flex;
+    align-items: baseline;
+    gap: 2px;
+    font-weight: 600;
+  }
+  .w-logo-mark .prefix,
+  .w-logo-mark .cursor {
+    font-weight: 700;
+  }
+  .w-cursor-blink {
+    animation: w-blink 1s steps(1) infinite;
+  }
+  @keyframes w-blink { 0%, 49% { opacity: 1; } 50%, 100% { opacity: 0; } }
+
+  .w-tag {
+    border: 1px solid var(--w-border);
+    border-radius: 4px;
+    padding: 1px 6px;
+    font-size: 11px;
+    display: inline-block;
+  }
+  .w-label {
+    font-size: 10px;
+    color: var(--w-muted);
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+  }
+  .w-mono-badge {
+    font-size: 9px;
+    background: var(--w-text);
+    color: white;
+    padding: 1px 5px;
+    border-radius: 2px;
+    margin-left: 4px;
+    vertical-align: middle;
+  }
+  .w-sans-badge {
+    font-size: 9px;
+    background: white;
+    color: var(--w-text);
+    border: 1px solid var(--w-border);
+    padding: 1px 5px;
+    border-radius: 2px;
+    margin-left: 4px;
+    vertical-align: middle;
+  }
+</style>
+</head>
+<body class="p-0 m-0 viewport-mobile">
+
+<nav class="flex items-center gap-4 px-6 py-2">
+  <span class="text-xs" style="color:var(--w-muted)">wireframe</span>
+  <button id="nav-0" onclick="show(0)" class="px-2 py-1">login</button>
+  <button id="nav-1" onclick="show(1)" class="px-2 py-1">browser chrome &amp; favicon</button>
+  <button id="nav-2" onclick="show(2)" class="px-2 py-1">og preview</button>
+  <div class="vp-toggle flex ml-auto">
+    <button id="vp-desktop" onclick="setViewport('desktop')">Desktop</button>
+    <button id="vp-mobile" onclick="setViewport('mobile')" class="active">Mobile</button>
+  </div>
+</nav>
+
+<!-- ============================================================ -->
+<!-- Screen 0 — Login (scenario-1, scenario-4)                    -->
+<!-- ============================================================ -->
+<div id="screen-0" class="screen" data-scenario="scenario-1">
+  <div class="screen-content @container max-w-md mx-auto p-6">
+
+    <h2 class="text-lg font-bold mb-5" style="color:var(--w-muted); border-bottom:1px solid var(--w-border); padding-bottom:8px;">
+      login · /login
+    </h2>
+
+    <div class="flex flex-col gap-6 py-8">
+      <!-- Logo (replaces previous "Claude Hunt" text) -->
+      <div>
+        <div class="w-label mb-2">logo · links to /</div>
+        <div class="w-logo-mark text-2xl">
+          <span class="prefix">&gt;</span>
+          <span>claude-hunt</span><span class="cursor w-cursor-blink">_</span>
+        </div>
+        <div class="text-[11px] mt-1" style="color:var(--w-muted)">
+          cursor blinks here (login hero only) · `&gt;` and `_` rendered in terracotta (visual, not shown in wireframe)
+        </div>
+      </div>
+
+      <!-- Headings -->
+      <div>
+        <div class="w-label mb-1">h1</div>
+        <div class="w-box p-2 text-base">Welcome back</div>
+      </div>
+      <div>
+        <div class="w-label mb-1">subtitle</div>
+        <div class="w-box p-2 text-sm">Sign in to your account to continue</div>
+      </div>
+
+      <!-- OAuth -->
+      <div class="grid grid-cols-2 gap-3">
+        <div class="w-box p-2 text-sm flex items-center justify-center gap-2">
+          <i data-lucide="github" class="w-4 h-4"></i> GitHub
+        </div>
+        <div class="w-box p-2 text-sm flex items-center justify-center gap-2">
+          <i data-lucide="chrome" class="w-4 h-4"></i> Google
+        </div>
+      </div>
+
+      <!-- Divider -->
+      <div class="grid grid-cols-[1fr_auto_1fr] items-center gap-3">
+        <div style="border-top:1px dashed var(--w-border)"></div>
+        <span class="text-xs" style="color:var(--w-muted)">Or continue with</span>
+        <div style="border-top:1px dashed var(--w-border)"></div>
+      </div>
+
+      <!-- Email + Continue -->
+      <div class="flex flex-col gap-2">
+        <div class="w-label">Email</div>
+        <div class="w-box p-2 text-sm" style="color:var(--w-muted)">you@example.com</div>
+      </div>
+      <div class="w-filled p-2 text-sm text-center rounded">
+        Continue <span class="text-[10px]" style="color:var(--w-muted)">(unchanged · existing primary)</span>
+      </div>
+
+      <!-- Terms -->
+      <div class="text-[11px] text-center" style="color:var(--w-muted)">
+        By continuing, you agree to our Terms of Service and Privacy Policy.
+      </div>
+    </div>
+
+    <div class="screen-notes">
+      <details open>
+        <summary>Notes</summary>
+        <p><strong>Scenario:</strong> 1 (login logo)</p>
+        <ul>
+          <li>Trigger: visitor lands on /login</li>
+          <li>Only change on this page: the "Claude Hunt" text is replaced by the CLI wordmark</li>
+          <li>No other element moves or restyles — buttons, inputs, fonts unchanged</li>
+          <li>The blinking cursor is allowed <em>only</em> on this screen (login hero)</li>
+          <li>Logo is a link to <code>/</code> with aria-label "claude-hunt home"</li>
+          <li>Terracotta on <code>&gt;</code> and <code>_</code> is visual — verified later via visual QA</li>
+        </ul>
+      </details>
+    </div>
+  </div>
+</div>
+
+<!-- ============================================================ -->
+<!-- Screen 1 — Browser chrome & favicon (scenario-2)             -->
+<!-- ============================================================ -->
+<div id="screen-1" class="screen" data-scenario="scenario-2">
+  <div class="screen-content @container max-w-3xl mx-auto p-6">
+
+    <h2 class="text-lg font-bold mb-5" style="color:var(--w-muted); border-bottom:1px solid var(--w-border); padding-bottom:8px;">
+      browser chrome &amp; favicon sizes
+    </h2>
+
+    <!-- Mock browser tab -->
+    <div class="w-label mb-2">browser tab</div>
+    <div class="w-box flex items-center gap-2 p-2 rounded-t-lg" style="max-width:320px">
+      <div class="w-filled flex items-center justify-center" style="width:16px;height:16px;border-radius:2px">
+        <span style="font-size:9px;font-weight:700">_</span>
+      </div>
+      <div class="text-xs flex-1 truncate">claude-hunt</div>
+      <i data-lucide="x" class="w-3 h-3" style="color:var(--w-muted)"></i>
+    </div>
+    <div class="text-[11px] mt-1" style="color:var(--w-muted)">
+      title always ends with "claude-hunt"
+    </div>
+
+    <!-- Favicon size strip -->
+    <div class="mt-8">
+      <div class="w-label mb-2">favicon sizes</div>
+      <div class="flex items-end gap-6 flex-wrap">
+        <div class="flex flex-col items-center gap-2">
+          <div class="w-filled flex items-center justify-center" style="width:16px;height:16px;border-radius:2px">
+            <span style="font-size:9px;font-weight:700">_</span>
+          </div>
+          <div class="text-[10px]" style="color:var(--w-muted)">16×16</div>
+        </div>
+        <div class="flex flex-col items-center gap-2">
+          <div class="w-filled flex items-center justify-center" style="width:32px;height:32px;border-radius:4px">
+            <span style="font-size:18px;font-weight:700">_</span>
+          </div>
+          <div class="text-[10px]" style="color:var(--w-muted)">32×32</div>
+        </div>
+        <div class="flex flex-col items-center gap-2">
+          <div class="w-filled flex items-center justify-center" style="width:64px;height:64px;border-radius:10px">
+            <span style="font-size:36px;font-weight:700">_</span>
+          </div>
+          <div class="text-[10px]" style="color:var(--w-muted)">64×64</div>
+        </div>
+        <div class="flex flex-col items-center gap-2">
+          <div class="w-filled flex items-center justify-center" style="width:120px;height:120px;border-radius:20px">
+            <span style="font-size:72px;font-weight:700">_</span>
+          </div>
+          <div class="text-[10px]" style="color:var(--w-muted)">180×180 (scaled)</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Size rules -->
+    <div class="mt-8 w-box p-3">
+      <div class="w-label mb-2">collapse rule</div>
+      <ul class="text-xs" style="color:var(--w-muted); padding-left:16px">
+        <li>Full mark <code>&gt; claude-hunt_</code> used at logo sizes (≥ 120px wide)</li>
+        <li>Below favicon threshold, the prefix <code>&gt;</code> drops away</li>
+        <li>At 16/32 px, only the <code>_</code> cursor inside a filled square remains</li>
+      </ul>
+    </div>
+
+    <div class="screen-notes">
+      <details open>
+        <summary>Notes</summary>
+        <p><strong>Scenario:</strong> 2 (browser tab + favicon)</p>
+        <ul>
+          <li>Trigger: any route in the app, browser tab visible</li>
+          <li>Favicon never blinks (static everywhere outside login hero)</li>
+          <li>180×180 apple-touch-icon variant must read legibly on iOS home screen</li>
+          <li>Shape at favicon size = filled square + single glyph <code>_</code></li>
+        </ul>
+      </details>
+    </div>
+  </div>
+</div>
+
+<!-- ============================================================ -->
+<!-- Screen 2 — OG social preview (scenario-3)                    -->
+<!-- ============================================================ -->
+<div id="screen-2" class="screen" data-scenario="scenario-3">
+  <div class="screen-content @container max-w-4xl mx-auto p-6">
+
+    <h2 class="text-lg font-bold mb-5" style="color:var(--w-muted); border-bottom:1px solid var(--w-border); padding-bottom:8px;">
+      og social preview · 1200×630
+    </h2>
+
+    <!-- OG canvas -->
+    <div class="w-label mb-2">og image (1200 × 630, scaled down)</div>
+    <div class="w-box mx-auto" style="aspect-ratio: 1200 / 630; max-width: 600px; padding: 48px; display: flex; flex-direction: column; justify-content: center; align-items: flex-start; gap: 24px;">
+      <div class="w-logo-mark" style="font-size: 44px;">
+        <span class="prefix">&gt;</span>
+        <span>claude-hunt</span><span class="cursor">_</span>
+      </div>
+      <div class="text-base" style="max-width: 80%;">
+        Discover what the cohort is building.
+      </div>
+      <div class="text-[11px] mt-auto" style="color:var(--w-muted)">
+        claude-hunt.app
+      </div>
+    </div>
+
+    <!-- Mock unfurl card -->
+    <div class="mt-8">
+      <div class="w-label mb-2">slack / twitter unfurl preview</div>
+      <div class="w-box mx-auto" style="max-width: 480px; display: flex; flex-direction: column;">
+        <div class="w-placeholder" style="aspect-ratio: 1200 / 630;"></div>
+        <div class="p-3 flex flex-col gap-1">
+          <div class="text-[10px]" style="color:var(--w-muted)">claude-hunt.app</div>
+          <div class="text-sm font-bold">claude-hunt — cohort project board</div>
+          <div class="text-xs" style="color:var(--w-muted)">Discover what the cohort is building.</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="screen-notes">
+      <details open>
+        <summary>Notes</summary>
+        <p><strong>Scenario:</strong> 3 (social share preview)</p>
+        <ul>
+          <li>OG image is 1200×630 (standard), stable URL</li>
+          <li>Wordmark anchored to left with comfortable padding — not cropped by mobile thumbnails</li>
+          <li>og:title / twitter:title both include "claude-hunt"</li>
+          <li>Cursor <em>static</em> on OG image (can't animate in a static image anyway)</li>
+        </ul>
+      </details>
+    </div>
+  </div>
+</div>
+
+<script>
+var currentScreen = 0;
+var screenIds = [];
+
+function show(id) {
+  document.querySelectorAll('.screen').forEach(function(s) { s.classList.remove('active'); });
+  document.getElementById('screen-' + id).classList.add('active');
+  document.querySelectorAll('nav button[id^="nav-"]').forEach(function(b) { b.classList.remove('active'); });
+  document.getElementById('nav-' + id).classList.add('active');
+  currentScreen = screenIds.indexOf(id);
+}
+
+function setViewport(mode) {
+  document.body.classList.remove('viewport-mobile', 'viewport-desktop');
+  document.body.classList.add('viewport-' + mode);
+  document.querySelectorAll('.vp-toggle button').forEach(function(b) { b.classList.remove('active'); });
+  document.getElementById('vp-' + mode).classList.add('active');
+}
+
+document.addEventListener('DOMContentLoaded', function() {
+  document.querySelectorAll('nav button[id^="nav-"]').forEach(function(b) {
+    screenIds.push(parseInt(b.id.replace('nav-', '')));
+  });
+  var first = document.querySelector('nav button[id^="nav-"]');
+  if (first) first.click();
+  lucide.createIcons();
+});
+</script>
+</body>
+</html>
