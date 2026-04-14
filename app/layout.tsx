@@ -12,6 +12,17 @@ export const metadata: Metadata = {
     template: "%s · claude-hunt",
   },
   description: "Discover what the cohort is building.",
+  openGraph: {
+    title: "claude-hunt",
+    description: "Discover what the cohort is building.",
+    type: "website",
+    siteName: "claude-hunt",
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: "claude-hunt",
+    description: "Discover what the cohort is building.",
+  },
 };
 
 const notoSans = Noto_Sans({ subsets: ["latin"], variable: "--font-sans" });

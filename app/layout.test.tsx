@@ -38,4 +38,20 @@ describe("app/layout metadata", () => {
   it("has a description present", () => {
     expect(metadata.description).toBeTruthy();
   });
+
+  it("sets an openGraph title containing 'claude-hunt'", () => {
+    const og = metadata.openGraph;
+    expect(og).toBeDefined();
+    expect(String(og?.title)).toContain("claude-hunt");
+  });
+
+  it("sets a twitter title containing 'claude-hunt'", () => {
+    const tw = metadata.twitter;
+    expect(tw).toBeDefined();
+    expect(String(tw?.title)).toContain("claude-hunt");
+  });
+
+  it("uses 'summary_large_image' twitter card so the OG image renders full-bleed", () => {
+    expect(metadata.twitter?.card).toBe("summary_large_image");
+  });
 });
