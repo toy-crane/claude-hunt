@@ -6,6 +6,7 @@ create table public.projects (
   tagline text not null check (char_length(tagline) between 1 and 140),
   project_url text not null check (project_url ~* '^https?://'),
   screenshot_path text not null check (char_length(screenshot_path) > 0),
+  vote_count bigint not null default 0,
   created_at timestamptz not null default now(),
   updated_at timestamptz not null default now()
 );
