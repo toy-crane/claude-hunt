@@ -1,7 +1,9 @@
 create table public.cohorts (
   id uuid not null default gen_random_uuid() primary key,
   name text not null unique,
-  created_at timestamptz not null default now()
+  label text not null,
+  created_at timestamptz not null default now(),
+  updated_at timestamptz not null default now()
 );
 
 alter table public.cohorts enable row level security;
