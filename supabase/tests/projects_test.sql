@@ -4,7 +4,7 @@
 --   Ownership spoof rejected
 
 BEGIN;
-SELECT plan(13);
+SELECT plan(18);
 
 -- 1. Table exists
 SELECT has_table('public', 'projects', 'projects table should exist');
@@ -88,6 +88,64 @@ SELECT throws_ok(
   '42501',
   NULL,
   'Insert with spoofed user_id is rejected by RLS'
+);
+
+-- 14. projects has updated_at column
+RESET role;
+SELECT has_column(
+  'public', 'projects', 'updated_at',
+  'projects should have updated_at column'
+);
+
+-- 15. handle_updated_at trigger exists on projects
+SELECT has_trigger(
+  'public', 'projects', 'handle_updated_at',
+  'handle_updated_at trigger should exist on projects'
+);
+
+-- 16. Update advances updated_at beyond its prior value.
+--     pgTAP runs in a single transaction, so now() is constant. We force a
+--     past updated_at with the trigger disabled, then re-enable and do a
+--     real update to prove the trigger fires and overwrites.
+ALTER TABLE public.projects DISABLE TRIGGER handle_updated_at;
+UPDATE public.projects
+  SET updated_at = '2020-01-01T00:00:00Z'::timestamptz
+  WHERE user_id = '00000000-0000-0000-0000-000000000011';
+ALTER TABLE public.projects ENABLE TRIGGER handle_updated_at;
+
+UPDATE public.projects
+  SET title = 'Updated Title'
+  WHERE user_id = '00000000-0000-0000-0000-000000000011';
+
+SELECT cmp_ok(
+  (SELECT updated_at FROM public.projects
+     WHERE user_id = '00000000-0000-0000-0000-000000000011'),
+  '>',
+  '2020-01-01T00:00:00Z'::timestamptz,
+  'Editing a project advances updated_at beyond its prior value'
+);
+
+-- 17. Caller-supplied updated_at is overridden by the trigger.
+UPDATE public.projects
+  SET updated_at = '2000-01-01T00:00:00Z'::timestamptz
+  WHERE user_id = '00000000-0000-0000-0000-000000000011';
+
+SELECT cmp_ok(
+  (SELECT updated_at FROM public.projects
+     WHERE user_id = '00000000-0000-0000-0000-000000000011'),
+  '>',
+  '2000-01-01T00:00:00Z'::timestamptz,
+  'Caller-supplied past updated_at on projects is overridden by the trigger'
+);
+
+-- 18. Freshly inserted project has updated_at within 1 second of created_at.
+SELECT cmp_ok(
+  (SELECT EXTRACT(EPOCH FROM (updated_at - created_at))::numeric
+     FROM public.projects
+     WHERE user_id = '00000000-0000-0000-0000-000000000011'),
+  '<=',
+  1::numeric,
+  'Freshly inserted project has updated_at within 1 second of created_at'
 );
 
 SELECT * FROM finish();
