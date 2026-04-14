@@ -2,7 +2,6 @@ import { fetchCohorts } from "@features/cohort-filter/index.ts";
 import { OnboardingForm } from "@features/onboarding/index.ts";
 import { createClient } from "@shared/api/supabase/server.ts";
 import { redirect } from "next/navigation";
-import { Suspense } from "react";
 
 interface OnboardingPageProps {
   searchParams: Promise<{ next?: string }>;
@@ -41,21 +40,16 @@ export default async function OnboardingPage({
     redirect("/login");
   }
 
-  const { data: profile } = await supabase
-    .from("profiles")
-    .select("cohort_id")
-    .eq("id", user.id)
-    .single();
+  // Profile query depends on user.id; cohorts fetch is independent —
+  // run them in parallel to halve the TTFB of this page.
+  const [{ data: profile }, cohorts] = await Promise.all([
+    supabase.from("profiles").select("cohort_id").eq("id", user.id).single(),
+    fetchCohorts(),
+  ]);
 
   if (profile?.cohort_id) {
     redirect(safeNext);
   }
 
-  const cohorts = await fetchCohorts();
-
-  return (
-    <Suspense fallback={null}>
-      <OnboardingForm cohorts={cohorts} initialNext={safeNext} />
-    </Suspense>
-  );
+  return <OnboardingForm cohorts={cohorts} initialNext={safeNext} />;
 }

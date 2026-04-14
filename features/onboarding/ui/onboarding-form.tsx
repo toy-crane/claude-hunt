@@ -18,6 +18,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@shared/ui/select.tsx";
+import { Separator } from "@shared/ui/separator.tsx";
 import { Spinner } from "@shared/ui/spinner.tsx";
 import { useRouter } from "next/navigation";
 import { useId, useState, useTransition } from "react";
@@ -93,9 +94,13 @@ export function OnboardingForm({ cohorts, initialNext }: OnboardingFormProps) {
 
   async function handleSignOut() {
     setIsSigningOut(true);
-    const supabase = createClient();
-    await supabase.auth.signOut();
-    router.replace("/login");
+    try {
+      const supabase = createClient();
+      await supabase.auth.signOut();
+      router.replace("/login");
+    } finally {
+      setIsSigningOut(false);
+    }
   }
 
   const submitDisabled = isPending || isSigningOut || noCohorts;
@@ -207,6 +212,12 @@ export function OnboardingForm({ cohorts, initialNext }: OnboardingFormProps) {
           {isPending ? <Spinner data-icon="inline-start" /> : null}
           {isPending ? "Saving..." : "Continue"}
         </Button>
+
+        <div className="grid grid-cols-[1fr_auto_1fr] items-center gap-3">
+          <Separator />
+          <span className="text-muted-foreground text-xs">or</span>
+          <Separator />
+        </div>
 
         <Button
           data-testid="onboarding-sign-out"
