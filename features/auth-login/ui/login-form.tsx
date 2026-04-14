@@ -52,7 +52,7 @@ export function LoginForm() {
     <section className="flex min-h-screen items-center justify-center bg-zinc-50 px-4 py-16 md:py-32 dark:bg-transparent">
       <form className="w-full max-w-sm" onSubmit={handleEmailLogin}>
         <div>
-          <Logo blink className="text-4xl" />
+          <Logo blink className="text-3xl" />
           <h1 className="mt-4 mb-1 font-semibold text-xl">Welcome back</h1>
           <p className="text-muted-foreground text-sm">
             Sign in to your account to continue
