@@ -10,10 +10,10 @@ Use when starting a new project or feature, requirements are ambiguous, the chan
 |-------|----------------|
 | Specify | `/write-spec` skill |
 | Plan | `/draft-plan` skill |
-| Build | `/build` command |
-| Verify | `/test` command |
-| Review | `/review` command |
-| Ship | `/ship` command |
+| Build | `/execute-plan` skill |
+| Verify | `/test` skill |
+| Review | `/review` skill |
+| Ship | `/ship` skill |
 
 Each phase has a human review gate. Do not advance until the current phase is validated.
 
