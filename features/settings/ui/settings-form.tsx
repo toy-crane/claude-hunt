@@ -43,9 +43,13 @@ export function SettingsForm({ initialDisplayName, email }: SettingsFormProps) {
   }
 
   return (
-    <form aria-label="Update display name" onSubmit={handleSubmit}>
+    <form
+      aria-label="Update display name"
+      className="flex flex-col gap-6"
+      onSubmit={handleSubmit}
+    >
       <FieldGroup>
-        <Field>
+        <Field data-invalid={error === null ? undefined : ""}>
           <FieldLabel htmlFor={displayNameId}>Display name</FieldLabel>
           <Input
             aria-invalid={error !== null}
@@ -67,15 +71,18 @@ export function SettingsForm({ initialDisplayName, email }: SettingsFormProps) {
               {error}
             </p>
           ) : null}
-          <div>
-            <Button disabled={isPending} type="submit">
-              {isPending ? <Spinner data-icon="inline-start" /> : null}
-              {isPending ? "Saving..." : "Save"}
-            </Button>
-          </div>
         </Field>
+      </FieldGroup>
 
-        <Field>
+      <div>
+        <Button disabled={isPending} type="submit">
+          {isPending ? <Spinner data-icon="inline-start" /> : null}
+          {isPending ? "Saving..." : "Save"}
+        </Button>
+      </div>
+
+      <FieldGroup>
+        <Field data-disabled="">
           <FieldLabel htmlFor={emailId}>Email</FieldLabel>
           <Input
             disabled

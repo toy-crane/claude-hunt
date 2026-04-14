@@ -1,4 +1,3 @@
-import { createMockSupabaseClient } from "@shared/lib/test-utils.tsx";
 import { render, screen } from "@testing-library/react";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
@@ -21,21 +20,10 @@ vi.mock("next/link", () => ({
   ),
 }));
 
-const profileSingle = vi.fn().mockResolvedValue({ data: null, error: null });
+const fetchViewerMock = vi.fn();
 
-const mockClient = {
-  ...createMockSupabaseClient(),
-  from: vi.fn().mockReturnValue({
-    select: vi.fn().mockReturnValue({
-      eq: vi.fn().mockReturnValue({
-        single: profileSingle,
-      }),
-    }),
-  }),
-};
-
-vi.mock("@shared/api/supabase/server", () => ({
-  createClient: vi.fn().mockResolvedValue(mockClient),
+vi.mock("@shared/api/supabase/viewer", () => ({
+  fetchViewer: (...args: unknown[]) => fetchViewerMock(...args),
 }));
 
 vi.mock("@features/auth-login", () => ({
@@ -48,10 +36,11 @@ vi.mock("next-themes", () => ({
 
 describe("<Header />", () => {
   beforeEach(() => {
-    vi.clearAllMocks();
+    fetchViewerMock.mockReset();
   });
 
   it("renders the claude-hunt logo linking to /", async () => {
+    fetchViewerMock.mockResolvedValue(null);
     const { Header } = await import("./header.tsx");
     const jsx = await Header();
     render(jsx);
@@ -61,10 +50,7 @@ describe("<Header />", () => {
   });
 
   it("renders a Log in button navigating to /login when signed out", async () => {
-    vi.mocked(mockClient.auth.getUser).mockResolvedValueOnce({
-      data: { user: null },
-      error: null,
-    });
+    fetchViewerMock.mockResolvedValue(null);
 
     const { Header } = await import("./header.tsx");
     const jsx = await Header();
@@ -75,10 +61,7 @@ describe("<Header />", () => {
   });
 
   it("does not render an avatar for signed-out visitors", async () => {
-    vi.mocked(mockClient.auth.getUser).mockResolvedValueOnce({
-      data: { user: null },
-      error: null,
-    });
+    fetchViewerMock.mockResolvedValue(null);
 
     const { Header } = await import("./header.tsx");
     const jsx = await Header();
@@ -90,13 +73,12 @@ describe("<Header />", () => {
   });
 
   it("renders the avatar menu and omits the Log in button when signed in", async () => {
-    vi.mocked(mockClient.auth.getUser).mockResolvedValueOnce({
-      data: { user: { id: "user-1" } },
-      error: null,
-    });
-    profileSingle.mockResolvedValueOnce({
-      data: { display_name: "Alice", avatar_url: null },
-      error: null,
+    fetchViewerMock.mockResolvedValue({
+      id: "user-1",
+      email: "alice@example.com",
+      displayName: "Alice",
+      avatarUrl: null,
+      cohortId: null,
     });
 
     const { Header } = await import("./header.tsx");
@@ -112,13 +94,12 @@ describe("<Header />", () => {
   });
 
   it("shows the first character of the display name inside the avatar fallback", async () => {
-    vi.mocked(mockClient.auth.getUser).mockResolvedValueOnce({
-      data: { user: { id: "user-1" } },
-      error: null,
-    });
-    profileSingle.mockResolvedValueOnce({
-      data: { display_name: "Alice", avatar_url: null },
-      error: null,
+    fetchViewerMock.mockResolvedValue({
+      id: "user-1",
+      email: "alice@example.com",
+      displayName: "Alice",
+      avatarUrl: null,
+      cohortId: null,
     });
 
     const { Header } = await import("./header.tsx");

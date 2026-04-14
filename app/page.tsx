@@ -4,6 +4,7 @@ import { EditDialog } from "@features/edit-project/index.ts";
 import { SubmitDialog } from "@features/submit-project/index.ts";
 import { VoteButton } from "@features/toggle-vote/index.ts";
 import { createClient } from "@shared/api/supabase/server.ts";
+import { fetchViewer } from "@shared/api/supabase/viewer.ts";
 import { Separator } from "@shared/ui/separator.tsx";
 import { Header } from "@widgets/header/index.ts";
 import { fetchProjects, ProjectGrid } from "@widgets/project-grid/index.ts";
@@ -19,31 +20,12 @@ export default async function Page({ searchParams }: PageProps) {
 
   const supabase = await createClient();
 
-  // Stage 1: auth + cohorts in parallel (cohorts do not depend on the
-  // viewer; getUser returns quickly from the session cookie).
-  const [
-    {
-      data: { user },
-    },
-    cohorts,
-  ] = await Promise.all([supabase.auth.getUser(), fetchCohorts()]);
+  const [viewer, cohorts] = await Promise.all([fetchViewer(), fetchCohorts()]);
 
-  // Stage 2: projects (+ viewer's votes merged inside) and profile's
-  // cohort_id lookup in parallel. Both depend on `user`, neither on
-  // each other.
-  const [projects, profileResult] = await Promise.all([
-    fetchProjects({
-      cohortId: selectedCohortId,
-      viewerUserId: user?.id ?? null,
-    }),
-    user
-      ? supabase.from("profiles").select("cohort_id").eq("id", user.id).single()
-      : Promise.resolve({
-          data: null as { cohort_id: string | null } | null,
-          error: null,
-        }),
-  ]);
-  const viewerCohortId = profileResult.data?.cohort_id ?? null;
+  const projects = await fetchProjects({
+    cohortId: selectedCohortId,
+    viewerUserId: viewer?.id ?? null,
+  });
 
   const resolveScreenshotUrl = (path: string) =>
     supabase.storage.from("project-screenshots").getPublicUrl(path).data
@@ -63,10 +45,12 @@ export default async function Page({ searchParams }: PageProps) {
                 Projects built by cohort students. Upvote your favourites.
               </p>
             </div>
-            <SubmitDialog
-              cohortId={viewerCohortId}
-              isAuthenticated={Boolean(user)}
-            />
+            <div className="w-fit self-start">
+              <SubmitDialog
+                cohortId={viewer?.cohortId ?? null}
+                isAuthenticated={Boolean(viewer)}
+              />
+            </div>
           </div>
 
           <Separator />
@@ -109,14 +93,16 @@ export default async function Page({ searchParams }: PageProps) {
                   ? Boolean(project.viewer_has_voted)
                   : false
               }
-              isAuthenticated={Boolean(user)}
-              ownedByViewer={user?.id != null && project.user_id === user.id}
+              isAuthenticated={Boolean(viewer)}
+              ownedByViewer={
+                viewer?.id != null && project.user_id === viewer.id
+              }
               projectId={project.id ?? ""}
               voteCount={project.vote_count ?? 0}
             />
           )}
           resolveScreenshotUrl={resolveScreenshotUrl}
-          viewerUserId={user?.id ?? null}
+          viewerUserId={viewer?.id ?? null}
         />
       </main>
     </>

@@ -8,6 +8,26 @@
 **Harness Signal**: N/A
 **Result**: Pending
 
+## Reviewer feedback — accepted fixes
+
+**When**: Step 5, Evaluation loop
+**Decision**: Accepted every FAIL and most Warning items from the four reviewers; rejected advisories that conflicted with user-approved design choices:
+
+Accepted (fixed):
+- **react-reviewer FAIL (`app/page.tsx`)**: duplicate `getUser()` + profile calls between Page and Header. Introduced `shared/api/supabase/viewer.ts` — a `cache()`-wrapped `fetchViewer()` that fetches user + profile once per request. Home page, Settings page, and Header all delegate to it. Halves the Supabase round-trips on `/`.
+- **design-reviewer FAIL (`settings-form.tsx`)**: `Field` missing `data-invalid` and `data-disabled`. Added both. Also moved the Save button out of `FieldGroup` so it isn't semantically nested inside a field container.
+- **design-reviewer notes**: removed `size-4` override on the fallback icon; added `data-icon="inline-start"` on the settings Log-out icon.
+- **ui-quality-reviewer Warning**: SubmitDialog stretched edge-to-edge on mobile. Wrapped in a `w-fit self-start` container.
+
+Rejected (logged):
+- **react-reviewer advisory (`LoginForm` Suspense)**: call site already wraps `<LoginForm />` in `<Suspense>` at `app/login/page.tsx`. Moving the boundary inside the component is defensive against future re-use but not required. Not changed.
+- **ui-quality advisory — filter label right-aligned / Log in button variant**: the user explicitly approved this layout during the wireframe iteration (separator above filter, right-aligned filter). Holding the line per approved design.
+- **ui-quality advisory — no Header on /settings**: spec scope is "home only this round". Intentional.
+
+**Why**: FAIL-tier items are non-negotiable — duplicate network calls and missing form-state data attributes both degrade real user experience. Advisory items clash with approved wireframe choices; changing them would undo work the user signed off on.
+**Harness Signal**: When RSC + client-island pairs both need session data, the default instinct should be "cache the fetch helper" rather than "fetch twice". A plan-reviewer check would be: "if multiple server components in the same tree call `getUser()`, flag it and propose `React.cache()` or prop drilling." Worth adding to the plan-reviewer prompt.
+**Result**: Pending — re-running react-reviewer and design-reviewer after the fixes.
+
 ## LoginForm now honors `?next=<path>`
 
 **When**: Step 4, Task 7

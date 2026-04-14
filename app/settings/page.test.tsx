@@ -1,4 +1,3 @@
-import { createMockSupabaseClient } from "@shared/lib/test-utils.tsx";
 import { render, screen } from "@testing-library/react";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
@@ -34,38 +33,45 @@ vi.mock("sonner", () => ({
   toast: { success: vi.fn() },
 }));
 
-const profileSingle = vi.fn().mockResolvedValue({ data: null, error: null });
+const fetchViewerMock = vi.fn();
 
-const mockClient = {
-  ...createMockSupabaseClient(),
-  from: vi.fn().mockReturnValue({
-    select: vi.fn().mockReturnValue({
-      eq: vi.fn().mockReturnValue({
-        single: profileSingle,
-      }),
-    }),
-  }),
-};
-
-vi.mock("@shared/api/supabase/server", () => ({
-  createClient: vi.fn().mockResolvedValue(mockClient),
+vi.mock("@shared/api/supabase/viewer", () => ({
+  fetchViewer: (...args: unknown[]) => fetchViewerMock(...args),
 }));
 
-const signOutMock = vi.fn();
 vi.mock("@features/auth-login", () => ({
-  signOut: signOutMock,
+  signOut: vi.fn(),
+}));
+
+vi.mock("@features/settings", () => ({
+  SettingsForm: ({
+    email,
+    initialDisplayName,
+  }: {
+    email: string;
+    initialDisplayName: string;
+  }) => (
+    <div data-testid="settings-form-stub">
+      <label htmlFor="display-name">
+        Display name
+        <input defaultValue={initialDisplayName} id="display-name" />
+      </label>
+      <label htmlFor="email">
+        Email
+        <input defaultValue={email} disabled id="email" type="email" />
+      </label>
+    </div>
+  ),
 }));
 
 describe("settings page", () => {
   beforeEach(() => {
-    vi.clearAllMocks();
+    fetchViewerMock.mockReset();
+    redirectMock.mockClear();
   });
 
   it("redirects unauthenticated visitors to /login?next=/settings", async () => {
-    vi.mocked(mockClient.auth.getUser).mockResolvedValueOnce({
-      data: { user: null },
-      error: null,
-    });
+    fetchViewerMock.mockResolvedValue(null);
 
     const Page = (await import("./page.tsx")).default;
 
@@ -74,13 +80,12 @@ describe("settings page", () => {
   });
 
   it("renders the heading, display name, email, and back-to-home link for signed-in users", async () => {
-    vi.mocked(mockClient.auth.getUser).mockResolvedValueOnce({
-      data: { user: { id: "user-1", email: "alice@example.com" } },
-      error: null,
-    });
-    profileSingle.mockResolvedValueOnce({
-      data: { display_name: "Alice", email: "alice@example.com" },
-      error: null,
+    fetchViewerMock.mockResolvedValue({
+      id: "user-1",
+      email: "alice@example.com",
+      displayName: "Alice",
+      avatarUrl: null,
+      cohortId: null,
     });
 
     const Page = (await import("./page.tsx")).default;
@@ -102,27 +107,21 @@ describe("settings page", () => {
     );
   });
 
-  it("renders a Log out button that submits the signOut server action", async () => {
-    vi.mocked(mockClient.auth.getUser).mockResolvedValueOnce({
-      data: { user: { id: "user-1", email: "alice@example.com" } },
-      error: null,
-    });
-    profileSingle.mockResolvedValueOnce({
-      data: { display_name: "Alice", email: "alice@example.com" },
-      error: null,
+  it("renders a Log out button submitting the signOut server action", async () => {
+    fetchViewerMock.mockResolvedValue({
+      id: "user-1",
+      email: "alice@example.com",
+      displayName: "Alice",
+      avatarUrl: null,
+      cohortId: null,
     });
 
     const Page = (await import("./page.tsx")).default;
     const jsx = await Page();
-    const { container } = render(jsx);
+    render(jsx);
 
     const button = screen.getByRole("button", { name: LOG_OUT_LABEL });
     expect(button).toBeInTheDocument();
-    const form = button.closest("form");
-    expect(form).not.toBeNull();
-    // Sanity check: the form's action wires through the signOut mock —
-    // when rendered in a server component tree, React serializes the
-    // action prop as a string or function reference.
-    expect(container).toBeDefined();
+    expect(button.closest("form")).not.toBeNull();
   });
 });
