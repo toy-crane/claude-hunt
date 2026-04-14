@@ -3,6 +3,21 @@ import { fireEvent, render, screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
+vi.mock("next/link", () => ({
+  default: ({
+    children,
+    href,
+    ...props
+  }: {
+    children: React.ReactNode;
+    href: string;
+  }) => (
+    <a href={href} {...props}>
+      {children}
+    </a>
+  ),
+}));
+
 const replaceMock = vi.fn();
 vi.mock("next/navigation", () => ({
   useRouter: () => ({ replace: replaceMock }),
@@ -59,6 +74,68 @@ describe("OnboardingForm", () => {
     expect(screen.getByTestId("onboarding-cohort-trigger")).toBeInTheDocument();
     expect(screen.getByTestId("onboarding-submit")).toBeEnabled();
     expect(screen.getByTestId("onboarding-sign-out")).toBeEnabled();
+  });
+
+  it("renders the claude-hunt Logo and not the legacy 'Claude Hunt' text", () => {
+    const { container } = render(
+      <OnboardingForm cohorts={cohorts} initialNext="/" />
+    );
+    expect(
+      screen.getByRole("link", { name: "claude-hunt home" })
+    ).toBeInTheDocument();
+    expect(container.textContent).not.toContain("Claude Hunt");
+  });
+
+  it("renders exactly one h1 with 'Set up your profile' as the page heading", () => {
+    const { container } = render(
+      <OnboardingForm cohorts={cohorts} initialNext="/" />
+    );
+    const headings = container.querySelectorAll("h1");
+    expect(headings).toHaveLength(1);
+    expect(headings[0].textContent).toBe("Set up your profile");
+  });
+
+  it("renders the subtitle describing the onboarding task", () => {
+    render(<OnboardingForm cohorts={cohorts} initialNext="/" />);
+    expect(
+      screen.getByText(
+        "Pick a cohort and set your display name to start submitting projects."
+      )
+    ).toBeInTheDocument();
+  });
+
+  it("blinks the Logo cursor on /onboarding (same motion as /login)", () => {
+    render(<OnboardingForm cohorts={cohorts} initialNext="/" />);
+    const cursor = screen.getByText("_");
+    expect(cursor.style.animationName).toBe("logo-cursor-blink");
+    expect(cursor.style.animationDuration).toBe("1s");
+  });
+
+  it("has exactly one claude-hunt Logo (single source of header truth)", () => {
+    render(<OnboardingForm cohorts={cohorts} initialNext="/" />);
+    const logos = screen.getAllByRole("link", { name: "claude-hunt home" });
+    expect(logos).toHaveLength(1);
+  });
+
+  it("renders the shared page-shell classes (unified with /login)", () => {
+    const { container } = render(
+      <OnboardingForm cohorts={cohorts} initialNext="/" />
+    );
+    const section = container.querySelector("section");
+    expect(section).not.toBeNull();
+    for (const cls of [
+      "flex",
+      "min-h-screen",
+      "items-center",
+      "justify-center",
+      "bg-zinc-50",
+      "px-4",
+      "py-16",
+      "md:py-32",
+      "dark:bg-transparent",
+    ]) {
+      expect(section?.className).toContain(cls);
+    }
   });
 
   it("shows 'Display name is required' when submitting empty", async () => {
