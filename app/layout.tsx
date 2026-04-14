@@ -13,6 +13,7 @@ export const metadata: Metadata = {
     template: "%s · claude-hunt",
   },
   description: "Discover what the cohort is building.",
+  keywords: ["Claude Code", "cohort projects", "AI coding", "showcase"],
   robots: {
     index: true,
     follow: true,

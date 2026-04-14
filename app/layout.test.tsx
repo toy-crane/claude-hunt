@@ -74,4 +74,15 @@ describe("app/layout metadata", () => {
   it("declares a canonical URL pointing to site root so query-string variants collapse", () => {
     expect(metadata.alternates?.canonical).toBe("/");
   });
+
+  it("includes the site-relevant keywords required by the spec", () => {
+    expect(metadata.keywords).toEqual(
+      expect.arrayContaining([
+        "Claude Code",
+        "cohort projects",
+        "AI coding",
+        "showcase",
+      ])
+    );
+  });
 });
