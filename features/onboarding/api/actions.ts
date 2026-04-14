@@ -9,6 +9,27 @@ export interface CompleteOnboardingResult {
   ok: boolean;
 }
 
+// Postgres SQLSTATE for unique_violation. When this fires on the
+// profiles_display_name_ci_unique index, we want the user to see a
+// short, form-friendly message instead of the raw Supabase error.
+const UNIQUE_VIOLATION_CODE = "23505";
+const DISPLAY_NAME_UNIQUE_INDEX = "profiles_display_name_ci_unique";
+const DISPLAY_NAME_TAKEN_MESSAGE = "That display name is already taken";
+
+function isDisplayNameUniqueViolation(error: {
+  code?: string;
+  message?: string;
+  details?: string;
+}): boolean {
+  if (error.code !== UNIQUE_VIOLATION_CODE) {
+    return false;
+  }
+  return (
+    (error.message ?? "").includes(DISPLAY_NAME_UNIQUE_INDEX) ||
+    (error.details ?? "").includes(DISPLAY_NAME_UNIQUE_INDEX)
+  );
+}
+
 /**
  * Server action: writes the display name and cohort id to the signed-in
  * user's own profile row. The onboarding gate (middleware + /onboarding
@@ -51,6 +72,9 @@ export async function completeOnboarding(
   );
 
   if (upsertError) {
+    if (isDisplayNameUniqueViolation(upsertError)) {
+      return { ok: false, error: DISPLAY_NAME_TAKEN_MESSAGE };
+    }
     return { ok: false, error: upsertError.message };
   }
 
