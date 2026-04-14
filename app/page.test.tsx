@@ -1,5 +1,4 @@
 import type { Cohort } from "@entities/cohort/index.ts";
-import type { ProjectWithVoteCount } from "@entities/vote/index.ts";
 import { createMockSupabaseClient } from "@shared/lib/test-utils.tsx";
 import { render, screen } from "@testing-library/react";
 import { vi } from "vitest";
@@ -25,21 +24,24 @@ vi.mock("next/navigation", () => ({
   useSearchParams: () => new URLSearchParams(),
 }));
 
-const fetchProjectsMock =
-  vi.fn<
-    (options?: { cohortId?: string | null }) => Promise<ProjectWithVoteCount[]>
-  >();
-const fetchCohortsMock = vi.fn<() => Promise<Cohort[]>>();
+// ProjectGridSection is an async RSC; mock it so the page unit test
+// stays synchronous and doesn't require a real Supabase connection.
+const sectionMock = vi.fn(
+  (_props: {
+    cohortId: string | null;
+    viewerUserId: string | null;
+    isAuthenticated: boolean;
+  }) => <div data-testid="project-grid-section-stub" />
+);
+vi.mock("./_components/project-grid-section.tsx", () => ({
+  ProjectGridSection: (props: {
+    cohortId: string | null;
+    viewerUserId: string | null;
+    isAuthenticated: boolean;
+  }) => sectionMock(props),
+}));
 
-vi.mock("@widgets/project-grid", async () => {
-  const actual = await vi.importActual<typeof import("@widgets/project-grid")>(
-    "@widgets/project-grid"
-  );
-  return {
-    ...actual,
-    fetchProjects: fetchProjectsMock,
-  };
-});
+const fetchCohortsMock = vi.fn<() => Promise<Cohort[]>>();
 
 vi.mock("@features/cohort-filter", async () => {
   const actual = await vi.importActual<
@@ -73,9 +75,17 @@ vi.mock("@widgets/header", () => ({
   Header: () => <div data-testid="site-header-stub" />,
 }));
 
-const getPublicUrl = vi.fn().mockImplementation((path: string) => ({
-  data: { publicUrl: `https://cdn.example.com/${path}` },
-}));
+// Skeleton: rendered as a Suspense fallback — stub it so the unit test
+// doesn't need any CSS / animation infrastructure.
+vi.mock("@widgets/project-grid", async () => {
+  const actual = await vi.importActual<typeof import("@widgets/project-grid")>(
+    "@widgets/project-grid"
+  );
+  return {
+    ...actual,
+    ProjectGridSkeleton: () => <div data-testid="project-grid-skeleton-stub" />,
+  };
+});
 
 const profileSingle = vi
   .fn()
@@ -90,33 +100,11 @@ const mockClient = {
       }),
     }),
   }),
-  storage: {
-    from: vi.fn().mockReturnValue({ getPublicUrl }),
-  },
 };
 
 vi.mock("@shared/api/supabase/server", () => ({
   createClient: vi.fn().mockResolvedValue(mockClient),
 }));
-
-function buildProject(
-  overrides: Partial<ProjectWithVoteCount> & { id: string; title: string }
-): ProjectWithVoteCount {
-  return {
-    user_id: "user-1",
-    cohort_id: "cohort-1",
-    cohort_name: "LGE-1",
-    tagline: `${overrides.title} tagline`,
-    project_url: "https://example.com",
-    screenshot_path: `user-1/${overrides.id}.png`,
-    created_at: "2026-04-14T00:00:00Z",
-    updated_at: "2026-04-14T00:00:00Z",
-    vote_count: 0,
-    author_display_name: "Author",
-    author_avatar_url: null,
-    ...overrides,
-  };
-}
 
 const cohorts: Cohort[] = [
   {
@@ -147,66 +135,21 @@ describe("home page", () => {
     vi.clearAllMocks();
   });
 
-  it("renders 5 cards in vote-count-descending order with top-3 badges", async () => {
-    fetchProjectsMock.mockResolvedValue([
-      buildProject({ id: "p1", title: "A", vote_count: 9 }),
-      buildProject({ id: "p2", title: "B", vote_count: 7 }),
-      buildProject({ id: "p3", title: "C", vote_count: 5 }),
-      buildProject({ id: "p4", title: "D", vote_count: 3 }),
-      buildProject({ id: "p5", title: "E", vote_count: 1 }),
-    ]);
-
-    await renderPage();
-
-    expect(screen.getAllByTestId("project-card")).toHaveLength(5);
-    expect(screen.getByText("1st")).toBeInTheDocument();
-    expect(screen.getByText("2nd")).toBeInTheDocument();
-    expect(screen.getByText("3rd")).toBeInTheDocument();
-  });
-
-  it("omits the 3rd badge when only 2 projects exist", async () => {
-    fetchProjectsMock.mockResolvedValue([
-      buildProject({ id: "p1", title: "A", vote_count: 9 }),
-      buildProject({ id: "p2", title: "B", vote_count: 7 }),
-    ]);
-
-    await renderPage();
-
-    expect(screen.getByText("1st")).toBeInTheDocument();
-    expect(screen.getByText("2nd")).toBeInTheDocument();
-    expect(screen.queryByText("3rd")).not.toBeInTheDocument();
-  });
-
-  it("renders the empty state when there are no projects", async () => {
-    fetchProjectsMock.mockResolvedValue([]);
-
-    await renderPage();
-
-    expect(screen.getByTestId("project-grid-empty")).toBeInTheDocument();
-  });
-
-  it("passes the cohort searchParam to fetchProjects when set", async () => {
-    fetchProjectsMock.mockResolvedValue([]);
-
+  it("passes the cohort searchParam to ProjectGridSection as cohortId", async () => {
     await renderPage({ cohort: "a1" });
-
-    expect(fetchProjectsMock).toHaveBeenCalledWith(
+    expect(sectionMock).toHaveBeenCalledWith(
       expect.objectContaining({ cohortId: "a1" })
     );
   });
 
-  it("passes null cohortId when no cohort searchParam is set", async () => {
-    fetchProjectsMock.mockResolvedValue([]);
-
+  it("passes null cohortId to ProjectGridSection when no cohort param is set", async () => {
     await renderPage();
-
-    expect(fetchProjectsMock).toHaveBeenCalledWith(
+    expect(sectionMock).toHaveBeenCalledWith(
       expect.objectContaining({ cohortId: null })
     );
   });
 
-  it("renders the SubmitDialog trigger for signed-out visitors and skips the inline submit section", async () => {
-    fetchProjectsMock.mockResolvedValue([]);
+  it("renders the SubmitDialog trigger for signed-out visitors", async () => {
     profileSingle.mockResolvedValue({ data: null, error: null });
 
     await renderPage();
@@ -214,11 +157,9 @@ describe("home page", () => {
     const trigger = screen.getByTestId("submit-dialog-stub");
     expect(trigger).toHaveAttribute("data-authenticated", "no");
     expect(trigger).toHaveAttribute("data-cohort-id", "");
-    expect(screen.queryByRole("heading", { level: 2 })).not.toBeInTheDocument();
   });
 
   it("renders the SubmitDialog trigger for signed-in students with a cohort", async () => {
-    fetchProjectsMock.mockResolvedValue([]);
     vi.mocked(mockClient.auth.getUser).mockResolvedValueOnce({
       data: { user: { id: "user-1" } },
       error: null,
@@ -233,11 +174,9 @@ describe("home page", () => {
     const trigger = screen.getByTestId("submit-dialog-stub");
     expect(trigger).toHaveAttribute("data-authenticated", "yes");
     expect(trigger).toHaveAttribute("data-cohort-id", "cohort-1");
-    expect(screen.queryByRole("heading", { level: 2 })).not.toBeInTheDocument();
   });
 
   it("renders the SubmitDialog trigger for signed-in students without a cohort", async () => {
-    fetchProjectsMock.mockResolvedValue([]);
     vi.mocked(mockClient.auth.getUser).mockResolvedValueOnce({
       data: { user: { id: "user-2" } },
       error: null,
@@ -252,6 +191,5 @@ describe("home page", () => {
     const trigger = screen.getByTestId("submit-dialog-stub");
     expect(trigger).toHaveAttribute("data-authenticated", "yes");
     expect(trigger).toHaveAttribute("data-cohort-id", "");
-    expect(screen.queryByRole("heading", { level: 2 })).not.toBeInTheDocument();
   });
 });
