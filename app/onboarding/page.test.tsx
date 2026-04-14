@@ -59,7 +59,13 @@ vi.mock("@shared/api/supabase/server", () => ({
 }));
 
 const cohorts: Cohort[] = [
-  { id: "a1", name: "Cohort A", created_at: "2026-04-14T00:00:00Z" },
+  {
+    id: "a1",
+    name: "LGE-1",
+    label: "LG전자 1기",
+    created_at: "2026-04-14T00:00:00Z",
+    updated_at: "2026-04-14T00:00:00Z",
+  },
 ];
 
 async function renderPage(search: Record<string, string> = {}) {

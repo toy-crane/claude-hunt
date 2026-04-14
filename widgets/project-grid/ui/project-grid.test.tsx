@@ -9,7 +9,7 @@ function buildProject(
   return {
     user_id: "user-1",
     cohort_id: "cohort-1",
-    cohort_name: "Cohort A",
+    cohort_name: "LGE-1",
     tagline: `${overrides.title} tagline`,
     project_url: "https://example.com",
     screenshot_path: `user-1/${overrides.id}.png`,

@@ -10,7 +10,7 @@ function buildProject(
     id: "proj-1",
     user_id: "user-1",
     cohort_id: "cohort-1",
-    cohort_name: "Cohort A",
+    cohort_name: "LGE-1",
     title: "My App",
     tagline: "A cool tool",
     project_url: "https://myapp.com",
