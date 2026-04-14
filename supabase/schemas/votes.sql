@@ -3,6 +3,7 @@ create table public.votes (
   user_id uuid not null references public.profiles(id) on delete cascade,
   project_id uuid not null references public.projects(id) on delete cascade,
   created_at timestamptz not null default now(),
+  updated_at timestamptz not null default now(),
   unique (user_id, project_id)
 );
 

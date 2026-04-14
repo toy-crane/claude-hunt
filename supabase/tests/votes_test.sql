@@ -6,7 +6,7 @@
 --   Anonymous visitors can read author_display_name via the view
 
 BEGIN;
-SELECT plan(13);
+SELECT plan(18);
 
 -- 1. votes table exists
 SELECT has_table('public', 'votes', 'votes table should exist');
@@ -147,6 +147,81 @@ SELECT throws_ok(
   '23514',
   'users cannot vote on their own projects',
   'Self-vote trigger rejects the insert'
+);
+
+-- 14. votes has updated_at column
+RESET role;
+SELECT has_column(
+  'public', 'votes', 'updated_at',
+  'votes should have updated_at column'
+);
+
+-- 15. handle_updated_at trigger exists on votes
+SELECT has_trigger(
+  'public', 'votes', 'handle_updated_at',
+  'handle_updated_at trigger should exist on votes'
+);
+
+-- Seed a vote for behavioral tests. Runs as superuser to bypass RLS; the
+-- self-vote trigger still applies, so voter (022) != project owner (021).
+INSERT INTO public.votes (user_id, project_id)
+VALUES (
+  '00000000-0000-0000-0000-000000000022',
+  '00000000-0000-0000-0000-000000000032'
+);
+
+-- 16. Freshly inserted vote has updated_at within 1 second of created_at.
+SELECT cmp_ok(
+  (SELECT EXTRACT(EPOCH FROM (updated_at - created_at))::numeric
+     FROM public.votes
+     WHERE user_id = '00000000-0000-0000-0000-000000000022'
+       AND project_id = '00000000-0000-0000-0000-000000000032'),
+  '<=',
+  1::numeric,
+  'Freshly inserted vote has updated_at within 1 second of created_at'
+);
+
+-- 17. Update advances updated_at beyond its prior value.
+--     Votes are append-only in app code, so we drive the UPDATE directly
+--     via SQL. pgTAP runs in a single transaction, so we force a past
+--     updated_at with the trigger disabled, then re-enable and UPDATE to
+--     prove the trigger fires and overwrites.
+ALTER TABLE public.votes DISABLE TRIGGER handle_updated_at;
+UPDATE public.votes
+  SET updated_at = '2020-01-01T00:00:00Z'::timestamptz
+  WHERE user_id = '00000000-0000-0000-0000-000000000022'
+    AND project_id = '00000000-0000-0000-0000-000000000032';
+ALTER TABLE public.votes ENABLE TRIGGER handle_updated_at;
+
+-- Votes has no non-key mutable column; a no-op SET on project_id still
+-- fires BEFORE UPDATE triggers in Postgres.
+UPDATE public.votes
+  SET project_id = project_id
+  WHERE user_id = '00000000-0000-0000-0000-000000000022'
+    AND project_id = '00000000-0000-0000-0000-000000000032';
+
+SELECT cmp_ok(
+  (SELECT updated_at FROM public.votes
+     WHERE user_id = '00000000-0000-0000-0000-000000000022'
+       AND project_id = '00000000-0000-0000-0000-000000000032'),
+  '>',
+  '2020-01-01T00:00:00Z'::timestamptz,
+  'Updating a vote advances updated_at beyond its prior value'
+);
+
+-- 18. Caller-supplied updated_at is overridden by the trigger.
+UPDATE public.votes
+  SET updated_at = '2000-01-01T00:00:00Z'::timestamptz
+  WHERE user_id = '00000000-0000-0000-0000-000000000022'
+    AND project_id = '00000000-0000-0000-0000-000000000032';
+
+SELECT cmp_ok(
+  (SELECT updated_at FROM public.votes
+     WHERE user_id = '00000000-0000-0000-0000-000000000022'
+       AND project_id = '00000000-0000-0000-0000-000000000032'),
+  '>',
+  '2000-01-01T00:00:00Z'::timestamptz,
+  'Caller-supplied past updated_at on votes is overridden by the trigger'
 );
 
 SELECT * FROM finish();
