@@ -45,11 +45,7 @@ export function HeaderMenu({ displayName, avatarUrl }: HeaderMenuProps) {
         <Avatar>
           {avatarUrl ? <AvatarImage alt={altText} src={avatarUrl} /> : null}
           <AvatarFallback data-testid="header-avatar-fallback">
-            {hasInitial ? (
-              initial
-            ) : (
-              <RiUserLine aria-label="Account" className="size-4" />
-            )}
+            {hasInitial ? initial : <RiUserLine aria-label="Account" />}
           </AvatarFallback>
         </Avatar>
       </DropdownMenuTrigger>
