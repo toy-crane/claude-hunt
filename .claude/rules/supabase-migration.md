@@ -34,11 +34,18 @@ Use `supabase migration new <descriptive_name>` **only** for entities the diff t
 
 ## Config-Declared Resources
 
-Some Supabase resources are declared in `supabase/config.toml`, **not** via SQL schemas or migrations.
+Some Supabase resources are partly declared in `supabase/config.toml`.
 
-- **Storage buckets** — declare under `[storage.buckets.<name>]`. See the `supabase` skill's `storage-buckets.md`.
+### Storage buckets — dual-source pattern (required)
 
-`supabase db diff` does **not** capture `config.toml` changes. Do not try to generate a migration for a bucket — edit `config.toml` and restart local Supabase.
+Every project-owned storage bucket **must** be declared in **both** places:
+
+1. `supabase/config.toml` under `[storage.buckets.<name>]` — local development only. The CLI materialises the row on `supabase start` / `db reset`, but **`supabase db push` does NOT propagate `config.toml` to remote**.
+2. A manual upsert migration in `supabase/migrations/` — the canonical source of truth for any non-local environment (production, staging, CI, fresh clones).
+
+The migration must use `on conflict (id) do update set ...` so it is idempotent and reconciles any drift between config.toml and the database row.
+
+See the `supabase` skill's `storage-buckets.md` for the full workflow, canonical SQL template, and units-conversion table.
 
 RLS on `storage.objects` is still SQL — use the Manual Migration Path (`supabase migration new ...`) because the diff tool cannot reliably capture policies in the `storage` schema.
 
@@ -47,4 +54,4 @@ RLS on `storage.objects` is still SQL — use the Manual Migration Path (`supaba
 - Creating files in `supabase/migrations/` by hand
 - Writing SQL directly into migration files for schema changes
 - Skipping the `supabase db diff` step
-- Creating migrations for storage bucket definitions — edit `supabase/config.toml` instead
+- Declaring a storage bucket in `config.toml` **without** a matching upsert migration — config.toml alone never reaches remote

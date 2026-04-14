@@ -1,8 +1,8 @@
-# Creating a Storage Bucket (Local)
+# Creating a Storage Bucket
 
-Workflow for declaring a bucket in local Supabase and writing its RLS.
+Workflow for declaring a bucket in both local and remote Supabase.
 
-> **Key caveat**: `supabase db diff` does **not** capture `config.toml` changes, and it cannot reliably capture RLS policies on the `storage` schema. Buckets are declared in `config.toml`; their RLS ships via manual migration. See `.claude/rules/supabase-migration.md`.
+> **Key caveat**: `supabase db diff` does **not** capture `config.toml` changes, and it cannot reliably capture RLS policies on the `storage` schema. `config.toml` is local-only — **`supabase db push` does NOT propagate it to remote**. Every bucket requires both a `config.toml` entry (local) and an upsert migration (canonical source of truth). See `.claude/rules/supabase-migration.md`.
 
 ## Step 1: Declare the Bucket in `config.toml`
 
@@ -26,7 +26,65 @@ Bucket name conventions: use `snake_case`. To pick up changes, restart local Sup
 
 Docs: [Local Development Configuration](https://supabase.com/docs/guides/cli/local-development).
 
-## Step 2: Write RLS on `storage.objects` via Manual Migration
+## Step 2: Add an upsert migration as source of truth
+
+`config.toml` only creates the bucket locally. For production and any other remote environment you must add a manual migration:
+
+```bash
+supabase migration new create_<bucket_name>_bucket
+```
+
+Fill the generated file with an upsert that matches your `config.toml` values exactly:
+
+```sql
+-- <ts>_create_<bucket_name>_bucket.sql
+-- WHY MANUAL: DML (INSERT) is not captured by `supabase db diff`.
+-- WHY UPSERT: idempotent — safe to re-run after `supabase db reset`,
+-- and reconciles any drift between config.toml and the DB row.
+insert into storage.buckets (id, name, public, file_size_limit, allowed_mime_types)
+values (
+  '<bucket_name>',
+  '<bucket_name>',
+  true,           -- match config.toml `public`
+  5242880,        -- match config.toml `file_size_limit` (bigint bytes — see table below)
+  array['image/jpeg', 'image/png', 'image/webp']  -- match config.toml `allowed_mime_types`
+)
+on conflict (id) do update set
+  public             = excluded.public,
+  file_size_limit    = excluded.file_size_limit,
+  allowed_mime_types = excluded.allowed_mime_types;
+```
+
+### `config.toml` string → migration `bigint` bytes
+
+| config.toml string | bigint value |
+|---|---|
+| `"1MiB"` | `1048576` |
+| `"2MiB"` | `2097152` |
+| `"5MiB"` | `5242880` |
+| `"10MiB"` | `10485760` |
+| `"50MiB"` | `52428800` |
+| `"100MiB"` | `104857600` |
+
+### Changing an existing bucket's settings
+
+Every settings change (e.g. raising `file_size_limit`) requires a **new** upsert migration that re-asserts the full bucket definition with updated values. Update `config.toml` at the same time so local and remote stay in sync.
+
+```bash
+supabase migration new update_<bucket_name>_bucket
+```
+
+```sql
+-- Re-assert with updated values; ON CONFLICT updates the remote row.
+insert into storage.buckets (id, name, public, file_size_limit, allowed_mime_types)
+values ('<bucket_name>', '<bucket_name>', true, <new_bytes>, array[...])
+on conflict (id) do update set
+  public             = excluded.public,
+  file_size_limit    = excluded.file_size_limit,
+  allowed_mime_types = excluded.allowed_mime_types;
+```
+
+## Step 3: Write RLS on `storage.objects` via Manual Migration
 
 Generate a migration file — do **not** put these into `supabase/schemas/*.sql` because the diff tool cannot reliably capture policies in the `storage` schema:
 
@@ -77,7 +135,7 @@ create policy "Anyone can read avatars"
 
 Docs: [Storage Access Control](https://supabase.com/docs/guides/storage/security/access-control).
 
-## Step 3: (Optional) Seed Fixture Files
+## Step 4: (Optional) Seed Fixture Files
 
 For deterministic local / test data, point `objects_path` at a version-controlled folder and run the seed command:
 
@@ -89,7 +147,7 @@ supabase seed buckets
 
 `supabase seed buckets` uploads every file under `objects_path` to the declared bucket. Re-run it after `supabase db reset`.
 
-## Step 4: Apply and Reset
+## Step 5: Apply and Reset
 
 `config.toml` changes require a restart:
 
@@ -106,7 +164,7 @@ supabase migration up
 
 `supabase db reset` recreates Postgres, re-applies migrations, and clears the local Storage objects volume. Re-run `supabase seed buckets` afterward to restore fixtures.
 
-## Step 5: Write Tests
+## Step 6: Write Tests
 
 `storage.objects` is a regular Postgres table — pgTAP can assert RLS on it. Follow the patterns in `testing.md`:
 
@@ -127,7 +185,7 @@ For end-to-end upload flows (multipart, size-limit rejection, MIME enforcement a
 
 Docs: [pgTAP Extended](https://supabase.com/docs/guides/local-development/testing/pgtap-extended).
 
-## Step 6: Verify
+## Step 7: Verify
 
 ```bash
 supabase test db
