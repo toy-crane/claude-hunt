@@ -37,18 +37,9 @@ describe("SubmitForm", () => {
     submitProject.mockReset();
   });
 
-  it("renders a cohort-less warning and disables submit when cohortId is null", () => {
-    render(<SubmitForm cohortId={null} />);
-
-    expect(
-      screen.getByTestId("submit-form-cohort-warning")
-    ).toBeInTheDocument();
-    expect(
-      screen.getByRole("button", { name: "Submit project" })
-    ).toBeDisabled();
-  });
-
-  it("enables submit and hides the warning when cohortId is set", () => {
+  it("renders an enabled Submit button when cohortId is set", () => {
+    // The onboarding gate (middleware + /onboarding) guarantees cohortId
+    // is non-null when this form renders.
     render(<SubmitForm cohortId="cohort-1" />);
 
     expect(

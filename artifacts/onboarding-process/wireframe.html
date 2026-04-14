@@ -1,0 +1,370 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Wireframe: onboarding-process</title>
+<script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
+<script src="https://unpkg.com/lucide@latest"></script>
+<style>
+  :root {
+    --w-bg: #f5f5f5;
+    --w-border: #ccc;
+    --w-text: #555;
+    --w-muted: #aaa;
+    --w-fill: #eee;
+  }
+
+  * {
+    font-family: ui-monospace, SFMono-Regular, "SF Mono", Menlo, Consolas, monospace;
+    color: var(--w-text);
+  }
+
+  body { background: var(--w-bg); }
+
+  /* Screen nav */
+  nav { position: sticky; top: 0; z-index: 40; background: var(--w-bg); border-bottom: 1px solid var(--w-border); }
+  nav button { cursor: pointer; font-size: 13px; }
+  nav button:hover { background: var(--w-fill); border-radius: 4px; }
+  nav button.active { font-weight: bold; border-bottom: 2px solid var(--w-text); }
+
+  .screen { display: none; }
+  .screen.active { display: block; }
+
+  /* Viewport toggle */
+  .vp-toggle button {
+    font-size: 12px; padding: 2px 8px;
+    border: 1px solid var(--w-border); cursor: pointer; background: white;
+  }
+  .vp-toggle button:first-child { border-radius: 4px 0 0 4px; }
+  .vp-toggle button:last-child { border-radius: 0 4px 4px 0; border-left: none; }
+  .vp-toggle button.active { background: var(--w-text); color: white; }
+
+  /* Mobile viewport frame */
+  body.viewport-mobile .screen-content {
+    max-width: 375px !important;
+    margin: 24px auto !important;
+    border: 2px solid var(--w-border);
+    border-radius: 24px;
+    min-height: 667px;
+    background: white;
+    box-shadow: 0 4px 24px rgba(0,0,0,0.08);
+    padding: 32px 16px !important;
+  }
+
+  /* Screen Notes */
+  .screen-notes {
+    background: #fffde7;
+    border-left: 3px solid #ffd54f;
+    padding: 12px 16px;
+    margin-top: 24px;
+    font-size: 13px;
+    border-radius: 0 4px 4px 0;
+  }
+  .screen-notes summary {
+    cursor: pointer;
+    font-weight: bold;
+    font-size: 12px;
+    color: #b0a050;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+  }
+  .screen-notes p { margin: 6px 0 2px; color: #777; }
+  .screen-notes ul { margin: 4px 0 0 16px; padding: 0; color: #777; }
+  .screen-notes li { margin: 2px 0; }
+
+  /* Wireframe helpers (w- prefix) */
+  .w-field {
+    border: 1px solid var(--w-border);
+    background: white;
+    padding: 10px 12px;
+    font-size: 13px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+  }
+  .w-field--empty { color: var(--w-muted); }
+  .w-field--error { border-color: var(--w-text); border-width: 2px; }
+  .w-label { font-size: 12px; font-weight: bold; margin-bottom: 6px; display: block; }
+  .w-hint { font-size: 11px; color: var(--w-muted); margin-top: 4px; }
+  .w-error {
+    font-size: 12px;
+    margin-top: 4px;
+    color: var(--w-text);
+    font-weight: bold;
+  }
+  .w-btn {
+    background: var(--w-text);
+    color: white !important;
+    padding: 10px;
+    font-size: 13px;
+    font-weight: bold;
+    text-align: center;
+    cursor: pointer;
+    border-radius: 2px;
+  }
+  .w-btn--secondary {
+    background: white;
+    color: var(--w-text) !important;
+    border: 1px solid var(--w-border);
+    font-weight: normal;
+  }
+  .w-btn--disabled {
+    background: var(--w-fill);
+    color: var(--w-muted) !important;
+    cursor: not-allowed;
+  }
+  .w-notice {
+    border: 1px dashed var(--w-border);
+    background: var(--w-fill);
+    padding: 12px;
+    font-size: 12px;
+    line-height: 1.5;
+  }
+  .w-divider {
+    display: grid;
+    grid-template-columns: 1fr auto 1fr;
+    align-items: center;
+    gap: 12px;
+    margin: 20px 0;
+  }
+  .w-divider hr { border: 0; border-top: 1px dashed var(--w-border); }
+  .w-divider span { font-size: 11px; color: var(--w-muted); }
+</style>
+</head>
+<body class="p-0 m-0 viewport-mobile">
+
+<nav class="flex items-center gap-4 px-6 py-2">
+  <span class="text-xs" style="color:var(--w-muted)">wireframe: onboarding-process</span>
+  <button id="nav-0" onclick="show(0)" class="px-2 py-1">Onboarding form</button>
+  <button id="nav-1" onclick="show(1)" class="px-2 py-1">Validation errors</button>
+  <button id="nav-2" onclick="show(2)" class="px-2 py-1">No cohorts available</button>
+  <div class="vp-toggle flex ml-auto">
+    <button id="vp-desktop" onclick="setViewport('desktop')">Desktop</button>
+    <button id="vp-mobile" onclick="setViewport('mobile')" class="active">Mobile</button>
+  </div>
+</nav>
+
+<!-- ────────── Screen 0: Onboarding form (base) ────────── -->
+<div id="screen-0" class="screen" data-scenario="scenario-1, scenario-2, scenario-6">
+  <div class="screen-content @container max-w-md mx-auto p-6">
+
+    <h2 class="text-lg font-bold mb-5" style="color:var(--w-muted); border-bottom:1px solid var(--w-border); padding-bottom:8px;">
+      Onboarding form
+    </h2>
+
+    <div class="mb-8">
+      <div class="font-bold text-sm mb-4">Claude Hunt</div>
+      <h1 class="font-bold text-base mb-1">Welcome! Let's set up your profile</h1>
+      <p class="text-xs" style="color:var(--w-muted)">
+        Pick a cohort and set your display name to start submitting projects.
+      </p>
+    </div>
+
+    <form class="flex flex-col gap-5">
+
+      <div>
+        <label class="w-label" for="display-name">Display name</label>
+        <div class="w-field w-field--empty">
+          <span>Type your display name</span>
+          <i data-lucide="pencil-line" class="w-3 h-3"></i>
+        </div>
+        <div class="w-hint">Shown on your project cards. 1–50 characters.</div>
+      </div>
+
+      <div>
+        <label class="w-label" for="cohort">Cohort</label>
+        <div class="w-field w-field--empty">
+          <span>Select a cohort</span>
+          <i data-lucide="chevron-down" class="w-3 h-3"></i>
+        </div>
+        <div class="w-hint">Ask your instructor which cohort you're in.</div>
+      </div>
+
+      <div class="w-btn">Continue</div>
+
+      <div class="w-divider">
+        <hr />
+        <span>or</span>
+        <hr />
+      </div>
+
+      <div class="w-btn w-btn--secondary">Sign out</div>
+
+    </form>
+
+    <div class="screen-notes">
+      <details open>
+        <summary>Notes</summary>
+        <p>Entry to app for any signed-in user whose <code>cohort_id</code> is null. Hard gate: any authed page redirects here.</p>
+        <ul>
+          <li><b>Trigger:</b> signed-in user with <code>cohort_id IS NULL</code> hits any authed route → redirect to <code>/onboarding?next=&lt;original&gt;</code> (scenario 1, 6)</li>
+          <li><b>Interaction:</b> type display name, pick cohort from dropdown, press Continue</li>
+          <li><b>Transition (success):</b> Continue → profile updated → redirect to <code>next</code> (or <code>/</code>) (scenario 2)</li>
+          <li><b>Transition (invalid):</b> stays on screen with inline errors → see "Validation errors" screen (scenario 3)</li>
+          <li><b>Transition (escape):</b> Sign out → session cleared → redirect to <code>/login</code></li>
+          <li><b>Not shown here:</b> onboarded user visiting <code>/onboarding</code> is redirected away (scenario 4) — no UI</li>
+        </ul>
+      </details>
+    </div>
+
+  </div>
+</div>
+
+<!-- ────────── Screen 1: Validation errors ────────── -->
+<div id="screen-1" class="screen" data-scenario="scenario-3">
+  <div class="screen-content @container max-w-md mx-auto p-6">
+
+    <h2 class="text-lg font-bold mb-5" style="color:var(--w-muted); border-bottom:1px solid var(--w-border); padding-bottom:8px;">
+      Validation errors
+    </h2>
+
+    <div class="mb-8">
+      <div class="font-bold text-sm mb-4">Claude Hunt</div>
+      <h1 class="font-bold text-base mb-1">Welcome! Let's set up your profile</h1>
+      <p class="text-xs" style="color:var(--w-muted)">
+        Pick a cohort and set your display name to start submitting projects.
+      </p>
+    </div>
+
+    <form class="flex flex-col gap-5">
+
+      <div>
+        <label class="w-label" for="display-name">Display name</label>
+        <div class="w-field w-field--error w-field--empty">
+          <span>(empty)</span>
+          <i data-lucide="alert-circle" class="w-3 h-3"></i>
+        </div>
+        <div class="w-error">⚠ Display name is required</div>
+      </div>
+
+      <div>
+        <label class="w-label" for="cohort">Cohort</label>
+        <div class="w-field w-field--error w-field--empty">
+          <span>Select a cohort</span>
+          <i data-lucide="chevron-down" class="w-3 h-3"></i>
+        </div>
+        <div class="w-error">⚠ Please select a cohort</div>
+      </div>
+
+      <div class="w-btn">Continue</div>
+
+      <div class="w-notice mt-2">
+        Other error variants shown on the same screen (not stacked):
+        <ul class="list-disc ml-4 mt-1">
+          <li>Whitespace-only name → "Display name is required"</li>
+          <li>&gt; 50 chars → "Display name must be 50 characters or fewer"</li>
+        </ul>
+      </div>
+
+    </form>
+
+    <div class="screen-notes">
+      <details open>
+        <summary>Notes</summary>
+        <p>Same layout as the base onboarding form. Only the inline error states differ.</p>
+        <ul>
+          <li><b>Trigger:</b> user presses Continue with missing or invalid input (scenario 3)</li>
+          <li><b>Interaction:</b> error messages appear under each invalid field; valid values already entered are preserved</li>
+          <li><b>Transition:</b> user corrects the fields and presses Continue again → goes to the "Onboarding form" happy path</li>
+          <li><b>Scope:</b> all three validation cases (empty, whitespace-only, over-length) map to this screen</li>
+        </ul>
+      </details>
+    </div>
+
+  </div>
+</div>
+
+<!-- ────────── Screen 2: No cohorts available ────────── -->
+<div id="screen-2" class="screen" data-scenario="scenario-5">
+  <div class="screen-content @container max-w-md mx-auto p-6">
+
+    <h2 class="text-lg font-bold mb-5" style="color:var(--w-muted); border-bottom:1px solid var(--w-border); padding-bottom:8px;">
+      No cohorts available
+    </h2>
+
+    <div class="mb-8">
+      <div class="font-bold text-sm mb-4">Claude Hunt</div>
+      <h1 class="font-bold text-base mb-1">Almost there…</h1>
+      <p class="text-xs" style="color:var(--w-muted)">
+        Your cohort hasn't been set up yet.
+      </p>
+    </div>
+
+    <div class="flex flex-col gap-5">
+
+      <div>
+        <label class="w-label">Display name</label>
+        <div class="w-field w-field--empty">
+          <span>Type your display name</span>
+          <i data-lucide="pencil-line" class="w-3 h-3"></i>
+        </div>
+        <div class="w-hint">You can fill this in, but saving is blocked until a cohort is available.</div>
+      </div>
+
+      <div class="w-notice flex gap-3 items-start">
+        <i data-lucide="info" class="w-4 h-4 mt-0.5 shrink-0"></i>
+        <div>
+          <div class="font-bold mb-1">No cohorts are available yet.</div>
+          <div>Please contact your instructor to get assigned to a cohort.</div>
+        </div>
+      </div>
+
+      <div class="w-btn w-btn--disabled">Continue (disabled)</div>
+
+      <div class="w-divider">
+        <hr />
+        <span>or</span>
+        <hr />
+      </div>
+
+      <div class="w-btn w-btn--secondary">Sign out</div>
+
+    </div>
+
+    <div class="screen-notes">
+      <details open>
+        <summary>Notes</summary>
+        <p>Degraded state when the <code>cohorts</code> table is empty. The selector is hidden (not just disabled) so the user is not misled into trying it.</p>
+        <ul>
+          <li><b>Trigger:</b> signed-in user hits onboarding while zero cohort rows exist (scenario 5)</li>
+          <li><b>Interaction:</b> Continue is disabled — the user cannot submit an incomplete profile; Sign out remains available so they are not trapped</li>
+          <li><b>Transition:</b> once a cohort is seeded by the instructor, the next visit shows the base "Onboarding form" screen</li>
+          <li><b>Rationale:</b> per spec invariant "Completion condition is single-field" — without a cohort there is nothing to save that would clear the gate</li>
+        </ul>
+      </details>
+    </div>
+
+  </div>
+</div>
+
+<script>
+var currentScreen = 0;
+var screenIds = [];
+
+function show(id) {
+  document.querySelectorAll('.screen').forEach(function(s) { s.classList.remove('active'); });
+  document.getElementById('screen-' + id).classList.add('active');
+  document.querySelectorAll('nav button[id^="nav-"]').forEach(function(b) { b.classList.remove('active'); });
+  document.getElementById('nav-' + id).classList.add('active');
+  currentScreen = screenIds.indexOf(id);
+}
+
+function setViewport(mode) {
+  document.body.classList.remove('viewport-mobile', 'viewport-desktop');
+  document.body.classList.add('viewport-' + mode);
+  document.querySelectorAll('.vp-toggle button').forEach(function(b) { b.classList.remove('active'); });
+  document.getElementById('vp-' + mode).classList.add('active');
+}
+
+document.addEventListener('DOMContentLoaded', function() {
+  document.querySelectorAll('nav button[id^="nav-"]').forEach(function(b) {
+    screenIds.push(parseInt(b.id.replace('nav-', '')));
+  });
+  var first = document.querySelector('nav button[id^="nav-"]');
+  if (first) first.click();
+  lucide.createIcons();
+});
+</script>
+</body>
+</html>
