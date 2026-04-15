@@ -31,7 +31,7 @@ export default async function Page({ searchParams }: PageProps) {
                 프로젝트 보드
               </h1>
               <p className="text-muted-foreground text-sm">
-                좋아하는 프로젝트에 응원을 보내주세요.
+                마음에 드는 프로젝트에 응원을 보내주세요.
               </p>
             </div>
             <div className="w-fit self-start">

@@ -75,7 +75,7 @@ describe("home page (/)", () => {
       screen.getByRole("heading", { name: "프로젝트 보드", level: 1 })
     ).toBeInTheDocument();
     expect(
-      screen.getByText("좋아하는 프로젝트에 응원을 보내주세요.")
+      screen.getByText("마음에 드는 프로젝트에 응원을 보내주세요.")
     ).toBeInTheDocument();
   });
 });
