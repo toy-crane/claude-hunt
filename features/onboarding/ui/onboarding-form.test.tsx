@@ -111,7 +111,7 @@ describe("OnboardingForm", () => {
     render(<OnboardingForm cohorts={cohorts} initialNext="/" />);
     expect(
       screen.getByText(
-        "과정를 선택하고 닉네임을 설정하면 프로젝트를 제출할 수 있어요."
+        "클래스를 선택하고 닉네임을 설정하면 프로젝트를 제출할 수 있어요."
       )
     ).toBeInTheDocument();
   });
@@ -193,7 +193,7 @@ describe("OnboardingForm", () => {
 
     expect(
       await screen.findByTestId("onboarding-cohort-error")
-    ).toHaveTextContent("과정를 선택해 주세요.");
+    ).toHaveTextContent("클래스를 선택해 주세요.");
     expect(completeOnboardingMock).not.toHaveBeenCalled();
   });
 
