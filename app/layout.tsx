@@ -13,13 +13,15 @@ const fontHeading = JetBrains_Mono({
   variable: "--font-heading",
 });
 
+const TAGLINE = "함께 배우는 사람들의 프로젝트";
+
 export const metadata: Metadata = {
   metadataBase: new URL("https://www.claude-hunt.com"),
   title: {
     default: "claude-hunt",
     template: "%s · claude-hunt",
   },
-  description: "Discover what the cohort is building.",
+  description: TAGLINE,
   keywords: ["Claude Code", "cohort projects", "AI coding", "showcase"],
   robots: {
     index: true,
@@ -30,14 +32,14 @@ export const metadata: Metadata = {
   },
   openGraph: {
     title: "claude-hunt",
-    description: "Discover what the cohort is building.",
+    description: TAGLINE,
     type: "website",
     siteName: "claude-hunt",
   },
   twitter: {
     card: "summary_large_image",
     title: "claude-hunt",
-    description: "Discover what the cohort is building.",
+    description: TAGLINE,
   },
 };
 
@@ -62,7 +64,7 @@ export default function RootLayout({
         inter.variable,
         fontHeading.variable
       )}
-      lang="en"
+      lang="ko"
       suppressHydrationWarning
     >
       <body>
