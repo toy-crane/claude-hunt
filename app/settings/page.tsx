@@ -8,7 +8,7 @@ import Link from "next/link";
 import { redirect } from "next/navigation";
 
 export const metadata: Metadata = {
-  title: "Settings",
+  title: "설정",
 };
 
 export default async function SettingsPage() {
@@ -25,10 +25,10 @@ export default async function SettingsPage() {
           href="/"
         >
           <RiArrowLeftLine />
-          <span>Back to home</span>
+          <span>홈으로 돌아가기</span>
         </Link>
 
-        <h1 className="font-heading font-medium text-2xl">Settings</h1>
+        <h1 className="font-heading font-medium text-2xl">설정</h1>
       </div>
 
       <section
@@ -39,7 +39,7 @@ export default async function SettingsPage() {
           className="px-1 font-medium text-muted-foreground text-xs"
           id="settings-profile-heading"
         >
-          Profile
+          프로필
         </h2>
         <Card>
           <CardContent>
@@ -59,16 +59,16 @@ export default async function SettingsPage() {
           className="px-1 font-medium text-muted-foreground text-xs"
           id="settings-danger-heading"
         >
-          Danger Zone
+          위험 영역
         </h2>
         <Card>
           <CardContent>
             <div className="flex items-center justify-between gap-3">
               <div className="flex flex-col gap-1">
-                <span className="font-medium text-sm">Delete account</span>
+                <span className="font-medium text-sm">계정 삭제</span>
                 <p className="text-muted-foreground text-xs">
-                  Permanently remove your profile, projects, and votes. This
-                  cannot be undone.
+                  프로필, 프로젝트, 추천 기록을 영구 삭제합니다. 되돌릴 수
+                  없어요.
                 </p>
               </div>
               <WithdrawDialog email={viewer.email} />

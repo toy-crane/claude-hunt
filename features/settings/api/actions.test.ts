@@ -61,7 +61,7 @@ describe("updateDisplayName", () => {
 
     expect(result).toEqual({
       ok: false,
-      error: { field: "displayName", message: "Display name is required" },
+      error: { field: "displayName", message: "표시명을 입력해 주세요." },
     });
     expect(updateMock).not.toHaveBeenCalled();
   });
@@ -73,7 +73,7 @@ describe("updateDisplayName", () => {
 
     expect(result).toEqual({
       ok: false,
-      error: { field: "displayName", message: "Display name is required" },
+      error: { field: "displayName", message: "표시명을 입력해 주세요." },
     });
     expect(updateMock).not.toHaveBeenCalled();
   });
@@ -87,7 +87,7 @@ describe("updateDisplayName", () => {
       ok: false,
       error: {
         field: "displayName",
-        message: "Display name must be 50 characters or fewer",
+        message: "표시명은 50자 이하로 입력해 주세요.",
       },
     });
     expect(updateMock).not.toHaveBeenCalled();
@@ -122,7 +122,7 @@ describe("updateDisplayName", () => {
       ok: false,
       error: {
         field: "displayName",
-        message: "That display name is already taken",
+        message: "이미 사용 중인 표시명이에요.",
       },
     });
   });

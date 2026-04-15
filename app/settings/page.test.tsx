@@ -1,13 +1,13 @@
 import { render, screen, within } from "@testing-library/react";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
-const BACK_HOME_LABEL = /back to home/i;
-const SETTINGS_HEADING = /^settings$/i;
-const WITHDRAW_LABEL = /^withdraw$/i;
-const DELETE_ACCOUNT_HEADING = /^delete account$/i;
+const BACK_HOME_LABEL = /홈으로 돌아가기/;
+const SETTINGS_HEADING = /^설정$/;
+const WITHDRAW_LABEL = /^Withdraw$/;
+const DELETE_ACCOUNT_HEADING = /^계정 삭제$/;
 const DANGER_WARNING =
-  /permanently remove your profile, projects, and votes\. this cannot be undone\./i;
-const DANGER_ZONE_REGION = /^danger zone$/i;
+  /프로필, 프로젝트, 추천 기록을 영구 삭제합니다\. 되돌릴 수 없어요\./;
+const DANGER_ZONE_REGION = /^위험 영역$/;
 
 vi.mock("next/link", () => ({
   default: ({
@@ -125,7 +125,7 @@ describe("settings page", () => {
     const sectionHeadings = screen
       .getAllByRole("heading", { level: 2 })
       .map((h) => h.textContent?.trim());
-    expect(sectionHeadings).toEqual(["Profile", "Danger Zone"]);
+    expect(sectionHeadings).toEqual(["프로필", "위험 영역"]);
   });
 
   it("renders the Delete account row with a Withdraw button and warning text in Danger Zone", async () => {

@@ -162,7 +162,7 @@ describe("completeOnboarding server action", () => {
     const result = await completeOnboarding(validInput);
 
     expect(result.ok).toBe(false);
-    expect(result.error).toBe("That display name is already taken");
+    expect(result.error).toBe("이미 사용 중인 표시명이에요.");
   });
 
   it("does NOT remap unrelated 23505 errors (other unique constraints pass through)", async () => {

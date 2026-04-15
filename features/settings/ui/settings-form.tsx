@@ -29,7 +29,7 @@ export function SettingsForm({ initialDisplayName, email }: SettingsFormProps) {
     startTransition(async () => {
       const result = await updateDisplayName(displayName);
       if (result.ok) {
-        toast.success("Display name updated");
+        toast.success("표시명이 변경되었어요.");
         router.refresh();
         return;
       }
@@ -39,13 +39,13 @@ export function SettingsForm({ initialDisplayName, email }: SettingsFormProps) {
 
   return (
     <form
-      aria-label="Update display name"
+      aria-label="표시명 변경"
       className="flex flex-col gap-6"
       onSubmit={handleSubmit}
     >
       <FieldGroup>
         <Field data-disabled="">
-          <FieldLabel htmlFor={emailId}>Email</FieldLabel>
+          <FieldLabel htmlFor={emailId}>이메일</FieldLabel>
           <Input
             disabled
             id={emailId}
@@ -57,7 +57,7 @@ export function SettingsForm({ initialDisplayName, email }: SettingsFormProps) {
         </Field>
 
         <Field data-invalid={error === null ? undefined : ""}>
-          <FieldLabel htmlFor={displayNameId}>Display name</FieldLabel>
+          <FieldLabel htmlFor={displayNameId}>표시명</FieldLabel>
           <Input
             aria-invalid={error !== null}
             disabled={isPending}
@@ -81,7 +81,7 @@ export function SettingsForm({ initialDisplayName, email }: SettingsFormProps) {
       <div className="flex justify-end">
         <Button disabled={isPending} type="submit">
           {isPending ? <Spinner data-icon="inline-start" /> : null}
-          {isPending ? "Saving..." : "Save"}
+          {isPending ? "저장 중..." : "저장"}
         </Button>
       </div>
     </form>
