@@ -1,16 +1,18 @@
 "use client";
 
-import { RiThumbUpFill, RiThumbUpLine } from "@remixicon/react";
+import { RiArrowUpFill, RiArrowUpLine } from "@remixicon/react";
 import { cn } from "@shared/lib/utils";
 import { Button } from "@shared/ui/button";
 import Link from "next/link";
 import { useState, useTransition } from "react";
 import { toggleVote } from "../api/actions";
 
+const ARIA_LABEL = "추천하기";
+
 export interface VoteButtonProps {
   /** True when a signed-in viewer has already voted. */
   alreadyVoted: boolean;
-  /** True when the viewer is authenticated. False → "Sign in" prompt. */
+  /** True when the viewer is authenticated. False → routes to /login on click. */
   isAuthenticated: boolean;
   /** True when the viewer is the owner — upvote hidden entirely. */
   ownedByViewer: boolean;
@@ -36,6 +38,7 @@ export function VoteButton({
   if (!isAuthenticated) {
     return (
       <Button
+        aria-label={ARIA_LABEL}
         asChild
         className="gap-1.5"
         data-testid="vote-button-signin"
@@ -43,8 +46,8 @@ export function VoteButton({
         variant="outline"
       >
         <Link href="/login">
-          <RiThumbUpLine aria-hidden="true" className="size-3.5" />
-          Sign in to vote
+          <RiArrowUpLine aria-hidden="true" className="size-3.5" />
+          {voteCount}
         </Link>
       </Button>
     );
@@ -57,7 +60,6 @@ export function VoteButton({
     startTransition(async () => {
       const result = await toggleVote(projectId);
       if (!result.ok) {
-        // Roll back on failure
         setOptimisticVoted((prev) => !prev);
         setOptimisticCount((prev) => prev + (nextVoted ? -1 : 1));
       }
@@ -66,6 +68,7 @@ export function VoteButton({
 
   return (
     <Button
+      aria-label={ARIA_LABEL}
       aria-pressed={optimisticVoted}
       className={cn(
         "gap-1.5",
@@ -79,9 +82,9 @@ export function VoteButton({
       variant="outline"
     >
       {optimisticVoted ? (
-        <RiThumbUpFill aria-hidden="true" className="size-3.5" />
+        <RiArrowUpFill aria-hidden="true" className="size-3.5" />
       ) : (
-        <RiThumbUpLine aria-hidden="true" className="size-3.5" />
+        <RiArrowUpLine aria-hidden="true" className="size-3.5" />
       )}
       {optimisticCount}
     </Button>
