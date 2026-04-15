@@ -4,20 +4,19 @@
 
 ## Workflow Phases
 
-Define → Plan → Build → Verify → Review → Ship
+Define → Sketch → Plan → Build
 
 ### Spec-Driven Development
 
-Use when starting a new project or feature, requirements are ambiguous, the change touches multiple files, or the task would take more than 30 minutes. Skip for single-line fixes or unambiguous changes.
+- Use for product features that are ambiguous, multi-file, or take over 30 minutes.
+- Skip for single-line fixes, unambiguous changes, or meta-tooling (skills, rules, hooks, repo config).
 
 | Phase | Skill / Command |
 |-------|----------------|
 | Specify | `/write-spec` skill |
+| Sketch | `/sketch-wireframe` skill |
 | Plan | `/draft-plan` skill |
 | Build | `/execute-plan` skill |
-| Verify | `/test` skill |
-| Review | `/review` skill |
-| Ship | `/ship` skill |
 
 Each phase has a human review gate. Do not advance until the current phase is validated.
 
