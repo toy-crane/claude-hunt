@@ -114,7 +114,7 @@ export function SubmitForm({
         </Field>
 
         <Field>
-          <FieldLabel htmlFor={taglineId}>태그라인</FieldLabel>
+          <FieldLabel htmlFor={taglineId}>한 줄 소개</FieldLabel>
           <Textarea
             disabled={submitting}
             id={taglineId}

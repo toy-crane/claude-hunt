@@ -50,7 +50,7 @@ export function SubmitDialog({ isAuthenticated, cohortId }: SubmitDialogProps) {
         <DialogHeader>
           <DialogTitle>프로젝트 제출</DialogTitle>
           <DialogDescription>
-            스크린샷, 한 줄 태그라인, 프로젝트 링크를 공유해 주세요.
+            스크린샷, 한 줄 소개, 프로젝트 링크를 공유해 주세요.
           </DialogDescription>
         </DialogHeader>
         <SubmitForm cohortId={cohortId} onSuccess={handleSuccess} />

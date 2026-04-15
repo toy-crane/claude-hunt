@@ -18,10 +18,10 @@ export const submitProjectInputSchema = z.object({
   tagline: z
     .string()
     .trim()
-    .min(1, "태그라인을 입력해 주세요.")
+    .min(1, "한 줄 소개을 입력해 주세요.")
     .max(
       MAX_TAGLINE_LENGTH,
-      `태그라인은 ${MAX_TAGLINE_LENGTH}자 이하로 입력해 주세요.`
+      `한 줄 소개은 ${MAX_TAGLINE_LENGTH}자 이하로 입력해 주세요.`
     ),
   projectUrl: z
     .string()

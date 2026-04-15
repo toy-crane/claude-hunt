@@ -10,7 +10,6 @@ import { Button } from "@shared/ui/button";
 import {
   Dialog,
   DialogContent,
-  DialogDescription,
   DialogFooter,
   DialogHeader,
   DialogTitle,
@@ -94,10 +93,6 @@ export function EditDialog({ project }: EditDialogProps) {
       <DialogContent>
         <DialogHeader>
           <DialogTitle>프로젝트 수정</DialogTitle>
-          <DialogDescription>
-            프로젝트 정보를 업데이트해요. 스크린샷을 비워 두면 기존 이미지가
-            유지됩니다.
-          </DialogDescription>
         </DialogHeader>
         <form
           aria-label="프로젝트 수정"
@@ -117,7 +112,7 @@ export function EditDialog({ project }: EditDialogProps) {
               />
             </Field>
             <Field>
-              <FieldLabel htmlFor={taglineId}>태그라인</FieldLabel>
+              <FieldLabel htmlFor={taglineId}>한 줄 소개</FieldLabel>
               <Textarea
                 defaultValue={project.tagline ?? ""}
                 disabled={submitting}
