@@ -53,6 +53,7 @@ Change Type: New | Modify | Delete
 - **Verification**:
   - `bun run test:unit -- <pattern>` (or `bun run test:db` for DB-only changes)
   - `bun run build`
+  - Browser MCP (`mcp__claude-in-chrome__*`) — for tasks with user-visible UI changes; navigate the affected route(s), assert observable outcomes, save evidence to `artifacts/<feature>/evidence/<task-N>.<ext>`
 
 ---
 
