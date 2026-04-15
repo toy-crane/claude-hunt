@@ -1,6 +1,6 @@
 ---
 name: draft-plan
-description: Create an implementation plan based on spec.md. Discover related skills and generate a TDD-based task list with vertical slicing and dependency ordering. Triggered by "/draft-plan", "create plan", "implementation plan", etc.
+description: Create an implementation plan (artifacts/<feature>/plan.md) based on spec.md. **Use only for product features that are ambiguous, multi-file, or take over 30 minutes — NOT for meta-tooling (skills, rules, hooks, repo config), single-line fixes, or unambiguous changes.** Discover related skills and generate a TDD-based task list with vertical slicing and dependency ordering. Triggered by "/draft-plan", "create plan", "implementation plan", etc.
 argument-hint: "feature name"
 ---
 
