@@ -29,7 +29,7 @@ export function DeleteButton({ projectId, projectTitle }: DeleteButtonProps) {
     const result = await deleteProject(projectId);
     setDeleting(false);
     if (!result.ok) {
-      setError(result.error ?? "Could not delete project");
+      setError(result.error ?? "프로젝트를 삭제할 수 없어요.");
       return;
     }
     setOpen(false);
@@ -43,15 +43,14 @@ export function DeleteButton({ projectId, projectTitle }: DeleteButtonProps) {
           size="sm"
           variant="outline"
         >
-          Delete
+          삭제
         </Button>
       </DialogTrigger>
       <DialogContent>
         <DialogHeader>
-          <DialogTitle>Delete project?</DialogTitle>
+          <DialogTitle>프로젝트를 삭제할까요?</DialogTitle>
           <DialogDescription>
-            This removes "{projectTitle}" from the grid. This action cannot be
-            undone.
+            "{projectTitle}"을(를) 그리드에서 제거합니다. 되돌릴 수 없어요.
           </DialogDescription>
         </DialogHeader>
         {error ? (
@@ -70,7 +69,7 @@ export function DeleteButton({ projectId, projectTitle }: DeleteButtonProps) {
             type="button"
             variant="outline"
           >
-            Cancel
+            취소
           </Button>
           <Button
             data-testid="delete-project-confirm"
@@ -79,7 +78,7 @@ export function DeleteButton({ projectId, projectTitle }: DeleteButtonProps) {
             type="button"
             variant="destructive"
           >
-            {deleting ? "Deleting..." : "Delete"}
+            {deleting ? "삭제 중..." : "삭제"}
           </Button>
         </DialogFooter>
       </DialogContent>
