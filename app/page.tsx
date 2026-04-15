@@ -2,6 +2,7 @@ import { fetchCohorts } from "@features/cohort-filter/server";
 import { SubmitDialog } from "@features/submit-project";
 import { fetchViewer } from "@shared/api/supabase/viewer";
 import { Separator } from "@shared/ui/separator";
+import { Footer } from "@widgets/footer";
 import { Header } from "@widgets/header";
 import { fetchProjects } from "@widgets/project-grid/server";
 import { ProjectBoard } from "./_components/project-board";
@@ -52,6 +53,7 @@ export default async function Page({ searchParams }: PageProps) {
           viewerUserId={viewer?.id ?? null}
         />
       </main>
+      <Footer />
     </>
   );
 }

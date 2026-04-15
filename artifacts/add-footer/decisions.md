@@ -17,7 +17,7 @@
 **Decision**: Execute Task 1 (Footer widget) then Task 2 (Mount on home page) sequentially, per plan.
 **Why**: Task 2 imports the component built in Task 1 — no other dependencies. No reason to deviate.
 **Harness Signal**: N/A
-**Result**: Pending
+**Result**: Success — both Tasks landed first try; full Vitest suite (272 tests) and `bun run build` pass.
 
 ## Switched from `lucide-react` to `@remixicon/react`
 
