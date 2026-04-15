@@ -57,7 +57,7 @@ export function OnboardingForm({ cohorts, initialNext }: OnboardingFormProps) {
       setDisplayNameError(null);
     }
     if (selectedCohortId === COHORT_UNSELECTED) {
-      setCohortError("과정를 선택해 주세요.");
+      setCohortError("클래스를 선택해 주세요.");
       ok = false;
     } else {
       setCohortError(null);
@@ -103,7 +103,7 @@ export function OnboardingForm({ cohorts, initialNext }: OnboardingFormProps) {
 
   return (
     <AuthLayout
-      description="과정를 선택하고 닉네임을 설정하면 프로젝트를 제출할 수 있어요."
+      description="클래스를 선택하고 닉네임을 설정하면 프로젝트를 제출할 수 있어요."
       title="프로필 설정"
     >
       <form
@@ -136,14 +136,14 @@ export function OnboardingForm({ cohorts, initialNext }: OnboardingFormProps) {
 
           {noCohorts ? (
             <Alert data-testid="onboarding-no-cohorts">
-              <AlertTitle>과정가 아직 없어요.</AlertTitle>
+              <AlertTitle>클래스가 아직 없어요.</AlertTitle>
               <AlertDescription>
-                강사에게 과정 배정을 요청해 주세요.
+                강사에게 클래스 배정을 요청해 주세요.
               </AlertDescription>
             </Alert>
           ) : (
             <Field>
-              <FieldLabel htmlFor={cohortId}>과정</FieldLabel>
+              <FieldLabel htmlFor={cohortId}>클래스</FieldLabel>
               <Select
                 disabled={isPending || isSigningOut}
                 onValueChange={setSelectedCohortId}
@@ -155,7 +155,7 @@ export function OnboardingForm({ cohorts, initialNext }: OnboardingFormProps) {
                   data-testid="onboarding-cohort-trigger"
                   id={cohortId}
                 >
-                  <SelectValue placeholder="과정를 선택하세요" />
+                  <SelectValue placeholder="클래스를 선택하세요" />
                 </SelectTrigger>
                 <SelectContent>
                   {cohorts.map((cohort) => (

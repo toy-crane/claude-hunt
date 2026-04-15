@@ -197,13 +197,13 @@ None.
 - **Implementation targets**:
   - `widgets/project-grid/ui/project-card.tsx` ("by" 그대로 또는 "·" 구분자, "Anonymous" → "익명", alt "Project screenshot" → "프로젝트 스크린샷")
   - `widgets/project-grid/ui/project-card.test.tsx` (신규)
-  - `features/cohort-filter/ui/cohort-dropdown.tsx` ("Filter by cohort" → "기수로 필터", "All cohorts" → "모든 기수")
+  - `features/cohort-filter/ui/cohort-dropdown.tsx` ("Filter by cohort" → "클래스로 필터", "All cohorts" → "모든 클래스")
   - `features/cohort-filter/ui/cohort-dropdown.test.tsx` (신규)
 - **Acceptance**:
   - [ ] 프로젝트 카드의 작성자 fallback 이 "익명" 이다
   - [ ] 카드 이미지의 alt 텍스트가 "프로젝트 스크린샷" (또는 동일 의미) 이다
-  - [ ] 코호트 필터 드롭다운의 기본 옵션이 "모든 기수" 이다
-  - [ ] 코호트 필터 트리거의 `aria-label` 이 "기수로 필터" 형태의 한국어이다
+  - [ ] 코호트 필터 드롭다운의 기본 옵션이 "모든 클래스" 이다
+  - [ ] 코호트 필터 트리거의 `aria-label` 이 "클래스로 필터" 형태의 한국어이다
   - [ ] 홈 페이지 전체 DOM 에 "Project Board", "Cohort", "Discover", "Submit a project", "All cohorts", "Filter by cohort", "Anonymous", "Project screenshot" 영문이 한 건도 없다 (Task 4a 와 결합 후 종합 검증)
 - **Verification**:
   - `bun run test:unit -- widgets/project-grid/ui/project-card.test.tsx features/cohort-filter/ui/cohort-dropdown.test.tsx`
@@ -245,7 +245,7 @@ None.
 
 ---
 
-### Task 6: 온보딩 폼과 검증 메시지를 한국어로 변경 ("Cohort" → "기수")
+### Task 6: 온보딩 폼과 검증 메시지를 한국어로 변경 ("Cohort" → "클래스")
 
 - **Covers**: Scenario 3 (full)
 - **Size**: S (2 파일 + 테스트)
@@ -254,22 +254,22 @@ None.
   - frontend-ui-engineering — form validation, Zod 메시지 위치
   - shadcn — Select/Input 컴포넌트 라벨 패턴
 - **Implementation targets**:
-  - `features/onboarding/ui/onboarding-form.tsx` (제목, 설명, 필드 라벨, dropdown placeholder, "기수 없음" alert, 버튼 모두 한국어)
+  - `features/onboarding/ui/onboarding-form.tsx` (제목, 설명, 필드 라벨, dropdown placeholder, "클래스 없음" alert, 버튼 모두 한국어)
   - `features/onboarding/ui/onboarding-form.test.tsx` (영문 assertion → 한국어 갱신)
-  - `features/onboarding/api/schema.ts` (Zod 메시지: "표시명을 입력해 주세요.", "표시명은 50자 이하로 입력해 주세요.", "기수를 선택해 주세요.")
+  - `features/onboarding/api/schema.ts` (Zod 메시지: "표시명을 입력해 주세요.", "표시명은 50자 이하로 입력해 주세요.", "클래스를 선택해 주세요.")
 - **Acceptance**:
   - [ ] 폼 헤딩이 "프로필 설정" 형태의 한국어이다
   - [ ] 표시명 필드 라벨이 "표시명" 이고 placeholder 가 한국어이다
-  - [ ] 기수 필드 라벨이 "기수" 이고 dropdown placeholder 가 "기수를 선택하세요" 형태이다
+  - [ ] 클래스 필드 라벨이 "클래스" 이고 dropdown placeholder 가 "클래스를 선택하세요" 형태이다
   - [ ] 빈 표시명으로 제출 → "표시명을 입력해 주세요." 형태의 한국어 에러가 필드 아래에 표시된다
   - [ ] 51자 이상 표시명 → "50자 이하" 안내 한국어 에러가 표시된다
-  - [ ] 기수 미선택 제출 → "기수를 선택해 주세요." 형태의 한국어 에러가 표시된다
-  - [ ] 사용 가능한 기수가 빈 배열일 때 "기수가 아직 없어요. 강사에게 기수 배정을 요청해 주세요." 형태의 한국어 alert 가 표시된다
+  - [ ] 클래스 미선택 제출 → "클래스를 선택해 주세요." 형태의 한국어 에러가 표시된다
+  - [ ] 사용 가능한 클래스가 빈 배열일 때 "클래스가 아직 없어요. 강사에게 클래스 배정을 요청해 주세요." 형태의 한국어 alert 가 표시된다
   - [ ] 페이지 DOM 에 "Cohort", "Display name", "Set up your profile" 등 영문이 없다
 - **Verification**:
   - `bun run test:unit -- features/onboarding`
   - `bun run build`
-  - Browser MCP — 신규 가입 후 `/onboarding` 진입 → 폼 + 기수 dropdown 열림 + 빈 표시명 제출로 검증 에러 노출 상태 스크린샷, `artifacts/korean-translation/evidence/task-6-onboarding.png` 저장
+  - Browser MCP — 신규 가입 후 `/onboarding` 진입 → 폼 + 클래스 dropdown 열림 + 빈 표시명 제출로 검증 에러 노출 상태 스크린샷, `artifacts/korean-translation/evidence/task-6-onboarding.png` 저장
 
 ---
 

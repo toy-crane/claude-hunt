@@ -105,7 +105,7 @@ describe("completeOnboarding server action", () => {
     });
 
     expect(result.ok).toBe(false);
-    expect(result.error).toBe("과정를 선택해 주세요.");
+    expect(result.error).toBe("클래스를 선택해 주세요.");
   });
 
   it("upserts the caller's own profile with trimmed display name and cohort id", async () => {
