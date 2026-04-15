@@ -1,8 +1,14 @@
 import type { ProjectWithVoteCount } from "@entities/vote";
 import { RiThumbUpLine } from "@remixicon/react";
+import Image from "next/image";
 import { RankBadge } from "./rank-badge";
 
 export interface ProjectCardProps {
+  /**
+   * Eagerly loads the screenshot and marks it as high-priority for LCP.
+   * Set only on above-the-fold cards (top-3). Defaults to false.
+   */
+  priority?: boolean;
   project: ProjectWithVoteCount;
   rank: number;
   /**
@@ -29,6 +35,7 @@ export interface ProjectCardProps {
 export function ProjectCard({
   project,
   rank,
+  priority = false,
   screenshotUrl,
   viewerUserId,
   renderOwnerActions,
@@ -47,12 +54,12 @@ export function ProjectCard({
         rel="noopener noreferrer"
         target="_blank"
       >
-        {/** biome-ignore lint/performance/noImgElement: avatar/screenshot served from supabase storage — next/image config not set up yet */}
-        <img
+        <Image
           alt={`${project.title ?? "Project"} screenshot`}
           className="h-full w-full object-cover transition-transform duration-300 group-hover:scale-[1.02]"
           height={360}
-          loading="lazy"
+          priority={priority}
+          sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw"
           src={screenshotUrl}
           width={640}
         />

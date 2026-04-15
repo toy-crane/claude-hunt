@@ -34,17 +34,21 @@ export function ProjectGrid({
       className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3"
       data-testid="project-grid"
     >
-      {projects.map((project, index) => (
-        <ProjectCard
-          key={project.id}
-          project={project}
-          rank={index + 1}
-          renderOwnerActions={renderOwnerActions}
-          renderVoteButton={renderVoteButton}
-          screenshotUrl={resolveScreenshotUrl(project.screenshot_path ?? "")}
-          viewerUserId={viewerUserId}
-        />
-      ))}
+      {projects.map((project, index) => {
+        const rank = index + 1;
+        return (
+          <ProjectCard
+            key={project.id}
+            priority={rank <= 3}
+            project={project}
+            rank={rank}
+            renderOwnerActions={renderOwnerActions}
+            renderVoteButton={renderVoteButton}
+            screenshotUrl={resolveScreenshotUrl(project.screenshot_path ?? "")}
+            viewerUserId={viewerUserId}
+          />
+        );
+      })}
     </div>
   );
 }

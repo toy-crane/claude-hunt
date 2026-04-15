@@ -1,7 +1,13 @@
 import type { ProjectWithVoteCount } from "@entities/vote";
 import { render, screen } from "@testing-library/react";
-import { describe, expect, it } from "vitest";
+import { describe, expect, it, vi } from "vitest";
 import { ProjectGrid } from "./project-grid";
+
+vi.mock("next/image", () => ({
+  default: ({ alt, src }: { alt: string; src: string }) => (
+    <div aria-label={alt} data-src={src} role="img" />
+  ),
+}));
 
 function buildProject(
   overrides: Partial<ProjectWithVoteCount> & { id: string; title: string }
