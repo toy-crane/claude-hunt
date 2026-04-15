@@ -61,7 +61,7 @@ export function EditDialog({ project }: EditDialogProps) {
       if (newScreenshot && newScreenshot.size > 0) {
         const upload = await uploadScreenshot(newScreenshot);
         if (upload.error || !upload.path) {
-          setFieldError(upload.error ?? "Upload failed");
+          setFieldError(upload.error ?? "업로드에 실패했어요.");
           return;
         }
         screenshotPath = upload.path;
@@ -75,7 +75,7 @@ export function EditDialog({ project }: EditDialogProps) {
         screenshotPath,
       });
       if (!result.ok) {
-        setSubmitError(result.error ?? "Could not save");
+        setSubmitError(result.error ?? "저장할 수 없어요.");
         return;
       }
       setOpen(false);
@@ -88,25 +88,25 @@ export function EditDialog({ project }: EditDialogProps) {
     <Dialog onOpenChange={setOpen} open={open}>
       <DialogTrigger asChild>
         <Button data-testid="edit-project-trigger" size="sm" variant="outline">
-          Edit
+          수정
         </Button>
       </DialogTrigger>
       <DialogContent>
         <DialogHeader>
-          <DialogTitle>Edit project</DialogTitle>
+          <DialogTitle>프로젝트 수정</DialogTitle>
           <DialogDescription>
-            Update your project's details. Leave the screenshot blank to keep
-            the current image.
+            프로젝트 정보를 업데이트해요. 스크린샷을 비워 두면 기존 이미지가
+            유지됩니다.
           </DialogDescription>
         </DialogHeader>
         <form
-          aria-label="Edit project"
+          aria-label="프로젝트 수정"
           className="flex flex-col gap-4"
           onSubmit={handleSubmit}
         >
           <FieldGroup>
             <Field>
-              <FieldLabel htmlFor={titleId}>Title</FieldLabel>
+              <FieldLabel htmlFor={titleId}>제목</FieldLabel>
               <Input
                 defaultValue={project.title ?? ""}
                 disabled={submitting}
@@ -117,7 +117,7 @@ export function EditDialog({ project }: EditDialogProps) {
               />
             </Field>
             <Field>
-              <FieldLabel htmlFor={taglineId}>Tagline</FieldLabel>
+              <FieldLabel htmlFor={taglineId}>태그라인</FieldLabel>
               <Textarea
                 defaultValue={project.tagline ?? ""}
                 disabled={submitting}
@@ -129,7 +129,7 @@ export function EditDialog({ project }: EditDialogProps) {
               />
             </Field>
             <Field>
-              <FieldLabel htmlFor={urlId}>Project URL</FieldLabel>
+              <FieldLabel htmlFor={urlId}>프로젝트 URL</FieldLabel>
               <Input
                 defaultValue={project.project_url ?? ""}
                 disabled={submitting}
@@ -140,9 +140,7 @@ export function EditDialog({ project }: EditDialogProps) {
               />
             </Field>
             <Field>
-              <FieldLabel htmlFor={screenshotId}>
-                Screenshot (optional)
-              </FieldLabel>
+              <FieldLabel htmlFor={screenshotId}>스크린샷 (선택)</FieldLabel>
               <Input
                 accept="image/jpeg,image/png,image/webp"
                 disabled={submitting}
@@ -179,11 +177,11 @@ export function EditDialog({ project }: EditDialogProps) {
               type="button"
               variant="outline"
             >
-              Cancel
+              취소
             </Button>
             <Button disabled={submitting} type="submit">
               {submitting ? <Spinner data-icon="inline-start" /> : null}
-              {submitting ? "Saving..." : "Save changes"}
+              {submitting ? "저장 중..." : "변경 사항 저장"}
             </Button>
           </DialogFooter>
         </form>
