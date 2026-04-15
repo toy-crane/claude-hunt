@@ -77,7 +77,9 @@ vi.mock("next/link", () => ({
 }));
 
 vi.mock("next/image", () => ({
-  default: ({ alt }: { alt: string }) => <div aria-label={alt} role="img" />,
+  default: ({ alt, src }: { alt: string; src: string }) => (
+    <div aria-label={alt} data-src={src} role="img" />
+  ),
 }));
 
 const cohorts: Cohort[] = [

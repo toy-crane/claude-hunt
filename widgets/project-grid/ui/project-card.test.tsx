@@ -1,7 +1,13 @@
 import type { ProjectWithVoteCount } from "@entities/vote";
 import { render, screen } from "@testing-library/react";
-import { describe, expect, it } from "vitest";
+import { describe, expect, it, vi } from "vitest";
 import { ProjectCard } from "./project-card";
+
+vi.mock("next/image", () => ({
+  default: ({ alt, src }: { alt: string; src: string }) => (
+    <div aria-label={alt} data-src={src} role="img" />
+  ),
+}));
 
 function buildProject(
   overrides: Partial<ProjectWithVoteCount> = {}
@@ -51,8 +57,21 @@ describe("ProjectCard", () => {
       />
     );
 
-    const img = screen.getByAltText("Paint screenshot") as HTMLImageElement;
-    expect(img.src).toBe("https://cdn.example.com/paint.png");
+    const img = screen.getByLabelText("Paint screenshot");
+    expect(img.getAttribute("data-src")).toContain("paint.png");
+  });
+
+  it("accepts the priority prop for above-the-fold cards", () => {
+    render(
+      <ProjectCard
+        priority
+        project={buildProject({ title: "Top" })}
+        rank={1}
+        screenshotUrl="https://cdn.example.com/top.png"
+      />
+    );
+
+    expect(screen.getByLabelText("Top screenshot")).toBeInTheDocument();
   });
 
   it("shows a rank badge when rank is 1, 2, or 3", () => {
