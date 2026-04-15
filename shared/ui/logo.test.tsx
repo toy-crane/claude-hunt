@@ -48,9 +48,9 @@ describe("Logo", () => {
     expect(screen.getByText("_")).toBeInTheDocument();
   });
 
-  it("is an anchor to / with aria-label 'claude-hunt home'", () => {
+  it("is an anchor to / with aria-label 'claude-hunt 홈'", () => {
     render(<Logo />);
-    const link = screen.getByRole("link", { name: "claude-hunt home" });
+    const link = screen.getByRole("link", { name: "claude-hunt 홈" });
     expect(link).toHaveAttribute("href", "/");
   });
 
@@ -66,7 +66,7 @@ describe("Logo", () => {
 
   it("uses a monospace font on the wordmark", () => {
     render(<Logo />);
-    const link = screen.getByRole("link", { name: "claude-hunt home" });
+    const link = screen.getByRole("link", { name: "claude-hunt 홈" });
     expect(link.className).toContain("font-mono");
   });
 

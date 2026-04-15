@@ -12,7 +12,7 @@ const ACCENT = "text-[#c15f3c] dark:text-[#e88a67]";
 export function Logo({ blink = false, className }: LogoProps) {
   return (
     <Link
-      aria-label="claude-hunt home"
+      aria-label="claude-hunt 홈"
       className={cn(
         "inline-flex items-baseline gap-[2px] font-mono font-semibold tracking-tight",
         className
