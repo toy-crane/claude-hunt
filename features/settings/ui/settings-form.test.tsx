@@ -2,10 +2,10 @@ import { render, screen, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
-const SAVE_LABEL = /^save$/i;
-const SAVING_LABEL = /saving/i;
-const REQUIRED_MESSAGE = /display name is required/i;
-const LENGTH_MESSAGE = /50 characters or fewer/i;
+const SAVE_LABEL = /^저장$/;
+const SAVING_LABEL = /저장 중/;
+const REQUIRED_MESSAGE = /표시명을 입력해 주세요/;
+const LENGTH_MESSAGE = /50자 이하/;
 
 const mocks = vi.hoisted(() => ({
   updateDisplayName: vi.fn(),
@@ -48,14 +48,14 @@ describe("<SettingsForm />", () => {
   it("pre-fills the display-name input with the current value", () => {
     renderForm();
 
-    const input = screen.getByLabelText("Display name") as HTMLInputElement;
+    const input = screen.getByLabelText("표시명") as HTMLInputElement;
     expect(input.value).toBe("Alice");
   });
 
   it("renders the email input disabled with the viewer's email", () => {
     renderForm();
 
-    const email = screen.getByLabelText("Email") as HTMLInputElement;
+    const email = screen.getByLabelText("이메일") as HTMLInputElement;
     expect(email).toBeDisabled();
     expect(email.value).toBe("alice@example.com");
   });
@@ -86,7 +86,7 @@ describe("<SettingsForm />", () => {
     const user = userEvent.setup();
     renderForm();
 
-    const input = screen.getByLabelText("Display name");
+    const input = screen.getByLabelText("표시명");
     await user.clear(input);
     await user.type(input, "Alice K.");
     await user.click(screen.getByRole("button", { name: SAVE_LABEL }));
@@ -94,7 +94,7 @@ describe("<SettingsForm />", () => {
     await waitFor(() => {
       expect(mocks.updateDisplayName).toHaveBeenCalledWith("Alice K.");
     });
-    expect(mocks.toastSuccess).toHaveBeenCalledWith("Display name updated");
+    expect(mocks.toastSuccess).toHaveBeenCalledWith("표시명이 변경되었어요.");
     expect(mocks.routerRefresh).toHaveBeenCalledTimes(1);
     expect((input as HTMLInputElement).value).toBe("Alice K.");
   });
@@ -102,12 +102,12 @@ describe("<SettingsForm />", () => {
   it("shows 'Display name is required' when the action rejects an empty value", async () => {
     mocks.updateDisplayName.mockResolvedValue({
       ok: false,
-      error: { field: "displayName", message: "Display name is required" },
+      error: { field: "displayName", message: "표시명을 입력해 주세요." },
     });
     const user = userEvent.setup();
     renderForm();
 
-    await user.clear(screen.getByLabelText("Display name"));
+    await user.clear(screen.getByLabelText("표시명"));
     await user.click(screen.getByRole("button", { name: SAVE_LABEL }));
 
     await waitFor(() => {
@@ -119,12 +119,12 @@ describe("<SettingsForm />", () => {
   it("shows 'Display name is required' for a whitespace-only value", async () => {
     mocks.updateDisplayName.mockResolvedValue({
       ok: false,
-      error: { field: "displayName", message: "Display name is required" },
+      error: { field: "displayName", message: "표시명을 입력해 주세요." },
     });
     const user = userEvent.setup();
     renderForm();
 
-    const input = screen.getByLabelText("Display name");
+    const input = screen.getByLabelText("표시명");
     await user.clear(input);
     await user.type(input, "   ");
     await user.click(screen.getByRole("button", { name: SAVE_LABEL }));
@@ -140,7 +140,7 @@ describe("<SettingsForm />", () => {
       ok: false,
       error: {
         field: "displayName",
-        message: "Display name must be 50 characters or fewer",
+        message: "표시명은 50자 이하로 입력해 주세요.",
       },
     });
     const user = userEvent.setup();
