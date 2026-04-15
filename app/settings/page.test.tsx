@@ -125,7 +125,7 @@ describe("settings page", () => {
     const sectionHeadings = screen
       .getAllByRole("heading", { level: 2 })
       .map((h) => h.textContent?.trim());
-    expect(sectionHeadings).toEqual(["프로필", "위험 영역"]);
+    expect(sectionHeadings).toEqual(["프로필 정보", "위험 영역"]);
   });
 
   it("renders the Delete account row with a Withdraw button and warning text in Danger Zone", async () => {

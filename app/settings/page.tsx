@@ -39,7 +39,7 @@ export default async function SettingsPage() {
           className="px-1 font-medium text-muted-foreground text-xs"
           id="settings-profile-heading"
         >
-          프로필
+          프로필 정보
         </h2>
         <Card>
           <CardContent>
