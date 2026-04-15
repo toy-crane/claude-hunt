@@ -6,27 +6,27 @@ import { z } from "zod";
  * optional: omit to keep the existing screenshot, supply to swap.
  */
 export const editProjectInputSchema = z.object({
-  projectId: z.string().trim().min(1, "Invalid project id"),
+  projectId: z.string().trim().min(1, "잘못된 프로젝트 ID 예요."),
   title: z
     .string()
     .trim()
-    .min(1, "Title is required")
+    .min(1, "제목을 입력해 주세요.")
     .max(
       MAX_TITLE_LENGTH,
-      `Title must be ${MAX_TITLE_LENGTH} characters or fewer`
+      `제목은 ${MAX_TITLE_LENGTH}자 이하로 입력해 주세요.`
     ),
   tagline: z
     .string()
     .trim()
-    .min(1, "Tagline is required")
+    .min(1, "태그라인을 입력해 주세요.")
     .max(
       MAX_TAGLINE_LENGTH,
-      `Tagline must be ${MAX_TAGLINE_LENGTH} characters or fewer`
+      `태그라인은 ${MAX_TAGLINE_LENGTH}자 이하로 입력해 주세요.`
     ),
   projectUrl: z
     .string()
     .trim()
-    .url("Enter a valid URL starting with http:// or https://"),
+    .url("http:// 또는 https:// 로 시작하는 URL을 입력해 주세요."),
   screenshotPath: z.string().trim().min(1).optional(),
 });
 
