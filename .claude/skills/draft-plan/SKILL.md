@@ -91,6 +91,21 @@ Each task's **Acceptance** section is a flat checklist of natural-language outco
 
 The task's **Covers** line names which scenarios are addressed and whether coverage is full or partial. If partial, note which subset (e.g. "happy path only", "validation only").
 
+#### Verification
+
+Each Acceptance bullet must name **how it will be verified** — a command, an MCP step, or a specific human review. The bullet is not done until a future reader can re-run that check independently. Pick the lowest provable boundary.
+
+| Provable in | Use |
+|---|---|
+| Code (DOM, function, DB, HTTP) | Vitest / pgTAP / `bun run build` |
+| Real browser, repeatable in CI | Playwright (`bun run test:e2e`) |
+| Real browser, one-shot with evidence | Browser MCP (`mcp__claude-in-chrome__*`) |
+| Cannot be automated (design judgment, screen-reader AT, cross-browser feel, perf threshold absent from tooling) | Human review — state the reviewer/role, the artifact, and the criterion. Save evidence (screenshot/video/note) to `artifacts/<feature>/evidence/`. |
+
+`manual: visit X` as a placeholder for a check that *could* be automated is not allowed. A named human review *is* — the test is "can someone else re-run this check from your bullet alone?"
+
+For the concrete shape of the Verification block, see `references/plan-template.md`.
+
 #### Ordering
 
 - Place test file generation first (colocated `<file>.test.tsx`, or `__tests__/` for App Router pages — see `CLAUDE.md` → Testing). If prerequisite work is needed, place it before with a reason
