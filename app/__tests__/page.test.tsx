@@ -63,4 +63,19 @@ describe("home page (/)", () => {
 
     expect(screen.getByRole("contentinfo")).toBeInTheDocument();
   });
+
+  it("renders the Korean heading and subheading", async () => {
+    fetchViewerMock.mockResolvedValue(null);
+
+    const { default: Page } = await import("../page");
+    const jsx = await Page({ searchParams: Promise.resolve({}) });
+    render(jsx);
+
+    expect(
+      screen.getByRole("heading", { name: "프로젝트 보드", level: 1 })
+    ).toBeInTheDocument();
+    expect(
+      screen.getByText("좋아하는 프로젝트에 응원을 보내주세요.")
+    ).toBeInTheDocument();
+  });
 });

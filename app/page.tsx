@@ -28,10 +28,10 @@ export default async function Page({ searchParams }: PageProps) {
           <div className="flex flex-wrap items-start justify-between gap-4">
             <div className="flex flex-col gap-2">
               <h1 className="font-heading font-medium text-2xl">
-                Project Board
+                프로젝트 보드
               </h1>
               <p className="text-muted-foreground text-sm">
-                Projects built by cohort students. Upvote your favourites.
+                좋아하는 프로젝트에 응원을 보내주세요.
               </p>
             </div>
             <div className="w-fit self-start">

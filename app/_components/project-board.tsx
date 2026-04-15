@@ -64,7 +64,7 @@ export function ProjectBoard({
     <>
       <div className="flex items-center justify-end gap-2">
         <span aria-hidden="true" className="text-muted-foreground text-xs">
-          Filter by cohort
+          기수로 필터
         </span>
         <CohortDropdown
           cohorts={cohorts}
