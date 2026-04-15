@@ -72,7 +72,7 @@ None — static content only.
 
 ---
 
-### Task 2: Mount Footer on the home page
+### Task 2: Mount Footer on the home page ✅
 
 - **Covers**: Scenario 1 (full — completes the "rendered on `/`", "rendered identically for signed-in and signed-out visitors", "not rendered on other routes", and "scrolls with content" criteria left from Task 1)
 - **Size**: S (1 file modified, 1 new test)
