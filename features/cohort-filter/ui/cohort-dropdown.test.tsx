@@ -27,7 +27,7 @@ describe("CohortDropdown", () => {
       <CohortDropdown cohorts={cohorts} onValueChange={vi.fn()} value={null} />
     );
     expect(screen.getByTestId("cohort-dropdown")).toHaveTextContent(
-      "All cohorts"
+      "모든 기수"
     );
   });
 
@@ -69,9 +69,7 @@ describe("CohortDropdown", () => {
     );
 
     await user.click(screen.getByTestId("cohort-dropdown"));
-    await user.click(
-      await screen.findByRole("option", { name: "All cohorts" })
-    );
+    await user.click(await screen.findByRole("option", { name: "모든 기수" }));
 
     expect(onValueChange).toHaveBeenCalledWith(null);
   });

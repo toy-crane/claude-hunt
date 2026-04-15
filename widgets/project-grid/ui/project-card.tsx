@@ -55,7 +55,7 @@ export function ProjectCard({
         target="_blank"
       >
         <Image
-          alt={`${project.title ?? "Project"} screenshot`}
+          alt={`${project.title ?? "프로젝트"} 스크린샷`}
           className="h-full w-full object-cover transition-transform duration-300 group-hover:scale-[1.02]"
           height={360}
           priority={priority}
@@ -91,7 +91,7 @@ export function ProjectCard({
         <p className="mt-1 text-muted-foreground text-xs">
           by{" "}
           <span className="font-medium text-foreground">
-            {project.author_display_name ?? "Anonymous"}
+            {project.author_display_name ?? "익명"}
           </span>
         </p>
         {renderVoteButton || (isOwner && renderOwnerActions) ? (
