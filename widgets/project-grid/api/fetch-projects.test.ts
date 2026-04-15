@@ -11,6 +11,13 @@ vi.mock("@shared/api/supabase/server", () => ({
       }
       return { select: votesSelectMock };
     }),
+    storage: {
+      from: vi.fn(() => ({
+        getPublicUrl: (path: string) => ({
+          data: { publicUrl: `https://cdn.example.com/${path}` },
+        }),
+      })),
+    },
   }),
 }));
 
@@ -61,6 +68,7 @@ describe("fetchProjects", () => {
 
     expect(rows).toHaveLength(2);
     expect(rows[0].id).toBe("p1");
+    expect(rows[0].screenshotUrl).toBe("https://cdn.example.com/u1/p1.png");
     expect(rows[1].id).toBe("p2");
   });
 

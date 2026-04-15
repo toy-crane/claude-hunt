@@ -1,6 +1,5 @@
 import { fetchCohorts } from "@features/cohort-filter/server";
 import { SubmitDialog } from "@features/submit-project";
-import { createClient } from "@shared/api/supabase/server";
 import { fetchViewer } from "@shared/api/supabase/viewer";
 import { Separator } from "@shared/ui/separator";
 import { Header } from "@widgets/header";
@@ -16,20 +15,9 @@ export default async function Page({ searchParams }: PageProps) {
   const selectedCohortId = cohortParam ?? null;
 
   const [viewer, cohorts] = await Promise.all([fetchViewer(), fetchCohorts()]);
-
-  const [supabase, projects] = await Promise.all([
-    createClient(),
-    fetchProjects({ viewerUserId: viewer?.id ?? null }),
-  ]);
-
-  const projectsWithScreenshots = projects.map((project) => ({
-    ...project,
-    screenshotUrl: project.screenshot_path
-      ? supabase.storage
-          .from("project-screenshots")
-          .getPublicUrl(project.screenshot_path).data.publicUrl
-      : "",
-  }));
+  const projects = await fetchProjects({
+    viewerUserId: viewer?.id ?? null,
+  });
 
   return (
     <>
@@ -60,7 +48,7 @@ export default async function Page({ searchParams }: PageProps) {
           cohorts={cohorts}
           initialCohortId={selectedCohortId}
           isAuthenticated={Boolean(viewer)}
-          projects={projectsWithScreenshots}
+          projects={projects}
           viewerUserId={viewer?.id ?? null}
         />
       </main>
