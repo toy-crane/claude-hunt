@@ -60,10 +60,7 @@ export function LoginForm() {
   }
 
   return (
-    <AuthLayout
-      description="계정에 로그인하고 계속하세요"
-      title="다시 만나서 반가워요"
-    >
+    <AuthLayout description="자유롭게 프로젝트를 공유해 보세요" title="로그인">
       <form onSubmit={handleEmailLogin}>
         <div className="grid grid-cols-2 gap-3">
           <Button
