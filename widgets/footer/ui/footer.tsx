@@ -1,4 +1,5 @@
-import { RiChat3Line, RiExternalLinkLine } from "@remixicon/react";
+import { RiChat3Line } from "@remixicon/react";
+import { Button } from "@shared/ui/button";
 import { GitHubIcon } from "@shared/ui/icons/github";
 import { Separator } from "@shared/ui/separator";
 
@@ -13,34 +14,30 @@ export function Footer() {
       <Separator />
       <div className="mx-auto flex w-full max-w-6xl flex-col items-start justify-between gap-3 px-6 py-6 text-muted-foreground text-sm sm:flex-row sm:items-center">
         <span>© {COPYRIGHT_YEAR} claude-hunt</span>
-        <nav className="flex items-center gap-5">
-          <a
-            className="inline-flex items-center gap-1.5 hover:text-foreground"
-            href={REPO_URL}
-            rel="noopener noreferrer"
-            target="_blank"
-          >
-            <GitHubIcon className="size-4" />
-            <span>GitHub</span>
-          </a>
-          <a
-            className="inline-flex items-center gap-1.5 hover:text-foreground"
-            href={ISSUE_URL}
-            rel="noopener noreferrer"
-            target="_blank"
-          >
-            <RiChat3Line className="size-4" />
-            <span>Feedback</span>
-          </a>
-          <a
-            className="inline-flex items-center gap-1.5 hover:text-foreground"
-            href={CREATOR_URL}
-            rel="noopener noreferrer"
-            target="_blank"
-          >
-            <span>by toycrane</span>
-            <RiExternalLinkLine className="size-3" />
-          </a>
+        <nav className="flex items-center gap-1">
+          <Button asChild size="sm" variant="ghost">
+            <a href={REPO_URL} rel="noopener noreferrer" target="_blank">
+              <GitHubIcon data-icon="inline-start" />
+              <span>GitHub</span>
+            </a>
+          </Button>
+          <Button asChild size="sm" variant="ghost">
+            <a href={ISSUE_URL} rel="noopener noreferrer" target="_blank">
+              <RiChat3Line data-icon="inline-start" />
+              <span>Feedback</span>
+            </a>
+          </Button>
+          <span className="px-2.5 text-xs">
+            Built by{" "}
+            <a
+              className="underline-offset-4 hover:underline"
+              href={CREATOR_URL}
+              rel="noopener noreferrer"
+              target="_blank"
+            >
+              toycrane
+            </a>
+          </span>
         </nav>
       </div>
     </footer>

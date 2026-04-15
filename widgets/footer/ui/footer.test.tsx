@@ -6,7 +6,8 @@ import { Footer } from "./footer";
 const COPYRIGHT_TEXT = /© 2026 claude-hunt/i;
 const GITHUB_LABEL = /github/i;
 const FEEDBACK_LABEL = /feedback/i;
-const CREATOR_LABEL = /by toycrane/i;
+const CREATOR_LABEL = /^toycrane$/i;
+const BUILT_BY_TEXT = /built by/i;
 const NOOPENER = /noopener/;
 const NOREFERRER = /noreferrer/;
 const GITHUB_URL = "https://github.com/toy-crane/claude-hunt";
@@ -35,8 +36,11 @@ describe("<Footer />", () => {
     expect(link).toHaveAttribute("href", FEEDBACK_URL);
   });
 
-  it("renders the creator link pointing at toycrane.xyz", () => {
+  it("renders 'Built by toycrane' with the name linking to toycrane.xyz", () => {
     render(<Footer />);
+
+    const footer = screen.getByRole("contentinfo");
+    expect(within(footer).getByText(BUILT_BY_TEXT)).toBeInTheDocument();
 
     const link = screen.getByRole("link", { name: CREATOR_LABEL });
     expect(link).toHaveAttribute("href", CREATOR_URL);
