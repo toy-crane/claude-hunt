@@ -53,7 +53,7 @@ describe("login", () => {
     expect(container.textContent).not.toContain("Claude Hunt");
   });
 
-  it("exposes the logo as a link to / with aria-label 'claude-hunt home'", () => {
+  it("exposes the logo as a link to / with aria-label 'claude-hunt 홈'", () => {
     render(<LoginForm />);
     const link = screen.getByRole("link", { name: "claude-hunt 홈" });
     expect(link).toHaveAttribute("href", "/");
@@ -70,13 +70,13 @@ describe("login", () => {
     const { container } = render(<LoginForm />);
     const headings = container.querySelectorAll("h1");
     expect(headings).toHaveLength(1);
-    expect(headings[0].textContent).toBe("다시 만나서 반가워요");
+    expect(headings[0].textContent).toBe("로그인");
   });
 
   it("renders the Korean subtitle after the h1", () => {
     const { container } = render(<LoginForm />);
     const heading = screen.getByRole("heading", { level: 1 });
-    const subtitle = screen.getByText("계정에 로그인하고 계속하세요");
+    const subtitle = screen.getByText("자유롭게 프로젝트를 공유해 보세요");
     const all = Array.from(container.querySelectorAll("*"));
     expect(all.indexOf(subtitle)).toBeGreaterThan(all.indexOf(heading));
   });
