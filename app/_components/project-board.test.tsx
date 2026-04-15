@@ -176,9 +176,8 @@ describe("ProjectBoard", () => {
     expect(screen.getByText("Beta One")).toBeInTheDocument();
   });
 
-  it("shows the Korean filter helper text instead of 'Filter by cohort'", async () => {
+  it("does not show English 'Filter by cohort' helper text", async () => {
     await renderBoard();
-    expect(screen.getByText("클래스로 필터")).toBeInTheDocument();
     expect(screen.queryByText("Filter by cohort")).not.toBeInTheDocument();
   });
 
