@@ -37,10 +37,10 @@ If reference images exist in the `artifacts/<feature>/references/` directory, re
 
 Output: `artifacts/<feature>/wireframe.html`
 
-Server start: `Bash(run_in_background): bunx vite artifacts/<feature> --port=3456`
+Server start: `Bash(run_in_background): bunx vite artifacts/<feature> --port=3456`. Vite auto-bumps to the next free port if 3456 is taken — read the background output and use the actual `Local:` URL it prints.
 
 Feedback loop:
-- Direct the user to check `http://localhost:3456/wireframe.html` (verify both sides with Mobile/Desktop toggle)
+- Direct the user to check `http://localhost:<actual-port>/wireframe.html` (verify both sides with Mobile/Desktop toggle)
 - Receive user feedback and modify wireframe.html
 
 Once the layout is finalized, proceed to Step 3.
