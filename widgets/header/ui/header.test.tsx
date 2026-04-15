@@ -1,9 +1,9 @@
 import { render, screen } from "@testing-library/react";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
-const LOGO_LABEL = /claude-hunt home/i;
-const LOGIN_LABEL = /log in/i;
-const ACCOUNT_MENU_LABEL = /open account menu/i;
+const LOGO_LABEL = /claude-hunt 홈/;
+const LOGIN_LABEL = /로그인/;
+const ACCOUNT_MENU_LABEL = /계정 메뉴 열기/;
 
 vi.mock("next/link", () => ({
   default: ({

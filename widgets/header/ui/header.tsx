@@ -19,7 +19,7 @@ export async function Header() {
           />
         ) : (
           <Button asChild size="sm" variant="outline">
-            <Link href="/login">Log in</Link>
+            <Link href="/login">로그인</Link>
           </Button>
         )}
       </div>

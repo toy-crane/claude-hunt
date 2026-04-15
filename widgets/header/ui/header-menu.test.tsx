@@ -2,14 +2,14 @@ import { render, screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
-const ACCOUNT_MENU_LABEL = /open account menu/i;
-const FALLBACK_ICON_LABEL = /account/i;
-const THEME_LABEL = /^theme$/i;
-const LIGHT_LABEL = /^light$/i;
-const DARK_LABEL = /^dark$/i;
-const SYSTEM_LABEL = /^system$/i;
-const SETTINGS_LABEL = /^settings$/i;
-const LOG_OUT_LABEL = /^log out$/i;
+const ACCOUNT_MENU_LABEL = /계정 메뉴 열기/;
+const FALLBACK_ICON_LABEL = /계정/;
+const THEME_LABEL = /^테마$/;
+const LIGHT_LABEL = /^라이트$/;
+const DARK_LABEL = /^다크$/;
+const SYSTEM_LABEL = /^시스템$/;
+const SETTINGS_LABEL = /^설정$/;
+const LOG_OUT_LABEL = /^로그아웃$/;
 
 const setThemeMock = vi.fn();
 const signOutMock = vi.fn();
@@ -189,12 +189,12 @@ describe("<HeaderMenu />", () => {
     const menu = screen.getByRole("menu");
     const text = menu.textContent ?? "";
     const positions = [
-      text.indexOf("Theme"),
-      text.indexOf("Light"),
-      text.indexOf("Dark"),
-      text.indexOf("System"),
-      text.indexOf("Settings"),
-      text.indexOf("Log out"),
+      text.indexOf("테마"),
+      text.indexOf("라이트"),
+      text.indexOf("다크"),
+      text.indexOf("시스템"),
+      text.indexOf("설정"),
+      text.indexOf("로그아웃"),
     ];
 
     for (const position of positions) {
