@@ -8,7 +8,14 @@ argument-hint: "feature description"
 
 The output of this skill is a single document: `artifacts/<feature-name>/spec.md`. The spec describes WHAT the feature must do from an externally observable perspective. Implementation choices (FSD slice placement, file layout, table schemas, test types, libraries) belong in `plan.md`, not here.
 
-## Step 1: Pre-exploration
+## Step 1: Ensure Worktree
+
+`/write-spec` must run inside a worktree. Check the current working directory:
+
+- If the path contains `.claude/worktrees/`, continue to Step 2.
+- Otherwise, invoke `/create-worktree feat/<short-description>` where `<short-description>` is derived from `$ARGUMENTS` (lowercase, hyphen-separated, max 5 words). The session will switch into the new worktree, then continue to Step 2.
+
+## Step 2: Pre-exploration
 
 Explore existing context before asking questions. Read in order if they exist:
 
@@ -17,7 +24,7 @@ Explore existing context before asking questions. Read in order if they exist:
 
 For entirely new features, only check idea.md.
 
-## Step 2: Surface Assumptions
+## Step 3: Surface Assumptions
 
 Before asking questions, list what you are assuming based on exploration:
 
@@ -30,7 +37,7 @@ ASSUMPTIONS I'M MAKING:
 
 Don't silently fill in ambiguous requirements. The spec's purpose is to surface misunderstandings before code gets written.
 
-## Step 3: Reframe as Success Criteria
+## Step 4: Reframe as Success Criteria
 
 Translate vague requirements from the user's description into concrete, testable conditions:
 
@@ -45,7 +52,7 @@ REFRAMED:
 
 If the user's description is already concrete, skip this step.
 
-## Step 4: Iterative Questioning
+## Step 5: Iterative Questioning
 
 Simulate user flows for `$ARGUMENTS` and find the blanks. At each step, check the happy path, error paths, boundary conditions, and intersections with existing features.
 
@@ -62,7 +69,7 @@ Classify by cost of change:
 - If a question intersects an existing scenario, mention that scenario specifically
 - After 3 rounds with no new discoveries, move to the next step — unless an unexplored branch has a high cost of change, in which case ask about that first
 
-## Step 5: Generate spec.md
+## Step 6: Generate spec.md
 
 If the user attached images, save them to `artifacts/<feature-name>/references/` first.
 
