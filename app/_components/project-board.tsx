@@ -63,9 +63,6 @@ export function ProjectBoard({
   return (
     <>
       <div className="flex items-center justify-end gap-2">
-        <span aria-hidden="true" className="text-muted-foreground text-xs">
-          클래스로 필터
-        </span>
         <CohortDropdown
           cohorts={cohorts}
           onValueChange={handleCohortChange}
