@@ -73,7 +73,7 @@ export function WithdrawDialog({ email }: WithdrawDialogProps) {
         </DialogHeader>
 
         <ul className="ml-4 list-disc text-muted-foreground text-xs/relaxed">
-          <li>프로필 (표시명, 이메일, 아바타)</li>
+          <li>프로필 (닉네임, 이메일, 아바타)</li>
           <li>제출한 모든 프로젝트</li>
           <li>추천한 모든 기록</li>
           <li>업로드한 모든 스크린샷</li>

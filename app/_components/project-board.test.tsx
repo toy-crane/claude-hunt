@@ -178,7 +178,7 @@ describe("ProjectBoard", () => {
 
   it("shows the Korean filter helper text instead of 'Filter by cohort'", async () => {
     await renderBoard();
-    expect(screen.getByText("기수로 필터")).toBeInTheDocument();
+    expect(screen.getByText("과정로 필터")).toBeInTheDocument();
     expect(screen.queryByText("Filter by cohort")).not.toBeInTheDocument();
   });
 

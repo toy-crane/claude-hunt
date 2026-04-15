@@ -61,7 +61,7 @@ async function pickCohort(name: string) {
 }
 
 function typeDisplayName(value: string) {
-  const input = screen.getByLabelText("표시명") as HTMLInputElement;
+  const input = screen.getByLabelText("닉네임") as HTMLInputElement;
   // Use fireEvent.change so React's synthetic event onChange runs — works
   // with whitespace and with strings longer than maxLength.
   fireEvent.change(input, { target: { value } });
@@ -82,7 +82,7 @@ describe("OnboardingForm", () => {
   it("renders display name input, cohort selector, continue, and sign out", () => {
     render(<OnboardingForm cohorts={cohorts} initialNext="/" />);
 
-    expect(screen.getByLabelText("표시명")).toBeInTheDocument();
+    expect(screen.getByLabelText("닉네임")).toBeInTheDocument();
     expect(screen.getByTestId("onboarding-cohort-trigger")).toBeInTheDocument();
     expect(screen.getByTestId("onboarding-submit")).toBeEnabled();
     expect(screen.getByTestId("onboarding-sign-out")).toBeEnabled();
@@ -111,7 +111,7 @@ describe("OnboardingForm", () => {
     render(<OnboardingForm cohorts={cohorts} initialNext="/" />);
     expect(
       screen.getByText(
-        "기수를 선택하고 표시명을 설정하면 프로젝트를 제출할 수 있어요."
+        "과정를 선택하고 닉네임을 설정하면 프로젝트를 제출할 수 있어요."
       )
     ).toBeInTheDocument();
   });
@@ -157,7 +157,7 @@ describe("OnboardingForm", () => {
 
     expect(
       await screen.findByTestId("onboarding-display-name-error")
-    ).toHaveTextContent("표시명을 입력해 주세요.");
+    ).toHaveTextContent("닉네임을 입력해 주세요.");
     expect(completeOnboardingMock).not.toHaveBeenCalled();
   });
 
@@ -169,7 +169,7 @@ describe("OnboardingForm", () => {
 
     expect(
       await screen.findByTestId("onboarding-display-name-error")
-    ).toHaveTextContent("표시명을 입력해 주세요.");
+    ).toHaveTextContent("닉네임을 입력해 주세요.");
     expect(completeOnboardingMock).not.toHaveBeenCalled();
   });
 
@@ -193,7 +193,7 @@ describe("OnboardingForm", () => {
 
     expect(
       await screen.findByTestId("onboarding-cohort-error")
-    ).toHaveTextContent("기수를 선택해 주세요.");
+    ).toHaveTextContent("과정를 선택해 주세요.");
     expect(completeOnboardingMock).not.toHaveBeenCalled();
   });
 
@@ -241,7 +241,7 @@ describe("OnboardingForm", () => {
       screen.queryByTestId("onboarding-cohort-trigger")
     ).not.toBeInTheDocument();
     expect(screen.getByTestId("onboarding-submit")).toBeDisabled();
-    expect(screen.getByLabelText("표시명")).toBeInTheDocument();
+    expect(screen.getByLabelText("닉네임")).toBeInTheDocument();
     expect(screen.getByTestId("onboarding-sign-out")).toBeEnabled();
   });
 

@@ -13,12 +13,12 @@ export const onboardingInputSchema = z.object({
   displayName: z
     .string()
     .trim()
-    .min(1, "표시명을 입력해 주세요.")
+    .min(1, "닉네임을 입력해 주세요.")
     .max(
       MAX_DISPLAY_NAME_LENGTH,
-      `표시명은 ${MAX_DISPLAY_NAME_LENGTH}자 이하로 입력해 주세요.`
+      `닉네임은 ${MAX_DISPLAY_NAME_LENGTH}자 이하로 입력해 주세요.`
     ),
-  cohortId: z.string().uuid("기수를 선택해 주세요."),
+  cohortId: z.string().uuid("과정를 선택해 주세요."),
 });
 
 export type OnboardingInput = z.infer<typeof onboardingInputSchema>;
