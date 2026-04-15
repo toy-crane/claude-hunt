@@ -2,15 +2,15 @@ import { render, screen, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
-const WITHDRAW_TRIGGER_LABEL = /^withdraw$/i;
-const DELETE_ACCOUNT_TITLE = /^delete account$/i;
-const DELETE_ACCOUNT_BUTTON_NAME = /^delete account$/i;
-const CANCEL_LABEL = /^cancel$/i;
-const TYPE_PROMPT_REGEX = /type .* to confirm/i;
-const LIST_PROFILE_REGEX = /your profile/i;
-const LIST_PROJECTS_REGEX = /projects you have submitted/i;
-const LIST_VOTES_REGEX = /votes you have cast/i;
-const LIST_SCREENSHOTS_REGEX = /uploaded screenshots/i;
+const WITHDRAW_TRIGGER_LABEL = /^탈퇴$/;
+const DELETE_ACCOUNT_TITLE = /^계정 삭제$/;
+const DELETE_ACCOUNT_BUTTON_NAME = /^계정 삭제$/;
+const CANCEL_LABEL = /^취소$/;
+const TYPE_PROMPT_REGEX = /확인을 위해 .* 입력해 주세요/;
+const LIST_PROFILE_REGEX = /프로필/;
+const LIST_PROJECTS_REGEX = /제출한 모든 프로젝트/;
+const LIST_VOTES_REGEX = /추천한 모든 기록/;
+const LIST_SCREENSHOTS_REGEX = /업로드한 모든 스크린샷/;
 
 const mocks = vi.hoisted(() => ({
   withdrawAccount: vi.fn(),

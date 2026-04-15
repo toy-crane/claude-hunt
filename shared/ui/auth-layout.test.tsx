@@ -67,7 +67,7 @@ describe("AuthLayout", () => {
       </AuthLayout>
     );
     const heading = screen.getByRole("heading", { level: 1 });
-    const logoLink = screen.getByRole("link", { name: "claude-hunt home" });
+    const logoLink = screen.getByRole("link", { name: "claude-hunt 홈" });
     expect(logoLink).toHaveAttribute("href", "/");
     expect(indexIn(container, logoLink)).toBeLessThan(
       indexIn(container, heading)

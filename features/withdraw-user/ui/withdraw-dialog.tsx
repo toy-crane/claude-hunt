@@ -63,26 +63,27 @@ export function WithdrawDialog({ email }: WithdrawDialogProps) {
           type="button"
           variant="destructive"
         >
-          Withdraw
+          탈퇴
         </Button>
       </DialogTrigger>
       <DialogContent>
         <DialogHeader>
-          <DialogTitle>Delete account</DialogTitle>
-          <DialogDescription>This will permanently remove:</DialogDescription>
+          <DialogTitle>계정 삭제</DialogTitle>
+          <DialogDescription>다음 항목이 영구 삭제됩니다:</DialogDescription>
         </DialogHeader>
 
         <ul className="ml-4 list-disc text-muted-foreground text-xs/relaxed">
-          <li>Your profile (display name, email, avatar)</li>
-          <li>All projects you have submitted</li>
-          <li>All votes you have cast</li>
-          <li>All uploaded screenshots</li>
+          <li>프로필 (표시명, 이메일, 아바타)</li>
+          <li>제출한 모든 프로젝트</li>
+          <li>추천한 모든 기록</li>
+          <li>업로드한 모든 스크린샷</li>
         </ul>
 
         <Field data-invalid={error === null ? undefined : ""}>
           <FieldLabel htmlFor={confirmationId}>
-            Type <span className="font-medium text-foreground">{email}</span> to
-            confirm.
+            확인을 위해{" "}
+            <span className="font-medium text-foreground">{email}</span> 을(를)
+            입력해 주세요.
           </FieldLabel>
           <Input
             aria-invalid={error !== null}
@@ -112,7 +113,7 @@ export function WithdrawDialog({ email }: WithdrawDialogProps) {
             type="button"
             variant="outline"
           >
-            Cancel
+            취소
           </Button>
           <Button
             data-testid="withdraw-confirm"
@@ -122,7 +123,7 @@ export function WithdrawDialog({ email }: WithdrawDialogProps) {
             variant="destructive"
           >
             {isPending ? <Spinner data-icon="inline-start" /> : null}
-            {isPending ? "Deleting..." : "Delete account"}
+            {isPending ? "삭제 중..." : "계정 삭제"}
           </Button>
         </DialogFooter>
       </DialogContent>
