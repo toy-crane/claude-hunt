@@ -89,10 +89,10 @@ export function ProjectCard({
           {project.tagline}
         </p>
         <p className="mt-1 text-muted-foreground text-xs">
-          by{" "}
           <span className="font-medium text-foreground">
             {project.author_display_name ?? "익명"}
           </span>
+          <span aria-hidden="true"> · 작성</span>
         </p>
         {renderVoteButton || (isOwner && renderOwnerActions) ? (
           <div

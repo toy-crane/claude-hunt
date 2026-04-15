@@ -6,7 +6,7 @@ const SETTINGS_HEADING = /^설정$/;
 const WITHDRAW_LABEL = /^Withdraw$/;
 const DELETE_ACCOUNT_HEADING = /^계정 삭제$/;
 const DANGER_WARNING =
-  /프로필, 프로젝트, 추천 기록을 영구 삭제합니다\. 되돌릴 수 없어요\./;
+  /프로필, 프로젝트, 추천 기록을 영구 삭제해요\. 되돌릴 수 없어요\./;
 const DANGER_ZONE_REGION = /^위험 영역$/;
 
 vi.mock("next/link", () => ({

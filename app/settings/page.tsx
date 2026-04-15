@@ -67,8 +67,7 @@ export default async function SettingsPage() {
               <div className="flex flex-col gap-1">
                 <span className="font-medium text-sm">계정 삭제</span>
                 <p className="text-muted-foreground text-xs">
-                  프로필, 프로젝트, 추천 기록을 영구 삭제합니다. 되돌릴 수
-                  없어요.
+                  프로필, 프로젝트, 추천 기록을 영구 삭제해요. 되돌릴 수 없어요.
                 </p>
               </div>
               <WithdrawDialog email={viewer.email} />
