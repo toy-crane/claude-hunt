@@ -1,6 +1,7 @@
 "use server";
 
-import { createClient } from "@shared/api/supabase/server";
+import { requireAuth } from "@shared/api/supabase/require-auth";
+import { SCREENSHOT_BUCKET } from "@shared/config/storage";
 import { revalidatePath } from "next/cache";
 
 export interface DeleteProjectResult {
@@ -9,11 +10,9 @@ export interface DeleteProjectResult {
 }
 
 /**
- * Deletes a project row the signed-in user owns and, best-effort, the
- * screenshot in storage. RLS is authoritative on the row delete — a
- * spoofed projectId just returns 0 rows and we surface a forbidden
- * error. Storage removal is best-effort: we ignore storage errors so a
- * missing/cleaned object doesn't block row deletion.
+ * RLS gates the DELETE, so a spoofed projectId returns 0 rows and
+ * surfaces as a forbidden error. Storage removal is best-effort: a
+ * missing/cleaned object must not block row deletion.
  */
 export async function deleteProject(
   projectId: string
@@ -22,19 +21,12 @@ export async function deleteProject(
     return { ok: false, error: "Invalid project id" };
   }
 
-  const supabase = await createClient();
-  const {
-    data: { user },
-    error: userError,
-  } = await supabase.auth.getUser();
-  if (userError || !user) {
-    return { ok: false, error: "You must be signed in to delete a project" };
+  const auth = await requireAuth("You must be signed in to delete a project");
+  if (!auth.ok) {
+    return auth;
   }
+  const { supabase } = auth;
 
-  // Look up the screenshot path first so we can clean it up after the
-  // row delete succeeds. Owner-only SELECT isn't required (row is
-  // publicly readable), but RLS on the subsequent DELETE enforces
-  // ownership.
   const { data: project } = await supabase
     .from("projects")
     .select("screenshot_path")
@@ -59,7 +51,7 @@ export async function deleteProject(
 
   if (project?.screenshot_path) {
     await supabase.storage
-      .from("project-screenshots")
+      .from(SCREENSHOT_BUCKET)
       .remove([project.screenshot_path]);
   }
 

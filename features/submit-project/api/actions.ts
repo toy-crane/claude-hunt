@@ -1,6 +1,7 @@
 "use server";
 
-import { createClient } from "@shared/api/supabase/server";
+import { requireAuth } from "@shared/api/supabase/require-auth";
+import { getZodErrorMessage } from "@shared/lib/validation";
 import { revalidatePath } from "next/cache";
 import { type SubmitProjectInput, submitProjectInputSchema } from "./schema";
 
@@ -10,29 +11,23 @@ export interface SubmitProjectResult {
   projectId?: string;
 }
 
-/**
- * Server action: inserts a row in `public.projects` using the signed-in
- * user's `cohort_id`. Rejects early if the actor is signed out or has
- * no cohort assignment (defence-in-depth against UI bypass).
- */
 export async function submitProject(
   raw: SubmitProjectInput
 ): Promise<SubmitProjectResult> {
   const parsed = submitProjectInputSchema.safeParse(raw);
   if (!parsed.success) {
-    const first = parsed.error.issues.at(0);
-    return { ok: false, error: first?.message ?? "Invalid input" };
+    return {
+      ok: false,
+      error: getZodErrorMessage(parsed.error, "Invalid input"),
+    };
   }
   const input = parsed.data;
 
-  const supabase = await createClient();
-  const {
-    data: { user },
-    error: userError,
-  } = await supabase.auth.getUser();
-  if (userError || !user) {
-    return { ok: false, error: "You must be signed in to submit a project" };
+  const auth = await requireAuth("You must be signed in to submit a project");
+  if (!auth.ok) {
+    return auth;
   }
+  const { supabase, user } = auth;
 
   const { data: profile, error: profileError } = await supabase
     .from("profiles")

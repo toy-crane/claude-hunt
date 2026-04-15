@@ -1,34 +1,24 @@
 "use server";
 
 import { createAdminClient } from "@shared/api/supabase/admin";
-import { createClient } from "@shared/api/supabase/server";
+import { requireAuth } from "@shared/api/supabase/require-auth";
+import { SCREENSHOT_BUCKET } from "@shared/config/storage";
 import { revalidatePath } from "next/cache";
 
 export type WithdrawAccountResult = { ok: true } | { error: string; ok: false };
 
 /**
- * Server action: permanently deletes the signed-in user's account.
- *
- * Security: `user.id` is always sourced from the authenticated session
- * on the server — never from arguments — so no parameter, header, or
- * body value can cause another user's account to be deleted.
- *
- * Ordering: screenshots are removed from storage first because
- * `auth.admin.deleteUser` is blocked while the user still owns any
- * storage objects. The auth delete then cascades through the existing
- * `profiles → projects → votes` foreign keys. The user-session is
- * cleared last so the browser reflects signed-out state immediately.
+ * Ordering: screenshots first, then `auth.admin.deleteUser` (blocked
+ * while the user still owns storage objects), then signOut. The auth
+ * delete cascades through `profiles → projects → votes` FKs. `user.id`
+ * is always read from the server session — never from arguments.
  */
 export async function withdrawAccount(): Promise<WithdrawAccountResult> {
-  const supabase = await createClient();
-  const {
-    data: { user },
-    error: userError,
-  } = await supabase.auth.getUser();
-
-  if (userError || !user) {
-    return { ok: false, error: "You must be signed in to withdraw" };
+  const auth = await requireAuth("You must be signed in to withdraw");
+  if (!auth.ok) {
+    return auth;
   }
+  const { supabase, user } = auth;
 
   const { data: projects, error: listError } = await supabase
     .from("projects")
@@ -44,7 +34,7 @@ export async function withdrawAccount(): Promise<WithdrawAccountResult> {
     .filter((path): path is string => Boolean(path));
 
   if (paths.length > 0) {
-    await supabase.storage.from("project-screenshots").remove(paths);
+    await supabase.storage.from(SCREENSHOT_BUCKET).remove(paths);
   }
 
   const admin = createAdminClient();
