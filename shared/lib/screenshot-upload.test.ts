@@ -14,7 +14,8 @@ vi.mock("@shared/lib/image/index.ts", () => ({
   downscaleImage,
 }));
 
-const { uploadScreenshot } = await import("./upload-screenshot");
+const { MAX_SCREENSHOT_BYTES, uploadScreenshot, validateScreenshotFile } =
+  await import("./screenshot-upload");
 
 const MIME_ERROR_REGEX = /JPEG, PNG, or WebP/;
 const USER_SCOPED_WEBP_PATH_REGEX = /^user-1\/.+\.webp$/;
@@ -41,6 +42,48 @@ function installSupabase(options?: { uploadError?: { message: string } }) {
     },
   });
 }
+
+describe("validateScreenshotFile", () => {
+  it.each([
+    ["image/jpeg", "shot.jpg"],
+    ["image/png", "shot.png"],
+    ["image/webp", "shot.webp"],
+  ])("accepts %s", (mime, name) => {
+    const file = new File([new Uint8Array(1024)], name, { type: mime });
+    expect(validateScreenshotFile(file).ok).toBe(true);
+  });
+
+  it("rejects .gif by MIME type", () => {
+    const file = new File([new Uint8Array(1024)], "shot.gif", {
+      type: "image/gif",
+    });
+    const result = validateScreenshotFile(file);
+    expect(result.ok).toBe(false);
+    expect(result.error).toMatch(MIME_ERROR_REGEX);
+  });
+
+  it("rejects files larger than 25 MB", () => {
+    const file = new File(
+      [new Uint8Array(MAX_SCREENSHOT_BYTES + 1)],
+      "big.png",
+      { type: "image/png" }
+    );
+    const result = validateScreenshotFile(file);
+    expect(result.ok).toBe(false);
+    expect(result.error).toBe("File must be 25 MB or smaller");
+  });
+
+  it("accepts a 24 MB JPEG (just under the cap)", () => {
+    const file = new File([new Uint8Array(24 * 1024 * 1024)], "photo.jpg", {
+      type: "image/jpeg",
+    });
+    expect(validateScreenshotFile(file).ok).toBe(true);
+  });
+
+  it("sets MAX_SCREENSHOT_BYTES to 25 MiB", () => {
+    expect(MAX_SCREENSHOT_BYTES).toBe(25 * 1024 * 1024);
+  });
+});
 
 describe("uploadScreenshot", () => {
   beforeEach(() => {
