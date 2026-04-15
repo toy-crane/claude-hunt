@@ -18,6 +18,8 @@ vi.mock("@core/providers/theme-provider.tsx", () => ({
 
 const { metadata } = await import("./layout");
 
+const ENGLISH_TAGLINE = /Discover|cohort|showcase/i;
+
 describe("app/layout metadata", () => {
   it("sets the default title to 'claude-hunt'", () => {
     expect(metadata.title).toEqual(
@@ -35,8 +37,8 @@ describe("app/layout metadata", () => {
     );
   });
 
-  it("has a description present", () => {
-    expect(metadata.description).toBeTruthy();
+  it("uses the Korean tagline as the description", () => {
+    expect(metadata.description).toBe("함께 배우는 사람들의 프로젝트");
   });
 
   it("sets an openGraph title containing 'claude-hunt'", () => {
@@ -45,10 +47,30 @@ describe("app/layout metadata", () => {
     expect(String(og?.title)).toContain("claude-hunt");
   });
 
+  it("sets the openGraph description to the Korean tagline", () => {
+    expect(metadata.openGraph?.description).toBe(
+      "함께 배우는 사람들의 프로젝트"
+    );
+  });
+
   it("sets a twitter title containing 'claude-hunt'", () => {
     const tw = metadata.twitter;
     expect(tw).toBeDefined();
     expect(String(tw?.title)).toContain("claude-hunt");
+  });
+
+  it("sets the twitter description to the Korean tagline", () => {
+    const twitter = metadata.twitter as { description?: string };
+    expect(twitter.description).toBe("함께 배우는 사람들의 프로젝트");
+  });
+
+  it("does not leak English copy in description fields", () => {
+    expect(metadata.description).not.toMatch(ENGLISH_TAGLINE);
+    expect(String(metadata.openGraph?.description)).not.toMatch(
+      ENGLISH_TAGLINE
+    );
+    const twitter = metadata.twitter as { description?: string };
+    expect(twitter.description).not.toMatch(ENGLISH_TAGLINE);
   });
 
   it("uses 'summary_large_image' twitter card so the OG image renders full-bleed", () => {
