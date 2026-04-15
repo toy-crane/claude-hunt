@@ -46,11 +46,15 @@ If the user wants Google/GitHub login, see [supabase-auth.md](./supabase-auth.md
 
 Skip this step if the user does not need OAuth.
 
-### Step 4: Verification
+### Step 4: Pin Vercel Function Region (recommended before first deploy)
+
+See [vercel-region.md](./vercel-region.md). Co-locate the Vercel function region with your Supabase region so SSR/RSC database calls don't pay cross-region latency. One-time edit to `vercel.json`.
+
+### Step 5: Verification
 
 See [verification.md](./verification.md) for build, lint, and database verification.
 
-### Step 5: Summary
+### Step 6: Summary
 
 Display the result:
 
