@@ -6,6 +6,7 @@ import { ThemeProvider } from "@core/providers/theme-provider";
 import { cn } from "@shared/lib/utils";
 import { Toaster } from "@shared/ui/sonner";
 import { Analytics } from "@vercel/analytics/next";
+import { SpeedInsights } from "@vercel/speed-insights/next";
 
 const fontHeading = JetBrains_Mono({
   subsets: ["latin"],
@@ -70,6 +71,7 @@ export default function RootLayout({
           <Toaster />
         </ThemeProvider>
         <Analytics />
+        <SpeedInsights />
       </body>
     </html>
   );
