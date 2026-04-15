@@ -5,9 +5,9 @@ export const size = { width: 1200, height: 630 };
 export const contentType = "image/png";
 
 const TERRACOTTA = "#c15f3c";
-const BG = "#fdf6ee";
-const INK = "#1a1512";
-const MUTED = "#6b5f54";
+const BG = "#ffffff";
+const INK = "#252525";
+const MUTED = "#8c8c8c";
 const MONO_STACK =
   "ui-monospace, SFMono-Regular, Menlo, Consolas, 'Liberation Mono', monospace";
 
