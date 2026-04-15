@@ -48,7 +48,7 @@ describe("ProjectCard", () => {
     expect(screen.getByTestId("vote-count")).toHaveTextContent("5");
   });
 
-  it("renders the screenshot with the supplied URL and title in the alt text", () => {
+  it("renders the screenshot with the supplied URL and Korean alt suffix", () => {
     render(
       <ProjectCard
         project={buildProject({ title: "Paint" })}
@@ -57,7 +57,7 @@ describe("ProjectCard", () => {
       />
     );
 
-    const img = screen.getByLabelText("Paint screenshot");
+    const img = screen.getByLabelText("Paint 스크린샷");
     expect(img.getAttribute("data-src")).toContain("paint.png");
   });
 
@@ -71,7 +71,18 @@ describe("ProjectCard", () => {
       />
     );
 
-    expect(screen.getByLabelText("Top screenshot")).toBeInTheDocument();
+    expect(screen.getByLabelText("Top 스크린샷")).toBeInTheDocument();
+  });
+
+  it("falls back to '익명' when author_display_name is missing", () => {
+    render(
+      <ProjectCard
+        project={buildProject({ author_display_name: null })}
+        rank={10}
+        screenshotUrl="https://cdn.example.com/shot.png"
+      />
+    );
+    expect(screen.getByText("익명")).toBeInTheDocument();
   });
 
   it("shows a rank badge when rank is 1, 2, or 3", () => {

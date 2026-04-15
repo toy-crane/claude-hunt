@@ -35,14 +35,14 @@ export function CohortDropdown({
   return (
     <Select onValueChange={handleChange} value={value ?? ALL_COHORTS}>
       <SelectTrigger
-        aria-label="Filter by cohort"
+        aria-label="기수로 필터"
         className="w-[200px]"
         data-testid="cohort-dropdown"
       >
-        <SelectValue placeholder="All cohorts" />
+        <SelectValue placeholder="모든 기수" />
       </SelectTrigger>
       <SelectContent>
-        <SelectItem value={ALL_COHORTS}>All cohorts</SelectItem>
+        <SelectItem value={ALL_COHORTS}>모든 기수</SelectItem>
         {cohorts.map((cohort) => (
           <SelectItem key={cohort.id} value={cohort.id}>
             {cohort.label}
