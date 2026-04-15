@@ -9,7 +9,7 @@ import {
   SelectValue,
 } from "@shared/ui/select";
 
-const ALL_COHORTS = "__all__";
+export const ALL_COHORTS = "__all__";
 
 export interface CohortDropdownProps {
   cohorts: Cohort[];

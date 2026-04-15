@@ -9,17 +9,12 @@ import type { ProjectGridRow } from "@widgets/project-grid";
 import { ProjectGrid } from "@widgets/project-grid";
 import { useCallback, useMemo, useState } from "react";
 
-export type ProjectBoardRow = ProjectGridRow & {
-  /** Absolute public URL resolved server-side from screenshot_path. */
-  screenshotUrl: string;
-};
-
 export interface ProjectBoardProps {
   cohorts: Cohort[];
   /** Cohort id from the URL on initial server render; null means "All". */
   initialCohortId: string | null;
   isAuthenticated: boolean;
-  projects: ProjectBoardRow[];
+  projects: ProjectGridRow[];
   viewerUserId: string | null;
 }
 

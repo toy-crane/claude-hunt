@@ -162,35 +162,6 @@ describe("home page", () => {
     );
   });
 
-  it("resolves screenshotUrl server-side for each project", async () => {
-    fetchProjectsMock.mockResolvedValueOnce([
-      {
-        id: "p1",
-        title: "A",
-        user_id: "u1",
-        cohort_id: "a1",
-        cohort_name: "LGE-1",
-        tagline: "t",
-        project_url: "https://example.com",
-        screenshot_path: "u1/p1.png",
-        created_at: "2026-04-14T00:00:00Z",
-        updated_at: "2026-04-14T00:00:00Z",
-        vote_count: 0,
-        author_display_name: "A",
-        author_avatar_url: null,
-        viewer_has_voted: false,
-      },
-    ] as ProjectGridRow[]);
-
-    await renderPage();
-
-    const call = boardMock.mock.calls[0][0];
-    expect(call.projects[0]).toMatchObject({
-      id: "p1",
-      screenshotUrl: "https://cdn.example.com/u1/p1.png",
-    });
-  });
-
   it("renders the SubmitDialog trigger for signed-out visitors", async () => {
     profileSingle.mockResolvedValue({ data: null, error: null });
 

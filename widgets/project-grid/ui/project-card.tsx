@@ -89,13 +89,13 @@ export function ProjectCard({
         </p>
         {renderVoteButton || (isOwner && renderOwnerActions) ? (
           <div
-            className="mt-2 flex flex-wrap items-center justify-between gap-2"
+            className="mt-2 flex flex-wrap items-center gap-2"
             data-testid="project-card-actions"
           >
-            {renderVoteButton ? renderVoteButton(project) : <span />}
+            {renderVoteButton ? renderVoteButton(project) : null}
             {isOwner && renderOwnerActions ? (
               <div
-                className="flex items-center gap-2"
+                className="ml-auto flex items-center gap-2"
                 data-testid="project-card-owner-actions"
               >
                 {renderOwnerActions(project)}
