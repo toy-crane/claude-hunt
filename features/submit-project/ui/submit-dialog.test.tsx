@@ -2,7 +2,7 @@ import { render, screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
-const TRIGGER_LABEL = /submit a project/i;
+const TRIGGER_LABEL = /프로젝트 제출/;
 const DISCARD_LABEL = /discard/i;
 
 const toastSuccess = vi.fn();
@@ -82,7 +82,7 @@ describe("SubmitDialog", () => {
 
       expect(screen.queryByRole("dialog")).not.toBeInTheDocument();
       expect(toastSuccess).toHaveBeenCalledTimes(1);
-      expect(toastSuccess).toHaveBeenCalledWith("Project submitted");
+      expect(toastSuccess).toHaveBeenCalledWith("프로젝트가 제출되었어요.");
     });
 
     it("closes the dialog silently when Escape is pressed, without a confirmation prompt", async () => {

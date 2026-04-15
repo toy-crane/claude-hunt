@@ -65,7 +65,7 @@ export function SubmitForm({
     const screenshot = fileEl?.files?.[0];
 
     if (!screenshot || screenshot.size === 0) {
-      setFieldError("Screenshot is required");
+      setFieldError("스크린샷을 첨부해 주세요.");
       return;
     }
 
@@ -73,7 +73,7 @@ export function SubmitForm({
     try {
       const upload = await uploadScreenshot(screenshot);
       if (upload.error || !upload.path) {
-        setFieldError(upload.error ?? "Upload failed");
+        setFieldError(upload.error ?? "업로드에 실패했어요.");
         return;
       }
 
@@ -84,7 +84,7 @@ export function SubmitForm({
         screenshotPath: upload.path,
       });
       if (!result.ok) {
-        setSubmitError(result.error ?? "Could not submit project");
+        setSubmitError(result.error ?? "프로젝트를 제출할 수 없어요.");
         return;
       }
       form.reset();
@@ -96,38 +96,38 @@ export function SubmitForm({
 
   return (
     <form
-      aria-label="Submit a project"
+      aria-label="프로젝트 제출"
       className="flex flex-col gap-4"
       onSubmit={handleSubmit}
     >
       <FieldGroup>
         <Field>
-          <FieldLabel htmlFor={titleId}>Title</FieldLabel>
+          <FieldLabel htmlFor={titleId}>제목</FieldLabel>
           <Input
             disabled={submitting}
             id={titleId}
             maxLength={MAX_TITLE_LENGTH}
             name="title"
-            placeholder="My App"
+            placeholder="내 앱"
             required
           />
         </Field>
 
         <Field>
-          <FieldLabel htmlFor={taglineId}>Tagline</FieldLabel>
+          <FieldLabel htmlFor={taglineId}>태그라인</FieldLabel>
           <Textarea
             disabled={submitting}
             id={taglineId}
             maxLength={MAX_TAGLINE_LENGTH}
             name="tagline"
-            placeholder="A cool tool"
+            placeholder="멋진 도구 한 줄 소개"
             required
             rows={2}
           />
         </Field>
 
         <Field>
-          <FieldLabel htmlFor={urlId}>Project URL</FieldLabel>
+          <FieldLabel htmlFor={urlId}>프로젝트 URL</FieldLabel>
           <Input
             disabled={submitting}
             id={urlId}
@@ -139,7 +139,7 @@ export function SubmitForm({
         </Field>
 
         <Field>
-          <FieldLabel htmlFor={screenshotId}>Screenshot</FieldLabel>
+          <FieldLabel htmlFor={screenshotId}>스크린샷</FieldLabel>
           <Input
             accept="image/jpeg,image/png,image/webp"
             disabled={submitting}
@@ -148,7 +148,7 @@ export function SubmitForm({
             required
             type="file"
           />
-          <FieldDescription>JPEG, PNG, or WebP up to 25 MB.</FieldDescription>
+          <FieldDescription>JPEG, PNG, WebP — 최대 25 MB.</FieldDescription>
         </Field>
       </FieldGroup>
 
@@ -173,7 +173,7 @@ export function SubmitForm({
 
       <Button disabled={submitting} type="submit">
         {submitting ? <Spinner data-icon="inline-start" /> : null}
-        {submitting ? "Submitting..." : "Submit project"}
+        {submitting ? "제출 중..." : "프로젝트 제출"}
       </Button>
     </form>
   );
