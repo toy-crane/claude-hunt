@@ -176,7 +176,7 @@ export function EditDialog({ project }: EditDialogProps) {
             </Button>
             <Button disabled={submitting} type="submit">
               {submitting ? <Spinner data-icon="inline-start" /> : null}
-              {submitting ? "저장 중..." : "변경 사항 저장"}
+              {submitting ? "저장 중..." : "저장"}
             </Button>
           </DialogFooter>
         </form>
