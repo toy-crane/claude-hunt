@@ -1,6 +1,6 @@
 "use server";
 
-import { createClient } from "@shared/api/supabase/server";
+import { requireAuth } from "@shared/api/supabase/require-auth";
 import { revalidatePath } from "next/cache";
 
 export interface ToggleVoteResult {
@@ -10,24 +10,19 @@ export interface ToggleVoteResult {
 }
 
 /**
- * Toggles the signed-in viewer's vote on a project. If no vote exists,
- * insert; if one exists, delete. RLS gates both writes; the self-vote
- * trigger on insert blocks owner self-votes at the DB as defence-in-
- * depth against any UI bypass.
+ * RLS gates both writes; the self-vote trigger on insert blocks owner
+ * self-votes at the DB as defence-in-depth against any UI bypass.
  */
 export async function toggleVote(projectId: string): Promise<ToggleVoteResult> {
   if (!projectId || typeof projectId !== "string") {
     return { ok: false, error: "Invalid project id" };
   }
 
-  const supabase = await createClient();
-  const {
-    data: { user },
-    error: userError,
-  } = await supabase.auth.getUser();
-  if (userError || !user) {
-    return { ok: false, error: "You must be signed in to vote" };
+  const auth = await requireAuth("You must be signed in to vote");
+  if (!auth.ok) {
+    return auth;
   }
+  const { supabase, user } = auth;
 
   const { data: existing, error: selectError } = await supabase
     .from("votes")

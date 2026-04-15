@@ -1,6 +1,8 @@
 "use server";
 
-import { createClient } from "@shared/api/supabase/server";
+import { requireAuth } from "@shared/api/supabase/require-auth";
+import { SCREENSHOT_BUCKET } from "@shared/config/storage";
+import { getZodErrorMessage } from "@shared/lib/validation";
 import { revalidatePath } from "next/cache";
 import { type EditProjectInput, editProjectInputSchema } from "./schema";
 
@@ -9,41 +11,29 @@ export interface EditProjectResult {
   ok: boolean;
 }
 
-const SCREENSHOT_BUCKET = "project-screenshots";
-
 /**
- * Updates text fields (and optionally the screenshot_path) on a project
- * the signed-in user owns. RLS enforces ownership, so spoofed project
- * ids return 0 rows and we surface a "not found or forbidden" error.
- *
- * When the caller supplies a new screenshot path that differs from the
- * existing one, the previous stored image is removed after the row
- * update succeeds. Removal is best-effort: storage errors do not fail
- * the user-visible save.
+ * RLS authorizes the UPDATE (ownership), so spoofed ids return 0 rows.
+ * Previous screenshot cleanup is best-effort: storage errors must not
+ * fail the user-visible save (spec invariant).
  */
 export async function editProject(
   raw: EditProjectInput
 ): Promise<EditProjectResult> {
   const parsed = editProjectInputSchema.safeParse(raw);
   if (!parsed.success) {
-    const first = parsed.error.issues.at(0);
-    return { ok: false, error: first?.message ?? "Invalid input" };
+    return {
+      ok: false,
+      error: getZodErrorMessage(parsed.error, "Invalid input"),
+    };
   }
   const input = parsed.data;
 
-  const supabase = await createClient();
-  const {
-    data: { user },
-    error: userError,
-  } = await supabase.auth.getUser();
-  if (userError || !user) {
-    return { ok: false, error: "You must be signed in to edit a project" };
+  const auth = await requireAuth("You must be signed in to edit a project");
+  if (!auth.ok) {
+    return auth;
   }
+  const { supabase } = auth;
 
-  // When the user uploaded a new screenshot, read the existing path so we
-  // can clean it up after the row update succeeds. Owner-only SELECT
-  // isn't required (row is publicly readable); RLS on the UPDATE below
-  // is what authorizes the change.
   let previousScreenshotPath: string | null = null;
   if (input.screenshotPath) {
     const { data: current } = await supabase
@@ -79,9 +69,6 @@ export async function editProject(
     };
   }
 
-  // Best-effort cleanup of the superseded screenshot. Storage errors are
-  // intentionally ignored so transient bucket issues don't fail the save
-  // (spec invariant: non-blocking cleanup).
   if (
     input.screenshotPath &&
     previousScreenshotPath &&
