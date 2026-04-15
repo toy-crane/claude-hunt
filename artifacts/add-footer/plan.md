@@ -46,7 +46,7 @@ None — static content only.
 
 ## Tasks
 
-### Task 1: Build the Footer widget
+### Task 1: Build the Footer widget ✅
 
 - **Covers**: Scenarios 2, 3, 4 (full); Scenario 1 (partial — rendering content only; presence on `/` and absence on other routes is verified in Task 2). Invariant (full).
 - **Size**: S (3 files)
