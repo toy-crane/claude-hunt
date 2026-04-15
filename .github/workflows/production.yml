@@ -3,6 +3,10 @@ name: Production Deploy
 on:
   push:
     branches: [main]
+    paths-ignore:
+      - '.claude/**'
+      - 'artifacts/**'
+      - '**/*.md'
 
 concurrency:
   group: production-deploy
