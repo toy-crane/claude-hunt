@@ -176,6 +176,12 @@ describe("ProjectBoard", () => {
     expect(screen.getByText("Beta One")).toBeInTheDocument();
   });
 
+  it("shows the Korean filter helper text instead of 'Filter by cohort'", async () => {
+    await renderBoard();
+    expect(screen.getByText("기수로 필터")).toBeInTheDocument();
+    expect(screen.queryByText("Filter by cohort")).not.toBeInTheDocument();
+  });
+
   it("shows only the selected cohort's projects on initial render", async () => {
     await renderBoard({ initialCohortId: "cohort-a" });
     expect(screen.getByText("Alpha One")).toBeInTheDocument();
