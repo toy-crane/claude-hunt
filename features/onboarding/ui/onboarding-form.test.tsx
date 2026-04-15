@@ -61,7 +61,7 @@ async function pickCohort(name: string) {
 }
 
 function typeDisplayName(value: string) {
-  const input = screen.getByLabelText("Display name") as HTMLInputElement;
+  const input = screen.getByLabelText("표시명") as HTMLInputElement;
   // Use fireEvent.change so React's synthetic event onChange runs — works
   // with whitespace and with strings longer than maxLength.
   fireEvent.change(input, { target: { value } });
@@ -82,7 +82,7 @@ describe("OnboardingForm", () => {
   it("renders display name input, cohort selector, continue, and sign out", () => {
     render(<OnboardingForm cohorts={cohorts} initialNext="/" />);
 
-    expect(screen.getByLabelText("Display name")).toBeInTheDocument();
+    expect(screen.getByLabelText("표시명")).toBeInTheDocument();
     expect(screen.getByTestId("onboarding-cohort-trigger")).toBeInTheDocument();
     expect(screen.getByTestId("onboarding-submit")).toBeEnabled();
     expect(screen.getByTestId("onboarding-sign-out")).toBeEnabled();
@@ -93,7 +93,7 @@ describe("OnboardingForm", () => {
       <OnboardingForm cohorts={cohorts} initialNext="/" />
     );
     expect(
-      screen.getByRole("link", { name: "claude-hunt home" })
+      screen.getByRole("link", { name: "claude-hunt 홈" })
     ).toBeInTheDocument();
     expect(container.textContent).not.toContain("Claude Hunt");
   });
@@ -104,14 +104,14 @@ describe("OnboardingForm", () => {
     );
     const headings = container.querySelectorAll("h1");
     expect(headings).toHaveLength(1);
-    expect(headings[0].textContent).toBe("Set up your profile");
+    expect(headings[0].textContent).toBe("프로필 설정");
   });
 
   it("renders the subtitle describing the onboarding task", () => {
     render(<OnboardingForm cohorts={cohorts} initialNext="/" />);
     expect(
       screen.getByText(
-        "Pick a cohort and set your display name to start submitting projects."
+        "기수를 선택하고 표시명을 설정하면 프로젝트를 제출할 수 있어요."
       )
     ).toBeInTheDocument();
   });
@@ -125,7 +125,7 @@ describe("OnboardingForm", () => {
 
   it("has exactly one claude-hunt Logo (single source of header truth)", () => {
     render(<OnboardingForm cohorts={cohorts} initialNext="/" />);
-    const logos = screen.getAllByRole("link", { name: "claude-hunt home" });
+    const logos = screen.getAllByRole("link", { name: "claude-hunt 홈" });
     expect(logos).toHaveLength(1);
   });
 
@@ -157,7 +157,7 @@ describe("OnboardingForm", () => {
 
     expect(
       await screen.findByTestId("onboarding-display-name-error")
-    ).toHaveTextContent("Display name is required");
+    ).toHaveTextContent("표시명을 입력해 주세요.");
     expect(completeOnboardingMock).not.toHaveBeenCalled();
   });
 
@@ -169,7 +169,7 @@ describe("OnboardingForm", () => {
 
     expect(
       await screen.findByTestId("onboarding-display-name-error")
-    ).toHaveTextContent("Display name is required");
+    ).toHaveTextContent("표시명을 입력해 주세요.");
     expect(completeOnboardingMock).not.toHaveBeenCalled();
   });
 
@@ -181,7 +181,7 @@ describe("OnboardingForm", () => {
 
     expect(
       await screen.findByTestId("onboarding-display-name-error")
-    ).toHaveTextContent("50 characters or fewer");
+    ).toHaveTextContent("50자 이하");
     expect(completeOnboardingMock).not.toHaveBeenCalled();
   });
 
@@ -193,7 +193,7 @@ describe("OnboardingForm", () => {
 
     expect(
       await screen.findByTestId("onboarding-cohort-error")
-    ).toHaveTextContent("Please select a cohort");
+    ).toHaveTextContent("기수를 선택해 주세요.");
     expect(completeOnboardingMock).not.toHaveBeenCalled();
   });
 
@@ -241,7 +241,7 @@ describe("OnboardingForm", () => {
       screen.queryByTestId("onboarding-cohort-trigger")
     ).not.toBeInTheDocument();
     expect(screen.getByTestId("onboarding-submit")).toBeDisabled();
-    expect(screen.getByLabelText("Display name")).toBeInTheDocument();
+    expect(screen.getByLabelText("표시명")).toBeInTheDocument();
     expect(screen.getByTestId("onboarding-sign-out")).toBeEnabled();
   });
 

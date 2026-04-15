@@ -74,7 +74,7 @@ describe("completeOnboarding server action", () => {
     });
 
     expect(result.ok).toBe(false);
-    expect(result.error).toBe("Display name is required");
+    expect(result.error).toBe("표시명을 입력해 주세요.");
     expect(getUser).not.toHaveBeenCalled();
   });
 
@@ -85,7 +85,7 @@ describe("completeOnboarding server action", () => {
     });
 
     expect(result.ok).toBe(false);
-    expect(result.error).toBe("Display name is required");
+    expect(result.error).toBe("표시명을 입력해 주세요.");
   });
 
   it("rejects display name longer than 50 characters", async () => {
@@ -95,7 +95,7 @@ describe("completeOnboarding server action", () => {
     });
 
     expect(result.ok).toBe(false);
-    expect(result.error).toBe("Display name must be 50 characters or fewer");
+    expect(result.error).toBe("표시명은 50자 이하로 입력해 주세요.");
   });
 
   it("rejects a missing/invalid cohort id", async () => {
@@ -105,7 +105,7 @@ describe("completeOnboarding server action", () => {
     });
 
     expect(result.ok).toBe(false);
-    expect(result.error).toBe("Please select a cohort");
+    expect(result.error).toBe("기수를 선택해 주세요.");
   });
 
   it("upserts the caller's own profile with trimmed display name and cohort id", async () => {

@@ -51,18 +51,18 @@ export function OnboardingForm({ cohorts, initialNext }: OnboardingFormProps) {
     let ok = true;
     const trimmed = displayName.trim();
     if (trimmed.length === 0) {
-      setDisplayNameError("Display name is required");
+      setDisplayNameError("표시명을 입력해 주세요.");
       ok = false;
     } else if (trimmed.length > MAX_DISPLAY_NAME_LENGTH) {
       setDisplayNameError(
-        `Display name must be ${MAX_DISPLAY_NAME_LENGTH} characters or fewer`
+        `표시명은 ${MAX_DISPLAY_NAME_LENGTH}자 이하로 입력해 주세요.`
       );
       ok = false;
     } else {
       setDisplayNameError(null);
     }
     if (selectedCohortId === COHORT_UNSELECTED) {
-      setCohortError("Please select a cohort");
+      setCohortError("기수를 선택해 주세요.");
       ok = false;
     } else {
       setCohortError(null);
@@ -86,7 +86,7 @@ export function OnboardingForm({ cohorts, initialNext }: OnboardingFormProps) {
         cohortId: selectedCohortId,
       });
       if (!result.ok) {
-        setSubmitError(result.error ?? "Could not complete onboarding");
+        setSubmitError(result.error ?? "온보딩을 완료할 수 없어요.");
         return;
       }
       router.replace(initialNext);
@@ -108,29 +108,28 @@ export function OnboardingForm({ cohorts, initialNext }: OnboardingFormProps) {
 
   return (
     <AuthLayout
-      description="Pick a cohort and set your display name to start submitting projects."
-      title="Set up your profile"
+      description="기수를 선택하고 표시명을 설정하면 프로젝트를 제출할 수 있어요."
+      title="프로필 설정"
     >
       <form
-        aria-label="Complete onboarding"
+        aria-label="온보딩 완료"
         className="flex flex-col gap-6"
         onSubmit={handleSubmit}
       >
         <FieldGroup>
           <Field>
-            <FieldLabel htmlFor={displayNameId}>Display name</FieldLabel>
+            <FieldLabel htmlFor={displayNameId}>표시명</FieldLabel>
             <Input
               aria-invalid={displayNameError !== null}
               disabled={isPending || isSigningOut}
               id={displayNameId}
               name="displayName"
               onChange={(event) => setDisplayName(event.target.value)}
-              placeholder="Type your display name"
+              placeholder="표시명을 입력하세요"
               value={displayName}
             />
             <FieldDescription>
-              Shown on your project cards. 1–{MAX_DISPLAY_NAME_LENGTH}{" "}
-              characters.
+              프로젝트 카드에 표시돼요. 1~{MAX_DISPLAY_NAME_LENGTH}자.
             </FieldDescription>
             {displayNameError ? (
               <p
@@ -145,14 +144,14 @@ export function OnboardingForm({ cohorts, initialNext }: OnboardingFormProps) {
 
           {noCohorts ? (
             <Alert data-testid="onboarding-no-cohorts">
-              <AlertTitle>No cohorts are available yet.</AlertTitle>
+              <AlertTitle>기수가 아직 없어요.</AlertTitle>
               <AlertDescription>
-                Please contact your instructor to get assigned to a cohort.
+                강사에게 기수 배정을 요청해 주세요.
               </AlertDescription>
             </Alert>
           ) : (
             <Field>
-              <FieldLabel htmlFor={cohortId}>Cohort</FieldLabel>
+              <FieldLabel htmlFor={cohortId}>기수</FieldLabel>
               <Select
                 disabled={isPending || isSigningOut}
                 onValueChange={setSelectedCohortId}
@@ -164,7 +163,7 @@ export function OnboardingForm({ cohorts, initialNext }: OnboardingFormProps) {
                   data-testid="onboarding-cohort-trigger"
                   id={cohortId}
                 >
-                  <SelectValue placeholder="Select a cohort" />
+                  <SelectValue placeholder="기수를 선택하세요" />
                 </SelectTrigger>
                 <SelectContent>
                   {cohorts.map((cohort) => (
@@ -203,12 +202,12 @@ export function OnboardingForm({ cohorts, initialNext }: OnboardingFormProps) {
           type="submit"
         >
           {isPending ? <Spinner data-icon="inline-start" /> : null}
-          {isPending ? "Saving..." : "Continue"}
+          {isPending ? "저장 중..." : "계속하기"}
         </Button>
 
         <div className="grid grid-cols-[1fr_auto_1fr] items-center gap-3">
           <Separator />
-          <span className="text-muted-foreground text-xs">or</span>
+          <span className="text-muted-foreground text-xs">또는</span>
           <Separator />
         </div>
 
@@ -219,7 +218,7 @@ export function OnboardingForm({ cohorts, initialNext }: OnboardingFormProps) {
           type="button"
           variant="outline"
         >
-          Sign out
+          로그아웃
         </Button>
       </form>
     </AuthLayout>
