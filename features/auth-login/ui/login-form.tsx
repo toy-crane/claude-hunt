@@ -61,8 +61,8 @@ export function LoginForm() {
 
   return (
     <AuthLayout
-      description="Sign in to your account to continue"
-      title="Welcome back"
+      description="계정에 로그인하고 계속하세요"
+      title="다시 만나서 반가워요"
     >
       <form onSubmit={handleEmailLogin}>
         <div className="grid grid-cols-2 gap-3">
@@ -89,7 +89,7 @@ export function LoginForm() {
         <div className="my-6 grid grid-cols-[1fr_auto_1fr] items-center gap-3">
           <hr className="border-dashed" />
           <span className="text-muted-foreground text-xs">
-            Or continue with
+            또는 이메일로 계속하기
           </span>
           <hr className="border-dashed" />
         </div>
@@ -97,8 +97,8 @@ export function LoginForm() {
         {otpSent ? (
           <div className="space-y-4 text-center">
             <p className="text-sm">
-              We sent a magic link to <strong>{email}</strong>. Check your email
-              to sign in.
+              <strong>{email}</strong> 으로 매직 링크를 보냈어요. 이메일을
+              확인하고 로그인해 주세요.
             </p>
             <Button
               onClick={() => {
@@ -108,14 +108,14 @@ export function LoginForm() {
               type="button"
               variant="link"
             >
-              Try another email
+              다른 이메일로 시도
             </Button>
           </div>
         ) : (
           <div className="space-y-4">
             <div className="space-y-2">
               <Label className="block text-sm" htmlFor="email">
-                Email
+                이메일
               </Label>
               <Input
                 disabled={loading !== null}
@@ -129,21 +129,21 @@ export function LoginForm() {
               />
             </div>
             <Button className="w-full" disabled={loading !== null}>
-              {loading === "email" ? "Sending..." : "Continue"}
+              {loading === "email" ? "보내는 중..." : "계속하기"}
             </Button>
           </div>
         )}
 
         <p className="mt-6 text-center text-muted-foreground text-xs">
-          By continuing, you agree to our{" "}
+          계속 진행하면{" "}
           <Link className="underline hover:text-foreground" href="/terms">
-            Terms of Service
+            서비스 이용약관
           </Link>{" "}
-          and{" "}
+          과{" "}
           <Link className="underline hover:text-foreground" href="/privacy">
-            Privacy Policy
+            개인정보 처리방침
           </Link>
-          .
+          에 동의하는 것으로 간주됩니다.
         </p>
       </form>
     </AuthLayout>
