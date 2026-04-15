@@ -31,7 +31,7 @@ vi.mock("next/navigation", () => ({
 
 const GITHUB_RE = /GitHub/i;
 const GOOGLE_RE = /Google/i;
-const SENDING_RE = /Sending/i;
+const SENDING_RE = /보내는 중/;
 const CALLBACK_PATH_RE = /\/auth\/callback$/;
 
 function neverResolve() {
@@ -55,7 +55,7 @@ describe("login", () => {
 
   it("exposes the logo as a link to / with aria-label 'claude-hunt home'", () => {
     render(<LoginForm />);
-    const link = screen.getByRole("link", { name: "claude-hunt home" });
+    const link = screen.getByRole("link", { name: "claude-hunt 홈" });
     expect(link).toHaveAttribute("href", "/");
   });
 
@@ -66,17 +66,17 @@ describe("login", () => {
     expect(cursor.style.animationDuration).toBe("1s");
   });
 
-  it("renders exactly one h1 with 'Welcome back' as the page heading", () => {
+  it("renders exactly one h1 with the Korean heading", () => {
     const { container } = render(<LoginForm />);
     const headings = container.querySelectorAll("h1");
     expect(headings).toHaveLength(1);
-    expect(headings[0].textContent).toBe("Welcome back");
+    expect(headings[0].textContent).toBe("다시 만나서 반가워요");
   });
 
-  it("renders the subtitle 'Sign in to your account to continue' after the h1", () => {
+  it("renders the Korean subtitle after the h1", () => {
     const { container } = render(<LoginForm />);
     const heading = screen.getByRole("heading", { level: 1 });
-    const subtitle = screen.getByText("Sign in to your account to continue");
+    const subtitle = screen.getByText("계정에 로그인하고 계속하세요");
     const all = Array.from(container.querySelectorAll("*"));
     expect(all.indexOf(subtitle)).toBeGreaterThan(all.indexOf(heading));
   });
@@ -102,7 +102,7 @@ describe("login", () => {
 
   it("has exactly one claude-hunt Logo on /login (single source of header truth)", () => {
     render(<LoginForm />);
-    const logos = screen.getAllByRole("link", { name: "claude-hunt home" });
+    const logos = screen.getAllByRole("link", { name: "claude-hunt 홈" });
     expect(logos).toHaveLength(1);
   });
 
@@ -110,15 +110,13 @@ describe("login", () => {
     const user = userEvent.setup();
     render(<LoginForm />);
 
-    const emailInput = screen.getByLabelText("Email");
+    const emailInput = screen.getByLabelText("이메일");
     await user.type(emailInput, "test@example.com");
-    await user.click(screen.getByRole("button", { name: "Continue" }));
+    await user.click(screen.getByRole("button", { name: "계속하기" }));
 
     await waitFor(() => {
       expect(
-        screen.getByText((content) =>
-          content.includes("We sent a magic link to")
-        )
+        screen.getByText((content) => content.includes("매직 링크를 보냈어요"))
       ).toBeInTheDocument();
     });
 
@@ -132,28 +130,28 @@ describe("login", () => {
     render(<LoginForm />);
 
     // Get to OTP sent state
-    const emailInput = screen.getByLabelText("Email");
+    const emailInput = screen.getByLabelText("이메일");
     await user.type(emailInput, "test@example.com");
-    await user.click(screen.getByRole("button", { name: "Continue" }));
+    await user.click(screen.getByRole("button", { name: "계속하기" }));
 
     await waitFor(() => {
       expect(
-        screen.getByRole("button", { name: "Try another email" })
+        screen.getByRole("button", { name: "다른 이메일로 시도" })
       ).toBeInTheDocument();
     });
 
     // Click "Try another email"
-    await user.click(screen.getByRole("button", { name: "Try another email" }));
+    await user.click(
+      screen.getByRole("button", { name: "다른 이메일로 시도" })
+    );
 
     // Email input reappears with empty value
-    const newEmailInput = screen.getByLabelText("Email");
+    const newEmailInput = screen.getByLabelText("이메일");
     expect(newEmailInput).toHaveValue("");
 
     // OTP message gone
     expect(
-      screen.queryByText((content) =>
-        content.includes("We sent a magic link to")
-      )
+      screen.queryByText((content) => content.includes("매직 링크를 보냈어요"))
     ).not.toBeInTheDocument();
   });
 
@@ -163,14 +161,14 @@ describe("login", () => {
     const user = userEvent.setup();
     render(<LoginForm />);
 
-    const emailInput = screen.getByLabelText("Email");
+    const emailInput = screen.getByLabelText("이메일");
     await user.type(emailInput, "test@example.com");
-    await user.click(screen.getByRole("button", { name: "Continue" }));
+    await user.click(screen.getByRole("button", { name: "계속하기" }));
 
     await waitFor(() => {
       expect(screen.getByRole("button", { name: GITHUB_RE })).toBeDisabled();
       expect(screen.getByRole("button", { name: GOOGLE_RE })).toBeDisabled();
-      expect(screen.getByLabelText("Email")).toBeDisabled();
+      expect(screen.getByLabelText("이메일")).toBeDisabled();
       expect(screen.getByRole("button", { name: SENDING_RE })).toBeDisabled();
     });
   });
@@ -181,13 +179,13 @@ describe("login", () => {
     const user = userEvent.setup();
     render(<LoginForm />);
 
-    const emailInput = screen.getByLabelText("Email");
+    const emailInput = screen.getByLabelText("이메일");
     await user.type(emailInput, "test@example.com");
-    await user.click(screen.getByRole("button", { name: "Continue" }));
+    await user.click(screen.getByRole("button", { name: "계속하기" }));
 
     await waitFor(() => {
       expect(
-        screen.getByRole("button", { name: "Sending..." })
+        screen.getByRole("button", { name: "보내는 중..." })
       ).toBeInTheDocument();
     });
   });
@@ -234,22 +232,20 @@ describe("login", () => {
     const user = userEvent.setup();
     render(<LoginForm />);
 
-    const emailInput = screen.getByLabelText("Email");
+    const emailInput = screen.getByLabelText("이메일");
     await user.type(emailInput, "test@example.com");
-    await user.click(screen.getByRole("button", { name: "Continue" }));
+    await user.click(screen.getByRole("button", { name: "계속하기" }));
 
     // OTP confirmation screen does NOT appear
     await waitFor(() => {
       expect(
-        screen.getByRole("button", { name: "Continue" })
+        screen.getByRole("button", { name: "계속하기" })
       ).not.toBeDisabled();
     });
     expect(
-      screen.queryByText((content) =>
-        content.includes("We sent a magic link to")
-      )
+      screen.queryByText((content) => content.includes("매직 링크를 보냈어요"))
     ).not.toBeInTheDocument();
-    expect(screen.getByLabelText("Email")).not.toBeDisabled();
+    expect(screen.getByLabelText("이메일")).not.toBeDisabled();
     expect(screen.getByRole("button", { name: GITHUB_RE })).not.toBeDisabled();
     expect(screen.getByRole("button", { name: GOOGLE_RE })).not.toBeDisabled();
   });
