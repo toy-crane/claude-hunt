@@ -27,7 +27,7 @@ Add a site footer to the home page (`/`) so visitors can find the copyright noti
 
 Success Criteria:
 - [ ] Footer is visible at the bottom of `/` after the project board section
-- [ ] Copyright text reads `© 2026 claude-hunt` (year matches the current calendar year at render time)
+- [ ] Copyright text reads `© 2026 claude-hunt`
 - [ ] Footer is rendered identically for signed-in and signed-out visitors
 - [ ] Footer scrolls with the page (it does not stay fixed at the viewport bottom)
 - [ ] Footer is not rendered on `/login`, `/onboarding`, or `/settings`
@@ -64,7 +64,6 @@ Success Criteria:
 
 ## Invariants
 - Every external link in the footer opens in a new tab and uses safe rel attributes appropriate for cross-origin links (no opener leakage to the destination).
-- The copyright year always reflects the current calendar year at render time — it does not display a stale hard-coded year after the year rolls over.
 
 ## Dependencies
 - The home page (`/`) layout into which the footer will be appended.
