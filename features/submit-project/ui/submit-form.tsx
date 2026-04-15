@@ -1,5 +1,7 @@
 "use client";
 
+import { MAX_TAGLINE_LENGTH, MAX_TITLE_LENGTH } from "@entities/project";
+import { uploadScreenshot } from "@shared/lib/screenshot-upload";
 import { Button } from "@shared/ui/button";
 import {
   Field,
@@ -12,8 +14,6 @@ import { Spinner } from "@shared/ui/spinner";
 import { Textarea } from "@shared/ui/textarea";
 import { useId, useState } from "react";
 import { submitProject } from "../api/actions";
-import { MAX_TAGLINE_LENGTH, MAX_TITLE_LENGTH } from "../api/schema";
-import { uploadScreenshot } from "../lib/upload-screenshot";
 
 export interface SubmitFormProps {
   /**

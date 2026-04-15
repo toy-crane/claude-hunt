@@ -1,11 +1,11 @@
 "use client";
 
-import type { Project } from "@entities/project";
 import {
   MAX_TAGLINE_LENGTH,
   MAX_TITLE_LENGTH,
-  uploadScreenshot,
-} from "@features/submit-project";
+  type Project,
+} from "@entities/project";
+import { uploadScreenshot } from "@shared/lib/screenshot-upload";
 import { Button } from "@shared/ui/button";
 import {
   Dialog,

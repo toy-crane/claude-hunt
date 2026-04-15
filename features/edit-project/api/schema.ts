@@ -1,10 +1,5 @@
+import { MAX_TAGLINE_LENGTH, MAX_TITLE_LENGTH } from "@entities/project";
 import { z } from "zod";
-
-// Duplicated from submit-project to keep slice boundaries clean. Values
-// must stay in lock-step with the DB CHECK constraints on
-// public.projects (see supabase/schemas/projects.sql).
-const MAX_TITLE_LENGTH = 80;
-const MAX_TAGLINE_LENGTH = 140;
 
 /**
  * Edit mirrors submit validation for text fields. Screenshot path is

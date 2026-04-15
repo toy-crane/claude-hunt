@@ -5,7 +5,7 @@ import { beforeEach, describe, expect, it, vi } from "vitest";
 const uploadScreenshot = vi.fn();
 const submitProject = vi.fn();
 
-vi.mock("../lib/upload-screenshot.ts", () => ({
+vi.mock("@shared/lib/screenshot-upload", () => ({
   uploadScreenshot,
 }));
 vi.mock("../api/actions.ts", () => ({
