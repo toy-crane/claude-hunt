@@ -21,7 +21,7 @@ function makePng(name = "shot.png", size = 1024) {
 async function fillAndSubmit() {
   const user = userEvent.setup();
   const title = screen.getByLabelText("제목") as HTMLInputElement;
-  const tagline = screen.getByLabelText("태그라인") as HTMLTextAreaElement;
+  const tagline = screen.getByLabelText("한 줄 소개") as HTMLTextAreaElement;
   const url = screen.getByLabelText("프로젝트 URL") as HTMLInputElement;
   const file = screen.getByLabelText("스크린샷") as HTMLInputElement;
   fireEvent.change(title, { target: { value: "My App" } });
@@ -191,7 +191,7 @@ describe("SubmitForm", () => {
       "My App"
     );
     expect(
-      (screen.getByLabelText("태그라인") as HTMLTextAreaElement).value
+      (screen.getByLabelText("한 줄 소개") as HTMLTextAreaElement).value
     ).toBe("A cool tool");
     expect(
       (screen.getByLabelText("프로젝트 URL") as HTMLInputElement).value
