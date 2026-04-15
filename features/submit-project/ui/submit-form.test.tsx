@@ -20,10 +20,10 @@ function makePng(name = "shot.png", size = 1024) {
 
 async function fillAndSubmit() {
   const user = userEvent.setup();
-  const title = screen.getByLabelText("Title") as HTMLInputElement;
-  const tagline = screen.getByLabelText("Tagline") as HTMLTextAreaElement;
-  const url = screen.getByLabelText("Project URL") as HTMLInputElement;
-  const file = screen.getByLabelText("Screenshot") as HTMLInputElement;
+  const title = screen.getByLabelText("제목") as HTMLInputElement;
+  const tagline = screen.getByLabelText("태그라인") as HTMLTextAreaElement;
+  const url = screen.getByLabelText("프로젝트 URL") as HTMLInputElement;
+  const file = screen.getByLabelText("스크린샷") as HTMLInputElement;
   fireEvent.change(title, { target: { value: "My App" } });
   fireEvent.change(tagline, { target: { value: "A cool tool" } });
   fireEvent.change(url, { target: { value: "https://myapp.com" } });
@@ -45,9 +45,7 @@ describe("SubmitForm", () => {
     expect(
       screen.queryByTestId("submit-form-cohort-warning")
     ).not.toBeInTheDocument();
-    expect(
-      screen.getByRole("button", { name: "Submit project" })
-    ).toBeEnabled();
+    expect(screen.getByRole("button", { name: "프로젝트 제출" })).toBeEnabled();
   });
 
   it("uploads the screenshot then calls the server action on valid submit", async () => {
@@ -92,7 +90,9 @@ describe("SubmitForm", () => {
     await vi.waitFor(() => {
       expect(submitProject).toHaveBeenCalled();
     });
-    expect(screen.queryByText("Project submitted!")).not.toBeInTheDocument();
+    expect(
+      screen.queryByText("프로젝트가 제출되었어요.")
+    ).not.toBeInTheDocument();
   });
 
   it("does not call onSuccess when the server action returns ok: false", async () => {
@@ -158,7 +158,7 @@ describe("SubmitForm", () => {
     ).toHaveTextContent("Could not process this image");
     expect(submitProject).not.toHaveBeenCalled();
 
-    const form = (screen.getByLabelText("Title") as HTMLInputElement).form;
+    const form = (screen.getByLabelText("제목") as HTMLInputElement).form;
     if (!form) {
       throw new Error("form not found");
     }
@@ -187,14 +187,14 @@ describe("SubmitForm", () => {
       await screen.findByTestId("submit-form-field-error")
     ).toHaveTextContent("25 MB");
 
-    expect((screen.getByLabelText("Title") as HTMLInputElement).value).toBe(
+    expect((screen.getByLabelText("제목") as HTMLInputElement).value).toBe(
       "My App"
     );
     expect(
-      (screen.getByLabelText("Tagline") as HTMLTextAreaElement).value
+      (screen.getByLabelText("태그라인") as HTMLTextAreaElement).value
     ).toBe("A cool tool");
     expect(
-      (screen.getByLabelText("Project URL") as HTMLInputElement).value
+      (screen.getByLabelText("프로젝트 URL") as HTMLInputElement).value
     ).toBe("https://myapp.com");
   });
 });

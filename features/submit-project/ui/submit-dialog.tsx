@@ -31,26 +31,26 @@ export function SubmitDialog({ isAuthenticated, cohortId }: SubmitDialogProps) {
   if (!isAuthenticated) {
     return (
       <Button asChild>
-        <Link href="/login">Submit a project</Link>
+        <Link href="/login">프로젝트 제출</Link>
       </Button>
     );
   }
 
   function handleSuccess() {
     setOpen(false);
-    toast.success("Project submitted");
+    toast.success("프로젝트가 제출되었어요.");
   }
 
   return (
     <Dialog onOpenChange={setOpen} open={open}>
       <DialogTrigger asChild>
-        <Button data-testid="submit-project-trigger">Submit a project</Button>
+        <Button data-testid="submit-project-trigger">프로젝트 제출</Button>
       </DialogTrigger>
       <DialogContent>
         <DialogHeader>
-          <DialogTitle>Submit a project</DialogTitle>
+          <DialogTitle>프로젝트 제출</DialogTitle>
           <DialogDescription>
-            Share a screenshot, a one-line tagline, and a link to your project.
+            스크린샷, 한 줄 태그라인, 프로젝트 링크를 공유해 주세요.
           </DialogDescription>
         </DialogHeader>
         <SubmitForm cohortId={cohortId} onSuccess={handleSuccess} />
