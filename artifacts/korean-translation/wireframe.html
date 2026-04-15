@@ -1,0 +1,578 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Wireframe: korean-translation — 추천 버튼 옵션</title>
+<script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
+<script src="https://unpkg.com/lucide@latest"></script>
+<style>
+  :root {
+    --w-bg: #f5f5f5;
+    --w-border: #ccc;
+    --w-text: #555;
+    --w-muted: #aaa;
+    --w-fill: #eee;
+  }
+
+  * {
+    font-family: ui-monospace, SFMono-Regular, "SF Mono", Menlo, Consolas, monospace;
+    color: var(--w-text);
+  }
+
+  body { background: var(--w-bg); }
+
+  nav { position: sticky; top: 0; z-index: 40; background: var(--w-bg); border-bottom: 1px solid var(--w-border); }
+  nav button { cursor: pointer; font-size: 13px; }
+  nav button:hover { background: var(--w-fill); border-radius: 4px; }
+  nav button.active { font-weight: bold; border-bottom: 2px solid var(--w-text); }
+
+  .screen { display: none; }
+  .screen.active { display: block; }
+
+  .vp-toggle button {
+    font-size: 12px; padding: 2px 8px;
+    border: 1px solid var(--w-border); cursor: pointer; background: white;
+  }
+  .vp-toggle button:first-child { border-radius: 4px 0 0 4px; }
+  .vp-toggle button:last-child { border-radius: 0 4px 4px 0; border-left: none; }
+  .vp-toggle button.active { background: var(--w-text); color: white; }
+
+  body.viewport-mobile .screen-content {
+    max-width: 375px !important;
+    margin: 24px auto !important;
+    border: 2px solid var(--w-border);
+    border-radius: 24px;
+    min-height: 667px;
+    background: white;
+    box-shadow: 0 4px 24px rgba(0,0,0,0.08);
+    padding: 32px 16px !important;
+  }
+
+  .screen-notes {
+    background: #fffde7;
+    border-left: 3px solid #ffd54f;
+    padding: 12px 16px;
+    margin-top: 24px;
+    font-size: 13px;
+    border-radius: 0 4px 4px 0;
+  }
+  .screen-notes summary {
+    cursor: pointer;
+    font-weight: bold;
+    font-size: 12px;
+    color: #b0a050;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+  }
+  .screen-notes p { margin: 6px 0 2px; color: #777; }
+  .screen-notes ul { margin: 4px 0 0 16px; padding: 0; color: #777; }
+  .screen-notes li { margin: 2px 0; }
+
+  /* Wireframe-specific helpers */
+  .w-card {
+    border: 1px solid var(--w-border);
+    border-radius: 8px;
+    padding: 12px;
+    background: white;
+    display: flex;
+    gap: 12px;
+    align-items: stretch;
+  }
+  .w-thumb {
+    width: 80px;
+    height: 60px;
+    background: var(--w-fill);
+    border-radius: 4px;
+    flex-shrink: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--w-muted);
+    font-size: 10px;
+  }
+  .w-meta { flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 4px; }
+  .w-title { font-weight: bold; font-size: 13px; color: var(--w-text); }
+  .w-tagline { font-size: 11px; color: var(--w-muted); }
+  .w-author { font-size: 10px; color: var(--w-muted); }
+
+  /* Vote button container slot */
+  .w-vote-slot {
+    align-self: center;
+    flex-shrink: 0;
+  }
+
+  /* === Variant A — 세로 스택 === */
+  .w-vote-a {
+    display: flex; flex-direction: column; align-items: center;
+    border: 1px solid var(--w-border);
+    border-radius: 6px;
+    padding: 6px 10px;
+    min-width: 44px;
+    cursor: pointer;
+    background: white;
+  }
+  .w-vote-a.active {
+    border: 2px solid var(--w-text);
+    background: var(--w-fill);
+  }
+  .w-vote-a .icon { font-size: 18px; line-height: 1; }
+  .w-vote-a .count { font-size: 12px; font-weight: bold; margin-top: 2px; }
+
+  /* === Variant B — 가로 pill === */
+  .w-vote-b {
+    display: inline-flex; align-items: center; gap: 6px;
+    border: 1px solid var(--w-border);
+    border-radius: 999px;
+    padding: 6px 12px;
+    background: white;
+    cursor: pointer;
+    font-size: 12px;
+  }
+  .w-vote-b.active {
+    border: 2px solid var(--w-text);
+    background: var(--w-fill);
+    font-weight: bold;
+  }
+  .w-vote-b .icon { font-size: 14px; line-height: 1; }
+
+  /* === Variant C — 미니멀 outline (현재와 가까운 형태, 텍스트만 제거) === */
+  .w-vote-c {
+    display: inline-flex; align-items: center; gap: 6px;
+    border: 1px solid var(--w-border);
+    border-radius: 6px;
+    padding: 4px 10px;
+    background: white;
+    cursor: pointer;
+    font-size: 12px;
+  }
+  .w-vote-c.active {
+    border: 2px solid var(--w-text);
+    color: var(--w-text);
+    font-weight: bold;
+  }
+  .w-vote-c .icon { font-size: 13px; line-height: 1; }
+
+  /* === Variant D — 아이콘 큰 + 카운트 작게 === */
+  .w-vote-d {
+    display: flex; flex-direction: column; align-items: center;
+    cursor: pointer;
+    padding: 4px 8px;
+    border-radius: 6px;
+  }
+  .w-vote-d:hover { background: var(--w-fill); }
+  .w-vote-d.active { background: var(--w-fill); }
+  .w-vote-d .icon { font-size: 24px; line-height: 1; }
+  .w-vote-d.active .icon { font-weight: bold; }
+  .w-vote-d .count { font-size: 10px; color: var(--w-muted); margin-top: 2px; }
+  .w-vote-d.active .count { color: var(--w-text); font-weight: bold; }
+
+  .opt-label {
+    font-size: 11px; color: var(--w-muted);
+    text-transform: uppercase; letter-spacing: 0.05em;
+    margin: 16px 0 6px;
+    border-bottom: 1px dashed var(--w-border);
+    padding-bottom: 4px;
+  }
+  .opt-row {
+    display: flex; align-items: center; gap: 24px;
+    margin: 8px 0 16px;
+    flex-wrap: wrap;
+  }
+  .opt-state {
+    display: flex; flex-direction: column; align-items: center; gap: 4px;
+  }
+  .state-label {
+    font-size: 9px; color: var(--w-muted);
+    text-transform: uppercase; letter-spacing: 0.05em;
+  }
+  .opt-pros, .opt-cons {
+    font-size: 11px; color: var(--w-muted);
+    margin-top: 4px;
+  }
+  .color-chip {
+    display: inline-block;
+    width: 10px; height: 10px;
+    border-radius: 50%;
+    border: 1px solid var(--w-border);
+    background: var(--w-fill);
+    vertical-align: middle;
+    margin-right: 4px;
+  }
+</style>
+</head>
+<body class="p-0 m-0 viewport-mobile">
+
+<nav class="flex items-center gap-4 px-6 py-2">
+  <span class="text-xs" style="color:var(--w-muted)">wireframe — recommendation button</span>
+  <button id="nav-0" onclick="show(0)" class="px-2 py-1">A. 세로 스택</button>
+  <button id="nav-1" onclick="show(1)" class="px-2 py-1">B. 가로 pill</button>
+  <button id="nav-2" onclick="show(2)" class="px-2 py-1">C. 미니멀 outline</button>
+  <button id="nav-3" onclick="show(3)" class="px-2 py-1">D. 큰 아이콘</button>
+  <button id="nav-4" onclick="show(4)" class="px-2 py-1">전체 비교</button>
+  <div class="vp-toggle flex ml-auto">
+    <button id="vp-desktop" onclick="setViewport('desktop')">Desktop</button>
+    <button id="vp-mobile" onclick="setViewport('mobile')" class="active">Mobile</button>
+  </div>
+</nav>
+
+<!-- ===================== A: 세로 스택 ===================== -->
+<div id="screen-0" class="screen" data-scenario="scenario-4, scenario-5">
+  <div class="screen-content @container max-w-3xl mx-auto p-6">
+    <h2 class="text-lg font-bold mb-1" style="color:var(--w-muted); border-bottom:1px solid var(--w-border); padding-bottom:8px;">
+      옵션 A — 세로 스택 (Reddit 스타일)
+    </h2>
+    <p class="text-xs mb-4" style="color:var(--w-muted)">아이콘 위, 카운트 아래. 정사각 영역으로 카드 우측에 배치.</p>
+
+    <div class="opt-label">3가지 상태</div>
+    <div class="opt-row">
+      <div class="opt-state">
+        <div class="w-vote-a">
+          <div class="icon">↑</div>
+          <div class="count">12</div>
+        </div>
+        <div class="state-label">기본 (로그인 + 미추천)</div>
+      </div>
+      <div class="opt-state">
+        <div class="w-vote-a active">
+          <div class="icon">▲</div>
+          <div class="count">13</div>
+        </div>
+        <div class="state-label">활성 (추천함) <span class="color-chip"></span>긍정 컬러</div>
+      </div>
+      <div class="opt-state">
+        <div class="w-vote-a">
+          <div class="icon">↑</div>
+          <div class="count">12</div>
+        </div>
+        <div class="state-label">비로그인 (동일 외형, aria-label "추천하기")</div>
+      </div>
+    </div>
+
+    <div class="opt-label">카드 안에서</div>
+    <div class="w-card">
+      <div class="w-thumb">스크린샷</div>
+      <div class="w-meta">
+        <div class="w-title">제 첫 번째 프로젝트</div>
+        <div class="w-tagline">Claude Code로 만든 할 일 관리 앱</div>
+        <div class="w-author">by 김토이 · 3기</div>
+      </div>
+      <div class="w-vote-slot">
+        <div class="w-vote-a">
+          <div class="icon">↑</div>
+          <div class="count">12</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="opt-pros">
+      <strong>장점:</strong> Reddit·HN 등에서 익숙한 패턴. 카운트가 아이콘과 묶여 있어 시각적으로 강함.
+    </div>
+    <div class="opt-cons">
+      <strong>단점:</strong> 세로 공간 차지. 모바일 카드가 길어질 수 있음.
+    </div>
+
+    <div class="screen-notes">
+      <details open>
+        <summary>Notes</summary>
+        <p>옵션 A 검토 포인트</p>
+        <ul>
+          <li>활성 상태에서 아이콘이 outline → filled로 채워짐</li>
+          <li>긍정 컬러는 와이어프레임에서 색 대신 굵은 테두리·진한 배경으로 표현</li>
+          <li>비로그인도 동일 외형 → 클릭 시 /login 으로 이동</li>
+        </ul>
+      </details>
+    </div>
+  </div>
+</div>
+
+<!-- ===================== B: 가로 pill ===================== -->
+<div id="screen-1" class="screen" data-scenario="scenario-4, scenario-5">
+  <div class="screen-content @container max-w-3xl mx-auto p-6">
+    <h2 class="text-lg font-bold mb-1" style="color:var(--w-muted); border-bottom:1px solid var(--w-border); padding-bottom:8px;">
+      옵션 B — 가로 pill (ProductHunt 스타일)
+    </h2>
+    <p class="text-xs mb-4" style="color:var(--w-muted)">캡슐 형태에 아이콘 + 카운트를 가로 정렬. 활성 시 배경이 채워짐.</p>
+
+    <div class="opt-label">3가지 상태</div>
+    <div class="opt-row">
+      <div class="opt-state">
+        <div class="w-vote-b"><span class="icon">↑</span><span>12</span></div>
+        <div class="state-label">기본</div>
+      </div>
+      <div class="opt-state">
+        <div class="w-vote-b active"><span class="icon">▲</span><span>13</span></div>
+        <div class="state-label">활성 <span class="color-chip"></span>긍정 컬러 채움</div>
+      </div>
+      <div class="opt-state">
+        <div class="w-vote-b"><span class="icon">↑</span><span>12</span></div>
+        <div class="state-label">비로그인 (동일 외형)</div>
+      </div>
+    </div>
+
+    <div class="opt-label">카드 안에서</div>
+    <div class="w-card">
+      <div class="w-thumb">스크린샷</div>
+      <div class="w-meta">
+        <div class="w-title">제 첫 번째 프로젝트</div>
+        <div class="w-tagline">Claude Code로 만든 할 일 관리 앱</div>
+        <div class="w-author">by 김토이 · 3기</div>
+      </div>
+      <div class="w-vote-slot">
+        <div class="w-vote-b"><span class="icon">↑</span><span>12</span></div>
+      </div>
+    </div>
+
+    <div class="opt-pros">
+      <strong>장점:</strong> 부드럽고 친근한 형태. 카운트가 가로로 읽혀서 자연스러움.
+    </div>
+    <div class="opt-cons">
+      <strong>단점:</strong> 아이콘이 작아 보일 수 있음. "버튼 같음"이 더 강해서 클릭을 유도하지만, 카운트가 분리된 정보처럼 안 읽힐 수도.
+    </div>
+
+    <div class="screen-notes">
+      <details open>
+        <summary>Notes</summary>
+        <p>옵션 B 검토 포인트</p>
+        <ul>
+          <li>활성 시 배경 전체가 긍정 컬러로 채워짐</li>
+          <li>아이콘 + 카운트가 한 덩어리로 읽힘</li>
+          <li>현재 구현(`vote-button.tsx`)에 가장 적은 변경으로 적용 가능 (텍스트만 빼면 됨)</li>
+        </ul>
+      </details>
+    </div>
+  </div>
+</div>
+
+<!-- ===================== C: 미니멀 outline ===================== -->
+<div id="screen-2" class="screen" data-scenario="scenario-4, scenario-5">
+  <div class="screen-content @container max-w-3xl mx-auto p-6">
+    <h2 class="text-lg font-bold mb-1" style="color:var(--w-muted); border-bottom:1px solid var(--w-border); padding-bottom:8px;">
+      옵션 C — 미니멀 outline (현재와 가장 가까움)
+    </h2>
+    <p class="text-xs mb-4" style="color:var(--w-muted)">현재 ThumbsUp 버튼에서 텍스트만 제거하고 아이콘을 ↑로 교체. 가장 보수적.</p>
+
+    <div class="opt-label">3가지 상태</div>
+    <div class="opt-row">
+      <div class="opt-state">
+        <div class="w-vote-c"><span class="icon">↑</span><span>12</span></div>
+        <div class="state-label">기본</div>
+      </div>
+      <div class="opt-state">
+        <div class="w-vote-c active"><span class="icon">▲</span><span>13</span></div>
+        <div class="state-label">활성 <span class="color-chip"></span>긍정 컬러 텍스트/테두리</div>
+      </div>
+      <div class="opt-state">
+        <div class="w-vote-c"><span class="icon">↑</span><span>12</span></div>
+        <div class="state-label">비로그인 (동일 외형)</div>
+      </div>
+    </div>
+
+    <div class="opt-label">카드 안에서</div>
+    <div class="w-card">
+      <div class="w-thumb">스크린샷</div>
+      <div class="w-meta">
+        <div class="w-title">제 첫 번째 프로젝트</div>
+        <div class="w-tagline">Claude Code로 만든 할 일 관리 앱</div>
+        <div class="w-author">by 김토이 · 3기</div>
+      </div>
+      <div class="w-vote-slot">
+        <div class="w-vote-c"><span class="icon">↑</span><span>12</span></div>
+      </div>
+    </div>
+
+    <div class="opt-pros">
+      <strong>장점:</strong> 기존 디자인과 가장 일관됨. 변경 비용 최소. shadcn `outline` variant 그대로 활용.
+    </div>
+    <div class="opt-cons">
+      <strong>단점:</strong> 시각적 인상이 약함. "추천해 주세요" 라는 행동 유도가 다른 옵션보다 약함.
+    </div>
+
+    <div class="screen-notes">
+      <details open>
+        <summary>Notes</summary>
+        <p>옵션 C 검토 포인트</p>
+        <ul>
+          <li>shadcn Button outline variant 그대로 사용</li>
+          <li>활성 시 텍스트와 테두리만 긍정 컬러로 변경 (배경은 그대로)</li>
+          <li>현재 코드에서 "Sign in to vote" 텍스트 제거 + 아이콘 교체로 끝</li>
+        </ul>
+      </details>
+    </div>
+  </div>
+</div>
+
+<!-- ===================== D: 큰 아이콘 ===================== -->
+<div id="screen-3" class="screen" data-scenario="scenario-4, scenario-5">
+  <div class="screen-content @container max-w-3xl mx-auto p-6">
+    <h2 class="text-lg font-bold mb-1" style="color:var(--w-muted); border-bottom:1px solid var(--w-border); padding-bottom:8px;">
+      옵션 D — 큰 아이콘 + 작은 카운트 (배경 없음)
+    </h2>
+    <p class="text-xs mb-4" style="color:var(--w-muted)">테두리 없이 큰 ↑ 아이콘이 주인공. 카운트는 보조 정보로 작게.</p>
+
+    <div class="opt-label">3가지 상태</div>
+    <div class="opt-row">
+      <div class="opt-state">
+        <div class="w-vote-d">
+          <div class="icon">↑</div>
+          <div class="count">12</div>
+        </div>
+        <div class="state-label">기본</div>
+      </div>
+      <div class="opt-state">
+        <div class="w-vote-d active">
+          <div class="icon">▲</div>
+          <div class="count">13</div>
+        </div>
+        <div class="state-label">활성 <span class="color-chip"></span>아이콘 자체가 컬러로 채워짐</div>
+      </div>
+      <div class="opt-state">
+        <div class="w-vote-d">
+          <div class="icon">↑</div>
+          <div class="count">12</div>
+        </div>
+        <div class="state-label">비로그인 (동일 외형)</div>
+      </div>
+    </div>
+
+    <div class="opt-label">카드 안에서</div>
+    <div class="w-card">
+      <div class="w-thumb">스크린샷</div>
+      <div class="w-meta">
+        <div class="w-title">제 첫 번째 프로젝트</div>
+        <div class="w-tagline">Claude Code로 만든 할 일 관리 앱</div>
+        <div class="w-author">by 김토이 · 3기</div>
+      </div>
+      <div class="w-vote-slot">
+        <div class="w-vote-d">
+          <div class="icon">↑</div>
+          <div class="count">12</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="opt-pros">
+      <strong>장점:</strong> 아이콘이 가장 두드러져서 행동 유도가 강함. "응원" 의도가 시각적으로 잘 전달됨.
+    </div>
+    <div class="opt-cons">
+      <strong>단점:</strong> "버튼 같지 않다"는 약점. 사용자가 클릭 가능한지 모를 수 있음 (hover bg로 보완 필요).
+    </div>
+
+    <div class="screen-notes">
+      <details open>
+        <summary>Notes</summary>
+        <p>옵션 D 검토 포인트</p>
+        <ul>
+          <li>shadcn Button ghost variant 또는 커스텀 컴포넌트 필요</li>
+          <li>활성 상태에서 아이콘 색이 긍정 컬러로 변함 (배경은 hover 시에만)</li>
+          <li>탭 가능 영역(터치 타깃 44×44)을 별도로 확보 필요</li>
+        </ul>
+      </details>
+    </div>
+  </div>
+</div>
+
+<!-- ===================== 전체 비교 ===================== -->
+<div id="screen-4" class="screen" data-scenario="scenario-4, scenario-5">
+  <div class="screen-content @container max-w-3xl mx-auto p-6">
+    <h2 class="text-lg font-bold mb-1" style="color:var(--w-muted); border-bottom:1px solid var(--w-border); padding-bottom:8px;">
+      전체 비교 — 동일 카드에 4가지 옵션 적용
+    </h2>
+    <p class="text-xs mb-4" style="color:var(--w-muted)">같은 프로젝트 카드에 옵션을 차례로 끼워 본 모습. "기본" 상태 기준.</p>
+
+    <div class="opt-label">A. 세로 스택</div>
+    <div class="w-card">
+      <div class="w-thumb">스크린샷</div>
+      <div class="w-meta">
+        <div class="w-title">제 첫 번째 프로젝트</div>
+        <div class="w-tagline">Claude Code로 만든 할 일 관리 앱</div>
+        <div class="w-author">by 김토이 · 3기</div>
+      </div>
+      <div class="w-vote-slot">
+        <div class="w-vote-a"><div class="icon">↑</div><div class="count">12</div></div>
+      </div>
+    </div>
+
+    <div class="opt-label">B. 가로 pill</div>
+    <div class="w-card">
+      <div class="w-thumb">스크린샷</div>
+      <div class="w-meta">
+        <div class="w-title">제 첫 번째 프로젝트</div>
+        <div class="w-tagline">Claude Code로 만든 할 일 관리 앱</div>
+        <div class="w-author">by 김토이 · 3기</div>
+      </div>
+      <div class="w-vote-slot">
+        <div class="w-vote-b"><span class="icon">↑</span><span>12</span></div>
+      </div>
+    </div>
+
+    <div class="opt-label">C. 미니멀 outline</div>
+    <div class="w-card">
+      <div class="w-thumb">스크린샷</div>
+      <div class="w-meta">
+        <div class="w-title">제 첫 번째 프로젝트</div>
+        <div class="w-tagline">Claude Code로 만든 할 일 관리 앱</div>
+        <div class="w-author">by 김토이 · 3기</div>
+      </div>
+      <div class="w-vote-slot">
+        <div class="w-vote-c"><span class="icon">↑</span><span>12</span></div>
+      </div>
+    </div>
+
+    <div class="opt-label">D. 큰 아이콘</div>
+    <div class="w-card">
+      <div class="w-thumb">스크린샷</div>
+      <div class="w-meta">
+        <div class="w-title">제 첫 번째 프로젝트</div>
+        <div class="w-tagline">Claude Code로 만든 할 일 관리 앱</div>
+        <div class="w-author">by 김토이 · 3기</div>
+      </div>
+      <div class="w-vote-slot">
+        <div class="w-vote-d"><div class="icon">↑</div><div class="count">12</div></div>
+      </div>
+    </div>
+
+    <div class="screen-notes">
+      <details open>
+        <summary>Notes</summary>
+        <p>비교 시 체크</p>
+        <ul>
+          <li>모바일/데스크톱 토글로 두 폭 모두에서 카드 균형 확인</li>
+          <li>현재 구현 변경 비용: C &lt; B &lt; A &lt; D</li>
+          <li>시각적 임팩트: D &gt; A &gt; B &gt; C</li>
+        </ul>
+      </details>
+    </div>
+  </div>
+</div>
+
+<script>
+var currentScreen = 0;
+var screenIds = [];
+
+function show(id) {
+  document.querySelectorAll('.screen').forEach(function(s) { s.classList.remove('active'); });
+  document.getElementById('screen-' + id).classList.add('active');
+  document.querySelectorAll('nav button[id^="nav-"]').forEach(function(b) { b.classList.remove('active'); });
+  document.getElementById('nav-' + id).classList.add('active');
+  currentScreen = screenIds.indexOf(id);
+}
+
+function setViewport(mode) {
+  document.body.classList.remove('viewport-mobile', 'viewport-desktop');
+  document.body.classList.add('viewport-' + mode);
+  document.querySelectorAll('.vp-toggle button').forEach(function(b) { b.classList.remove('active'); });
+  document.getElementById('vp-' + mode).classList.add('active');
+}
+
+document.addEventListener('DOMContentLoaded', function() {
+  document.querySelectorAll('nav button[id^="nav-"]').forEach(function(b) {
+    screenIds.push(parseInt(b.id.replace('nav-', '')));
+  });
+  var first = document.querySelector('nav button[id^="nav-"]');
+  if (first) first.click();
+  lucide.createIcons();
+});
+</script>
+</body>
+</html>

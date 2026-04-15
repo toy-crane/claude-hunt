@@ -74,7 +74,7 @@ describe("completeOnboarding server action", () => {
     });
 
     expect(result.ok).toBe(false);
-    expect(result.error).toBe("표시명을 입력해 주세요.");
+    expect(result.error).toBe("닉네임을 입력해 주세요.");
     expect(getUser).not.toHaveBeenCalled();
   });
 
@@ -85,7 +85,7 @@ describe("completeOnboarding server action", () => {
     });
 
     expect(result.ok).toBe(false);
-    expect(result.error).toBe("표시명을 입력해 주세요.");
+    expect(result.error).toBe("닉네임을 입력해 주세요.");
   });
 
   it("rejects display name longer than 50 characters", async () => {
@@ -95,7 +95,7 @@ describe("completeOnboarding server action", () => {
     });
 
     expect(result.ok).toBe(false);
-    expect(result.error).toBe("표시명은 50자 이하로 입력해 주세요.");
+    expect(result.error).toBe("닉네임은 50자 이하로 입력해 주세요.");
   });
 
   it("rejects a missing/invalid cohort id", async () => {
@@ -105,7 +105,7 @@ describe("completeOnboarding server action", () => {
     });
 
     expect(result.ok).toBe(false);
-    expect(result.error).toBe("기수를 선택해 주세요.");
+    expect(result.error).toBe("과정를 선택해 주세요.");
   });
 
   it("upserts the caller's own profile with trimmed display name and cohort id", async () => {
@@ -162,7 +162,7 @@ describe("completeOnboarding server action", () => {
     const result = await completeOnboarding(validInput);
 
     expect(result.ok).toBe(false);
-    expect(result.error).toBe("이미 사용 중인 표시명이에요.");
+    expect(result.error).toBe("이미 사용 중인 닉네임이에요.");
   });
 
   it("does NOT remap unrelated 23505 errors (other unique constraints pass through)", async () => {

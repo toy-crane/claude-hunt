@@ -33,7 +33,7 @@ describe("onboardingInputSchema", () => {
     });
     expect(result.success).toBe(false);
     if (!result.success) {
-      expect(result.error.issues[0]?.message).toBe("표시명을 입력해 주세요.");
+      expect(result.error.issues[0]?.message).toBe("닉네임을 입력해 주세요.");
     }
   });
 
@@ -44,7 +44,7 @@ describe("onboardingInputSchema", () => {
     });
     expect(result.success).toBe(false);
     if (!result.success) {
-      expect(result.error.issues[0]?.message).toBe("표시명을 입력해 주세요.");
+      expect(result.error.issues[0]?.message).toBe("닉네임을 입력해 주세요.");
     }
   });
 
@@ -56,7 +56,7 @@ describe("onboardingInputSchema", () => {
     expect(result.success).toBe(false);
     if (!result.success) {
       expect(result.error.issues[0]?.message).toBe(
-        "표시명은 50자 이하로 입력해 주세요."
+        "닉네임은 50자 이하로 입력해 주세요."
       );
     }
   });
@@ -76,7 +76,7 @@ describe("onboardingInputSchema", () => {
     });
     expect(result.success).toBe(false);
     if (!result.success) {
-      expect(result.error.issues[0]?.message).toBe("기수를 선택해 주세요.");
+      expect(result.error.issues[0]?.message).toBe("과정를 선택해 주세요.");
     }
   });
 
@@ -87,7 +87,7 @@ describe("onboardingInputSchema", () => {
     });
     expect(result.success).toBe(false);
     if (!result.success) {
-      expect(result.error.issues[0]?.message).toBe("기수를 선택해 주세요.");
+      expect(result.error.issues[0]?.message).toBe("과정를 선택해 주세요.");
     }
   });
 });

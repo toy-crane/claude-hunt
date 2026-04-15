@@ -61,7 +61,7 @@ describe("updateDisplayName", () => {
 
     expect(result).toEqual({
       ok: false,
-      error: { field: "displayName", message: "표시명을 입력해 주세요." },
+      error: { field: "displayName", message: "닉네임을 입력해 주세요." },
     });
     expect(updateMock).not.toHaveBeenCalled();
   });
@@ -73,7 +73,7 @@ describe("updateDisplayName", () => {
 
     expect(result).toEqual({
       ok: false,
-      error: { field: "displayName", message: "표시명을 입력해 주세요." },
+      error: { field: "displayName", message: "닉네임을 입력해 주세요." },
     });
     expect(updateMock).not.toHaveBeenCalled();
   });
@@ -87,7 +87,7 @@ describe("updateDisplayName", () => {
       ok: false,
       error: {
         field: "displayName",
-        message: "표시명은 50자 이하로 입력해 주세요.",
+        message: "닉네임은 50자 이하로 입력해 주세요.",
       },
     });
     expect(updateMock).not.toHaveBeenCalled();
@@ -122,7 +122,7 @@ describe("updateDisplayName", () => {
       ok: false,
       error: {
         field: "displayName",
-        message: "이미 사용 중인 표시명이에요.",
+        message: "이미 사용 중인 닉네임이에요.",
       },
     });
   });

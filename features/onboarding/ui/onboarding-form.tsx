@@ -5,12 +5,7 @@ import { createClient } from "@shared/api/supabase/client";
 import { Alert, AlertDescription, AlertTitle } from "@shared/ui/alert";
 import { AuthLayout } from "@shared/ui/auth-layout";
 import { Button } from "@shared/ui/button";
-import {
-  Field,
-  FieldDescription,
-  FieldGroup,
-  FieldLabel,
-} from "@shared/ui/field";
+import { Field, FieldGroup, FieldLabel } from "@shared/ui/field";
 import { Input } from "@shared/ui/input";
 import {
   Select,
@@ -51,18 +46,18 @@ export function OnboardingForm({ cohorts, initialNext }: OnboardingFormProps) {
     let ok = true;
     const trimmed = displayName.trim();
     if (trimmed.length === 0) {
-      setDisplayNameError("표시명을 입력해 주세요.");
+      setDisplayNameError("닉네임을 입력해 주세요.");
       ok = false;
     } else if (trimmed.length > MAX_DISPLAY_NAME_LENGTH) {
       setDisplayNameError(
-        `표시명은 ${MAX_DISPLAY_NAME_LENGTH}자 이하로 입력해 주세요.`
+        `닉네임은 ${MAX_DISPLAY_NAME_LENGTH}자 이하로 입력해 주세요.`
       );
       ok = false;
     } else {
       setDisplayNameError(null);
     }
     if (selectedCohortId === COHORT_UNSELECTED) {
-      setCohortError("기수를 선택해 주세요.");
+      setCohortError("과정를 선택해 주세요.");
       ok = false;
     } else {
       setCohortError(null);
@@ -108,7 +103,7 @@ export function OnboardingForm({ cohorts, initialNext }: OnboardingFormProps) {
 
   return (
     <AuthLayout
-      description="기수를 선택하고 표시명을 설정하면 프로젝트를 제출할 수 있어요."
+      description="과정를 선택하고 닉네임을 설정하면 프로젝트를 제출할 수 있어요."
       title="프로필 설정"
     >
       <form
@@ -118,19 +113,16 @@ export function OnboardingForm({ cohorts, initialNext }: OnboardingFormProps) {
       >
         <FieldGroup>
           <Field>
-            <FieldLabel htmlFor={displayNameId}>표시명</FieldLabel>
+            <FieldLabel htmlFor={displayNameId}>닉네임</FieldLabel>
             <Input
               aria-invalid={displayNameError !== null}
               disabled={isPending || isSigningOut}
               id={displayNameId}
               name="displayName"
               onChange={(event) => setDisplayName(event.target.value)}
-              placeholder="표시명을 입력하세요"
+              placeholder="닉네임을 입력하세요"
               value={displayName}
             />
-            <FieldDescription>
-              프로젝트 카드에 표시돼요. 1~{MAX_DISPLAY_NAME_LENGTH}자.
-            </FieldDescription>
             {displayNameError ? (
               <p
                 className="text-destructive text-xs"
@@ -144,14 +136,14 @@ export function OnboardingForm({ cohorts, initialNext }: OnboardingFormProps) {
 
           {noCohorts ? (
             <Alert data-testid="onboarding-no-cohorts">
-              <AlertTitle>기수가 아직 없어요.</AlertTitle>
+              <AlertTitle>과정가 아직 없어요.</AlertTitle>
               <AlertDescription>
-                강사에게 기수 배정을 요청해 주세요.
+                강사에게 과정 배정을 요청해 주세요.
               </AlertDescription>
             </Alert>
           ) : (
             <Field>
-              <FieldLabel htmlFor={cohortId}>기수</FieldLabel>
+              <FieldLabel htmlFor={cohortId}>과정</FieldLabel>
               <Select
                 disabled={isPending || isSigningOut}
                 onValueChange={setSelectedCohortId}
@@ -163,7 +155,7 @@ export function OnboardingForm({ cohorts, initialNext }: OnboardingFormProps) {
                   data-testid="onboarding-cohort-trigger"
                   id={cohortId}
                 >
-                  <SelectValue placeholder="기수를 선택하세요" />
+                  <SelectValue placeholder="과정를 선택하세요" />
                 </SelectTrigger>
                 <SelectContent>
                   {cohorts.map((cohort) => (
