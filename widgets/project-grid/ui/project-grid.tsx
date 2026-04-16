@@ -1,4 +1,5 @@
 import type { ProjectWithVoteCount } from "@entities/vote";
+import { ViewTransition } from "react";
 import { EmptyState } from "./empty-state";
 import { ProjectCard } from "./project-card";
 
@@ -37,16 +38,19 @@ export function ProjectGrid({
       {projects.map((project, index) => {
         const rank = index + 1;
         return (
-          <ProjectCard
-            key={project.id}
-            priority={rank <= 3}
-            project={project}
-            rank={rank}
-            renderOwnerActions={renderOwnerActions}
-            renderVoteButton={renderVoteButton}
-            screenshotUrl={resolveScreenshotUrl(project.screenshot_path ?? "")}
-            viewerUserId={viewerUserId}
-          />
+          <ViewTransition key={project.id}>
+            <ProjectCard
+              priority={rank <= 3}
+              project={project}
+              rank={rank}
+              renderOwnerActions={renderOwnerActions}
+              renderVoteButton={renderVoteButton}
+              screenshotUrl={resolveScreenshotUrl(
+                project.screenshot_path ?? ""
+              )}
+              viewerUserId={viewerUserId}
+            />
+          </ViewTransition>
         );
       })}
     </div>
