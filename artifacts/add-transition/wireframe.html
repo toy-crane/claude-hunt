@@ -1,0 +1,976 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Wireframe: add-transition</title>
+<script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
+<script src="https://unpkg.com/lucide@latest"></script>
+<style>
+  :root {
+    --w-bg: #f5f5f5;
+    --w-border: #ccc;
+    --w-text: #555;
+    --w-muted: #aaa;
+    --w-fill: #eee;
+  }
+
+  * {
+    font-family: ui-monospace, SFMono-Regular, "SF Mono", Menlo, Consolas, monospace;
+    color: var(--w-text);
+  }
+
+  body { background: var(--w-bg); }
+
+  nav { position: sticky; top: 0; z-index: 40; background: var(--w-bg); border-bottom: 1px solid var(--w-border); }
+  nav button { cursor: pointer; font-size: 13px; }
+  nav button:hover { background: var(--w-fill); border-radius: 4px; }
+  nav button.active { font-weight: bold; border-bottom: 2px solid var(--w-text); }
+
+  .screen { display: none; }
+  .screen.active { display: block; }
+
+  .vp-toggle button {
+    font-size: 12px; padding: 2px 8px;
+    border: 1px solid var(--w-border); cursor: pointer; background: white;
+  }
+  .vp-toggle button:first-child { border-radius: 4px 0 0 4px; }
+  .vp-toggle button:last-child { border-radius: 0 4px 4px 0; border-left: none; }
+  .vp-toggle button.active { background: var(--w-text); color: white; }
+
+  body.viewport-mobile .screen-content {
+    max-width: 375px !important;
+    margin: 24px auto !important;
+    border: 2px solid var(--w-border);
+    border-radius: 24px;
+    min-height: 667px;
+    background: white;
+    box-shadow: 0 4px 24px rgba(0,0,0,0.08);
+    padding: 32px 16px !important;
+  }
+
+  .screen-notes {
+    background: #fffde7;
+    border-left: 3px solid #ffd54f;
+    padding: 12px 16px;
+    margin-top: 24px;
+    font-size: 13px;
+    border-radius: 0 4px 4px 0;
+  }
+  .screen-notes summary {
+    cursor: pointer;
+    font-weight: bold;
+    font-size: 12px;
+    color: #b0a050;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+  }
+  .screen-notes p { margin: 6px 0 2px; color: #777; }
+  .screen-notes ul { margin: 4px 0 0 16px; padding: 0; color: #777; }
+  .screen-notes li { margin: 2px 0; }
+
+  /* Wireframe-specific */
+  .w-card {
+    border: 1px solid var(--w-border);
+    border-radius: 6px;
+    overflow: hidden;
+    background: white;
+    position: relative;
+    transition: outline 0.15s;
+  }
+  .w-card.w-highlight {
+    outline: 2px dashed var(--w-text);
+    outline-offset: 2px;
+  }
+  .w-screenshot {
+    background: repeating-linear-gradient(
+      45deg,
+      var(--w-fill),
+      var(--w-fill) 8px,
+      #e4e4e4 8px,
+      #e4e4e4 16px
+    );
+    aspect-ratio: 16 / 9;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--w-muted);
+    font-size: 11px;
+  }
+  .w-rank-badge {
+    position: absolute;
+    top: 8px;
+    left: 8px;
+    background: white;
+    border: 1px solid var(--w-border);
+    border-radius: 4px;
+    padding: 2px 6px;
+    font-size: 11px;
+    font-weight: bold;
+  }
+  .w-vote-pill {
+    display: inline-flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    min-width: 44px;
+    border: 1.5px solid var(--w-border);
+    border-radius: 6px;
+    padding: 6px 8px;
+    background: white;
+    font-size: 12px;
+    font-weight: bold;
+    gap: 2px;
+  }
+  .w-vote-pill.w-voted {
+    background: var(--w-text);
+    color: white;
+    border-color: var(--w-text);
+  }
+  .w-vote-pill.w-voted * { color: white; }
+  .w-caption-label {
+    font-size: 11px;
+    color: var(--w-muted);
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    font-weight: bold;
+    margin-bottom: 8px;
+  }
+  .w-frame-title {
+    font-size: 12px;
+    color: var(--w-text);
+    font-weight: bold;
+    border: 1px solid var(--w-border);
+    border-radius: 4px;
+    padding: 4px 10px;
+    display: inline-block;
+    background: white;
+  }
+  .w-arrow-row {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+    font-size: 12px;
+    color: var(--w-muted);
+    padding: 8px 0;
+  }
+  .w-motion-note {
+    text-align: center;
+    font-size: 11px;
+    color: var(--w-muted);
+    padding: 6px 8px;
+    border: 1px dashed var(--w-border);
+    border-radius: 4px;
+    display: inline-block;
+  }
+  .w-grid {
+    display: grid;
+    gap: 12px;
+    grid-template-columns: 1fr;
+  }
+  body.viewport-desktop .w-grid {
+    grid-template-columns: repeat(3, 1fr);
+  }
+  .w-flow {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+  }
+  body.viewport-desktop .w-flow {
+    flex-direction: row;
+    align-items: stretch;
+  }
+  body.viewport-desktop .w-flow > .w-frame {
+    flex: 1 1 0;
+    min-width: 0;
+  }
+  body.viewport-desktop .w-flow > .w-arrow-col {
+    flex: 0 0 auto;
+    display: flex;
+    align-items: center;
+  }
+  .w-arrow-col { text-align: center; color: var(--w-muted); font-size: 20px; padding: 4px; }
+  .w-frame {
+    border: 1px solid var(--w-border);
+    border-radius: 8px;
+    padding: 12px;
+    background: var(--w-bg);
+  }
+  .w-card-body {
+    padding: 10px;
+    display: flex;
+    gap: 8px;
+    align-items: flex-start;
+  }
+  .w-card-text { flex: 1; min-width: 0; }
+  .w-card-title { font-size: 12px; font-weight: bold; color: var(--w-text); margin-bottom: 3px; }
+  .w-card-tagline { font-size: 11px; color: var(--w-muted); line-height: 1.4; }
+  .w-card-author { font-size: 10px; color: var(--w-muted); margin-top: 4px; }
+  .w-card.w-moves-up::before {
+    content: "↑ slides up";
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%) rotate(-12deg);
+    background: rgba(255,255,255,0.92);
+    border: 1px dashed var(--w-text);
+    padding: 3px 8px;
+    font-size: 10px;
+    font-weight: bold;
+    color: var(--w-text);
+    z-index: 5;
+    border-radius: 4px;
+  }
+  .w-card.w-moves-down::before {
+    content: "↓ slides down";
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%) rotate(-12deg);
+    background: rgba(255,255,255,0.92);
+    border: 1px dashed var(--w-text);
+    padding: 3px 8px;
+    font-size: 10px;
+    font-weight: bold;
+    color: var(--w-text);
+    z-index: 5;
+    border-radius: 4px;
+  }
+  .w-card.w-snaps::before {
+    content: "snap (no slide)";
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%) rotate(-12deg);
+    background: rgba(255,255,255,0.92);
+    border: 1px dashed var(--w-muted);
+    padding: 3px 8px;
+    font-size: 10px;
+    font-weight: bold;
+    color: var(--w-muted);
+    z-index: 5;
+    border-radius: 4px;
+  }
+  .w-card.w-stable::after {
+    content: "no movement";
+    position: absolute;
+    bottom: 6px;
+    right: 6px;
+    background: rgba(255,255,255,0.92);
+    border: 1px dashed var(--w-muted);
+    padding: 2px 6px;
+    font-size: 9px;
+    color: var(--w-muted);
+    border-radius: 3px;
+  }
+</style>
+</head>
+<body class="p-0 m-0 viewport-mobile">
+
+<nav class="flex items-center gap-4 px-6 py-2 flex-wrap">
+  <span class="text-xs" style="color:var(--w-muted)">wireframe</span>
+  <button id="nav-0" onclick="show(0)" class="px-2 py-1">1. Rank up</button>
+  <button id="nav-1" onclick="show(1)" class="px-2 py-1">2. Rank down</button>
+  <button id="nav-2" onclick="show(2)" class="px-2 py-1">3. No rank change</button>
+  <button id="nav-3" onclick="show(3)" class="px-2 py-1">4. Failed vote</button>
+  <button id="nav-4" onclick="show(4)" class="px-2 py-1">5. Reduced motion</button>
+  <div class="vp-toggle flex ml-auto">
+    <button id="vp-desktop" onclick="setViewport('desktop')">Desktop</button>
+    <button id="vp-mobile" onclick="setViewport('mobile')" class="active">Mobile</button>
+  </div>
+</nav>
+
+<!-- ================================================================
+     SCREEN 0 — Scenario 1: Vote raises a card's rank
+     ================================================================ -->
+<div id="screen-0" class="screen" data-scenario="scenario-1">
+  <div class="screen-content @container max-w-6xl mx-auto p-6">
+
+    <h2 class="text-lg font-bold mb-2" style="color:var(--w-muted); border-bottom:1px solid var(--w-border); padding-bottom:8px;">
+      Scenario 1 — Vote raises rank
+    </h2>
+    <p class="text-xs mb-5" style="color:var(--w-muted)">
+      Viewer votes on project P (rank 3). P's new vote count pushes it above Q (rank 2). Cards slide to new positions.
+    </p>
+
+    <div class="w-flow">
+
+      <!-- BEFORE -->
+      <div class="w-frame">
+        <div class="mb-2"><span class="w-frame-title">Before — P is below Q</span></div>
+        <div class="w-grid">
+          <div class="w-card">
+            <div class="w-rank-badge">#1</div>
+            <div class="w-screenshot">[screenshot]</div>
+            <div class="w-card-body">
+              <div class="w-card-text">
+                <div class="w-card-title">Project A</div>
+                <div class="w-card-tagline">Tagline line one</div>
+                <div class="w-card-author">by Author A</div>
+              </div>
+              <div class="w-vote-pill"><i data-lucide="arrow-up" style="width:12px;height:12px"></i><span>142</span></div>
+            </div>
+          </div>
+          <div class="w-card">
+            <div class="w-rank-badge">#2</div>
+            <div class="w-screenshot">[screenshot]</div>
+            <div class="w-card-body">
+              <div class="w-card-text">
+                <div class="w-card-title">Project Q</div>
+                <div class="w-card-tagline">Tagline line one</div>
+                <div class="w-card-author">by Author Q</div>
+              </div>
+              <div class="w-vote-pill"><i data-lucide="arrow-up" style="width:12px;height:12px"></i><span>88</span></div>
+            </div>
+          </div>
+          <div class="w-card w-highlight">
+            <div class="w-rank-badge">#3</div>
+            <div class="w-screenshot">[screenshot]</div>
+            <div class="w-card-body">
+              <div class="w-card-text">
+                <div class="w-card-title">Project P (viewer clicks)</div>
+                <div class="w-card-tagline">Target of the vote</div>
+                <div class="w-card-author">by Author P</div>
+              </div>
+              <div class="w-vote-pill"><i data-lucide="arrow-up" style="width:12px;height:12px"></i><span>87</span></div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="w-arrow-col">→</div>
+
+      <!-- DURING -->
+      <div class="w-frame">
+        <div class="mb-2"><span class="w-frame-title">During — cards slide</span></div>
+        <div class="w-grid">
+          <div class="w-card">
+            <div class="w-rank-badge">#1</div>
+            <div class="w-screenshot">[screenshot]</div>
+            <div class="w-card-body">
+              <div class="w-card-text">
+                <div class="w-card-title">Project A</div>
+                <div class="w-card-author">stays</div>
+              </div>
+              <div class="w-vote-pill"><i data-lucide="arrow-up" style="width:12px;height:12px"></i><span>142</span></div>
+            </div>
+          </div>
+          <div class="w-card w-highlight w-moves-up">
+            <div class="w-rank-badge">→ #2</div>
+            <div class="w-screenshot">[screenshot]</div>
+            <div class="w-card-body">
+              <div class="w-card-text">
+                <div class="w-card-title">Project P</div>
+                <div class="w-card-author">moving up</div>
+              </div>
+              <div class="w-vote-pill w-voted"><i data-lucide="arrow-up" style="width:12px;height:12px"></i><span>88</span></div>
+            </div>
+          </div>
+          <div class="w-card w-moves-down">
+            <div class="w-rank-badge">→ #3</div>
+            <div class="w-screenshot">[screenshot]</div>
+            <div class="w-card-body">
+              <div class="w-card-text">
+                <div class="w-card-title">Project Q</div>
+                <div class="w-card-author">moving down</div>
+              </div>
+              <div class="w-vote-pill"><i data-lucide="arrow-up" style="width:12px;height:12px"></i><span>88</span></div>
+            </div>
+          </div>
+        </div>
+        <div class="w-arrow-row mt-3">
+          <span class="w-motion-note">both cards visible simultaneously at intermediate positions</span>
+        </div>
+      </div>
+
+      <div class="w-arrow-col">→</div>
+
+      <!-- AFTER -->
+      <div class="w-frame">
+        <div class="mb-2"><span class="w-frame-title">After — P is above Q</span></div>
+        <div class="w-grid">
+          <div class="w-card">
+            <div class="w-rank-badge">#1</div>
+            <div class="w-screenshot">[screenshot]</div>
+            <div class="w-card-body">
+              <div class="w-card-text">
+                <div class="w-card-title">Project A</div>
+                <div class="w-card-tagline">Tagline line one</div>
+                <div class="w-card-author">by Author A</div>
+              </div>
+              <div class="w-vote-pill"><i data-lucide="arrow-up" style="width:12px;height:12px"></i><span>142</span></div>
+            </div>
+          </div>
+          <div class="w-card w-highlight">
+            <div class="w-rank-badge">#2</div>
+            <div class="w-screenshot">[screenshot]</div>
+            <div class="w-card-body">
+              <div class="w-card-text">
+                <div class="w-card-title">Project P (voted)</div>
+                <div class="w-card-tagline">Target of the vote</div>
+                <div class="w-card-author">by Author P</div>
+              </div>
+              <div class="w-vote-pill w-voted"><i data-lucide="arrow-up" style="width:12px;height:12px"></i><span>88</span></div>
+            </div>
+          </div>
+          <div class="w-card">
+            <div class="w-rank-badge">#3</div>
+            <div class="w-screenshot">[screenshot]</div>
+            <div class="w-card-body">
+              <div class="w-card-text">
+                <div class="w-card-title">Project Q</div>
+                <div class="w-card-tagline">Tagline line one</div>
+                <div class="w-card-author">by Author Q</div>
+              </div>
+              <div class="w-vote-pill"><i data-lucide="arrow-up" style="width:12px;height:12px"></i><span>88</span></div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+    </div>
+
+    <div class="screen-notes">
+      <details open>
+        <summary>Notes</summary>
+        <p>Entry condition: viewer sees a ranked list, P is below Q.</p>
+        <ul>
+          <li>Trigger: viewer clicks the vote pill on card P (the highlighted card).</li>
+          <li>Interaction: during the animated frame, P slides up one row and Q slides down one row simultaneously; both remain visible.</li>
+          <li>Transition: after the animation completes, the DOM order matches the server-rendered rank (A, P, Q).</li>
+          <li>The rank badge shown on each card follows the card as it moves. No layout changes outside the grid.</li>
+        </ul>
+      </details>
+    </div>
+
+  </div>
+</div>
+
+<!-- ================================================================
+     SCREEN 1 — Scenario 2: Unvote lowers a card's rank
+     ================================================================ -->
+<div id="screen-1" class="screen" data-scenario="scenario-2">
+  <div class="screen-content @container max-w-6xl mx-auto p-6">
+
+    <h2 class="text-lg font-bold mb-2" style="color:var(--w-muted); border-bottom:1px solid var(--w-border); padding-bottom:8px;">
+      Scenario 2 — Unvote lowers rank
+    </h2>
+    <p class="text-xs mb-5" style="color:var(--w-muted)">
+      Viewer has previously voted on P (rank 2). Unvoting drops P below Q. Cards slide to new positions.
+    </p>
+
+    <div class="w-flow">
+
+      <div class="w-frame">
+        <div class="mb-2"><span class="w-frame-title">Before — P is above Q</span></div>
+        <div class="w-grid">
+          <div class="w-card">
+            <div class="w-rank-badge">#1</div>
+            <div class="w-screenshot">[screenshot]</div>
+            <div class="w-card-body">
+              <div class="w-card-text">
+                <div class="w-card-title">Project A</div>
+                <div class="w-card-author">by Author A</div>
+              </div>
+              <div class="w-vote-pill"><i data-lucide="arrow-up" style="width:12px;height:12px"></i><span>142</span></div>
+            </div>
+          </div>
+          <div class="w-card w-highlight">
+            <div class="w-rank-badge">#2</div>
+            <div class="w-screenshot">[screenshot]</div>
+            <div class="w-card-body">
+              <div class="w-card-text">
+                <div class="w-card-title">Project P (voted by viewer)</div>
+                <div class="w-card-author">by Author P</div>
+              </div>
+              <div class="w-vote-pill w-voted"><i data-lucide="arrow-up" style="width:12px;height:12px"></i><span>89</span></div>
+            </div>
+          </div>
+          <div class="w-card">
+            <div class="w-rank-badge">#3</div>
+            <div class="w-screenshot">[screenshot]</div>
+            <div class="w-card-body">
+              <div class="w-card-text">
+                <div class="w-card-title">Project Q</div>
+                <div class="w-card-author">by Author Q</div>
+              </div>
+              <div class="w-vote-pill"><i data-lucide="arrow-up" style="width:12px;height:12px"></i><span>88</span></div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="w-arrow-col">→</div>
+
+      <div class="w-frame">
+        <div class="mb-2"><span class="w-frame-title">During — cards slide</span></div>
+        <div class="w-grid">
+          <div class="w-card">
+            <div class="w-rank-badge">#1</div>
+            <div class="w-screenshot">[screenshot]</div>
+            <div class="w-card-body">
+              <div class="w-card-text">
+                <div class="w-card-title">Project A</div>
+                <div class="w-card-author">stays</div>
+              </div>
+              <div class="w-vote-pill"><i data-lucide="arrow-up" style="width:12px;height:12px"></i><span>142</span></div>
+            </div>
+          </div>
+          <div class="w-card w-moves-up">
+            <div class="w-rank-badge">→ #2</div>
+            <div class="w-screenshot">[screenshot]</div>
+            <div class="w-card-body">
+              <div class="w-card-text">
+                <div class="w-card-title">Project Q</div>
+                <div class="w-card-author">moving up</div>
+              </div>
+              <div class="w-vote-pill"><i data-lucide="arrow-up" style="width:12px;height:12px"></i><span>88</span></div>
+            </div>
+          </div>
+          <div class="w-card w-highlight w-moves-down">
+            <div class="w-rank-badge">→ #3</div>
+            <div class="w-screenshot">[screenshot]</div>
+            <div class="w-card-body">
+              <div class="w-card-text">
+                <div class="w-card-title">Project P</div>
+                <div class="w-card-author">moving down</div>
+              </div>
+              <div class="w-vote-pill"><i data-lucide="arrow-up" style="width:12px;height:12px"></i><span>87</span></div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="w-arrow-col">→</div>
+
+      <div class="w-frame">
+        <div class="mb-2"><span class="w-frame-title">After — P is below Q</span></div>
+        <div class="w-grid">
+          <div class="w-card">
+            <div class="w-rank-badge">#1</div>
+            <div class="w-screenshot">[screenshot]</div>
+            <div class="w-card-body">
+              <div class="w-card-text">
+                <div class="w-card-title">Project A</div>
+                <div class="w-card-author">by Author A</div>
+              </div>
+              <div class="w-vote-pill"><i data-lucide="arrow-up" style="width:12px;height:12px"></i><span>142</span></div>
+            </div>
+          </div>
+          <div class="w-card">
+            <div class="w-rank-badge">#2</div>
+            <div class="w-screenshot">[screenshot]</div>
+            <div class="w-card-body">
+              <div class="w-card-text">
+                <div class="w-card-title">Project Q</div>
+                <div class="w-card-author">by Author Q</div>
+              </div>
+              <div class="w-vote-pill"><i data-lucide="arrow-up" style="width:12px;height:12px"></i><span>88</span></div>
+            </div>
+          </div>
+          <div class="w-card w-highlight">
+            <div class="w-rank-badge">#3</div>
+            <div class="w-screenshot">[screenshot]</div>
+            <div class="w-card-body">
+              <div class="w-card-text">
+                <div class="w-card-title">Project P (unvoted)</div>
+                <div class="w-card-author">by Author P</div>
+              </div>
+              <div class="w-vote-pill"><i data-lucide="arrow-up" style="width:12px;height:12px"></i><span>87</span></div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+    </div>
+
+    <div class="screen-notes">
+      <details open>
+        <summary>Notes</summary>
+        <p>Entry condition: viewer has previously voted for P; P is above Q.</p>
+        <ul>
+          <li>Trigger: viewer clicks the voted pill on card P to unvote.</li>
+          <li>Interaction: P slides down one row; Q slides up one row. Both remain visible during the transition.</li>
+          <li>Transition: after the animation completes, the DOM order matches the server-rendered rank (A, Q, P).</li>
+        </ul>
+      </details>
+    </div>
+
+  </div>
+</div>
+
+<!-- ================================================================
+     SCREEN 2 — Scenario 3: Vote that does not change rank
+     ================================================================ -->
+<div id="screen-2" class="screen" data-scenario="scenario-3">
+  <div class="screen-content @container max-w-6xl mx-auto p-6">
+
+    <h2 class="text-lg font-bold mb-2" style="color:var(--w-muted); border-bottom:1px solid var(--w-border); padding-bottom:8px;">
+      Scenario 3 — Vote does not change rank
+    </h2>
+    <p class="text-xs mb-5" style="color:var(--w-muted)">
+      Viewer votes on project P, but its neighbors' vote counts are far enough apart that its rank does not change. Grid is stable.
+    </p>
+
+    <div class="w-flow">
+
+      <div class="w-frame">
+        <div class="mb-2"><span class="w-frame-title">Before</span></div>
+        <div class="w-grid">
+          <div class="w-card w-stable">
+            <div class="w-rank-badge">#1</div>
+            <div class="w-screenshot">[screenshot]</div>
+            <div class="w-card-body">
+              <div class="w-card-text">
+                <div class="w-card-title">Project A</div>
+                <div class="w-card-author">by Author A</div>
+              </div>
+              <div class="w-vote-pill"><i data-lucide="arrow-up" style="width:12px;height:12px"></i><span>142</span></div>
+            </div>
+          </div>
+          <div class="w-card w-highlight w-stable">
+            <div class="w-rank-badge">#2</div>
+            <div class="w-screenshot">[screenshot]</div>
+            <div class="w-card-body">
+              <div class="w-card-text">
+                <div class="w-card-title">Project P (viewer clicks)</div>
+                <div class="w-card-author">by Author P</div>
+              </div>
+              <div class="w-vote-pill"><i data-lucide="arrow-up" style="width:12px;height:12px"></i><span>90</span></div>
+            </div>
+          </div>
+          <div class="w-card w-stable">
+            <div class="w-rank-badge">#3</div>
+            <div class="w-screenshot">[screenshot]</div>
+            <div class="w-card-body">
+              <div class="w-card-text">
+                <div class="w-card-title">Project Q</div>
+                <div class="w-card-author">by Author Q</div>
+              </div>
+              <div class="w-vote-pill"><i data-lucide="arrow-up" style="width:12px;height:12px"></i><span>40</span></div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="w-arrow-col">→</div>
+
+      <div class="w-frame">
+        <div class="mb-2"><span class="w-frame-title">After — same order</span></div>
+        <div class="w-grid">
+          <div class="w-card w-stable">
+            <div class="w-rank-badge">#1</div>
+            <div class="w-screenshot">[screenshot]</div>
+            <div class="w-card-body">
+              <div class="w-card-text">
+                <div class="w-card-title">Project A</div>
+                <div class="w-card-author">by Author A</div>
+              </div>
+              <div class="w-vote-pill"><i data-lucide="arrow-up" style="width:12px;height:12px"></i><span>142</span></div>
+            </div>
+          </div>
+          <div class="w-card w-highlight w-stable">
+            <div class="w-rank-badge">#2</div>
+            <div class="w-screenshot">[screenshot]</div>
+            <div class="w-card-body">
+              <div class="w-card-text">
+                <div class="w-card-title">Project P (voted)</div>
+                <div class="w-card-author">by Author P</div>
+              </div>
+              <div class="w-vote-pill w-voted"><i data-lucide="arrow-up" style="width:12px;height:12px"></i><span>91</span></div>
+            </div>
+          </div>
+          <div class="w-card w-stable">
+            <div class="w-rank-badge">#3</div>
+            <div class="w-screenshot">[screenshot]</div>
+            <div class="w-card-body">
+              <div class="w-card-text">
+                <div class="w-card-title">Project Q</div>
+                <div class="w-card-author">by Author Q</div>
+              </div>
+              <div class="w-vote-pill"><i data-lucide="arrow-up" style="width:12px;height:12px"></i><span>40</span></div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+    </div>
+
+    <div class="screen-notes">
+      <details open>
+        <summary>Notes</summary>
+        <p>Entry condition: viewer clicks vote on a card whose rank will not change after the vote.</p>
+        <ul>
+          <li>Trigger: click on vote pill for card P.</li>
+          <li>Interaction: only the vote pill updates visually (count + voted state). No card moves.</li>
+          <li>Transition: none — grid is visually stable from before to after.</li>
+          <li>The button's own state change (icon/color/count) is out of scope for this feature and follows the existing snap behavior.</li>
+        </ul>
+      </details>
+    </div>
+
+  </div>
+</div>
+
+<!-- ================================================================
+     SCREEN 3 — Scenario 4: Failed vote does not animate
+     ================================================================ -->
+<div id="screen-3" class="screen" data-scenario="scenario-4">
+  <div class="screen-content @container max-w-6xl mx-auto p-6">
+
+    <h2 class="text-lg font-bold mb-2" style="color:var(--w-muted); border-bottom:1px solid var(--w-border); padding-bottom:8px;">
+      Scenario 4 — Failed vote (no animation)
+    </h2>
+    <p class="text-xs mb-5" style="color:var(--w-muted)">
+      Viewer clicks vote on P, but the server rejects the request. The ranked list is unchanged; no card slides.
+    </p>
+
+    <div class="w-flow">
+
+      <div class="w-frame">
+        <div class="mb-2"><span class="w-frame-title">Before click</span></div>
+        <div class="w-grid">
+          <div class="w-card w-stable">
+            <div class="w-rank-badge">#1</div>
+            <div class="w-screenshot">[screenshot]</div>
+            <div class="w-card-body">
+              <div class="w-card-text">
+                <div class="w-card-title">Project A</div>
+                <div class="w-card-author">by Author A</div>
+              </div>
+              <div class="w-vote-pill"><i data-lucide="arrow-up" style="width:12px;height:12px"></i><span>142</span></div>
+            </div>
+          </div>
+          <div class="w-card w-stable">
+            <div class="w-rank-badge">#2</div>
+            <div class="w-screenshot">[screenshot]</div>
+            <div class="w-card-body">
+              <div class="w-card-text">
+                <div class="w-card-title">Project Q</div>
+                <div class="w-card-author">by Author Q</div>
+              </div>
+              <div class="w-vote-pill"><i data-lucide="arrow-up" style="width:12px;height:12px"></i><span>88</span></div>
+            </div>
+          </div>
+          <div class="w-card w-highlight w-stable">
+            <div class="w-rank-badge">#3</div>
+            <div class="w-screenshot">[screenshot]</div>
+            <div class="w-card-body">
+              <div class="w-card-text">
+                <div class="w-card-title">Project P (viewer clicks)</div>
+                <div class="w-card-author">by Author P</div>
+              </div>
+              <div class="w-vote-pill"><i data-lucide="arrow-up" style="width:12px;height:12px"></i><span>87</span></div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="w-arrow-col">✕</div>
+
+      <div class="w-frame">
+        <div class="mb-2"><span class="w-frame-title">After server rejects — identical</span></div>
+        <div class="w-grid">
+          <div class="w-card w-stable">
+            <div class="w-rank-badge">#1</div>
+            <div class="w-screenshot">[screenshot]</div>
+            <div class="w-card-body">
+              <div class="w-card-text">
+                <div class="w-card-title">Project A</div>
+                <div class="w-card-author">by Author A</div>
+              </div>
+              <div class="w-vote-pill"><i data-lucide="arrow-up" style="width:12px;height:12px"></i><span>142</span></div>
+            </div>
+          </div>
+          <div class="w-card w-stable">
+            <div class="w-rank-badge">#2</div>
+            <div class="w-screenshot">[screenshot]</div>
+            <div class="w-card-body">
+              <div class="w-card-text">
+                <div class="w-card-title">Project Q</div>
+                <div class="w-card-author">by Author Q</div>
+              </div>
+              <div class="w-vote-pill"><i data-lucide="arrow-up" style="width:12px;height:12px"></i><span>88</span></div>
+            </div>
+          </div>
+          <div class="w-card w-highlight w-stable">
+            <div class="w-rank-badge">#3</div>
+            <div class="w-screenshot">[screenshot]</div>
+            <div class="w-card-body">
+              <div class="w-card-text">
+                <div class="w-card-title">Project P (vote rolled back)</div>
+                <div class="w-card-author">by Author P</div>
+              </div>
+              <div class="w-vote-pill"><i data-lucide="arrow-up" style="width:12px;height:12px"></i><span>87</span></div>
+            </div>
+          </div>
+        </div>
+        <div class="w-arrow-row mt-3">
+          <span class="w-motion-note">no card slides · order identical to "before"</span>
+        </div>
+      </div>
+
+    </div>
+
+    <div class="screen-notes">
+      <details open>
+        <summary>Notes</summary>
+        <p>Entry condition: the server action rejects the vote (network or server error).</p>
+        <ul>
+          <li>Trigger: viewer clicks vote on P; request fails.</li>
+          <li>Interaction: the optimistic count on the vote button briefly updates then rolls back to its original value. No card moves at any point.</li>
+          <li>Transition: none — DOM order after the failure is byte-for-byte identical to the DOM order before the click.</li>
+        </ul>
+      </details>
+    </div>
+
+  </div>
+</div>
+
+<!-- ================================================================
+     SCREEN 4 — Scenario 5: Reduced motion preference
+     ================================================================ -->
+<div id="screen-4" class="screen" data-scenario="scenario-5">
+  <div class="screen-content @container max-w-6xl mx-auto p-6">
+
+    <h2 class="text-lg font-bold mb-2" style="color:var(--w-muted); border-bottom:1px solid var(--w-border); padding-bottom:8px;">
+      Scenario 5 — Reduced motion (snap, no slide)
+    </h2>
+    <p class="text-xs mb-5" style="color:var(--w-muted)">
+      Viewer has <code>prefers-reduced-motion: reduce</code>. Vote changes the ranking, but cards snap to new positions with no visible slide.
+    </p>
+
+    <div class="w-flow">
+
+      <div class="w-frame">
+        <div class="mb-2"><span class="w-frame-title">Before — P is below Q</span></div>
+        <div class="w-grid">
+          <div class="w-card">
+            <div class="w-rank-badge">#1</div>
+            <div class="w-screenshot">[screenshot]</div>
+            <div class="w-card-body">
+              <div class="w-card-text">
+                <div class="w-card-title">Project A</div>
+                <div class="w-card-author">by Author A</div>
+              </div>
+              <div class="w-vote-pill"><i data-lucide="arrow-up" style="width:12px;height:12px"></i><span>142</span></div>
+            </div>
+          </div>
+          <div class="w-card">
+            <div class="w-rank-badge">#2</div>
+            <div class="w-screenshot">[screenshot]</div>
+            <div class="w-card-body">
+              <div class="w-card-text">
+                <div class="w-card-title">Project Q</div>
+                <div class="w-card-author">by Author Q</div>
+              </div>
+              <div class="w-vote-pill"><i data-lucide="arrow-up" style="width:12px;height:12px"></i><span>88</span></div>
+            </div>
+          </div>
+          <div class="w-card w-highlight">
+            <div class="w-rank-badge">#3</div>
+            <div class="w-screenshot">[screenshot]</div>
+            <div class="w-card-body">
+              <div class="w-card-text">
+                <div class="w-card-title">Project P (viewer clicks)</div>
+                <div class="w-card-author">by Author P</div>
+              </div>
+              <div class="w-vote-pill"><i data-lucide="arrow-up" style="width:12px;height:12px"></i><span>87</span></div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="w-arrow-col">⚡</div>
+
+      <div class="w-frame">
+        <div class="mb-2"><span class="w-frame-title">After — snap (no intermediate frame)</span></div>
+        <div class="w-grid">
+          <div class="w-card w-snaps">
+            <div class="w-rank-badge">#1</div>
+            <div class="w-screenshot">[screenshot]</div>
+            <div class="w-card-body">
+              <div class="w-card-text">
+                <div class="w-card-title">Project A</div>
+                <div class="w-card-author">by Author A</div>
+              </div>
+              <div class="w-vote-pill"><i data-lucide="arrow-up" style="width:12px;height:12px"></i><span>142</span></div>
+            </div>
+          </div>
+          <div class="w-card w-highlight w-snaps">
+            <div class="w-rank-badge">#2</div>
+            <div class="w-screenshot">[screenshot]</div>
+            <div class="w-card-body">
+              <div class="w-card-text">
+                <div class="w-card-title">Project P (voted)</div>
+                <div class="w-card-author">by Author P</div>
+              </div>
+              <div class="w-vote-pill w-voted"><i data-lucide="arrow-up" style="width:12px;height:12px"></i><span>88</span></div>
+            </div>
+          </div>
+          <div class="w-card w-snaps">
+            <div class="w-rank-badge">#3</div>
+            <div class="w-screenshot">[screenshot]</div>
+            <div class="w-card-body">
+              <div class="w-card-text">
+                <div class="w-card-title">Project Q</div>
+                <div class="w-card-author">by Author Q</div>
+              </div>
+              <div class="w-vote-pill"><i data-lucide="arrow-up" style="width:12px;height:12px"></i><span>88</span></div>
+            </div>
+          </div>
+        </div>
+        <div class="w-arrow-row mt-3">
+          <span class="w-motion-note">positions update instantly · no visible intermediate slide</span>
+        </div>
+      </div>
+
+    </div>
+
+    <div class="screen-notes">
+      <details open>
+        <summary>Notes</summary>
+        <p>Entry condition: viewer's OS or browser has reduced-motion enabled.</p>
+        <ul>
+          <li>Trigger: same vote action as Scenario 1.</li>
+          <li>Interaction: cards jump directly to their new positions; no intermediate frame is rendered.</li>
+          <li>Transition: final DOM order is identical to Scenario 1's result, only the motion is suppressed.</li>
+        </ul>
+      </details>
+    </div>
+
+  </div>
+</div>
+
+<script>
+var currentScreen = 0;
+var screenIds = [];
+
+function show(id) {
+  document.querySelectorAll('.screen').forEach(function(s) { s.classList.remove('active'); });
+  document.getElementById('screen-' + id).classList.add('active');
+  document.querySelectorAll('nav button[id^="nav-"]').forEach(function(b) { b.classList.remove('active'); });
+  document.getElementById('nav-' + id).classList.add('active');
+  currentScreen = screenIds.indexOf(id);
+  lucide.createIcons();
+}
+
+function setViewport(mode) {
+  document.body.classList.remove('viewport-mobile', 'viewport-desktop');
+  document.body.classList.add('viewport-' + mode);
+  document.querySelectorAll('.vp-toggle button').forEach(function(b) { b.classList.remove('active'); });
+  document.getElementById('vp-' + mode).classList.add('active');
+}
+
+document.addEventListener('DOMContentLoaded', function() {
+  document.querySelectorAll('nav button[id^="nav-"]').forEach(function(b) {
+    screenIds.push(parseInt(b.id.replace('nav-', '')));
+  });
+  var first = document.querySelector('nav button[id^="nav-"]');
+  if (first) first.click();
+  lucide.createIcons();
+});
+</script>
+</body>
+</html>
