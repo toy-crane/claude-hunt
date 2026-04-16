@@ -12,6 +12,8 @@ const ONBOARDING_BYPASS_PATHS = [
   "/onboarding",
   "/login",
   "/auth", // /auth/callback, /auth/auth-code-error, ...
+  "/terms",
+  "/privacy",
 ];
 
 export function isOnboardingBypassPath(pathname: string): boolean {
