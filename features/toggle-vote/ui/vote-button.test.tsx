@@ -151,6 +151,37 @@ describe("VoteButton (unauthenticated)", () => {
     expect(link.textContent ?? "").not.toMatch(SIGN_IN_TO_VOTE);
     expect(link.textContent ?? "").not.toMatch(KOREAN_AUTH_LABEL);
   });
+
+  it("renders the pill with the same visual classes as the idle signed-in pill", () => {
+    render(
+      <VoteButton {...baseProps} isAuthenticated={false} voteCount={42} />
+    );
+    const link = screen.getByRole("link");
+    expect(link.className).toContain("border-vote");
+    expect(link.className).toContain("text-vote");
+    expect(link.textContent).toContain("42");
+  });
+
+  it("does not carry a disabled attribute", () => {
+    render(<VoteButton {...baseProps} isAuthenticated={false} />);
+    const link = screen.getByRole("link");
+    expect(link).not.toHaveAttribute("disabled");
+    expect(link).not.toHaveAttribute("aria-disabled", "true");
+  });
+
+  it("does not change the visible count when clicked (no optimistic path)", async () => {
+    const user = userEvent.setup();
+    render(
+      <VoteButton {...baseProps} isAuthenticated={false} voteCount={42} />
+    );
+    const link = screen.getByRole("link");
+    expect(link.textContent).toContain("42");
+
+    await user.click(link);
+
+    expect(screen.getByRole("link").textContent).toContain("42");
+    expect(toggleVoteMock).not.toHaveBeenCalled();
+  });
 });
 
 describe("VoteButton (owner)", () => {

@@ -2,7 +2,6 @@
 
 import { RiArrowUpFill, RiArrowUpLine } from "@remixicon/react";
 import { cn } from "@shared/lib/utils";
-import { Button } from "@shared/ui/button";
 import Link from "next/link";
 import { useState, useTransition } from "react";
 import { toggleVote } from "../api/actions";
@@ -45,19 +44,15 @@ export function VoteButton({
 
   if (!isAuthenticated) {
     return (
-      <Button
+      <Link
         aria-label={ARIA_LABEL}
-        asChild
-        className="gap-1.5"
+        className={cn(PILL_BASE_CLASS, PILL_IDLE_CLASS)}
         data-testid="vote-button-signin"
-        size="sm"
-        variant="outline"
+        href="/login"
       >
-        <Link href="/login">
-          <RiArrowUpLine aria-hidden="true" className="size-3.5" />
-          {voteCount}
-        </Link>
-      </Button>
+        <RiArrowUpLine aria-hidden="true" className="size-4" />
+        <span className="tabular-nums">{voteCount}</span>
+      </Link>
     );
   }
 
