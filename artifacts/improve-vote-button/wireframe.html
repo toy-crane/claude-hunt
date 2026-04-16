@@ -1,0 +1,534 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Wireframe: improve-vote-button</title>
+<script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
+<script src="https://unpkg.com/lucide@latest"></script>
+<style>
+  :root {
+    --w-bg: #f5f5f5;
+    --w-border: #ccc;
+    --w-text: #555;
+    --w-muted: #aaa;
+    --w-fill: #eee;
+    /* Proposed vote accent — warm coral matching Claude's brand tone */
+    --w-vote: #d97757;
+    --w-vote-weak: #fbe8df;
+  }
+
+  * {
+    font-family: ui-monospace, SFMono-Regular, "SF Mono", Menlo, Consolas, monospace;
+    color: var(--w-text);
+  }
+
+  body { background: var(--w-bg); }
+
+  nav { position: sticky; top: 0; z-index: 40; background: var(--w-bg); border-bottom: 1px solid var(--w-border); }
+  nav button { cursor: pointer; font-size: 13px; }
+  nav button:hover { background: var(--w-fill); border-radius: 4px; }
+  nav button.active { font-weight: bold; border-bottom: 2px solid var(--w-text); }
+
+  .screen { display: none; }
+  .screen.active { display: block; }
+
+  .vp-toggle button {
+    font-size: 12px; padding: 2px 8px;
+    border: 1px solid var(--w-border); cursor: pointer; background: white;
+  }
+  .vp-toggle button:first-child { border-radius: 4px 0 0 4px; }
+  .vp-toggle button:last-child { border-radius: 0 4px 4px 0; border-left: none; }
+  .vp-toggle button.active { background: var(--w-text); color: white; }
+
+  body.viewport-mobile .screen-content {
+    max-width: 375px !important;
+    margin: 24px auto !important;
+    border: 2px solid var(--w-border);
+    border-radius: 24px;
+    min-height: 667px;
+    background: white;
+    box-shadow: 0 4px 24px rgba(0,0,0,0.08);
+    padding: 32px 16px !important;
+  }
+
+  .screen-notes {
+    background: #fffde7;
+    border-left: 3px solid #ffd54f;
+    padding: 12px 16px;
+    margin-top: 24px;
+    font-size: 13px;
+    border-radius: 0 4px 4px 0;
+  }
+  .screen-notes summary {
+    cursor: pointer;
+    font-weight: bold;
+    font-size: 12px;
+    color: #b0a050;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+  }
+  .screen-notes p { margin: 6px 0 2px; color: #777; }
+  .screen-notes ul { margin: 4px 0 0 16px; padding: 0; color: #777; }
+  .screen-notes li { margin: 2px 0; }
+
+  /* Wireframe primitives */
+  .w-card { background: white; border: 1px solid var(--w-border); border-radius: 8px; overflow: hidden; }
+  .w-img { background: var(--w-fill); aspect-ratio: 16/9; display: flex; align-items: center; justify-content: center; color: var(--w-muted); font-size: 12px; }
+  .w-line { height: 8px; background: var(--w-fill); border-radius: 2px; }
+  .w-line-short { height: 8px; background: var(--w-fill); border-radius: 2px; width: 60%; }
+
+  /* The vote pill — what this wireframe is about */
+  .w-vote-pill {
+    display: flex; flex-direction: column; align-items: center; justify-content: center;
+    gap: 2px;
+    min-width: 56px; padding: 10px 8px;
+    border: 1.5px solid var(--w-vote);
+    border-radius: 10px;
+    background: white;
+    color: var(--w-vote);
+    font-weight: 600;
+  }
+  .w-vote-pill .arrow { font-size: 16px; line-height: 1; }
+  .w-vote-pill .count { font-size: 16px; line-height: 1.1; font-variant-numeric: tabular-nums; }
+  .w-vote-pill.voted {
+    background: var(--w-vote);
+    color: white;
+  }
+  .w-vote-pill.loading {
+    opacity: 0.6;
+  }
+
+  /* Legend dot */
+  .legend-dot { display: inline-block; width: 10px; height: 10px; border-radius: 2px; vertical-align: middle; margin-right: 6px; }
+</style>
+</head>
+<body class="p-0 m-0 viewport-mobile">
+
+<nav class="flex items-center gap-4 px-6 py-2">
+  <span class="text-xs" style="color:var(--w-muted)">wireframe — improve-vote-button</span>
+  <button id="nav-0" onclick="show(0)" class="px-2 py-1">Idle</button>
+  <button id="nav-1" onclick="show(1)" class="px-2 py-1">Voted</button>
+  <button id="nav-2" onclick="show(2)" class="px-2 py-1">Side-by-side</button>
+  <button id="nav-3" onclick="show(3)" class="px-2 py-1">Color options</button>
+  <div class="vp-toggle flex ml-auto">
+    <button id="vp-desktop" onclick="setViewport('desktop')">Desktop</button>
+    <button id="vp-mobile" onclick="setViewport('mobile')" class="active">Mobile</button>
+  </div>
+</nav>
+
+<!-- SCREEN 0 — IDLE -->
+<div id="screen-0" class="screen">
+  <div class="screen-content @container max-w-6xl mx-auto p-6">
+    <h2 class="text-lg font-bold mb-5" style="color:var(--w-muted); border-bottom:1px solid var(--w-border); padding-bottom:8px;">
+      Project card — idle (not voted)
+    </h2>
+
+    <div class="grid grid-cols-1 @md:grid-cols-2 gap-4">
+      <!-- Card -->
+      <div class="w-card">
+        <div class="w-img">screenshot 16:9</div>
+        <div class="flex gap-3 p-4">
+          <!-- Left: title, tagline, author -->
+          <div class="flex-1 min-w-0 flex flex-col gap-2">
+            <div class="w-line" style="width:80%"></div>
+            <div class="flex flex-col gap-1.5">
+              <div class="w-line"></div>
+              <div class="w-line-short"></div>
+            </div>
+            <div class="w-line-short" style="margin-top:4px; width:40%"></div>
+          </div>
+          <!-- Right: vertical vote pill (prominent) -->
+          <div class="shrink-0 self-start">
+            <button class="w-vote-pill" aria-label="upvote" aria-pressed="false">
+              <i data-lucide="chevron-up" class="arrow"></i>
+              <span class="count">128</span>
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Card — owner (no button) -->
+      <div class="w-card">
+        <div class="w-img">screenshot 16:9</div>
+        <div class="flex gap-3 p-4">
+          <div class="flex-1 min-w-0 flex flex-col gap-2">
+            <div class="w-line" style="width:80%"></div>
+            <div class="flex flex-col gap-1.5">
+              <div class="w-line"></div>
+              <div class="w-line-short"></div>
+            </div>
+            <div class="w-line-short" style="margin-top:4px; width:40%"></div>
+            <div class="flex items-center gap-2 mt-2">
+              <span class="text-xs" style="color:var(--w-muted)">[edit]</span>
+              <span class="text-xs" style="color:var(--w-muted)">[delete]</span>
+            </div>
+          </div>
+          <!-- Right: read-only count for the owner (no pill, no button) -->
+          <div class="shrink-0 self-start flex flex-col items-center gap-0.5 py-2 px-2">
+            <i data-lucide="chevron-up" style="width:16px;height:16px;color:var(--w-muted)"></i>
+            <span class="text-sm" style="color:var(--w-muted); font-variant-numeric:tabular-nums">42</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="screen-notes">
+      <details open>
+        <summary>Notes</summary>
+        <p>Layout change</p>
+        <ul>
+          <li>Vote button moves from the bottom action row to the top-right of the card content area (PH-style vertical pill).</li>
+          <li>Title row's tiny "👍 42" read-only indicator is removed — the pill is the single source of count.</li>
+          <li>Owner card: pill is replaced by a muted read-only count (same shape, no button). Edit/delete stay at bottom.</li>
+          <li>The accent color (<span class="legend-dot" style="background:var(--w-vote)"></span>warm coral) is reserved for this action — not used elsewhere.</li>
+        </ul>
+        <p>Interaction</p>
+        <ul>
+          <li>Signed-in viewer: clicking toggles vote. Optimistic count update + subtle press animation.</li>
+          <li>Anonymous viewer: clicking routes to /login (unchanged).</li>
+          <li>Owner: no button rendered — read-only count only.</li>
+        </ul>
+      </details>
+    </div>
+  </div>
+</div>
+
+<!-- SCREEN 1 — VOTED -->
+<div id="screen-1" class="screen">
+  <div class="screen-content @container max-w-6xl mx-auto p-6">
+    <h2 class="text-lg font-bold mb-5" style="color:var(--w-muted); border-bottom:1px solid var(--w-border); padding-bottom:8px;">
+      Project card — voted
+    </h2>
+
+    <div class="grid grid-cols-1 @md:grid-cols-2 gap-4">
+      <div class="w-card">
+        <div class="w-img">screenshot 16:9</div>
+        <div class="flex gap-3 p-4">
+          <div class="flex-1 min-w-0 flex flex-col gap-2">
+            <div class="w-line" style="width:80%"></div>
+            <div class="flex flex-col gap-1.5">
+              <div class="w-line"></div>
+              <div class="w-line-short"></div>
+            </div>
+            <div class="w-line-short" style="margin-top:4px; width:40%"></div>
+          </div>
+          <div class="shrink-0 self-start">
+            <button class="w-vote-pill voted" aria-label="remove upvote" aria-pressed="true">
+              <i data-lucide="chevron-up" class="arrow"></i>
+              <span class="count">129</span>
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <div class="w-card">
+        <div class="w-img">screenshot 16:9</div>
+        <div class="flex gap-3 p-4">
+          <div class="flex-1 min-w-0 flex flex-col gap-2">
+            <div class="w-line" style="width:80%"></div>
+            <div class="flex flex-col gap-1.5">
+              <div class="w-line"></div>
+              <div class="w-line-short"></div>
+            </div>
+            <div class="w-line-short" style="margin-top:4px; width:40%"></div>
+          </div>
+          <div class="shrink-0 self-start">
+            <button class="w-vote-pill loading" aria-label="saving" aria-pressed="true" disabled>
+              <i data-lucide="loader-2" class="arrow"></i>
+              <span class="count">7</span>
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="screen-notes">
+      <details open>
+        <summary>Notes</summary>
+        <p>Voted state</p>
+        <ul>
+          <li>Solid coral fill + white content = strong signal you've voted. Clicking again removes the vote.</li>
+          <li>Pending state: same solid fill but at 60% opacity; disabled during the server round-trip.</li>
+        </ul>
+      </details>
+    </div>
+  </div>
+</div>
+
+<!-- SCREEN 2 — SIDE-BY-SIDE -->
+<div id="screen-2" class="screen">
+  <div class="screen-content @container max-w-6xl mx-auto p-6">
+    <h2 class="text-lg font-bold mb-5" style="color:var(--w-muted); border-bottom:1px solid var(--w-border); padding-bottom:8px;">
+      Before / after
+    </h2>
+
+    <div class="grid grid-cols-1 @md:grid-cols-2 gap-4">
+      <!-- BEFORE -->
+      <div>
+        <div class="text-xs mb-2" style="color:var(--w-muted)">BEFORE — small outline button in the bottom action row</div>
+        <div class="w-card">
+          <div class="w-img">screenshot 16:9</div>
+          <div class="flex flex-col gap-1.5 p-4">
+            <div class="flex items-start justify-between gap-3">
+              <div class="w-line" style="width:60%"></div>
+              <span class="text-xs flex items-center gap-1" style="color:var(--w-muted)">
+                <i data-lucide="thumbs-up" style="width:12px;height:12px"></i> 128
+              </span>
+            </div>
+            <div class="w-line"></div>
+            <div class="w-line-short"></div>
+            <div class="w-line-short" style="width:40%; margin-top:4px"></div>
+            <div class="flex items-center gap-2 mt-2">
+              <button class="text-xs border rounded px-2 py-1 flex items-center gap-1" style="border-color:var(--w-border)">
+                <i data-lucide="chevron-up" style="width:12px;height:12px"></i> 128
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- AFTER -->
+      <div>
+        <div class="text-xs mb-2" style="color:var(--w-vote); font-weight:bold">AFTER — vertical coral pill, single source of count</div>
+        <div class="w-card">
+          <div class="w-img">screenshot 16:9</div>
+          <div class="flex gap-3 p-4">
+            <div class="flex-1 min-w-0 flex flex-col gap-2">
+              <div class="w-line" style="width:80%"></div>
+              <div class="flex flex-col gap-1.5">
+                <div class="w-line"></div>
+                <div class="w-line-short"></div>
+              </div>
+              <div class="w-line-short" style="margin-top:4px; width:40%"></div>
+            </div>
+            <div class="shrink-0 self-start">
+              <button class="w-vote-pill" aria-label="upvote">
+                <i data-lucide="chevron-up" class="arrow"></i>
+                <span class="count">128</span>
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="screen-notes">
+      <details open>
+        <summary>Notes</summary>
+        <p>Color token proposal</p>
+        <ul>
+          <li><span class="legend-dot" style="background:var(--w-vote)"></span>Add a new semantic token <code>--vote</code> (warm coral, <code>oklch(0.7 0.14 42)</code>) + <code>--vote-foreground</code>.</li>
+          <li>Light mode: <code>oklch(0.7 0.14 42)</code> (≈ Claude coral). Dark mode: <code>oklch(0.76 0.14 42)</code>.</li>
+          <li>Used only for the vote pill. Keeps the rest of the theme neutral.</li>
+        </ul>
+      </details>
+    </div>
+  </div>
+</div>
+
+<!-- SCREEN 3 — COLOR OPTIONS -->
+<div id="screen-3" class="screen">
+  <div class="screen-content @container max-w-6xl mx-auto p-6">
+    <h2 class="text-lg font-bold mb-5" style="color:var(--w-muted); border-bottom:1px solid var(--w-border); padding-bottom:8px;">
+      Color options
+    </h2>
+
+    <p class="text-xs mb-4" style="color:var(--w-muted)">
+      Each card shows the same pill in two states: idle (outlined) and voted (solid). Swatch hex shown below each option.
+    </p>
+
+    <div class="grid grid-cols-1 @md:grid-cols-2 gap-4">
+
+      <!-- A. Claude Coral -->
+      <div class="w-card p-4" style="--opt: #d97757">
+        <div class="flex items-center justify-between mb-3">
+          <div>
+            <div class="text-sm font-bold" style="color:var(--opt)">A · Claude coral</div>
+            <div class="text-xs" style="color:var(--w-muted)">warm, on-brand · #d97757</div>
+          </div>
+        </div>
+        <div class="flex items-center gap-3">
+          <button class="w-vote-pill" style="border-color:var(--opt); color:var(--opt)">
+            <i data-lucide="chevron-up" class="arrow"></i><span class="count">128</span>
+          </button>
+          <button class="w-vote-pill voted" style="border-color:var(--opt); background:var(--opt); color:white">
+            <i data-lucide="chevron-up" class="arrow"></i><span class="count">129</span>
+          </button>
+        </div>
+      </div>
+
+      <!-- B. Product Hunt orange -->
+      <div class="w-card p-4" style="--opt: #da552f">
+        <div class="flex items-center justify-between mb-3">
+          <div>
+            <div class="text-sm font-bold" style="color:var(--opt)">B · Product Hunt orange</div>
+            <div class="text-xs" style="color:var(--w-muted)">classic upvote · #da552f</div>
+          </div>
+        </div>
+        <div class="flex items-center gap-3">
+          <button class="w-vote-pill" style="border-color:var(--opt); color:var(--opt)">
+            <i data-lucide="chevron-up" class="arrow"></i><span class="count">128</span>
+          </button>
+          <button class="w-vote-pill voted" style="border-color:var(--opt); background:var(--opt); color:white">
+            <i data-lucide="chevron-up" class="arrow"></i><span class="count">129</span>
+          </button>
+        </div>
+      </div>
+
+      <!-- C. Amber -->
+      <div class="w-card p-4" style="--opt: #f59e0b">
+        <div class="flex items-center justify-between mb-3">
+          <div>
+            <div class="text-sm font-bold" style="color:var(--opt)">C · Amber</div>
+            <div class="text-xs" style="color:var(--w-muted)">cheerful, gold-leaning · #f59e0b</div>
+          </div>
+        </div>
+        <div class="flex items-center gap-3">
+          <button class="w-vote-pill" style="border-color:var(--opt); color:var(--opt)">
+            <i data-lucide="chevron-up" class="arrow"></i><span class="count">128</span>
+          </button>
+          <button class="w-vote-pill voted" style="border-color:var(--opt); background:var(--opt); color:white">
+            <i data-lucide="chevron-up" class="arrow"></i><span class="count">129</span>
+          </button>
+        </div>
+      </div>
+
+      <!-- D. Emerald -->
+      <div class="w-card p-4" style="--opt: #10b981">
+        <div class="flex items-center justify-between mb-3">
+          <div>
+            <div class="text-sm font-bold" style="color:var(--opt)">D · Emerald</div>
+            <div class="text-xs" style="color:var(--w-muted)">positive / growth · #10b981</div>
+          </div>
+        </div>
+        <div class="flex items-center gap-3">
+          <button class="w-vote-pill" style="border-color:var(--opt); color:var(--opt)">
+            <i data-lucide="chevron-up" class="arrow"></i><span class="count">128</span>
+          </button>
+          <button class="w-vote-pill voted" style="border-color:var(--opt); background:var(--opt); color:white">
+            <i data-lucide="chevron-up" class="arrow"></i><span class="count">129</span>
+          </button>
+        </div>
+      </div>
+
+      <!-- E. Indigo -->
+      <div class="w-card p-4" style="--opt: #6366f1">
+        <div class="flex items-center justify-between mb-3">
+          <div>
+            <div class="text-sm font-bold" style="color:var(--opt)">E · Indigo</div>
+            <div class="text-xs" style="color:var(--w-muted)">calm, modern · #6366f1</div>
+          </div>
+        </div>
+        <div class="flex items-center gap-3">
+          <button class="w-vote-pill" style="border-color:var(--opt); color:var(--opt)">
+            <i data-lucide="chevron-up" class="arrow"></i><span class="count">128</span>
+          </button>
+          <button class="w-vote-pill voted" style="border-color:var(--opt); background:var(--opt); color:white">
+            <i data-lucide="chevron-up" class="arrow"></i><span class="count">129</span>
+          </button>
+        </div>
+      </div>
+
+      <!-- F. Rose -->
+      <div class="w-card p-4" style="--opt: #e11d48">
+        <div class="flex items-center justify-between mb-3">
+          <div>
+            <div class="text-sm font-bold" style="color:var(--opt)">F · Rose</div>
+            <div class="text-xs" style="color:var(--w-muted)">bold, passionate · #e11d48</div>
+          </div>
+        </div>
+        <div class="flex items-center gap-3">
+          <button class="w-vote-pill" style="border-color:var(--opt); color:var(--opt)">
+            <i data-lucide="chevron-up" class="arrow"></i><span class="count">128</span>
+          </button>
+          <button class="w-vote-pill voted" style="border-color:var(--opt); background:var(--opt); color:white">
+            <i data-lucide="chevron-up" class="arrow"></i><span class="count">129</span>
+          </button>
+        </div>
+      </div>
+
+      <!-- G. Sky -->
+      <div class="w-card p-4" style="--opt: #0ea5e9">
+        <div class="flex items-center justify-between mb-3">
+          <div>
+            <div class="text-sm font-bold" style="color:var(--opt)">G · Sky blue</div>
+            <div class="text-xs" style="color:var(--w-muted)">clean, trustworthy · #0ea5e9</div>
+          </div>
+        </div>
+        <div class="flex items-center gap-3">
+          <button class="w-vote-pill" style="border-color:var(--opt); color:var(--opt)">
+            <i data-lucide="chevron-up" class="arrow"></i><span class="count">128</span>
+          </button>
+          <button class="w-vote-pill voted" style="border-color:var(--opt); background:var(--opt); color:white">
+            <i data-lucide="chevron-up" class="arrow"></i><span class="count">129</span>
+          </button>
+        </div>
+      </div>
+
+      <!-- H. Violet -->
+      <div class="w-card p-4" style="--opt: #8b5cf6">
+        <div class="flex items-center justify-between mb-3">
+          <div>
+            <div class="text-sm font-bold" style="color:var(--opt)">H · Violet</div>
+            <div class="text-xs" style="color:var(--w-muted)">distinct, playful · #8b5cf6</div>
+          </div>
+        </div>
+        <div class="flex items-center gap-3">
+          <button class="w-vote-pill" style="border-color:var(--opt); color:var(--opt)">
+            <i data-lucide="chevron-up" class="arrow"></i><span class="count">128</span>
+          </button>
+          <button class="w-vote-pill voted" style="border-color:var(--opt); background:var(--opt); color:white">
+            <i data-lucide="chevron-up" class="arrow"></i><span class="count">129</span>
+          </button>
+        </div>
+      </div>
+
+    </div>
+
+    <div class="screen-notes">
+      <details open>
+        <summary>Notes</summary>
+        <p>Recommendation</p>
+        <ul>
+          <li><b>A (Claude coral)</b> and <b>B (PH orange)</b> both reinforce the "upvote" semantic — A feels on-brand, B feels more iconic.</li>
+          <li><b>C (amber)</b> gives a "trophy" vibe — good if ranking is the core story.</li>
+          <li><b>F (rose)</b> is the strongest visual hit but can read as destructive since <code>--destructive</code> is already red.</li>
+          <li><b>D/E/G/H</b> avoid the warm palette — cleaner separation from destructive red, but lose the "upvote" warmth.</li>
+        </ul>
+        <p>Pick one letter and I'll lock it in.</p>
+      </details>
+    </div>
+  </div>
+</div>
+
+<script>
+var currentScreen = 0;
+var screenIds = [];
+
+function show(id) {
+  document.querySelectorAll('.screen').forEach(function(s) { s.classList.remove('active'); });
+  document.getElementById('screen-' + id).classList.add('active');
+  document.querySelectorAll('nav button[id^="nav-"]').forEach(function(b) { b.classList.remove('active'); });
+  document.getElementById('nav-' + id).classList.add('active');
+  currentScreen = screenIds.indexOf(id);
+}
+
+function setViewport(mode) {
+  document.body.classList.remove('viewport-mobile', 'viewport-desktop');
+  document.body.classList.add('viewport-' + mode);
+  document.querySelectorAll('.vp-toggle button').forEach(function(b) { b.classList.remove('active'); });
+  document.getElementById('vp-' + mode).classList.add('active');
+}
+
+document.addEventListener('DOMContentLoaded', function() {
+  document.querySelectorAll('nav button[id^="nav-"]').forEach(function(b) {
+    screenIds.push(parseInt(b.id.replace('nav-', '')));
+  });
+  var first = document.querySelector('nav button[id^="nav-"]');
+  if (first) first.click();
+  lucide.createIcons();
+});
+</script>
+</body>
+</html>
