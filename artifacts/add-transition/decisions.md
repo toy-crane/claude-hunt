@@ -10,7 +10,7 @@
 - `wireframe-reviewer` — omitted because the wireframe depicts before/after frames of a motion that cannot be rendered statically; pixel comparison would be meaningless here.
 - `design-reviewer` — omitted because the feature introduces no new UI components or shadcn tokens; it only wraps existing cards and adds a single `@media` CSS rule.
 **Harness Signal**: When a feature is motion-only with no layout change, wireframe-reviewer comparison is low-signal. The execute-plan skill could note this edge case: "If the wireframe only depicts before/after state frames of a motion, skip wireframe-reviewer."
-**Result**: Pending
+**Result**: Pending → Success — both chosen reviewers returned PASS with only advisory + low-priority warnings.
 
 ## Task Execution Order
 
@@ -18,7 +18,7 @@
 **Decision**: Execute Task 1 (reduced-motion CSS) first, then Task 2 (wrap cards in ViewTransition). Sequential.
 **Why**: plan.md explicitly states Task 2 depends on Task 1 — the accessibility invariant from spec must be in place before the animation can run. The two tasks also touch disjoint files (globals.css vs project-grid.tsx), so they commit cleanly as separate logical units.
 **Harness Signal**: N/A
-**Result**: Pending
+**Result**: Pending → Success — Task 1 and Task 2 landed in order; no rework needed.
 
 ## Vitest mock for `<ViewTransition>`
 
@@ -41,3 +41,29 @@
   The production effect is fully determined by a single canonical pattern (per-card `<ViewTransition>` wrap + Next 16 + React 19.2.4); the `react-reviewer` and `ui-quality-reviewer` will examine the code for correctness. The motion itself is best verified on a seeded environment by a human reviewer (deployed preview or locally seeded dev).
 **Harness Signal**: plan.md verification steps should call out environment prerequisites (seeded DB, auth) when Browser MCP is expected, or fall back to a deployed preview URL. The execute-plan skill could note: "If Browser MCP verification depends on seeded data and the local environment is unseeded, document the deferral in decisions.md and defer to human review rather than bootstrapping seed data within the execution turn."
 **Result**: Pending → Partial — regression-safe (build + 300 tests + clean baseline render); live motion evidence deferred to human review.
+
+## Applied ui-quality-reviewer warning: image-pair reduced-motion gap
+
+**When**: Step 5, post-review
+**Decision**: Extend the `@media (prefers-reduced-motion: reduce)` block in `app/globals.css` to also cover `::view-transition-image-pair(*)`.
+**Why**: `ui-quality-reviewer` flagged that the pair pseudo-element retains its default UA fade animation even when `old`, `new`, and `group` are zeroed — potentially producing a faint flash under reduced motion (directly relevant to Scenario 5 in spec.md). The `vercel-react-view-transitions` skill's canonical recipe omits the pair; applying the warning closes the gap with a 1-line CSS change and better matches the spec's invariant.
+**Harness Signal**: The `vercel-react-view-transitions` skill's `references/css-recipes.md` reduced-motion block should include `::view-transition-image-pair(*)` for complete coverage. Consider filing this upstream.
+**Result**: Pending → Success — CSS extended, build passes.
+
+## Logged ui-quality-reviewer warning: import path fragility
+
+**When**: Step 5, post-review
+**Decision**: Leave `import { ViewTransition } from "react";` as-is, per the `vercel-react-view-transitions` skill. No inline code comment added.
+**Why**: The skill defines this as the canonical import for Next.js projects ("Next.js already bundles React canary internally — npm ls react may show a stable-looking version; this is expected"). Adding a repetition-of-skill comment at every usage site would be noise. The subtlety is already documented in the Vitest mock rationale entry above.
+**Harness Signal**: N/A
+**Result**: Success — warning logged without re-review per ui-quality-reviewer convention.
+
+## Logged react-reviewer advisories
+
+**When**: Step 5, post-review
+**Decision**: Leave `<ViewTransition key={project.id}>` without `default="none"` and the vitest mock at module scope. Surface the advisories in the Step 6 report but do not change the code.
+**Why**:
+- `default="none"` advisory: current scope has a single `startTransition` source (the vote button's `useTransition`) affecting the grid; no other transition-firing event exists in this tree today. Adding `default="none"` would be defensive future-proofing, which `CLAUDE.md` cautions against ("Don't design for hypothetical future requirements"). If a future change introduces Suspense or unrelated `startTransition` calls in the grid subtree, revisit.
+- Global `vi.mock` scope: this is intentional — every test file that renders a grid descendant transitively imports a component with `<ViewTransition>`. Making the mock per-file would duplicate the boilerplate. If a future test needs to inspect VT behavior, it can override the mock locally.
+**Harness Signal**: N/A
+**Result**: Success — advisories logged, surfaced in Step 6 report.
