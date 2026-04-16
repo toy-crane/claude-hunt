@@ -107,6 +107,24 @@ describe("proxy — onboarding gate", () => {
     expect(res.headers.get("location")).toBeNull();
   });
 
+  it("does not redirect authed-no-cohort user away from /terms", async () => {
+    getUser.mockResolvedValue({ data: { user: { id: "u1" } }, error: null });
+    profileSingle.mockResolvedValue({ data: { cohort_id: null }, error: null });
+
+    const res = await proxy(buildRequest("/terms"));
+
+    expect(res.headers.get("location")).toBeNull();
+  });
+
+  it("does not redirect authed-no-cohort user away from /privacy", async () => {
+    getUser.mockResolvedValue({ data: { user: { id: "u1" } }, error: null });
+    profileSingle.mockResolvedValue({ data: { cohort_id: null }, error: null });
+
+    const res = await proxy(buildRequest("/privacy"));
+
+    expect(res.headers.get("location")).toBeNull();
+  });
+
   it("re-bounces a previously onboarded user whose cohort has been deleted", async () => {
     // Simulates ON DELETE SET NULL on profiles.cohort_id
     getUser.mockResolvedValue({ data: { user: { id: "u1" } }, error: null });
@@ -150,6 +168,11 @@ describe("isOnboardingBypassPath", () => {
     expect(isOnboardingBypassPath("/login")).toBe(true);
     expect(isOnboardingBypassPath("/auth/callback")).toBe(true);
     expect(isOnboardingBypassPath("/auth/auth-code-error")).toBe(true);
+  });
+
+  it("returns true for /terms and /privacy (public legal pages)", () => {
+    expect(isOnboardingBypassPath("/terms")).toBe(true);
+    expect(isOnboardingBypassPath("/privacy")).toBe(true);
   });
 
   it("returns false for regular app paths", () => {
