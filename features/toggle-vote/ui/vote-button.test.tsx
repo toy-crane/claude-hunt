@@ -24,18 +24,19 @@ const VOTE_LABEL_PATTERN = /Upvote|Vote|추천|투표/i;
 const SIGN_IN_TO_VOTE = /Sign in to vote/i;
 const KOREAN_AUTH_LABEL = /추천|투표|로그인/;
 
+function createDeferred<T>() {
+  let resolve!: (value: T) => void;
+  const promise = new Promise<T>((r) => {
+    resolve = r;
+  });
+  return { promise, resolve };
+}
+
 beforeEach(() => {
   toggleVoteMock.mockReset();
 });
 
-describe("VoteButton", () => {
-  it("hides the button when the project is owned by the viewer", () => {
-    const { container } = render(
-      <VoteButton {...baseProps} ownedByViewer={true} />
-    );
-    expect(container.firstChild).toBeNull();
-  });
-
+describe("VoteButton (signed-in non-owner)", () => {
   it("renders no text label other than the vote count", () => {
     render(<VoteButton {...baseProps} />);
     const button = screen.getByRole("button");
@@ -61,11 +62,21 @@ describe("VoteButton", () => {
     expect(screen.getByRole("link")).toHaveAttribute("aria-label", "추천하기");
   });
 
-  it("applies the active color classes when already voted", () => {
-    render(<VoteButton {...baseProps} alreadyVoted={true} />);
+  it("renders the idle outlined state when not voted (aria-pressed=false, bordered on card background)", () => {
+    render(<VoteButton {...baseProps} voteCount={128} />);
     const button = screen.getByRole("button");
-    expect(button.className).toContain("border-primary");
-    expect(button.className).toContain("text-primary");
+    expect(button).toHaveAttribute("aria-pressed", "false");
+    expect(button.className).toContain("bg-background");
+    expect(button.className).toContain("text-foreground");
+    expect(button.textContent).toContain("128");
+  });
+
+  it("renders the voted solid state when already voted (aria-pressed=true, filled with primary)", () => {
+    render(<VoteButton {...baseProps} alreadyVoted={true} voteCount={128} />);
+    const button = screen.getByRole("button");
+    expect(button).toHaveAttribute("aria-pressed", "true");
+    expect(button.className).toContain("bg-primary");
+    expect(button.className).toContain("text-primary-foreground");
   });
 
   it("uses an up-pointing arrow icon (svg)", () => {
@@ -75,6 +86,63 @@ describe("VoteButton", () => {
     expect(svg).not.toBeNull();
   });
 
+  it("optimistically increments the count and flips aria-pressed synchronously on click", async () => {
+    toggleVoteMock.mockResolvedValue({ ok: true, voted: true });
+    const user = userEvent.setup();
+    render(<VoteButton {...baseProps} voteCount={12} />);
+
+    const button = screen.getByRole("button");
+    expect(button.textContent).toContain("12");
+    expect(button).toHaveAttribute("aria-pressed", "false");
+
+    await user.click(button);
+
+    expect(button.textContent).toContain("13");
+    expect(button).toHaveAttribute("aria-pressed", "true");
+  });
+
+  it("disables the button while the server call is in flight", async () => {
+    const deferred = createDeferred<{ ok: true; voted: true }>();
+    toggleVoteMock.mockReturnValue(deferred.promise);
+    const user = userEvent.setup();
+    render(<VoteButton {...baseProps} voteCount={12} />);
+
+    const button = screen.getByRole("button");
+    await user.click(button);
+
+    expect(button).toBeDisabled();
+
+    deferred.resolve({ ok: true, voted: true });
+  });
+
+  it("stays in the voted state with the optimistic count after the server confirms success", async () => {
+    toggleVoteMock.mockResolvedValue({ ok: true, voted: true });
+    const user = userEvent.setup();
+    render(<VoteButton {...baseProps} voteCount={128} />);
+
+    const button = screen.getByRole("button");
+    await user.click(button);
+
+    expect(button).toHaveAttribute("aria-pressed", "true");
+    expect(button.textContent).toContain("129");
+    expect(button).not.toBeDisabled();
+  });
+
+  it("reverts to the idle state with the original count when the server rejects the vote", async () => {
+    toggleVoteMock.mockResolvedValue({ ok: false });
+    const user = userEvent.setup();
+    render(<VoteButton {...baseProps} voteCount={128} />);
+
+    const button = screen.getByRole("button");
+    await user.click(button);
+
+    expect(button).toHaveAttribute("aria-pressed", "false");
+    expect(button.textContent).toContain("128");
+    expect(button).not.toBeDisabled();
+  });
+});
+
+describe("VoteButton (unauthenticated)", () => {
   it("renders a link to /login without 'Sign in to vote' text when unauthenticated", () => {
     render(<VoteButton {...baseProps} isAuthenticated={false} />);
     const link = screen.getByRole("link");
@@ -83,17 +151,58 @@ describe("VoteButton", () => {
     expect(link.textContent ?? "").not.toMatch(KOREAN_AUTH_LABEL);
   });
 
-  it("optimistically increments the count when clicked", async () => {
-    toggleVoteMock.mockResolvedValue({ ok: true, voted: true });
+  it("renders the count and uses the outline button variant", () => {
+    render(
+      <VoteButton {...baseProps} isAuthenticated={false} voteCount={42} />
+    );
+    const link = screen.getByRole("link");
+    expect(link.textContent).toContain("42");
+  });
+
+  it("does not carry a disabled attribute", () => {
+    render(<VoteButton {...baseProps} isAuthenticated={false} />);
+    const link = screen.getByRole("link");
+    expect(link).not.toHaveAttribute("disabled");
+    expect(link).not.toHaveAttribute("aria-disabled", "true");
+  });
+
+  it("does not change the visible count when clicked (no optimistic path)", async () => {
     const user = userEvent.setup();
-    render(<VoteButton {...baseProps} />);
+    render(
+      <VoteButton {...baseProps} isAuthenticated={false} voteCount={42} />
+    );
+    const link = screen.getByRole("link");
+    expect(link.textContent).toContain("42");
 
-    const button = screen.getByRole("button");
-    expect(button.textContent).toContain("12");
+    await user.click(link);
 
-    await user.click(button);
+    expect(screen.getByRole("link").textContent).toContain("42");
+    expect(toggleVoteMock).not.toHaveBeenCalled();
+  });
+});
 
-    expect(button.textContent).toContain("13");
-    expect(button).toHaveAttribute("aria-pressed", "true");
+describe("VoteButton (owner)", () => {
+  it("renders no control with the vote accessible name when owned by the viewer", () => {
+    render(<VoteButton {...baseProps} ownedByViewer={true} voteCount={7} />);
+    expect(screen.queryByRole("button", { name: "추천하기" })).toBeNull();
+    expect(screen.queryByRole("link", { name: "추천하기" })).toBeNull();
+  });
+
+  it("shows the count exactly once in a muted read-only indicator", () => {
+    render(<VoteButton {...baseProps} ownedByViewer={true} voteCount={7} />);
+    const matches = screen.getAllByText("7");
+    expect(matches).toHaveLength(1);
+    const indicator = matches[0].closest("[data-testid='vote-owner-count']");
+    expect(indicator).not.toBeNull();
+    expect(indicator?.className).toContain("text-muted-foreground");
+  });
+
+  it("renders the owner indicator as non-interactive (no button/link, no aria-pressed)", () => {
+    const { container } = render(
+      <VoteButton {...baseProps} ownedByViewer={true} voteCount={7} />
+    );
+    expect(container.querySelector("button")).toBeNull();
+    expect(container.querySelector("a")).toBeNull();
+    expect(container.querySelector("[aria-pressed]")).toBeNull();
   });
 });

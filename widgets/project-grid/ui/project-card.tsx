@@ -1,5 +1,4 @@
 import type { ProjectWithVoteCount } from "@entities/vote";
-import { RiThumbUpLine } from "@remixicon/react";
 import Image from "next/image";
 import { RankBadge } from "./rank-badge";
 
@@ -19,8 +18,8 @@ export interface ProjectCardProps {
   renderOwnerActions?: (project: ProjectWithVoteCount) => React.ReactNode;
   /**
    * Slot for the vote button. Rendered for every viewer (the feature
-   * itself decides whether to show a "Sign in" prompt or an actual
-   * toggle, based on viewer state).
+   * itself decides whether to show a "Sign in" prompt, a toggle, or
+   * a read-only indicator based on viewer state).
    */
   renderVoteButton?: (project: ProjectWithVoteCount) => React.ReactNode;
   screenshotUrl: string;
@@ -41,7 +40,6 @@ export function ProjectCard({
   renderOwnerActions,
   renderVoteButton,
 }: ProjectCardProps) {
-  const voteCount = project.vote_count ?? 0;
   const isOwner = viewerUserId != null && project.user_id === viewerUserId;
   return (
     <article
@@ -67,8 +65,8 @@ export function ProjectCard({
           <RankBadge className="absolute top-2 left-2 shadow" rank={rank} />
         ) : null}
       </a>
-      <div className="flex flex-col gap-1.5 p-4">
-        <div className="flex items-start justify-between gap-3">
+      <div className="flex gap-3 p-4">
+        <div className="flex min-w-0 flex-1 flex-col gap-1.5">
           <a
             className="font-heading font-medium text-sm leading-tight hover:underline"
             href={project.project_url ?? "#"}
@@ -77,38 +75,26 @@ export function ProjectCard({
           >
             {project.title}
           </a>
-          <span
-            className="inline-flex shrink-0 items-center gap-1 text-muted-foreground text-xs"
-            data-testid="vote-count"
-          >
-            <RiThumbUpLine aria-hidden="true" className="size-3.5" />
-            {voteCount}
-          </span>
+          <p className="line-clamp-2 text-muted-foreground text-xs/relaxed">
+            {project.tagline}
+          </p>
+          <p className="mt-1 text-muted-foreground text-xs">
+            <span className="font-medium text-foreground">
+              {project.author_display_name ?? "익명"}
+            </span>
+            <span aria-hidden="true"> · 작성</span>
+          </p>
+          {isOwner && renderOwnerActions ? (
+            <div
+              className="mt-2 flex items-center gap-2"
+              data-testid="project-card-owner-actions"
+            >
+              {renderOwnerActions(project)}
+            </div>
+          ) : null}
         </div>
-        <p className="line-clamp-2 text-muted-foreground text-xs/relaxed">
-          {project.tagline}
-        </p>
-        <p className="mt-1 text-muted-foreground text-xs">
-          <span className="font-medium text-foreground">
-            {project.author_display_name ?? "익명"}
-          </span>
-          <span aria-hidden="true"> · 작성</span>
-        </p>
-        {renderVoteButton || (isOwner && renderOwnerActions) ? (
-          <div
-            className="mt-2 flex flex-wrap items-center gap-2"
-            data-testid="project-card-actions"
-          >
-            {renderVoteButton ? renderVoteButton(project) : null}
-            {isOwner && renderOwnerActions ? (
-              <div
-                className="ml-auto flex items-center gap-2"
-                data-testid="project-card-owner-actions"
-              >
-                {renderOwnerActions(project)}
-              </div>
-            ) : null}
-          </div>
+        {renderVoteButton ? (
+          <div className="shrink-0 self-start">{renderVoteButton(project)}</div>
         ) : null}
       </div>
     </article>
