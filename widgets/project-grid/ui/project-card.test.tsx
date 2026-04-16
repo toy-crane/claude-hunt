@@ -33,7 +33,7 @@ function buildProject(
 const RANK_BADGE_LABEL = /1st|2nd|3rd/;
 
 describe("ProjectCard", () => {
-  it("renders title, tagline, author display name, and vote count", () => {
+  it("renders title, tagline, and author display name", () => {
     render(
       <ProjectCard
         project={buildProject()}
@@ -45,7 +45,64 @@ describe("ProjectCard", () => {
     expect(screen.getByText("My App")).toBeInTheDocument();
     expect(screen.getByText("A cool tool")).toBeInTheDocument();
     expect(screen.getByText("Alice")).toBeInTheDocument();
-    expect(screen.getByTestId("vote-count")).toHaveTextContent("5");
+  });
+
+  it("renders the vote count in only one place (via the slot) when a vote button is provided", () => {
+    render(
+      <ProjectCard
+        project={buildProject({ vote_count: 5 })}
+        rank={10}
+        renderVoteButton={(project) => (
+          <span data-testid="vote-slot">{project.vote_count}</span>
+        )}
+        screenshotUrl="https://cdn.example.com/shot.png"
+      />
+    );
+
+    const allFives = screen.getAllByText("5");
+    expect(allFives).toHaveLength(1);
+    expect(screen.getByTestId("vote-slot")).toHaveTextContent("5");
+  });
+
+  it("renders the vote button slot inside the card but outside the bottom owner-actions region", () => {
+    render(
+      <ProjectCard
+        project={buildProject()}
+        rank={10}
+        renderOwnerActions={() => <button type="button">Edit</button>}
+        renderVoteButton={() => <span data-testid="vote-slot">vote</span>}
+        screenshotUrl="https://cdn.example.com/shot.png"
+        viewerUserId="user-1"
+      />
+    );
+
+    const voteSlot = screen.getByTestId("vote-slot");
+    const ownerActions = screen.getByTestId("project-card-owner-actions");
+    expect(ownerActions.contains(voteSlot)).toBe(false);
+  });
+
+  it("renders owner actions only when the viewer is the project owner", () => {
+    const { rerender } = render(
+      <ProjectCard
+        project={buildProject({ user_id: "user-1" })}
+        rank={10}
+        renderOwnerActions={() => <span>owner-tools</span>}
+        screenshotUrl="https://cdn.example.com/shot.png"
+        viewerUserId="user-1"
+      />
+    );
+    expect(screen.getByText("owner-tools")).toBeInTheDocument();
+
+    rerender(
+      <ProjectCard
+        project={buildProject({ user_id: "user-1" })}
+        rank={10}
+        renderOwnerActions={() => <span>owner-tools</span>}
+        screenshotUrl="https://cdn.example.com/shot.png"
+        viewerUserId="someone-else"
+      />
+    );
+    expect(screen.queryByText("owner-tools")).toBeNull();
   });
 
   it("renders the screenshot with the supplied URL and Korean alt suffix", () => {
