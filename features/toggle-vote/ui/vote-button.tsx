@@ -45,6 +45,7 @@ export function VoteButton({
         data-testid="vote-owner-count"
       >
         <RiArrowUpLine aria-hidden="true" className="size-4" />
+        <span className="sr-only">추천 수</span>
         <span className="tabular-nums">{voteCount}</span>
       </div>
     );
