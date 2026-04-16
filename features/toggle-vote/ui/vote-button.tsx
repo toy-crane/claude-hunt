@@ -9,6 +9,14 @@ import { toggleVote } from "../api/actions";
 
 const ARIA_LABEL = "추천하기";
 
+const PILL_BASE_CLASS =
+  "inline-flex flex-col items-center justify-center min-w-14 gap-0.5 rounded-lg border px-2 py-2 font-semibold text-sm outline-none transition-colors focus-visible:ring-2 focus-visible:ring-vote/50 disabled:pointer-events-none";
+
+const PILL_IDLE_CLASS = "border-vote bg-background text-vote hover:bg-vote/10";
+
+const PILL_VOTED_CLASS =
+  "border-vote bg-vote text-vote-foreground hover:bg-vote/90";
+
 export interface VoteButtonProps {
   /** True when a signed-in viewer has already voted. */
   alreadyVoted: boolean;
@@ -67,26 +75,25 @@ export function VoteButton({
   }
 
   return (
-    <Button
+    <button
       aria-label={ARIA_LABEL}
       aria-pressed={optimisticVoted}
       className={cn(
-        "gap-1.5",
-        optimisticVoted && "border-primary text-primary"
+        PILL_BASE_CLASS,
+        optimisticVoted ? PILL_VOTED_CLASS : PILL_IDLE_CLASS,
+        isPending && "opacity-60"
       )}
       data-testid={optimisticVoted ? "vote-button-voted" : "vote-button-idle"}
       disabled={isPending}
       onClick={handleClick}
-      size="sm"
       type="button"
-      variant="outline"
     >
       {optimisticVoted ? (
-        <RiArrowUpFill aria-hidden="true" className="size-3.5" />
+        <RiArrowUpFill aria-hidden="true" className="size-4" />
       ) : (
-        <RiArrowUpLine aria-hidden="true" className="size-3.5" />
+        <RiArrowUpLine aria-hidden="true" className="size-4" />
       )}
-      {optimisticCount}
-    </Button>
+      <span className="tabular-nums">{optimisticCount}</span>
+    </button>
   );
 }
