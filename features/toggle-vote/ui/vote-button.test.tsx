@@ -23,6 +23,9 @@ const WHITESPACE = /\s/g;
 const VOTE_LABEL_PATTERN = /Upvote|Vote|추천|투표/i;
 const SIGN_IN_TO_VOTE = /Sign in to vote/i;
 const KOREAN_AUTH_LABEL = /추천|투표|로그인/;
+const CORAL_BG = /\bbg-vote\b/;
+const CORAL_TEXT = /\btext-vote\b/;
+const CORAL_BORDER = /\bborder-vote\b/;
 
 function createDeferred<T>() {
   let resolve!: (value: T) => void;
@@ -185,10 +188,37 @@ describe("VoteButton (unauthenticated)", () => {
 });
 
 describe("VoteButton (owner)", () => {
-  it("hides the button when the project is owned by the viewer", () => {
+  it("renders no control with the vote accessible name when owned by the viewer", () => {
+    render(<VoteButton {...baseProps} ownedByViewer={true} voteCount={7} />);
+    expect(screen.queryByRole("button", { name: "추천하기" })).toBeNull();
+    expect(screen.queryByRole("link", { name: "추천하기" })).toBeNull();
+  });
+
+  it("shows the count exactly once in a muted read-only indicator", () => {
+    render(<VoteButton {...baseProps} ownedByViewer={true} voteCount={7} />);
+    const matches = screen.getAllByText("7");
+    expect(matches).toHaveLength(1);
+    const indicator = matches[0].closest("[data-testid='vote-owner-count']");
+    expect(indicator).not.toBeNull();
+    expect(indicator?.className).toContain("text-muted-foreground");
+  });
+
+  it("does not use any of the coral utility classes", () => {
     const { container } = render(
-      <VoteButton {...baseProps} ownedByViewer={true} />
+      <VoteButton {...baseProps} ownedByViewer={true} voteCount={7} />
     );
-    expect(container.firstChild).toBeNull();
+    const html = container.innerHTML;
+    expect(html).not.toMatch(CORAL_BG);
+    expect(html).not.toMatch(CORAL_TEXT);
+    expect(html).not.toMatch(CORAL_BORDER);
+  });
+
+  it("renders the owner indicator as non-interactive (no button/link, no aria-pressed)", () => {
+    const { container } = render(
+      <VoteButton {...baseProps} ownedByViewer={true} voteCount={7} />
+    );
+    expect(container.querySelector("button")).toBeNull();
+    expect(container.querySelector("a")).toBeNull();
+    expect(container.querySelector("[aria-pressed]")).toBeNull();
   });
 });

@@ -39,7 +39,15 @@ export function VoteButton({
   const [isPending, startTransition] = useTransition();
 
   if (ownedByViewer) {
-    return null;
+    return (
+      <div
+        className="inline-flex min-w-14 flex-col items-center justify-center gap-0.5 rounded-lg border border-transparent px-2 py-2 font-semibold text-muted-foreground text-sm"
+        data-testid="vote-owner-count"
+      >
+        <RiArrowUpLine aria-hidden="true" className="size-4" />
+        <span className="tabular-nums">{voteCount}</span>
+      </div>
+    );
   }
 
   if (!isAuthenticated) {
