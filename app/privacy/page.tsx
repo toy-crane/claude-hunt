@@ -196,15 +196,19 @@ export default function PrivacyPage() {
               <table className="w-full text-sm">
                 <thead className="bg-muted/50 text-muted-foreground">
                   <tr>
-                    <th className="p-2 text-left font-medium">수탁자</th>
-                    <th className="p-2 text-left font-medium">위탁 업무</th>
+                    <th className="px-3 py-2 text-left font-medium">수탁자</th>
+                    <th className="px-3 py-2 text-left font-medium">
+                      위탁 업무
+                    </th>
                   </tr>
                 </thead>
                 <tbody>
                   {PROCESSORS.map((processor) => (
                     <tr className="border-t" key={processor.name}>
-                      <td className="p-2 font-medium">{processor.name}</td>
-                      <td className="p-2 text-muted-foreground">
+                      <td className="px-3 py-2 font-medium">
+                        {processor.name}
+                      </td>
+                      <td className="px-3 py-2 text-muted-foreground">
                         {processor.purpose}
                       </td>
                     </tr>
