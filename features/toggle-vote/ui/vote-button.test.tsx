@@ -62,19 +62,21 @@ describe("VoteButton (signed-in non-owner)", () => {
     expect(screen.getByRole("link")).toHaveAttribute("aria-label", "추천하기");
   });
 
-  it("renders the idle outlined state when not voted (aria-pressed=false, variant=outline)", () => {
+  it("renders the idle outlined state when not voted (aria-pressed=false, bordered on card background)", () => {
     render(<VoteButton {...baseProps} voteCount={128} />);
     const button = screen.getByRole("button");
     expect(button).toHaveAttribute("aria-pressed", "false");
-    expect(button).toHaveAttribute("data-variant", "outline");
+    expect(button.className).toContain("bg-background");
+    expect(button.className).toContain("text-foreground");
     expect(button.textContent).toContain("128");
   });
 
-  it("renders the voted solid state when already voted (aria-pressed=true, variant=default)", () => {
+  it("renders the voted solid state when already voted (aria-pressed=true, filled with primary)", () => {
     render(<VoteButton {...baseProps} alreadyVoted={true} voteCount={128} />);
     const button = screen.getByRole("button");
     expect(button).toHaveAttribute("aria-pressed", "true");
-    expect(button).toHaveAttribute("data-variant", "default");
+    expect(button.className).toContain("bg-primary");
+    expect(button.className).toContain("text-primary-foreground");
   });
 
   it("uses an up-pointing arrow icon (svg)", () => {
