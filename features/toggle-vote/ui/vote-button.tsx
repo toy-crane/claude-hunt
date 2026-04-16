@@ -1,20 +1,12 @@
 "use client";
 
 import { RiArrowUpFill, RiArrowUpLine } from "@remixicon/react";
-import { cn } from "@shared/lib/utils";
+import { Button } from "@shared/ui/button";
 import Link from "next/link";
 import { useState, useTransition } from "react";
 import { toggleVote } from "../api/actions";
 
 const ARIA_LABEL = "추천하기";
-
-const PILL_BASE_CLASS =
-  "inline-flex flex-col items-center justify-center min-w-14 gap-0.5 rounded-lg border px-2 py-2 font-semibold text-sm outline-none transition-colors focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-vote focus-visible:ring-offset-background disabled:pointer-events-none";
-
-const PILL_IDLE_CLASS = "border-vote bg-background text-vote hover:bg-vote/10";
-
-const PILL_VOTED_CLASS =
-  "border-vote bg-vote text-vote-foreground hover:bg-vote/90";
 
 export interface VoteButtonProps {
   /** True when a signed-in viewer has already voted. */
@@ -41,10 +33,10 @@ export function VoteButton({
   if (ownedByViewer) {
     return (
       <div
-        className="inline-flex min-w-14 flex-col items-center justify-center gap-0.5 rounded-lg border border-transparent px-2 py-2 font-semibold text-muted-foreground text-sm"
+        className="inline-flex items-center gap-1.5 px-2 text-muted-foreground text-xs"
         data-testid="vote-owner-count"
       >
-        <RiArrowUpLine aria-hidden="true" className="size-4" />
+        <RiArrowUpLine aria-hidden="true" className="size-3.5" />
         <span className="sr-only">추천 수</span>
         <span className="tabular-nums">{voteCount}</span>
       </div>
@@ -53,15 +45,18 @@ export function VoteButton({
 
   if (!isAuthenticated) {
     return (
-      <Link
+      <Button
         aria-label={ARIA_LABEL}
-        className={cn(PILL_BASE_CLASS, PILL_IDLE_CLASS)}
+        asChild
         data-testid="vote-button-signin"
-        href="/login"
+        size="sm"
+        variant="outline"
       >
-        <RiArrowUpLine aria-hidden="true" className="size-4" />
-        <span className="tabular-nums">{voteCount}</span>
-      </Link>
+        <Link href="/login">
+          <RiArrowUpLine aria-hidden="true" />
+          <span className="tabular-nums">{voteCount}</span>
+        </Link>
+      </Button>
     );
   }
 
@@ -79,25 +74,22 @@ export function VoteButton({
   }
 
   return (
-    <button
+    <Button
       aria-label={ARIA_LABEL}
       aria-pressed={optimisticVoted}
-      className={cn(
-        PILL_BASE_CLASS,
-        optimisticVoted ? PILL_VOTED_CLASS : PILL_IDLE_CLASS,
-        isPending && "opacity-60"
-      )}
       data-testid={optimisticVoted ? "vote-button-voted" : "vote-button-idle"}
       disabled={isPending}
       onClick={handleClick}
+      size="sm"
       type="button"
+      variant={optimisticVoted ? "default" : "outline"}
     >
       {optimisticVoted ? (
-        <RiArrowUpFill aria-hidden="true" className="size-4" />
+        <RiArrowUpFill aria-hidden="true" />
       ) : (
-        <RiArrowUpLine aria-hidden="true" className="size-4" />
+        <RiArrowUpLine aria-hidden="true" />
       )}
       <span className="tabular-nums">{optimisticCount}</span>
-    </button>
+    </Button>
   );
 }

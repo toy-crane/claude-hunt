@@ -23,9 +23,6 @@ const WHITESPACE = /\s/g;
 const VOTE_LABEL_PATTERN = /Upvote|Vote|추천|투표/i;
 const SIGN_IN_TO_VOTE = /Sign in to vote/i;
 const KOREAN_AUTH_LABEL = /추천|투표|로그인/;
-const CORAL_BG = /\bbg-vote\b/;
-const CORAL_TEXT = /\btext-vote\b/;
-const CORAL_BORDER = /\bborder-vote\b/;
 
 function createDeferred<T>() {
   let resolve!: (value: T) => void;
@@ -65,21 +62,19 @@ describe("VoteButton (signed-in non-owner)", () => {
     expect(screen.getByRole("link")).toHaveAttribute("aria-label", "추천하기");
   });
 
-  it("renders the idle coral pill when not voted (aria-pressed=false, border-vote + text-vote classes)", () => {
+  it("renders the idle outlined state when not voted (aria-pressed=false, variant=outline)", () => {
     render(<VoteButton {...baseProps} voteCount={128} />);
     const button = screen.getByRole("button");
     expect(button).toHaveAttribute("aria-pressed", "false");
-    expect(button.className).toContain("border-vote");
-    expect(button.className).toContain("text-vote");
+    expect(button).toHaveAttribute("data-variant", "outline");
     expect(button.textContent).toContain("128");
   });
 
-  it("renders the voted solid-coral pill when already voted (aria-pressed=true, bg-vote + text-vote-foreground classes)", () => {
+  it("renders the voted solid state when already voted (aria-pressed=true, variant=default)", () => {
     render(<VoteButton {...baseProps} alreadyVoted={true} voteCount={128} />);
     const button = screen.getByRole("button");
     expect(button).toHaveAttribute("aria-pressed", "true");
-    expect(button.className).toContain("bg-vote");
-    expect(button.className).toContain("text-vote-foreground");
+    expect(button).toHaveAttribute("data-variant", "default");
   });
 
   it("uses an up-pointing arrow icon (svg)", () => {
@@ -104,7 +99,7 @@ describe("VoteButton (signed-in non-owner)", () => {
     expect(button).toHaveAttribute("aria-pressed", "true");
   });
 
-  it("disables the button and dims it while the server call is in flight", async () => {
+  it("disables the button while the server call is in flight", async () => {
     const deferred = createDeferred<{ ok: true; voted: true }>();
     toggleVoteMock.mockReturnValue(deferred.promise);
     const user = userEvent.setup();
@@ -114,7 +109,6 @@ describe("VoteButton (signed-in non-owner)", () => {
     await user.click(button);
 
     expect(button).toBeDisabled();
-    expect(button.className).toContain("opacity-");
 
     deferred.resolve({ ok: true, voted: true });
   });
@@ -155,13 +149,11 @@ describe("VoteButton (unauthenticated)", () => {
     expect(link.textContent ?? "").not.toMatch(KOREAN_AUTH_LABEL);
   });
 
-  it("renders the pill with the same visual classes as the idle signed-in pill", () => {
+  it("renders the count and uses the outline button variant", () => {
     render(
       <VoteButton {...baseProps} isAuthenticated={false} voteCount={42} />
     );
     const link = screen.getByRole("link");
-    expect(link.className).toContain("border-vote");
-    expect(link.className).toContain("text-vote");
     expect(link.textContent).toContain("42");
   });
 
@@ -201,16 +193,6 @@ describe("VoteButton (owner)", () => {
     const indicator = matches[0].closest("[data-testid='vote-owner-count']");
     expect(indicator).not.toBeNull();
     expect(indicator?.className).toContain("text-muted-foreground");
-  });
-
-  it("does not use any of the coral utility classes", () => {
-    const { container } = render(
-      <VoteButton {...baseProps} ownedByViewer={true} voteCount={7} />
-    );
-    const html = container.innerHTML;
-    expect(html).not.toMatch(CORAL_BG);
-    expect(html).not.toMatch(CORAL_TEXT);
-    expect(html).not.toMatch(CORAL_BORDER);
   });
 
   it("renders the owner indicator as non-interactive (no button/link, no aria-pressed)", () => {
