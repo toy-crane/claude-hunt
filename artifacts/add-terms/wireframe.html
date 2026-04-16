@@ -1,0 +1,574 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Wireframe: add-terms</title>
+<script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
+<script src="https://unpkg.com/lucide@latest"></script>
+<style>
+  :root {
+    --w-bg: #f5f5f5;
+    --w-border: #ccc;
+    --w-text: #555;
+    --w-muted: #aaa;
+    --w-fill: #eee;
+  }
+
+  * {
+    font-family: ui-monospace, SFMono-Regular, "SF Mono", Menlo, Consolas, monospace;
+    color: var(--w-text);
+  }
+
+  body { background: var(--w-bg); }
+
+  nav { position: sticky; top: 0; z-index: 40; background: var(--w-bg); border-bottom: 1px solid var(--w-border); }
+  nav button { cursor: pointer; font-size: 13px; }
+  nav button:hover { background: var(--w-fill); border-radius: 4px; }
+  nav button.active { font-weight: bold; border-bottom: 2px solid var(--w-text); }
+
+  .screen { display: none; }
+  .screen.active { display: block; }
+
+  .vp-toggle button {
+    font-size: 12px; padding: 2px 8px;
+    border: 1px solid var(--w-border); cursor: pointer; background: white;
+  }
+  .vp-toggle button:first-child { border-radius: 4px 0 0 4px; }
+  .vp-toggle button:last-child { border-radius: 0 4px 4px 0; border-left: none; }
+  .vp-toggle button.active { background: var(--w-text); color: white; }
+
+  body.viewport-mobile .screen-content {
+    max-width: 375px !important;
+    margin: 24px auto !important;
+    border: 2px solid var(--w-border);
+    border-radius: 24px;
+    min-height: 667px;
+    background: white;
+    box-shadow: 0 4px 24px rgba(0,0,0,0.08);
+    padding: 32px 16px !important;
+  }
+
+  .screen-notes {
+    background: #fffde7;
+    border-left: 3px solid #ffd54f;
+    padding: 12px 16px;
+    margin-top: 24px;
+    font-size: 13px;
+    border-radius: 0 4px 4px 0;
+  }
+  .screen-notes summary {
+    cursor: pointer;
+    font-weight: bold;
+    font-size: 12px;
+    color: #b0a050;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+  }
+  .screen-notes p { margin: 6px 0 2px; color: #777; }
+  .screen-notes ul { margin: 4px 0 0 16px; padding: 0; color: #777; }
+  .screen-notes li { margin: 2px 0; }
+
+  /* wireframe-specific helpers */
+  .w-frame { border: 1px dashed var(--w-border); border-radius: 4px; }
+  .w-fillbox { background: var(--w-fill); border: 1px dashed var(--w-border); border-radius: 4px; }
+  .w-section-title { color: var(--w-text); font-weight: bold; font-size: 14px; }
+  .w-line { background: var(--w-fill); height: 10px; border-radius: 2px; }
+  .w-line-short { background: var(--w-fill); height: 10px; border-radius: 2px; width: 60%; }
+  .w-anchor { color: var(--w-text); text-decoration: underline; text-decoration-style: dotted; }
+  .w-badge { border: 1px solid var(--w-border); border-radius: 10px; padding: 1px 8px; font-size: 11px; color: var(--w-muted); display: inline-block; }
+</style>
+</head>
+<body class="p-0 m-0 viewport-mobile">
+
+<nav class="flex items-center gap-4 px-6 py-2">
+  <span class="text-xs" style="color:var(--w-muted)">wireframe · add-terms</span>
+  <button id="nav-0" onclick="show(0)" class="px-2 py-1">/terms</button>
+  <button id="nav-1" onclick="show(1)" class="px-2 py-1">/privacy</button>
+  <button id="nav-2" onclick="show(2)" class="px-2 py-1">footer links</button>
+  <div class="vp-toggle flex ml-auto">
+    <button id="vp-desktop" onclick="setViewport('desktop')">Desktop</button>
+    <button id="vp-mobile" onclick="setViewport('mobile')" class="active">Mobile</button>
+  </div>
+</nav>
+
+<!-- ────────────────────────── SCREEN 0: /terms ────────────────────────── -->
+<div id="screen-0" class="screen" data-scenario="scenario-1, scenario-4, scenario-5">
+  <div class="screen-content @container max-w-3xl mx-auto p-6">
+
+    <!-- Site Header (existing) -->
+    <div class="w-frame flex items-center justify-between px-4 py-3 mb-6" style="background: white;">
+      <div class="flex items-center gap-2">
+        <i data-lucide="hexagon" class="size-4"></i>
+        <span class="text-xs">claude-hunt</span>
+      </div>
+      <span class="w-badge">로그인</span>
+    </div>
+
+    <!-- Breadcrumb / back -->
+    <a href="#" class="inline-flex items-center gap-1 text-xs mb-4" style="color:var(--w-muted)">
+      <i data-lucide="arrow-left" class="size-3"></i>
+      <span>홈으로</span>
+    </a>
+
+    <!-- Document Title Block -->
+    <h1 class="text-xl font-bold mb-2" style="color:var(--w-text)">서비스 이용약관</h1>
+    <p class="text-xs mb-6" style="color:var(--w-muted)">시행일: 2026년 4월 16일</p>
+
+    <!-- Table of Contents -->
+    <div class="w-frame p-4 mb-8">
+      <div class="w-section-title mb-3 flex items-center gap-2">
+        <i data-lucide="list" class="size-4"></i>
+        <span>목차</span>
+      </div>
+      <ol class="grid @md:grid-cols-2 gap-x-6 gap-y-1 text-xs list-decimal pl-5">
+        <li><a class="w-anchor" href="#t-1">목적</a></li>
+        <li><a class="w-anchor" href="#t-2">용어의 정의</a></li>
+        <li><a class="w-anchor" href="#t-3">약관의 게시와 개정</a></li>
+        <li><a class="w-anchor" href="#t-4">이용계약의 체결</a></li>
+        <li><a class="w-anchor" href="#t-5">회원 정보의 관리</a></li>
+        <li><a class="w-anchor" href="#t-6">운영자의 의무</a></li>
+        <li><a class="w-anchor" href="#t-7">회원의 의무</a></li>
+        <li><a class="w-anchor" href="#t-8">서비스의 제공 및 변경</a></li>
+        <li><a class="w-anchor" href="#t-9">서비스 이용의 제한</a></li>
+        <li><a class="w-anchor" href="#t-10">게시물의 관리 및 권리</a></li>
+        <li><a class="w-anchor" href="#t-11">면책조항</a></li>
+        <li><a class="w-anchor" href="#t-12">계약 해지</a></li>
+        <li><a class="w-anchor" href="#t-13">준거법 및 관할</a></li>
+        <li><a class="w-anchor" href="#t-14">시행일</a></li>
+      </ol>
+    </div>
+
+    <!-- Sections -->
+    <article class="space-y-8">
+      <section id="t-1">
+        <h2 class="w-section-title mb-2">제1조 (목적)</h2>
+        <div class="space-y-2">
+          <div class="w-line"></div>
+          <div class="w-line"></div>
+          <div class="w-line-short"></div>
+        </div>
+      </section>
+
+      <section id="t-2">
+        <h2 class="w-section-title mb-2">제2조 (용어의 정의)</h2>
+        <ul class="space-y-2 pl-4 text-xs list-disc">
+          <li>“회원” — 서비스에 가입한 사용자</li>
+          <li>“게시물” — 회원이 제출한 프로젝트 등 콘텐츠</li>
+          <li>“클래스” — 운영자가 운영하는 강의 그룹(수강 기수)</li>
+        </ul>
+      </section>
+
+      <section id="t-3">
+        <h2 class="w-section-title mb-2">제3조 (약관의 게시와 개정)</h2>
+        <div class="space-y-2">
+          <div class="w-line"></div>
+          <div class="w-line-short"></div>
+          <div class="w-frame p-2 text-xs" style="color:var(--w-muted)">
+            공지 기간: 시행 7일 전 / 불리한 변경은 30일 전
+          </div>
+        </div>
+      </section>
+
+      <section id="t-4">
+        <h2 class="w-section-title mb-2">제4조 (이용계약의 체결)</h2>
+        <div class="space-y-2">
+          <div class="w-line"></div>
+          <div class="w-line-short"></div>
+        </div>
+      </section>
+
+      <section id="t-5">
+        <h2 class="w-section-title mb-2">제5조 (회원 정보의 관리)</h2>
+        <div class="space-y-2">
+          <div class="w-line"></div>
+          <div class="w-line-short"></div>
+        </div>
+      </section>
+
+      <section id="t-6">
+        <h2 class="w-section-title mb-2">제6조 (운영자의 의무)</h2>
+        <div class="space-y-2">
+          <div class="w-line"></div>
+          <div class="w-line-short"></div>
+        </div>
+      </section>
+
+      <section id="t-7">
+        <h2 class="w-section-title mb-2">제7조 (회원의 의무)</h2>
+        <ul class="space-y-1 pl-4 text-xs list-disc">
+          <li>허위 정보 기재 금지</li>
+          <li>타인의 권리를 침해하는 게시물 금지</li>
+          <li>어뷰징/자동화된 투표 금지</li>
+        </ul>
+      </section>
+
+      <section id="t-8">
+        <h2 class="w-section-title mb-2">제8조 (서비스의 제공 및 변경)</h2>
+        <div class="space-y-2">
+          <div class="w-line"></div>
+          <div class="w-line-short"></div>
+        </div>
+      </section>
+
+      <section id="t-9">
+        <h2 class="w-section-title mb-2">제9조 (서비스 이용의 제한)</h2>
+        <div class="space-y-2">
+          <div class="w-line"></div>
+          <div class="w-line-short"></div>
+        </div>
+      </section>
+
+      <section id="t-10">
+        <h2 class="w-section-title mb-2">제10조 (게시물의 관리 및 권리)</h2>
+        <div class="space-y-2">
+          <div class="w-line"></div>
+          <div class="w-line-short"></div>
+        </div>
+      </section>
+
+      <section id="t-11">
+        <h2 class="w-section-title mb-2">제11조 (면책조항)</h2>
+        <div class="space-y-2">
+          <div class="w-line"></div>
+          <div class="w-line-short"></div>
+        </div>
+      </section>
+
+      <section id="t-12">
+        <h2 class="w-section-title mb-2">제12조 (계약 해지)</h2>
+        <div class="space-y-2">
+          <div class="w-line-short"></div>
+          <p class="text-xs">설정 페이지의 ‘회원 탈퇴’에서 언제든 해지할 수 있습니다.</p>
+        </div>
+      </section>
+
+      <section id="t-13">
+        <h2 class="w-section-title mb-2">제13조 (준거법 및 관할)</h2>
+        <p class="text-xs">대한민국 법률을 준거법으로 하며, 분쟁은 서울중앙지방법원을 전속 관할 법원으로 합니다.</p>
+      </section>
+
+      <section id="t-14">
+        <h2 class="w-section-title mb-2">제14조 (시행일)</h2>
+        <p class="text-xs">본 약관은 2026년 4월 16일부터 시행됩니다.</p>
+      </section>
+    </article>
+
+    <!-- Footer contact block -->
+    <div class="w-frame mt-10 p-4 text-xs">
+      <div class="font-bold mb-1" style="color:var(--w-text)">문의</div>
+      <div>운영자: toycrane (개인 운영)</div>
+      <div>이메일: alwaysfun2183@gmail.com</div>
+      <div class="mt-2" style="color:var(--w-muted)">시행일: 2026-04-16</div>
+    </div>
+
+    <!-- Site Footer (existing + new links) -->
+    <div class="w-frame mt-8 px-4 py-3 flex flex-col @md:flex-row items-start @md:items-center justify-between gap-2 text-xs" style="background: white;">
+      <span>© 2026 claude-hunt</span>
+      <div class="flex items-center gap-3">
+        <a class="w-anchor" href="#">이용약관</a>
+        <a class="w-anchor" href="#">개인정보 처리방침</a>
+        <span class="w-badge">GitHub</span>
+        <span class="w-badge">Feedback</span>
+      </div>
+    </div>
+
+    <div class="screen-notes">
+      <details open>
+        <summary>Notes</summary>
+        <p>정적 공개 문서 — 로그인 없이 접근 가능. 시나리오 1·4·5 커버.</p>
+        <ul>
+          <li>트리거: /login의 링크 클릭, 푸터의 ‘이용약관’ 클릭, 주소창 직접 입력</li>
+          <li>인터랙션: 목차 앵커로 각 조항 이동, 하단 연락처 열람</li>
+          <li>전환: 상단 ‘홈으로’ → /, 푸터 ‘개인정보 처리방침’ → /privacy</li>
+        </ul>
+      </details>
+    </div>
+
+  </div>
+</div>
+
+<!-- ────────────────────────── SCREEN 1: /privacy ────────────────────────── -->
+<div id="screen-1" class="screen" data-scenario="scenario-2, scenario-4, scenario-6">
+  <div class="screen-content @container max-w-3xl mx-auto p-6">
+
+    <div class="w-frame flex items-center justify-between px-4 py-3 mb-6" style="background: white;">
+      <div class="flex items-center gap-2">
+        <i data-lucide="hexagon" class="size-4"></i>
+        <span class="text-xs">claude-hunt</span>
+      </div>
+      <span class="w-badge">로그인</span>
+    </div>
+
+    <a href="#" class="inline-flex items-center gap-1 text-xs mb-4" style="color:var(--w-muted)">
+      <i data-lucide="arrow-left" class="size-3"></i>
+      <span>홈으로</span>
+    </a>
+
+    <h1 class="text-xl font-bold mb-2" style="color:var(--w-text)">개인정보 처리방침</h1>
+    <p class="text-xs mb-6" style="color:var(--w-muted)">시행일: 2026년 4월 16일</p>
+
+    <!-- TOC -->
+    <div class="w-frame p-4 mb-8">
+      <div class="w-section-title mb-3 flex items-center gap-2">
+        <i data-lucide="list" class="size-4"></i>
+        <span>목차</span>
+      </div>
+      <ol class="grid @md:grid-cols-2 gap-x-6 gap-y-1 text-xs list-decimal pl-5">
+        <li><a class="w-anchor" href="#p-1">개인정보의 처리 목적</a></li>
+        <li><a class="w-anchor" href="#p-2">처리하는 개인정보 항목</a></li>
+        <li><a class="w-anchor" href="#p-3">처리 및 보유 기간</a></li>
+        <li><a class="w-anchor" href="#p-4">제3자 제공</a></li>
+        <li><a class="w-anchor" href="#p-5">처리의 위탁</a></li>
+        <li><a class="w-anchor" href="#p-6">정보주체의 권리</a></li>
+        <li><a class="w-anchor" href="#p-7">파기 절차 및 방법</a></li>
+        <li><a class="w-anchor" href="#p-8">안전성 확보 조치</a></li>
+        <li><a class="w-anchor" href="#p-9">자동 수집 (쿠키 등)</a></li>
+        <li><a class="w-anchor" href="#p-10">개인정보 보호책임자</a></li>
+        <li><a class="w-anchor" href="#p-11">권익침해 구제방법</a></li>
+        <li><a class="w-anchor" href="#p-12">처리방침의 변경</a></li>
+      </ol>
+    </div>
+
+    <article class="space-y-8">
+      <section id="p-1">
+        <h2 class="w-section-title mb-2">1. 개인정보의 처리 목적</h2>
+        <ul class="space-y-1 pl-4 text-xs list-disc">
+          <li>회원 식별 및 인증</li>
+          <li>프로젝트 게시 및 투표 집계</li>
+          <li>서비스 개선</li>
+        </ul>
+      </section>
+
+      <section id="p-2">
+        <h2 class="w-section-title mb-2">2. 처리하는 개인정보 항목</h2>
+        <div class="w-frame p-3 text-xs">
+          <div class="grid @md:grid-cols-2 gap-2">
+            <div><span class="w-badge">필수</span> 이메일 주소</div>
+            <div><span class="w-badge">필수</span> OAuth 식별자 (GitHub/Google)</div>
+            <div><span class="w-badge">필수</span> 닉네임(displayName)</div>
+            <div><span class="w-badge">선택</span> 프로필 이미지</div>
+            <div><span class="w-badge">필수</span> 소속 클래스</div>
+            <div><span class="w-badge">선택</span> 제출 프로젝트(제목/URL/태그라인/스크린샷)</div>
+            <div><span class="w-badge">자동</span> 투표 기록</div>
+            <div><span class="w-badge">자동</span> 접속 로그 (IP, User-Agent)</div>
+          </div>
+        </div>
+      </section>
+
+      <section id="p-3">
+        <h2 class="w-section-title mb-2">3. 개인정보의 처리 및 보유 기간</h2>
+        <p class="text-xs">회원 탈퇴 시 지체 없이 파기합니다. 관계 법령에 따른 보존 의무가 있는 경우에 한해 해당 기간 동안 보관 후 파기합니다.</p>
+      </section>
+
+      <section id="p-4">
+        <h2 class="w-section-title mb-2">4. 개인정보의 제3자 제공</h2>
+        <p class="text-xs">본 서비스는 회원의 개인정보를 제3자에게 제공하지 않습니다.</p>
+      </section>
+
+      <section id="p-5">
+        <h2 class="w-section-title mb-2">5. 개인정보 처리의 위탁</h2>
+        <div class="w-frame overflow-hidden">
+          <table class="w-full text-xs">
+            <thead>
+              <tr style="background: var(--w-fill)">
+                <th class="text-left p-2">수탁자</th>
+                <th class="text-left p-2">위탁 업무</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr class="border-t" style="border-color: var(--w-border)">
+                <td class="p-2">Supabase</td>
+                <td class="p-2">인증 · 데이터베이스 · 스토리지</td>
+              </tr>
+              <tr class="border-t" style="border-color: var(--w-border)">
+                <td class="p-2">Vercel</td>
+                <td class="p-2">호스팅 · 배포</td>
+              </tr>
+              <tr class="border-t" style="border-color: var(--w-border)">
+                <td class="p-2">Google</td>
+                <td class="p-2">OAuth 인증 제공</td>
+              </tr>
+              <tr class="border-t" style="border-color: var(--w-border)">
+                <td class="p-2">GitHub</td>
+                <td class="p-2">OAuth 인증 제공</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </section>
+
+      <section id="p-6">
+        <h2 class="w-section-title mb-2">6. 정보주체의 권리와 행사 방법</h2>
+        <ul class="space-y-1 pl-4 text-xs list-disc">
+          <li>열람 · 정정 — 설정 페이지</li>
+          <li>삭제(탈퇴) — 설정 페이지의 ‘회원 탈퇴’</li>
+          <li>처리 정지 요구 — 이메일 문의</li>
+        </ul>
+      </section>
+
+      <section id="p-7">
+        <h2 class="w-section-title mb-2">7. 개인정보의 파기 절차 및 방법</h2>
+        <p class="text-xs">데이터베이스 레코드는 전자적으로 삭제하며, 스토리지 파일은 제거합니다. 탈퇴 시 즉시 실행됩니다.</p>
+      </section>
+
+      <section id="p-8">
+        <h2 class="w-section-title mb-2">8. 개인정보의 안전성 확보 조치</h2>
+        <ul class="space-y-1 pl-4 text-xs list-disc">
+          <li>전 구간 HTTPS</li>
+          <li>Row-Level Security (Supabase)</li>
+          <li>암호화된 스토리지</li>
+          <li>운영자 키의 최소 권한 원칙</li>
+        </ul>
+      </section>
+
+      <section id="p-9">
+        <h2 class="w-section-title mb-2">9. 자동 수집 (쿠키 등)</h2>
+        <div class="w-frame p-3 text-xs space-y-2">
+          <div><span class="w-badge">필수</span> Supabase 인증 세션 쿠키 — 로그인 유지</div>
+          <div><span class="w-badge">통계</span> Vercel Analytics — 익명 이용 통계</div>
+          <div><span class="w-badge">통계</span> Vercel Speed Insights — 성능 지표</div>
+          <p class="mt-2" style="color:var(--w-muted)">개인 식별 정보는 수집하지 않습니다.</p>
+        </div>
+      </section>
+
+      <section id="p-10">
+        <h2 class="w-section-title mb-2">10. 개인정보 보호책임자</h2>
+        <div class="w-frame p-3 text-xs">
+          <div>성명 / 닉네임: toycrane</div>
+          <div>직책: 개인정보 보호책임자</div>
+          <div>이메일: alwaysfun2183@gmail.com</div>
+        </div>
+      </section>
+
+      <section id="p-11">
+        <h2 class="w-section-title mb-2">11. 권익침해 구제방법</h2>
+        <ul class="space-y-1 pl-4 text-xs list-disc">
+          <li>개인정보분쟁조정위원회 — 1833-6972</li>
+          <li>개인정보침해신고센터 — 118</li>
+          <li>대검찰청 사이버수사과 — 1301</li>
+          <li>경찰청 사이버수사국 — 182</li>
+        </ul>
+      </section>
+
+      <section id="p-12">
+        <h2 class="w-section-title mb-2">12. 개인정보 처리방침의 변경</h2>
+        <p class="text-xs">변경 시 시행 7일 전 공지하며, 회원에게 불리한 변경의 경우 30일 전 공지합니다.</p>
+        <p class="text-xs mt-2" style="color:var(--w-muted)">시행일: 2026-04-16</p>
+      </section>
+    </article>
+
+    <!-- Site Footer (existing + new links) -->
+    <div class="w-frame mt-10 px-4 py-3 flex flex-col @md:flex-row items-start @md:items-center justify-between gap-2 text-xs" style="background: white;">
+      <span>© 2026 claude-hunt</span>
+      <div class="flex items-center gap-3">
+        <a class="w-anchor" href="#">이용약관</a>
+        <a class="w-anchor" href="#">개인정보 처리방침</a>
+        <span class="w-badge">GitHub</span>
+        <span class="w-badge">Feedback</span>
+      </div>
+    </div>
+
+    <div class="screen-notes">
+      <details open>
+        <summary>Notes</summary>
+        <p>정적 공개 문서 — 로그인 없이 접근 가능. 시나리오 2·4·6 커버.</p>
+        <ul>
+          <li>트리거: /login의 링크 클릭, 푸터의 ‘개인정보 처리방침’ 클릭, 주소창 직접 입력</li>
+          <li>인터랙션: 목차 앵커로 각 조항 이동, 보호책임자 블록에서 연락처 확인</li>
+          <li>전환: 푸터 ‘이용약관’ → /terms</li>
+        </ul>
+      </details>
+    </div>
+
+  </div>
+</div>
+
+<!-- ────────────────────────── SCREEN 2: Footer links ────────────────────────── -->
+<div id="screen-2" class="screen" data-scenario="scenario-3">
+  <div class="screen-content @container max-w-3xl mx-auto p-6">
+
+    <!-- Context: site page (simplified) -->
+    <div class="w-frame flex items-center justify-between px-4 py-3 mb-6" style="background: white;">
+      <div class="flex items-center gap-2">
+        <i data-lucide="hexagon" class="size-4"></i>
+        <span class="text-xs">claude-hunt</span>
+      </div>
+      <span class="w-badge">로그인 / 프로필</span>
+    </div>
+
+    <!-- Main content placeholder -->
+    <div class="w-fillbox mb-8" style="height: 320px; display:flex; align-items:center; justify-content:center; font-size:12px; color:var(--w-muted)">
+      (페이지 본문 — 예: / 의 프로젝트 보드)
+    </div>
+
+    <!-- Footer (updated) -->
+    <footer class="w-frame" style="background: white;">
+      <div class="px-4 py-4 flex flex-col @md:flex-row items-start @md:items-center justify-between gap-3 text-xs">
+        <span>© 2026 claude-hunt</span>
+
+        <nav class="flex flex-wrap items-center gap-x-3 gap-y-2">
+          <!-- NEW: legal links -->
+          <a class="w-anchor" href="#">이용약관</a>
+          <a class="w-anchor" href="#">개인정보 처리방침</a>
+
+          <span style="color:var(--w-muted)">·</span>
+
+          <!-- existing -->
+          <span class="w-badge inline-flex items-center gap-1">
+            <i data-lucide="github" class="size-3"></i> GitHub
+          </span>
+          <span class="w-badge inline-flex items-center gap-1">
+            <i data-lucide="message-square" class="size-3"></i> Feedback
+          </span>
+          <span style="color:var(--w-muted)">Built by toycrane</span>
+        </nav>
+      </div>
+    </footer>
+
+    <div class="screen-notes">
+      <details open>
+        <summary>Notes</summary>
+        <p>시나리오 3 — 사이트 푸터에 법적 문서 링크 2개를 추가. 기존 GitHub/Feedback/Built by 블록은 유지.</p>
+        <ul>
+          <li>트리거: 푸터가 렌더되는 모든 페이지(현재는 / 에서 렌더) 하단으로 스크롤</li>
+          <li>인터랙션: ‘이용약관’ → /terms, ‘개인정보 처리방침’ → /privacy (같은 탭, 내부 네비게이션)</li>
+          <li>전환: 외부 링크(GitHub/Feedback/Creator)는 기존과 동일하게 새 탭</li>
+          <li>배치: 모바일에서는 두 줄 이상으로 wrap 허용, 데스크톱에서는 한 줄 정렬</li>
+        </ul>
+      </details>
+    </div>
+
+  </div>
+</div>
+
+<script>
+var currentScreen = 0;
+var screenIds = [];
+
+function show(id) {
+  document.querySelectorAll('.screen').forEach(function(s) { s.classList.remove('active'); });
+  document.getElementById('screen-' + id).classList.add('active');
+  document.querySelectorAll('nav button[id^="nav-"]').forEach(function(b) { b.classList.remove('active'); });
+  document.getElementById('nav-' + id).classList.add('active');
+  currentScreen = screenIds.indexOf(id);
+}
+
+function setViewport(mode) {
+  document.body.classList.remove('viewport-mobile', 'viewport-desktop');
+  document.body.classList.add('viewport-' + mode);
+  document.querySelectorAll('.vp-toggle button').forEach(function(b) { b.classList.remove('active'); });
+  document.getElementById('vp-' + mode).classList.add('active');
+}
+
+document.addEventListener('DOMContentLoaded', function() {
+  document.querySelectorAll('nav button[id^="nav-"]').forEach(function(b) {
+    screenIds.push(parseInt(b.id.replace('nav-', '')));
+  });
+  var first = document.querySelector('nav button[id^="nav-"]');
+  if (first) first.click();
+  lucide.createIcons();
+});
+</script>
+</body>
+</html>
