@@ -35,3 +35,36 @@ create policy "Users can insert their own profile"
   on public.profiles for insert
   to authenticated
   with check ((select auth.uid()) = id);
+
+-- DO NOT drop this function — referenced by the on_auth_user_created trigger on
+-- auth.users (see migration 20260325024939_create_profile_trigger.sql). The
+-- trigger itself cannot be declared here because migra does not cross schema
+-- boundaries.
+create or replace function public.handle_new_user()
+returns trigger
+language plpgsql
+security definer set search_path = ''
+as $$
+declare
+  _full_name text := coalesce(
+    new.raw_user_meta_data ->> 'full_name',
+    new.raw_user_meta_data ->> 'name',
+    new.raw_user_meta_data ->> 'user_name'
+  );
+begin
+  insert into public.profiles (id, email, full_name, avatar_url)
+  values (
+    new.id,
+    new.email,
+    _full_name,
+    new.raw_user_meta_data ->> 'avatar_url'
+  )
+  on conflict (id) do nothing;
+  return new;
+end;
+$$;
+
+create trigger handle_updated_at
+  before update on public.profiles
+  for each row
+  execute procedure extensions.moddatetime (updated_at);
