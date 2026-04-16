@@ -9,7 +9,7 @@ import { toggleVote } from "../api/actions";
 const ARIA_LABEL = "추천하기";
 
 const PILL_BASE_CLASS =
-  "inline-flex flex-col items-center justify-center min-w-14 gap-0.5 rounded-lg border px-2 py-2 font-semibold text-sm outline-none transition-colors focus-visible:ring-2 focus-visible:ring-vote/50 disabled:pointer-events-none";
+  "inline-flex flex-col items-center justify-center min-w-14 gap-0.5 rounded-lg border px-2 py-2 font-semibold text-sm outline-none transition-colors focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-vote focus-visible:ring-offset-background disabled:pointer-events-none";
 
 const PILL_IDLE_CLASS = "border-vote bg-background text-vote hover:bg-vote/10";
 
