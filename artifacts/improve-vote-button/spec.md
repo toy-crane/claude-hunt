@@ -1,12 +1,11 @@
 ## Overview
-Replace the understated outline vote button on project-board cards with a prominent vertical "upvote pill" in a reserved warm coral color, so the primary action on each card is visually unmissable and the card shows the vote count in only one place.
+Replace the understated outline vote button on project-board cards with a prominent vertical "upvote pill" (Product Hunt style) using the theme's existing primary/foreground tokens, so the primary action on each card is visually unmissable and the card shows the vote count in only one place.
 
 ## Scope
 
 ### Included
 - A new vertical upvote pill (arrow on top, numeric count below) appears at the top-right of every project card's content area on the project board.
-- Distinct visual states for: **idle** (not voted), **voted**, **saving** (in-flight server call), and **owner** (read-only count, no button).
-- A reserved accent color used exclusively for the upvote pill — no other element on the page uses it.
+- Distinct visual states for: **idle** (not voted, outlined on card background), **voted** (filled with the theme primary color), **saving** (in-flight server call, dimmed + disabled), and **owner** (muted read-only count, no button).
 - The existing duplicate vote-count indicator that currently appears next to the project title is removed. The pill is the only place a count is displayed on the card.
 
 ### Excluded
@@ -20,7 +19,7 @@ Replace the understated outline vote button on project-board cards with a promin
 ### 1. Signed-in viewer sees an unvoted card
 - **Given** a signed-in viewer who has not voted on a project showing a count of 128
 - **When** the project board loads
-- **Then** the card displays a vertical pill at the top-right with an up-arrow and the number "128"; the pill is outlined in warm coral and its interior is the card background color
+- **Then** the card displays a vertical pill at the top-right with an up-arrow and the number "128"; the pill is outlined with a bordered style and its interior matches the card background
 
 Success Criteria:
 - [ ] The pill is a single tappable control with accessible name "추천하기" and `aria-pressed="false"`
@@ -30,7 +29,7 @@ Success Criteria:
 ### 2. Signed-in viewer upvotes a card
 - **Given** a signed-in viewer looking at an unvoted card with count "128"
 - **When** the viewer clicks the pill
-- **Then** the pill immediately switches to the voted state: solid coral background, white arrow and count, `aria-pressed="true"`, and the count becomes "129"
+- **Then** the pill immediately switches to the voted state: solid primary background, primary-foreground arrow and count, `aria-pressed="true"`, and the count becomes "129"
 
 Success Criteria:
 - [ ] The count visible inside the pill changes from "128" to "129" within the same paint as the click (optimistic update)
@@ -64,12 +63,12 @@ Success Criteria:
 Success Criteria:
 - [ ] No control with accessible name "추천하기" is present on the owner's own card
 - [ ] The visible count "7" is present exactly once on the card
-- [ ] The read-only count is rendered in a muted (non-coral) style so it is visually distinct from the pill
+- [ ] The read-only count is rendered in a muted style (muted-foreground) so it is visually distinct from the pill
 
 ## Invariants
 
 - **Single source of count.** Each project card displays its vote count in exactly one location — the pill (for non-owners) or the read-only indicator (for owners). No card ever shows the count twice.
-- **Reserved accent.** The warm-coral accent is used only for the upvote pill's idle border/text and voted fill. No other element (link, badge, heading, icon, rank medal, etc.) on the project board uses this color.
+- **Visual distinction by state, not hue.** The pill's idle vs. voted states differ in fill (outlined vs. solid primary), not color family — the whole control stays within the theme's existing monochrome tokens.
 - **Owner cannot vote.** No access path — UI, keyboard, or any other interaction — lets a project's owner cast or appear to cast a vote on their own project.
 
 ## Dependencies

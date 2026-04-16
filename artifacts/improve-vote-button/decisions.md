@@ -47,3 +47,28 @@
 **Why**: The a11y note was a real defect — screen readers announce the bare number without context. The stale-closure concern is moot in practice because `disabled={isPending}` blocks a double-fire before the closure could re-execute, and migrating to `useOptimistic` is a net-positive refactor that doesn't belong in a UI-polish PR.
 **Harness Signal**: N/A — advisory-vs-fail tiering worked as intended.
 **Result**: Success — a11y fix shipped in commit 60cbbe7.
+
+---
+
+# Post-execution revisions
+
+The following decisions occurred after plan.md was marked complete. They rolled back the coral color story in favor of a monochrome treatment. The overall feature (vertical pill, top-right placement, owner read-only, single count source) is unchanged.
+
+## Iterated vote accent: coral → muted coral → monochrome
+
+**When**: Post-execution user review
+**Decision**: Dropped the `--vote` / `--vote-foreground` theme tokens entirely. Pill now uses `border-border` + `bg-background` + `text-foreground` (idle) and `border-primary` + `bg-primary` + `text-primary-foreground` (voted). Owner indicator stays `text-muted-foreground`.
+**Why**: After evaluating the WCAG-corrected coral (`oklch 0.58`), the user preferred a more restrained, minimalist treatment. We stepped through three intermediate options (pure foreground, warm neutral gray, muted coral) before landing on "theme primary, no new token." The monochrome choice:
+  1. eliminates a custom semantic token the rest of the design system doesn't need
+  2. removes the WCAG contrast risk surface — primary/foreground is already compliance-verified
+  3. preserves state distinction via fill intensity (outlined vs. solid) rather than hue
+**Harness Signal**: The wireframe skill's Color options tab let us evaluate many hues but did not prompt us to consider "no hue at all." Adding a "monochrome baseline" prompt — "have you confirmed a new hue is worth the token?" — would catch over-introduction of tokens in future features.
+**Result**: Success — commit `231ade8` removed the token, commit `e7073c5` restored the vertical PH layout with the monochrome palette. 300/300 unit tests green.
+
+## Kept vertical layout after brief horizontal detour
+
+**When**: Post-execution user review
+**Decision**: When moving to plain shadcn `Button`, the pill briefly flattened to horizontal (shadcn Button's native shape). User immediately asked for Product Hunt vertical back, so the plain `<button>` vertical layout was restored with monochrome tokens.
+**Why**: The vertical silhouette is the point of the redesign — it's what signals "upvote" at a glance. The shadcn Button's variant system can't render that shape without className fights, so a plain `<button>` with semantic tokens is correct for this one specialized control. The design-reviewer endorsed this choice during the main review (Advisory only, no fail).
+**Harness Signal**: Tying layout decisions to a named design pattern ("PH pill") up-front helps resist the temptation to refactor into a generic primitive later. Consider adding a "name the reference pattern" field to `draft-plan` when a feature has a recognizable UI lineage.
+**Result**: Success — final commit `e7073c5`.

@@ -1,11 +1,13 @@
 # Improve Vote Button Implementation Plan
 
+> **Post-execution note** (commit `e7073c5`): the `--vote` coral token was introduced during execution, then rolled back to monochrome per an aesthetic revision. Current implementation uses the theme's existing `--primary` / `--foreground` / `--background` tokens. See `decisions.md` for the full audit trail.
+
 ## Architecture Decisions
 
 | Decision | Choice | Reason |
 |----------|--------|--------|
-| Color exposure | Add `--vote` and `--vote-foreground` CSS variables in `app/globals.css` and register them under the existing `@theme inline` block | Matches the pattern of other semantic tokens (`--primary`, `--destructive`) so Tailwind exposes `bg-vote`, `text-vote`, `border-vote` utilities automatically. |
-| Accent color value | Warm coral (`oklch(0.7 0.14 42)` light / `oklch(0.76 0.14 42)` dark) | Approved in the wireframe "Color options" review; reads as upvote, stays distinct from the existing destructive red, and echoes Claude's brand tone. |
+| ~~Color exposure (rolled back)~~ | ~~Add `--vote` / `--vote-foreground` tokens~~ | Dropped — see Decisions log. Current: uses `--primary` / `--foreground` directly, no new token. |
+| Accent treatment | Idle: outlined on card background (`bg-background` + `text-foreground` + `border-border`). Voted: solid `bg-primary` with `text-primary-foreground`. | Monochrome state switch avoids an extra custom token and keeps the palette austere. |
 | Owner read-only slot owner | Keep the read-only count inside `VoteButton`, not in a separate component | `VoteButton` already branches on `ownedByViewer`; returning a muted indicator (instead of `null`) keeps the project-card slot contract "render one thing in the top-right" with a single caller. |
 | Scope of the pill slot | Place the pill at the top-right of the card's content area (not overlapping the screenshot) | Matches the approved wireframe; doesn't disturb the screenshot's click target (which opens the project URL). |
 | Keep existing slot API | `renderVoteButton` prop on `ProjectGrid`/`ProjectCard` is unchanged | Only the slot's position inside `ProjectCard` and the rendered markup change — no callers need updating. |
