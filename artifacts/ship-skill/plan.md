@@ -25,7 +25,7 @@ Replace remote GitHub Actions deploy pipeline with a local, synchronous `/ship` 
 
 ### Vercel integration
 
-- Project linked (`.vercel/project.json` present)
+- Project linked locally (`.vercel/project.json` present — gitignored)
 - Vercel CLI installed globally (`/opt/homebrew/bin/vercel` v41.7.4)
 - Deploys triggered today via **`VERCEL_DEPLOY_HOOK`** curl from `production.yml`
 - **Unknown**: whether Vercel's native git integration (auto-deploy on push to `main`) is ALSO enabled. Must verify in dashboard.
@@ -62,7 +62,30 @@ All four GitHub workflow files deleted. No remote automation.
 
 Tasks are sequential. Each task = one commit.
 
-### Task 1 — Create `/ship` skill skeleton
+### Task 1 — Create `/ship` skill config
+
+**File**: `.claude/skills/ship/config.json` (new, tracked)
+
+Production target identifiers live in config, separate from skill logic. Keeps `SKILL.md` generic and "what is production?" visible in one place.
+
+```json
+{
+  "production": {
+    "vercel": { "projectId": "prj_TpUsNVy1tlcK1PuU1vwXXp0FAiPH" },
+    "supabase": { "projectRef": "sphsvgudpwjwfurkulmr" }
+  }
+}
+```
+
+**Security note**: both IDs are safe to commit to this public repo.
+- Supabase `projectRef` is already public via `NEXT_PUBLIC_SUPABASE_URL` in the client bundle, and already appears in `artifacts/fix-production-buckets/*.md`.
+- Vercel `projectId` is not cryptographically sensitive — it's an identifier, not a credential. Deploys require `VERCEL_TOKEN` which is NOT in the repo. User has explicitly accepted the mild information-disclosure of committing the project ID in exchange for the simpler design.
+
+**Commit message**: `feat(ship): add config with production target IDs`
+
+---
+
+### Task 2 — Create `/ship` skill skeleton
 
 **File**: `.claude/skills/ship/SKILL.md` (new)
 
@@ -73,16 +96,32 @@ Tasks are sequential. Each task = one commit.
 
 **Preconditions (Step 1 — abort if any fail)**:
 ```bash
+CONFIG=".claude/skills/ship/config.json"
+EXPECTED_VERCEL=$(jq -r .production.vercel.projectId "$CONFIG")
+EXPECTED_SUPABASE=$(jq -r .production.supabase.projectRef "$CONFIG")
+
 # on main
-[ "$(git branch --show-current)" = "main" ] || abort
+[ "$(git branch --show-current)" = "main" ] || abort "not on main"
 
 # clean tree
-[ -z "$(git status --porcelain)" ] || abort
+[ -z "$(git status --porcelain)" ] || abort "working tree is dirty"
 
 # local == remote
 git fetch origin main
-[ "$(git rev-parse HEAD)" = "$(git rev-parse origin/main)" ] || abort
+[ "$(git rev-parse HEAD)" = "$(git rev-parse origin/main)" ] || abort "local main diverged from origin/main"
+
+# Vercel link matches production target
+[ -f .vercel/project.json ] || abort "Vercel not linked — run: vercel link"
+ACTUAL_VERCEL=$(jq -r .projectId .vercel/project.json)
+[ "$ACTUAL_VERCEL" = "$EXPECTED_VERCEL" ] || abort "Vercel linked to wrong project: $ACTUAL_VERCEL (expected $EXPECTED_VERCEL)"
+
+# Supabase link matches production target
+# supabase CLI stores linked project-ref under supabase/.temp/project-ref (gitignored)
+ACTUAL_SUPABASE=$(cat supabase/.temp/project-ref 2>/dev/null || echo "")
+[ "$ACTUAL_SUPABASE" = "$EXPECTED_SUPABASE" ] || abort "Supabase linked to wrong project: '$ACTUAL_SUPABASE' (expected $EXPECTED_SUPABASE) — run: supabase link --project-ref $EXPECTED_SUPABASE"
 ```
+
+**Why these checks**: `.vercel/project.json` is **gitignored** (confirmed — `.gitignore` contains `.vercel`), so both Vercel and Supabase link state must be re-established per clone/worktree. The config comparison catches "unlinked" and "linked to the wrong project" in the same check.
 
 **Step 2 — safety net**:
 - `bun run typecheck`
@@ -105,7 +144,7 @@ git fetch origin main
 
 ---
 
-### Task 2 — Remove `production.yml`
+### Task 3 — Remove `production.yml`
 
 **Why first among deletions**: this is the one that was actively doing work; removing it is the main substitution.
 
@@ -115,7 +154,7 @@ git fetch origin main
 
 ---
 
-### Task 3 — Remove `ci.yml`
+### Task 4 — Remove `ci.yml`
 
 The local `/ship` safety net (typecheck + test:unit) covers the same ground at ship time. Pre-merge, `/pr` (called by `/merge`) can optionally run the same checks locally — but that's a separate refinement.
 
@@ -125,7 +164,7 @@ The local `/ship` safety net (typecheck + test:unit) covers the same ground at s
 
 ---
 
-### Task 4 — Remove `claude-code-review.yml` and `claude.yml`
+### Task 5 — Remove `claude-code-review.yml` and `claude.yml`
 
 These are collaboration tools (auto-review of PRs, @-mention interactions). Solo, they have no value.
 
@@ -133,7 +172,7 @@ These are collaboration tools (auto-review of PRs, @-mention interactions). Solo
 
 ---
 
-### Task 5 — Update `CLAUDE.md` (if relevant)
+### Task 6 — Update `CLAUDE.md` (if relevant)
 
 Check whether `CLAUDE.md` references any of the removed workflows or the old deploy flow. If yes, update the Development Workflow section to reference `/ship` instead.
 
@@ -167,7 +206,8 @@ Delete or keep — no functional impact either way.
 ### Local env (verify before first `/ship` run)
 
 - `supabase projects list` returns projects (CLI authenticated)
-- `supabase link --project-ref <prod-ref>` done for this worktree (the `.claude/worktrees/feat/ship-skill/` directory may need its own link — `supabase link` state lives in `supabase/.temp/` which is gitignored)
+- `supabase link --project-ref sphsvgudpwjwfurkulmr` done **in the working directory where `/ship` will run** — `supabase link` state lives in `supabase/.temp/` which is gitignored, so each clone/worktree needs its own `supabase link`. The `/ship` precondition will abort with an explicit re-link command if missing.
+- `vercel link` done similarly (though `.vercel/` is also gitignored — if absent, precondition will instruct to run `vercel link`)
 - `vercel whoami` returns your account
 - `vercel --prod` from the main repo directory deploys successfully as a one-off test
 
@@ -218,18 +258,20 @@ The Claude workflows (Task 4) don't need restoration; they weren't earning their
 | `supabase db push` fails mid-migration → main has un-migrated schema | Med | Expand/contract discipline; user sees failure in terminal immediately |
 | Local Vercel token expires → `/ship` fails at deploy step | Low | Re-auth with `vercel login`; fast feedback |
 | Solo assumption breaks (collaborator joins) | Low | Re-introduce `ci.yml` + `claude-code-review.yml`; `/ship` remains as personal deploy command |
-| `/ship` runs from wrong `.vercel` project link | Med | `vercel --prod` reads `.vercel/project.json` — verify in preconditions |
+| `/ship` runs from wrong `.vercel` project link | Med | Precondition asserts `.vercel/project.json` → `projectId` matches expected production ID |
+| `/ship` runs from wrong `supabase` project link (non-prod, unlinked) | **High** | Precondition asserts `supabase/.temp/project-ref` matches expected production ref. **`supabase/.temp/` is gitignored** — must be verified per clone/worktree |
 
 ---
 
 ## 9. Execution order summary
 
 1. **User action first**: Vercel dashboard — disable auto-deploy from main (§5)
-2. Task 1 — create `/ship` skill
-3. Smoke test: run `/ship` on a trivial change end-to-end (validates S6, S7 before removing the old path)
-4. Task 2 — remove `production.yml`
-5. Task 3 — remove `ci.yml`
-6. Task 4 — remove Claude workflows
-7. Task 5 — docs update
-8. Verify all S1–S8 success criteria
-9. `/merge` this worktree back to main
+2. Task 1 — create `config.json` with production target IDs
+3. Task 2 — create `/ship` skill SKILL.md
+4. Smoke test: run `/ship` on a trivial change end-to-end (validates S6, S7 before removing the old path)
+5. Task 3 — remove `production.yml`
+6. Task 4 — remove `ci.yml`
+7. Task 5 — remove Claude workflows
+8. Task 6 — docs update
+9. Verify all S1–S8 success criteria
+10. `/merge` this worktree back to main
