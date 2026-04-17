@@ -1,5 +1,7 @@
 # Production Deployment Workflow
 
+> **Superseded 2026-04-17** by [`2026-04-17-ship-skill-replaces-github-actions.md`](./2026-04-17-ship-skill-replaces-github-actions.md). The GitHub Actions pipeline described below no longer exists; deploys are driven locally by the `/ship` skill. This document is preserved for historical context.
+
 ## Date
 2026-04-08
 
