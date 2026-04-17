@@ -83,3 +83,41 @@ update public.profiles
   set display_name = '소라',
       cohort_id = (select id from public.cohorts where name = 'Inflearn')
   where id = '00000000-0000-0000-0000-00000000000c';
+
+------------------------------------------------------------------------------
+-- 3. Demo projects (one per user). Fixed IDs so the Acceptance check
+--    "same image URLs across resets" holds — the public bucket URL
+--    includes the object key, which is keyed by user UUID + filename.
+------------------------------------------------------------------------------
+
+insert into public.projects (
+  id, user_id, cohort_id, title, tagline, project_url, screenshot_path
+) values
+  (
+    '00000000-0000-0000-0000-0000000000a1',
+    '00000000-0000-0000-0000-00000000000a',
+    (select id from public.cohorts where name = 'LGE-1'),
+    'Paint Studio',
+    '웹에서 바로 쓰는 간단한 드로잉 툴',
+    'https://paint-studio.example.com',
+    '00000000-0000-0000-0000-00000000000a/paint-studio.png'
+  ),
+  (
+    '00000000-0000-0000-0000-0000000000b1',
+    '00000000-0000-0000-0000-00000000000b',
+    (select id from public.cohorts where name = 'LGE-2'),
+    'Note Keeper',
+    '마크다운으로 빠르게 메모하고 태그로 정리해요',
+    'https://note-keeper.example.com',
+    '00000000-0000-0000-0000-00000000000b/note-keeper.png'
+  ),
+  (
+    '00000000-0000-0000-0000-0000000000c1',
+    '00000000-0000-0000-0000-00000000000c',
+    (select id from public.cohorts where name = 'Inflearn'),
+    'Focus Timer',
+    '뽀모도로 방식으로 집중 세션을 기록해 주는 타이머',
+    'https://focus-timer.example.com',
+    '00000000-0000-0000-0000-00000000000c/focus-timer.png'
+  )
+on conflict (id) do nothing;

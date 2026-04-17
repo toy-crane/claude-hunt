@@ -124,6 +124,11 @@ file_size_limit = "50MiB"
 public = true
 file_size_limit = "5MiB"
 allowed_mime_types = ["image/jpeg", "image/png", "image/webp"]
+# Seed fixture PNGs laid out as <owner-uuid>/<filename>.png under
+# supabase/seed/project-screenshots. The CLI uploads these on
+# `supabase start` / `supabase db reset`. supabase/seed.sql references
+# the same keys from public.projects.screenshot_path.
+objects_path = "./seed/project-screenshots"
 
 # Allow connections via S3 compatible clients
 [storage.s3_protocol]
