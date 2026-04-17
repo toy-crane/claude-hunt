@@ -15,7 +15,8 @@ globs:
 
 1. Edit or create the schema file in `supabase/schemas/*.sql`
 2. Run `supabase db diff -f <descriptive_name>` to generate the migration
-3. Review the generated migration file before committing
+3. Spawn `migration-reviewer` agent to review the generated migration (see Post-Diff Review below)
+4. Strip or resolve all flagged items, then commit
 
 ## Manual Migration Path (exceptions only)
 
@@ -52,24 +53,13 @@ See the `supabase` skill's `storage-buckets.md` for the full workflow, canonical
 
 RLS on `storage.objects` is still SQL — use the Manual Migration Path (`supabase migration new ...`) because the diff tool cannot reliably capture policies in the `storage` schema.
 
-## Expected Noise in `db diff`
+## Post-Diff Review
 
-`supabase/schemas/` cannot declare cross-schema objects, DML, or certain view modifiers. Those resources live in manual migrations and will always appear as `DROP` statements in generated diffs. **Strip these from the generated migration before committing** — they are expected noise, not drift.
+Every generated migration MUST be reviewed before commit. Spawn the `migration-reviewer` agent with:
+1. The path to the generated migration file
+2. The path to the edited schema file(s)
 
-### Always-noise checklist
-
-| Resource | Why it appears | Action |
-|---|---|---|
-| `drop trigger if exists "on_auth_user_created" on "auth"."users"` | Cross-schema trigger (migra does not cross into `auth`) | Strip |
-| `drop policy "Authenticated can upload own project-screenshots" on "storage"."objects"` | Cross-schema RLS | Strip |
-| `drop policy "Owners can delete their project-screenshots" on "storage"."objects"` | Cross-schema RLS | Strip |
-| `drop policy "Owners can update their project-screenshots" on "storage"."objects"` | Cross-schema RLS | Strip |
-| `drop policy "Public can read project-screenshots" on "storage"."objects"` | Cross-schema RLS | Strip |
-| `drop view if exists "public"."projects_with_vote_count"` + `create or replace view ...` (without `with (security_invoker = false)`) | Migra does not round-trip `with (security_invoker = false)` | Strip BOTH the drop and the recreate. **Never commit a recreate missing the `security_invoker` modifier — that is a silent security regression.** |
-
-### Anything else is drift
-
-Any DROP not in the table above means either (a) a declarative resource is missing from `schemas/`, or (b) someone accidentally removed a declaration. Investigate before stripping.
+The agent applies a universal safety checklist (cross-schema DROPs, extension DROPs, view modifier regressions, unintended public-schema DROPs, unexpected statements, function body drift). Strip or resolve everything it flags before committing.
 
 ## Strictly Prohibited
 
@@ -77,4 +67,4 @@ Any DROP not in the table above means either (a) a declarative resource is missi
 - Writing SQL directly into migration files for schema changes
 - Skipping the `supabase db diff` step
 - Declaring a storage bucket in `config.toml` **without** a matching upsert migration — config.toml alone never reaches remote
-- Committing a generated migration that drops and recreates `projects_with_vote_count` without `with (security_invoker = false)`
+- Committing a generated migration without running the `migration-reviewer` agent
