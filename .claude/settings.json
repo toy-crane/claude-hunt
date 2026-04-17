@@ -1,10 +1,6 @@
 {
   "permissions": {
-    "deny": [
-      "Bash(supabase db push:*)",
-      "Bash(supabase functions deploy:*)",
-      "Bash(vercel deploy:*)"
-    ]
+    "deny": []
   },
   "env": {
     "CLAUDE_CODE_EXPERIMENTAL_AGENT_TEAMS": "1"
