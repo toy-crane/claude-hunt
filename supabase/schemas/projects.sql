@@ -36,3 +36,27 @@ create policy "Owners can delete their own projects"
   on public.projects for delete
   to authenticated
   using ((select auth.uid()) = user_id);
+
+create or replace function public.maintain_project_vote_count()
+returns trigger
+language plpgsql
+security definer
+as $$
+begin
+  if (TG_OP = 'INSERT') then
+    update public.projects
+    set vote_count = vote_count + 1
+    where id = NEW.project_id;
+  elsif (TG_OP = 'DELETE') then
+    update public.projects
+    set vote_count = greatest(vote_count - 1, 0)
+    where id = OLD.project_id;
+  end if;
+  return null;
+end;
+$$;
+
+create trigger handle_updated_at
+  before update on public.projects
+  for each row
+  execute procedure extensions.moddatetime (updated_at);

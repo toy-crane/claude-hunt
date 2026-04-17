@@ -82,8 +82,9 @@ The following entities are **NOT captured** by `supabase db diff`. You must mana
 
 ### Not Tracked
 - **DML statements**: `INSERT`, `UPDATE`, `DELETE` (use seed files or manual migrations)
-- **Trigger functions and triggers**: must be created manually
-- **View ownership and grants**: including security invoker on views
+- **Cross-schema triggers and RLS policies** (on `auth.users`, `storage.objects`, etc.): migra does not cross schema boundaries. Keep these in manual migrations. Public-schema triggers and trigger functions ARE captured — declare them in the same `schemas/<table>.sql` file as the table they attach to.
+- **View modifiers `with (security_invoker = ...)`**: not round-tripped. The declaration in `schemas/` applies when the view is first created, but every subsequent `db diff` emits a drop+recreate that omits the modifier. Strip this drop+recreate from generated migrations.
+- **View ownership and grants**
 - **Materialized views**: not supported
 - **`ALTER POLICY` statements**: policy changes require manual migration
 - **Column privileges**: not tracked

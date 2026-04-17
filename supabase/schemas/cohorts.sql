@@ -12,3 +12,10 @@ create policy "Anyone can view cohorts"
   on public.cohorts for select
   to anon, authenticated
   using (true);
+
+create extension if not exists moddatetime schema extensions;
+
+create trigger handle_updated_at
+  before update on public.cohorts
+  for each row
+  execute procedure extensions.moddatetime (updated_at);
