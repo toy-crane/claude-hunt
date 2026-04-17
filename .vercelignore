@@ -1,34 +1,34 @@
 # Claude harness (worktrees are the main upload bloater)
-.claude/
+/.claude/
 
 # Project meta / docs
-artifacts/
-knowledge/
-CLAUDE.md
-README.md
-skills-lock.json
+/artifacts/
+/knowledge/
+/CLAUDE.md
+/README.md
+/skills-lock.json
 
 # Local dev infra (Supabase CLI state, not runtime)
-supabase/
+/supabase/
 
 # Tests — not needed for production build
-e2e/
-playwright.config.ts
-playwright-report/
-test-results/
-vitest.config.ts
-vitest.setup.ts
-proxy.test.ts
+/e2e/
+/playwright.config.ts
+/playwright-report/
+/test-results/
+/vitest.config.ts
+/vitest.setup.ts
+/proxy.test.ts
 
 # Tooling / lint / git hooks
-biome.jsonc
-components.json
-lefthook.yml
+/biome.jsonc
+/components.json
+/lefthook.yml
 
 # Build caches
-.next/
-tsconfig.tsbuildinfo
+/.next/
+/tsconfig.tsbuildinfo
 
 # Env files (Vercel uses its own dashboard-managed env vars)
-.env
-.env.*
+/.env
+/.env.*
