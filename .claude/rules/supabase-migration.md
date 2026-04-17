@@ -15,7 +15,7 @@ globs:
 
 1. Edit or create the schema file in `supabase/schemas/*.sql`
 2. Run `supabase db diff -f <descriptive_name>` to generate the migration
-3. Spawn `migration-reviewer` agent to review the generated migration (see Post-Diff Review below)
+3. Review the generated migration against the Post-Diff Review checklist below
 4. Strip or resolve all flagged items, then commit
 
 ## Manual Migration Path (exceptions only)
@@ -55,11 +55,14 @@ RLS on `storage.objects` is still SQL — use the Manual Migration Path (`supaba
 
 ## Post-Diff Review
 
-Every generated migration MUST be reviewed before commit. Spawn the `migration-reviewer` agent with:
-1. The path to the generated migration file
-2. The path to the edited schema file(s)
+Every generated migration MUST pass these checks before commit:
 
-The agent applies a universal safety checklist (cross-schema DROPs, extension DROPs, view modifier regressions, unintended public-schema DROPs, unexpected statements, function body drift). Strip or resolve everything it flags before committing.
+1. **Cross-schema DROPs → strip.** Any `DROP` targeting `auth.*`, `storage.*`, or `extensions.*` is noise — migra cannot cross schema boundaries.
+2. **Extension DROPs → strip.** `DROP EXTENSION IF EXISTS ...` is never intentional in a generated diff.
+3. **View recreate losing modifiers → block.** A `DROP VIEW` + `CREATE OR REPLACE VIEW` that omits `security_invoker` or grants is a silent security regression. Strip both statements.
+4. **Unintended public-schema DROPs → investigate.** A `DROP TRIGGER/FUNCTION/POLICY` on `public.*` not matching a `schemas/` removal means either a missing declaration or an accidental deletion.
+5. **Unexpected statements → investigate.** `ALTER TABLE` on unedited tables, stray `CREATE INDEX`, or any DML (`INSERT`/`UPDATE`/`DELETE`) do not belong in a diff-generated migration.
+6. **Function body drift → investigate.** A `CREATE OR REPLACE FUNCTION` means `schemas/` differs from the live DB — verify the change is intentional and not a copy error.
 
 ## Strictly Prohibited
 
@@ -67,4 +70,4 @@ The agent applies a universal safety checklist (cross-schema DROPs, extension DR
 - Writing SQL directly into migration files for schema changes
 - Skipping the `supabase db diff` step
 - Declaring a storage bucket in `config.toml` **without** a matching upsert migration — config.toml alone never reaches remote
-- Committing a generated migration without running the `migration-reviewer` agent
+- Committing a generated migration without passing the Post-Diff Review checklist
