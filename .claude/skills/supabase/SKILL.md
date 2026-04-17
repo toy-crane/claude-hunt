@@ -1,6 +1,6 @@
 ---
 name: supabase
-description: Guides Supabase workflow — declarative schemas, migration generation, table conventions, pgTAP testing, auth configuration, and local development. Use this skill whenever creating tables, editing schemas, generating migrations, writing database tests, working with Supabase locally, configuring auth/OAuth settings, or setting up email magic link (OTP) login. Also triggers for supabase db diff, supabase db reset, supabase test db, config.toml, auth config, signInWithOtp, magic link, Inbucket, local development setup, schema file edits, or any database schema discussion.
+description: Guides Supabase workflow — declarative schemas, migration generation, table conventions, pgTAP testing, auth configuration, and local development. Use this skill whenever creating tables, editing schemas, generating migrations, writing database tests, working with Supabase locally, configuring auth/OAuth settings, or setting up email magic link (OTP) login. Also triggers for supabase db diff, supabase db reset, supabase test db, config.toml, auth config, signInWithOtp, magic link, Inbucket, seed data, seed.sql, demo data, local development setup, schema file edits, or any database schema discussion.
 ---
 
 # Supabase Database Workflow
@@ -39,6 +39,7 @@ Run through this checklist when working on auth, RLS, views, or user data:
 | Local OAuth setup | [oauth-local-setup.md](references/oauth-local-setup.md) |
 | Production OAuth setup | [oauth-production-setup.md](references/oauth-production-setup.md) |
 | Email magic link (OTP) login | [email-magiclink-local-setup.md](references/email-magiclink-local-setup.md) |
+| Seed demo data | [seed-data.md](references/seed-data.md) |
 | Type-safe client setup | [type-safe-client.md](references/type-safe-client.md) |
 
 ## Table Conventions
