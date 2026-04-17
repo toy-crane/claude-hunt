@@ -1,5 +1,10 @@
 {
   "permissions": {
+    "ask": [
+      "Bash(supabase db push:*)",
+      "Bash(supabase functions deploy:*)",
+      "Bash(vercel deploy:*)"
+    ],
     "deny": []
   },
   "env": {
