@@ -1,0 +1,6 @@
+{
+  "production": {
+    "vercel": { "projectId": "prj_TpUsNVy1tlcK1PuU1vwXXp0FAiPH" },
+    "supabase": { "projectRef": "sphsvgudpwjwfurkulmr" }
+  }
+}
