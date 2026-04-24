@@ -112,7 +112,7 @@ Success Criteria:
 Success Criteria:
 - [ ] The `RANK PREVIEW NAME AUTHOR VOTES` header strip is not rendered below 720 px.
 - [ ] Each row shows, top-to-bottom: a meta line (`{rank} · {class label}` with top-3 dot), a full-width thumbnail with a 16:10 aspect ratio, a two-line block with the title (heading font, 16 px) and tagline (sans, 13 px, dim), and a bottom row with `{author} · {submittedAt}` on the left and a vote button on the right.
-- [ ] Filter chips scroll horizontally when they overflow the viewport; the selected chip retains its inverted-color treatment.
+- [ ] Filter chips wrap onto subsequent lines when they overflow the viewport; the selected chip retains its inverted-color treatment.
 - [ ] The H1, subtitle, and `프로젝트 제출` button flow into a single column with consistent vertical spacing; the button stays reachable without horizontal scrolling.
 - [ ] The prompt line is visible but may wrap onto two lines when the `--class=...` flag is long; the leading `$ ` remains terracotta.
 
