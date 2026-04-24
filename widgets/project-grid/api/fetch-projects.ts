@@ -1,4 +1,5 @@
 import type { ProjectWithVoteCount } from "@entities/vote";
+import { createAnonServerClient } from "@shared/api/supabase/anon-server";
 import { createClient } from "@shared/api/supabase/server";
 import { SCREENSHOT_BUCKET } from "@shared/config/storage";
 
@@ -14,6 +15,15 @@ export type ProjectGridRow = ProjectWithVoteCount & {
   screenshotUrl: string;
   viewer_has_voted: boolean;
 };
+
+/** Narrow row shape consumed by `app/opengraph-image.tsx`. No viewer-vote merge. */
+export type TopProjectRow = ProjectWithVoteCount & {
+  screenshotUrl: string;
+};
+
+export interface FetchTopProjectsOptions {
+  limit?: number;
+}
 
 /**
  * Reads the landing-page grid rows from `projects_with_vote_count` and
@@ -65,5 +75,37 @@ export async function fetchProjects(
       ? screenshots.getPublicUrl(row.screenshot_path).data.publicUrl
       : "",
     viewer_has_voted: row.id != null && votedProjectIds.has(row.id),
+  }));
+}
+
+/**
+ * Cookie-free variant for contexts that cannot call `cookies()` — currently
+ * `app/opengraph-image.tsx`, where the route is regenerated on an ISR schedule
+ * and must not depend on a per-request auth session. Orders the same way as
+ * `fetchProjects` so the OG image mirrors the homepage's top-N exactly.
+ */
+export async function fetchTopProjects(
+  options: FetchTopProjectsOptions = {}
+): Promise<TopProjectRow[]> {
+  const limit = options.limit ?? 6;
+  const supabase = createAnonServerClient();
+  const result = await supabase
+    .from("projects_with_vote_count")
+    .select("*")
+    .order("vote_count", { ascending: false })
+    .order("created_at", { ascending: false })
+    .limit(limit);
+
+  if (result.error) {
+    throw result.error;
+  }
+
+  const rows = result.data ?? [];
+  const screenshots = supabase.storage.from(SCREENSHOT_BUCKET);
+  return rows.map((row) => ({
+    ...row,
+    screenshotUrl: row.screenshot_path
+      ? screenshots.getPublicUrl(row.screenshot_path).data.publicUrl
+      : "",
   }));
 }

@@ -11,6 +11,10 @@ export default defineConfig({
       "@widgets": resolve(import.meta.dirname, "./widgets"),
       "@entities": resolve(import.meta.dirname, "./entities"),
       "@shared": resolve(import.meta.dirname, "./shared"),
+      "server-only": resolve(
+        import.meta.dirname,
+        "./shared/lib/server-only-shim.ts"
+      ),
     },
   },
   test: {
