@@ -4,8 +4,22 @@ import { describe, expect, it, vi } from "vitest";
 import { ProjectCard } from "./project-card";
 
 vi.mock("next/image", () => ({
-  default: ({ alt, src }: { alt: string; src: string }) => (
-    <div aria-label={alt} data-src={src} role="img" />
+  default: ({
+    alt,
+    src,
+    className,
+  }: {
+    alt: string;
+    src: string;
+    className?: string;
+  }) => (
+    <div
+      aria-label={alt}
+      className={className}
+      data-src={src}
+      data-testid="project-card-thumb"
+      role="img"
+    />
   ),
 }));
 
@@ -30,9 +44,7 @@ function buildProject(
   };
 }
 
-const RANK_BADGE_LABEL = /1st|2nd|3rd/;
-
-describe("ProjectCard", () => {
+describe("ProjectCard (terminal row)", () => {
   it("renders title, tagline, and author display name", () => {
     render(
       <ProjectCard
@@ -47,35 +59,93 @@ describe("ProjectCard", () => {
     expect(screen.getByText("Alice")).toBeInTheDocument();
   });
 
-  it("renders the vote count in only one place (via the slot) when a vote button is provided", () => {
-    render(
+  it("renders the rank as a two-digit zero-padded number", () => {
+    const { rerender } = render(
       <ProjectCard
-        project={buildProject({ vote_count: 5 })}
-        rank={10}
-        renderVoteButton={(project) => (
-          <span data-testid="vote-slot">{project.vote_count}</span>
-        )}
+        project={buildProject()}
+        rank={1}
         screenshotUrl="https://cdn.example.com/shot.png"
       />
     );
+    expect(screen.getByText("01")).toBeInTheDocument();
 
-    const allFives = screen.getAllByText("5");
-    expect(allFives).toHaveLength(1);
-    expect(screen.getByTestId("vote-slot")).toHaveTextContent("5");
+    rerender(
+      <ProjectCard
+        project={buildProject()}
+        rank={42}
+        screenshotUrl="https://cdn.example.com/shot.png"
+      />
+    );
+    expect(screen.getByText("42")).toBeInTheDocument();
   });
 
-  it("renders the vote button slot inside the card but outside the bottom owner-actions region", () => {
+  it("renders a rank dot for ranks 1–3 and dims the number for 4+", () => {
+    const { rerender } = render(
+      <ProjectCard
+        project={buildProject()}
+        rank={1}
+        screenshotUrl="https://cdn.example.com/shot.png"
+      />
+    );
+    expect(screen.getByTestId("rank-dot")).toHaveAttribute("data-rank", "1");
+
+    rerender(
+      <ProjectCard
+        project={buildProject()}
+        rank={4}
+        screenshotUrl="https://cdn.example.com/shot.png"
+      />
+    );
+    expect(screen.queryByTestId("rank-dot")).toBeNull();
+    expect(screen.getByText("04").className).toContain("text-muted-foreground");
+  });
+
+  it("opens the project URL in a new tab from both the thumbnail and the title link", () => {
+    render(
+      <ProjectCard
+        project={buildProject({ project_url: "https://myapp.com" })}
+        rank={5}
+        screenshotUrl="https://cdn.example.com/shot.png"
+      />
+    );
+    const links = screen.getAllByRole("link");
+    expect(links.length).toBeGreaterThanOrEqual(2);
+    for (const link of links) {
+      expect(link).toHaveAttribute("href", "https://myapp.com");
+      expect(link).toHaveAttribute("target", "_blank");
+      expect(link).toHaveAttribute("rel", "noopener noreferrer");
+    }
+  });
+
+  it("scales the thumbnail on row hover via group-hover CSS", () => {
+    render(
+      <ProjectCard
+        project={buildProject()}
+        rank={2}
+        screenshotUrl="https://cdn.example.com/shot.png"
+      />
+    );
+    const row = screen.getByTestId("project-card");
+    expect(row.className).toContain("group/row");
+    expect(row.className).toContain("hover:bg-muted");
+
+    const thumb = screen.getByTestId("project-card-thumb");
+    expect(thumb.className).toContain("group-hover/row:scale-[1.08]");
+    expect(thumb.className).toContain("origin-left");
+    expect(thumb.className).toContain("transition-transform");
+  });
+
+  it("renders the vote-button slot once, separate from the owner-actions region", () => {
     render(
       <ProjectCard
         project={buildProject()}
         rank={10}
-        renderOwnerActions={() => <button type="button">Edit</button>}
-        renderVoteButton={() => <span data-testid="vote-slot">vote</span>}
+        renderOwnerActions={() => <button type="button">owner</button>}
+        renderVoteButton={() => <span data-testid="vote-slot">vote-slot</span>}
         screenshotUrl="https://cdn.example.com/shot.png"
         viewerUserId="user-1"
       />
     );
-
     const voteSlot = screen.getByTestId("vote-slot");
     const ownerActions = screen.getByTestId("project-card-owner-actions");
     expect(ownerActions.contains(voteSlot)).toBe(false);
@@ -118,7 +188,7 @@ describe("ProjectCard", () => {
     expect(img.getAttribute("data-src")).toContain("paint.png");
   });
 
-  it("accepts the priority prop for above-the-fold cards", () => {
+  it("accepts the priority prop for above-the-fold rows", () => {
     render(
       <ProjectCard
         priority
@@ -127,7 +197,6 @@ describe("ProjectCard", () => {
         screenshotUrl="https://cdn.example.com/top.png"
       />
     );
-
     expect(screen.getByLabelText("Top 스크린샷")).toBeInTheDocument();
   });
 
@@ -140,27 +209,5 @@ describe("ProjectCard", () => {
       />
     );
     expect(screen.getByText("익명")).toBeInTheDocument();
-  });
-
-  it("shows a rank badge when rank is 1, 2, or 3", () => {
-    render(
-      <ProjectCard
-        project={buildProject()}
-        rank={1}
-        screenshotUrl="https://cdn.example.com/shot.png"
-      />
-    );
-    expect(screen.getByText("1st")).toBeInTheDocument();
-  });
-
-  it("omits the rank badge when rank is 4 or worse", () => {
-    render(
-      <ProjectCard
-        project={buildProject()}
-        rank={4}
-        screenshotUrl="https://cdn.example.com/shot.png"
-      />
-    );
-    expect(screen.queryByText(RANK_BADGE_LABEL)).not.toBeInTheDocument();
   });
 });

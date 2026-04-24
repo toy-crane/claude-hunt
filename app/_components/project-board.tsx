@@ -4,6 +4,7 @@ import type { Cohort } from "@entities/cohort";
 import { CohortDropdown } from "@features/cohort-filter";
 import { DeleteButton } from "@features/delete-project";
 import { EditDialog } from "@features/edit-project";
+import { SubmitDialog } from "@features/submit-project";
 import { VoteButton } from "@features/toggle-vote";
 import type { ProjectGridRow } from "@widgets/project-grid";
 import { ProjectGrid, PromptLine } from "@widgets/project-grid";
@@ -15,6 +16,8 @@ export interface ProjectBoardProps {
   initialCohortId: string | null;
   isAuthenticated: boolean;
   projects: ProjectGridRow[];
+  /** Signed-in viewer's cohort id (for the submit form's default). */
+  viewerCohortId?: string | null;
   viewerUserId: string | null;
 }
 
@@ -23,12 +26,16 @@ export interface ProjectBoardProps {
  * All projects are passed in on first render; cohort switching filters in
  * memory so there are no additional network requests after the initial load.
  * URL is kept in sync via `history.replaceState` (no RSC re-render).
+ *
+ * Owns the full landing layout (prompt line, H1, subtitle, submit button,
+ * filter, list) so all three pieces stay synchronized with the filter state.
  */
 export function ProjectBoard({
   initialCohortId,
   cohorts,
   projects,
   viewerUserId,
+  viewerCohortId = null,
   isAuthenticated,
 }: ProjectBoardProps) {
   const [cohortId, setCohortId] = useState(initialCohortId);
@@ -68,6 +75,24 @@ export function ProjectBoard({
   return (
     <>
       <PromptLine cohortLabel={cohortLabel} />
+      <section className="flex flex-wrap items-end justify-between gap-4">
+        <div className="flex flex-col gap-1">
+          <h1 className="font-heading font-medium text-2xl">프로젝트 보드</h1>
+          <p
+            className="text-muted-foreground text-sm"
+            data-testid="project-board-subtitle"
+          >
+            {filteredProjects.length}개 프로젝트 · 마음에 드는 곳에 응원을
+            보내주세요.
+          </p>
+        </div>
+        <div className="w-fit self-end">
+          <SubmitDialog
+            cohortId={viewerCohortId}
+            isAuthenticated={isAuthenticated}
+          />
+        </div>
+      </section>
       <div className="flex items-center justify-end gap-2">
         <CohortDropdown
           cohorts={cohorts}
@@ -103,6 +128,7 @@ export function ProjectBoard({
               viewerUserId != null && project.user_id === viewerUserId
             }
             projectId={project.id ?? ""}
+            variant="inline"
             voteCount={project.vote_count ?? 0}
           />
         )}

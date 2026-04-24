@@ -5,9 +5,9 @@ import { ProjectCard } from "./project-card";
 
 export interface ProjectGridProps {
   projects: ProjectWithVoteCount[];
-  /** Owner-only actions slot forwarded to each card. */
+  /** Owner-only actions slot forwarded to each row. */
   renderOwnerActions?: (project: ProjectWithVoteCount) => React.ReactNode;
-  /** Vote button slot forwarded to each card. */
+  /** Vote button slot forwarded to each row. */
   renderVoteButton?: (project: ProjectWithVoteCount) => React.ReactNode;
   /**
    * Maps a `screenshot_path` from the view to a fetchable URL. Injected by
@@ -18,6 +18,8 @@ export interface ProjectGridProps {
   /** Current viewer's `auth.uid()` (null for anonymous). */
   viewerUserId?: string | null;
 }
+
+const HEADER_GRID_COLS = "grid-cols-[52px_72px_minmax(0,1fr)_130px_auto]";
 
 export function ProjectGrid({
   projects,
@@ -31,28 +33,42 @@ export function ProjectGrid({
   }
 
   return (
-    <div
-      className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3"
+    <section
+      aria-label="프로젝트 목록"
+      className="border border-border"
       data-testid="project-grid"
     >
-      {projects.map((project, index) => {
-        const rank = index + 1;
-        return (
-          <ViewTransition key={project.id}>
-            <ProjectCard
-              priority={rank <= 3}
-              project={project}
-              rank={rank}
-              renderOwnerActions={renderOwnerActions}
-              renderVoteButton={renderVoteButton}
-              screenshotUrl={resolveScreenshotUrl(
-                project.screenshot_path ?? ""
-              )}
-              viewerUserId={viewerUserId}
-            />
-          </ViewTransition>
-        );
-      })}
-    </div>
+      <div
+        aria-hidden="true"
+        className={`hidden gap-4 bg-muted px-5 py-2 font-mono text-[10px] text-muted-foreground uppercase tracking-[0.08em] min-[720px]:grid ${HEADER_GRID_COLS}`}
+        data-testid="project-grid-header"
+      >
+        <div>RANK</div>
+        <div>PREVIEW</div>
+        <div>NAME</div>
+        <div>AUTHOR</div>
+        <div className="justify-self-end">VOTES</div>
+      </div>
+      <ul className="flex flex-col">
+        {projects.map((project, index) => {
+          const rank = index + 1;
+          return (
+            <ViewTransition key={project.id}>
+              <ProjectCard
+                priority={rank <= 3}
+                project={project}
+                rank={rank}
+                renderOwnerActions={renderOwnerActions}
+                renderVoteButton={renderVoteButton}
+                screenshotUrl={resolveScreenshotUrl(
+                  project.screenshot_path ?? ""
+                )}
+                viewerUserId={viewerUserId}
+              />
+            </ViewTransition>
+          );
+        })}
+      </ul>
+    </section>
   );
 }

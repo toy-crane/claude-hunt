@@ -48,6 +48,24 @@ vi.mock("@features/edit-project", () => ({
 vi.mock("@features/delete-project", () => ({
   DeleteButton: () => null,
 }));
+vi.mock("@features/submit-project", () => ({
+  SubmitDialog: ({
+    cohortId,
+    isAuthenticated,
+  }: {
+    cohortId: string | null;
+    isAuthenticated: boolean;
+  }) => (
+    <button
+      data-authenticated={String(isAuthenticated)}
+      data-cohort-id={cohortId ?? ""}
+      data-testid="submit-dialog-stub"
+      type="button"
+    >
+      프로젝트 제출
+    </button>
+  ),
+}));
 
 vi.mock("@shared/api/supabase/server", () => ({
   createClient: vi.fn().mockResolvedValue({
@@ -167,6 +185,44 @@ describe("ProjectBoard", () => {
 
   afterEach(() => {
     vi.restoreAllMocks();
+  });
+
+  it("renders the Korean H1 and the subtitle with the filtered project count", async () => {
+    await renderBoard();
+    expect(
+      screen.getByRole("heading", { name: "프로젝트 보드", level: 1 })
+    ).toBeInTheDocument();
+    expect(screen.getByTestId("project-board-subtitle")).toHaveTextContent(
+      "3개 프로젝트 · 마음에 드는 곳에 응원을 보내주세요."
+    );
+
+    act(() => capturedOnValueChange?.("cohort-a"));
+    expect(screen.getByTestId("project-board-subtitle")).toHaveTextContent(
+      "2개 프로젝트 · 마음에 드는 곳에 응원을 보내주세요."
+    );
+
+    act(() => capturedOnValueChange?.("cohort-b"));
+    expect(screen.getByTestId("project-board-subtitle")).toHaveTextContent(
+      "1개 프로젝트 · 마음에 드는 곳에 응원을 보내주세요."
+    );
+  });
+
+  it("forwards viewerCohortId + isAuthenticated to the inline SubmitDialog trigger", async () => {
+    capturedOnValueChange = undefined;
+    const { ProjectBoard } = await import("./project-board");
+    render(
+      <ProjectBoard
+        cohorts={cohorts}
+        initialCohortId={null}
+        isAuthenticated={true}
+        projects={allProjects}
+        viewerCohortId="cohort-a"
+        viewerUserId="user-1"
+      />
+    );
+    const submit = screen.getByTestId("submit-dialog-stub");
+    expect(submit).toHaveAttribute("data-authenticated", "true");
+    expect(submit).toHaveAttribute("data-cohort-id", "cohort-a");
   });
 
   it("shows all projects when no cohort is selected", async () => {
