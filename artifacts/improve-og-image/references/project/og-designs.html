@@ -1,0 +1,673 @@
+<!doctype html>
+<html lang="ko">
+  <head>
+    <meta charset="utf-8" />
+    <title>claude-hunt — OG 이미지 탐색</title>
+    <link rel="stylesheet" href="colors_and_type.css" />
+    <style>
+      :root { --terracotta: #c15f3c; --ink: #252525; --muted: #8c8c8c; }
+      html, body { margin: 0; background: #f4f4f5; }
+
+      /* === OG 캔버스 === */
+      .og {
+        width: 1200px;
+        height: 630px;
+        background: #fff;
+        color: var(--ink);
+        overflow: hidden;
+        position: relative;
+        box-sizing: border-box;
+        flex-shrink: 0;
+        font-family: "Geist Mono", ui-monospace, monospace;
+      }
+      .og *, .og *::before, .og *::after { box-sizing: border-box; }
+
+      /* ---- 옵션 1 · 터미널 세션 ---- */
+      .og-term { padding: 48px 64px 40px; display: flex; flex-direction: column; }
+      .og-term .chrome {
+        display: flex; align-items: center; gap: 8px;
+        padding-bottom: 14px;
+        border-bottom: 1px dashed rgba(0,0,0,.12);
+      }
+      .og-term .dot { width: 12px; height: 12px; border-radius: 50%; background: #e4e4e7; }
+      .og-term .chrome .path {
+        margin-left: 12px; font-size: 14px; color: var(--muted);
+        font-family: "Geist Mono", monospace;
+      }
+      .og-term .session { margin-top: 18px; display: flex; flex-direction: column; gap: 10px; }
+      .og-term .line { display: flex; align-items: baseline; gap: 12px; font-size: 20px; line-height: 1.3; white-space: nowrap; }
+      .og-term .prompt { color: var(--terracotta); font-weight: 700; }
+      .og-term .cmd { color: var(--ink); font-weight: 500; }
+      .og-term .wordmark-hero {
+        margin-top: 8px;
+        font-family: "Geist Mono", monospace;
+        font-weight: 700; font-size: 88px; line-height: 1;
+        letter-spacing: -2px; color: var(--ink);
+        white-space: nowrap;
+      }
+      .og-term .wordmark-hero .prompt { color: var(--terracotta); margin-right: 6px; }
+      .og-term .output {
+        margin-top: 18px;
+        font-family: "Geist Mono", monospace;
+        font-size: 16px; color: var(--ink);
+        display: grid; grid-template-columns: auto auto 1fr auto; gap: 4px 22px;
+        align-items: baseline;
+      }
+      .og-term .output .rank { color: var(--muted); font-variant-numeric: tabular-nums; }
+      .og-term .output .votes { color: var(--ink); font-weight: 600; font-variant-numeric: tabular-nums; }
+      .og-term .output .title { color: var(--ink); font-family: "Inter", sans-serif; }
+      .og-term .output .author { color: var(--muted); white-space: nowrap; }
+      .og-term .output .title { white-space: nowrap; }
+      .og-term .output .dot-1 { color: #f59e0b; }
+      .og-term .output .dot-2 { color: #a1a1aa; }
+      .og-term .output .dot-3 { color: #c2410c; }
+      .og-term .footer {
+        margin-top: auto;
+        display: flex; justify-content: space-between; align-items: flex-end;
+        font-size: 15px; color: var(--muted);
+        padding-top: 14px;
+        border-top: 1px dashed rgba(0,0,0,.12);
+        white-space: nowrap;
+      }
+      .og-term .footer .tag { color: var(--ink); font-family: "Inter", sans-serif; }
+
+      /* ---- 옵션 2 · 프로젝트 그리드 ---- */
+      .og-grid { display: grid; grid-template-columns: 1fr 1fr; }
+      .og-grid .left {
+        padding: 64px 48px 64px 72px;
+        display: flex; flex-direction: column; justify-content: space-between;
+      }
+      .og-grid .wordmark {
+        font-family: "Geist Mono", monospace;
+        font-weight: 700;
+        font-size: 52px; line-height: 1; letter-spacing: -1.2px;
+        color: var(--ink);
+        white-space: nowrap;
+      }
+      .og-grid .wordmark .prompt { color: var(--terracotta); margin-right: 4px; }
+      .og-grid .tagline-ko {
+        margin-top: 28px;
+        font-family: "Inter", sans-serif;
+        font-weight: 500;
+        font-size: 32px; line-height: 1.3; color: var(--ink);
+        letter-spacing: -0.01em;
+        max-width: 440px;
+      }
+      .og-grid .sub {
+        margin-top: 16px;
+        font-family: "Inter", sans-serif;
+        font-size: 18px; color: var(--muted); line-height: 1.55;
+        max-width: 420px;
+      }
+      .og-grid .meta {
+        display: flex; flex-wrap: wrap; gap: 8px 20px; font-size: 13px; color: var(--muted);
+        font-family: "Geist Mono", monospace;
+        white-space: nowrap;
+      }
+      .og-grid .meta .k { color: var(--ink); font-weight: 600; margin-right: 6px; }
+
+      /* 옵션 2 변형들 */
+      .og-grid .cta {
+        display: inline-flex; align-items: center; gap: 10px;
+        padding: 14px 20px;
+        background: var(--ink); color: #fff;
+        font-family: "JetBrains Mono", monospace;
+        font-weight: 500; font-size: 16px;
+        letter-spacing: -0.01em;
+        align-self: flex-start;
+        white-space: nowrap;
+      }
+      .og-grid .cta .arrow { color: var(--terracotta); font-family: "Geist Mono", monospace; font-weight: 700; }
+
+      .og-grid .trend {
+        display: flex; flex-direction: column; gap: 8px;
+        font-family: "Geist Mono", monospace;
+      }
+      .og-grid .trend .label {
+        font-family: "Inter", sans-serif;
+        font-size: 11px; color: var(--muted);
+        text-transform: uppercase; letter-spacing: 0.12em;
+      }
+      .og-grid .trend .list {
+        display: flex; gap: 10px; align-items: baseline; flex-wrap: wrap;
+        font-size: 15px; color: var(--ink);
+      }
+      .og-grid .trend .list .name { font-family: "Inter", sans-serif; font-weight: 500; }
+      .og-grid .trend .list .sep { color: rgba(0,0,0,.25); }
+
+      .og-grid .prompt-cta {
+        display: flex; align-items: center; gap: 12px;
+        font-family: "Geist Mono", monospace;
+        font-size: 18px; color: var(--ink);
+        padding: 16px 20px;
+        border: 1px dashed rgba(0,0,0,.2);
+        background: #fafafa;
+        white-space: nowrap;
+        align-self: stretch;
+      }
+      .og-grid .prompt-cta .p { color: var(--terracotta); font-weight: 700; }
+      .og-grid .prompt-cta .caret {
+        display: inline-block; width: 9px; height: 18px;
+        background: var(--terracotta); margin-left: 2px;
+      }
+
+      .og-grid .right {
+        position: relative;
+        background: #fafafa;
+        border-left: 1px solid rgba(0,0,0,.08);
+        overflow: hidden;
+      }
+      .og-grid .cards {
+        position: absolute; top: 44px; left: 40px;
+        width: 760px;
+        display: grid; grid-template-columns: repeat(2, 260px); gap: 16px;
+        transform: rotate(-7deg);
+        transform-origin: 0 0;
+      }
+      .og-grid .card {
+        background: #fff;
+        box-shadow: inset 0 0 0 1px rgba(0,0,0,.1);
+        border-radius: 6px;
+        overflow: hidden;
+        display: flex; flex-direction: column;
+      }
+      .og-grid .thumb {
+        aspect-ratio: 16/9; position: relative;
+        background: var(--muted);
+        overflow: hidden;
+      }
+      .og-grid .thumb img {
+        width: 100%; height: 100%; object-fit: cover; display: block;
+      }
+      .og-grid .thumb .rank-badge {
+        position: absolute; top: 8px; left: 8px;
+        padding: 2px 8px; border-radius: 6px;
+        background: #fff; box-shadow: 0 1px 2px rgba(0,0,0,.2);
+        font-family: "Geist Mono", monospace;
+        font-size: 10px; font-weight: 700;
+      }
+      .og-grid .card .body { padding: 12px; display: flex; flex-direction: column; gap: 4px; }
+      .og-grid .card .t {
+        font-family: "JetBrains Mono", monospace;
+        font-weight: 500; font-size: 12px; color: var(--ink);
+      }
+      .og-grid .card .d {
+        font-family: "Inter", sans-serif;
+        font-size: 10px; line-height: 1.5; color: var(--muted);
+        display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden;
+      }
+      .og-grid .card .foot {
+        display: flex; justify-content: space-between; align-items: center;
+        margin-top: 4px; font-size: 10px; color: var(--muted);
+        font-family: "Inter", sans-serif;
+      }
+      .og-grid .card .vote {
+        display: inline-flex; align-items: center; gap: 4px;
+        padding: 3px 8px; border-radius: 6px;
+        box-shadow: inset 0 0 0 1px rgba(0,0,0,.12);
+        font-weight: 600; color: var(--ink); font-size: 10px;
+        font-family: "Geist Mono", monospace;
+      }
+      .og-grid .fade {
+        position: absolute; inset: 0;
+        background: linear-gradient(to right, transparent 35%, rgba(250,250,250,.3) 70%, #fafafa 100%);
+        pointer-events: none;
+      }
+
+      /* ---- 옵션 3 · 한글 히어로 ---- */
+      .og-ko { padding: 56px 72px; display: flex; flex-direction: column; justify-content: space-between; }
+      .og-ko .top {
+        display: flex; justify-content: space-between; align-items: flex-start;
+      }
+      .og-ko .mark {
+        font-family: "Geist Mono", monospace;
+        font-weight: 700; font-size: 26px; letter-spacing: -0.5px; color: var(--ink);
+        white-space: nowrap;
+      }
+      .og-ko .mark .prompt { color: var(--terracotta); }
+      .og-ko .meta-right {
+        text-align: right;
+        font-family: "Geist Mono", monospace;
+        font-size: 13px; color: var(--muted); line-height: 1.6;
+        white-space: nowrap;
+      }
+      .og-ko .meta-right .url { color: var(--ink); font-weight: 600; }
+
+      .og-ko .middle {
+        display: grid; grid-template-columns: 1fr 340px; gap: 48px;
+        align-items: center;
+      }
+      .og-ko .statement {
+        font-family: "Inter", sans-serif;
+        font-weight: 600;
+        font-size: 76px; line-height: 1.08; letter-spacing: -0.035em;
+        color: var(--ink);
+      }
+      .og-ko .statement .accent {
+        color: var(--terracotta);
+        font-family: "Geist Mono", monospace;
+        font-weight: 700;
+      }
+      .og-ko .statement .sub {
+        display: block;
+        margin-top: 18px;
+        font-family: "Inter", sans-serif;
+        font-weight: 400;
+        font-size: 20px; line-height: 1.5; color: var(--muted);
+        letter-spacing: -0.005em;
+      }
+      .og-ko .preview {
+        display: flex; flex-direction: column; gap: 10px;
+      }
+      .og-ko .preview .card {
+        background: #fff;
+        box-shadow: inset 0 0 0 1px rgba(0,0,0,.1);
+        border-radius: 6px;
+        overflow: hidden;
+        display: flex;
+      }
+      .og-ko .preview .thumb {
+        width: 112px; height: 72px; flex-shrink: 0;
+        background: var(--muted);
+        overflow: hidden;
+      }
+      .og-ko .preview .thumb img {
+        width: 100%; height: 100%; object-fit: cover; display: block;
+      }
+      .og-ko .preview .body {
+        padding: 10px 12px;
+        display: flex; flex-direction: column; gap: 4px; min-width: 0; flex: 1;
+      }
+      .og-ko .preview .rank {
+        font-family: "Geist Mono", monospace;
+        font-size: 10px; font-weight: 700; color: var(--muted);
+        letter-spacing: 0.05em;
+      }
+      .og-ko .preview .rank.r1 { color: #f59e0b; }
+      .og-ko .preview .rank.r2 { color: #a1a1aa; }
+      .og-ko .preview .rank.r3 { color: #c2410c; }
+      .og-ko .preview .t {
+        font-family: "JetBrains Mono", monospace;
+        font-weight: 500; font-size: 13px; color: var(--ink);
+        white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+      }
+      .og-ko .preview .v {
+        font-family: "Geist Mono", monospace;
+        font-size: 11px; color: var(--muted);
+      }
+
+      .og-ko .bottom {
+        display: flex; justify-content: space-between; align-items: flex-end; gap: 24px;
+        padding-top: 20px;
+        border-top: 1px solid rgba(0,0,0,.08);
+      }
+      .og-ko .bottom .credit {
+        font-family: "Inter", sans-serif;
+        font-size: 14px; color: var(--muted); line-height: 1.5;
+        white-space: nowrap;
+      }
+      .og-ko .bottom .credit b { color: var(--ink); font-weight: 600; }
+      .og-ko .bottom .stats {
+        display: flex; gap: 32px; font-family: "Geist Mono", monospace;
+        white-space: nowrap; flex-shrink: 0;
+      }
+      .og-ko .bottom .stat .n {
+        display: block; font-size: 28px; font-weight: 700; color: var(--ink);
+        font-variant-numeric: tabular-nums;
+        letter-spacing: -0.02em;
+      }
+      .og-ko .bottom .stat .l {
+        font-family: "Inter", sans-serif;
+        font-size: 12px; color: var(--muted);
+        letter-spacing: 0.02em;
+      }
+    </style>
+  </head>
+  <body>
+    <div id="root"></div>
+
+    <script src="https://unpkg.com/react@18.3.1/umd/react.development.js" integrity="sha384-hD6/rw4ppMLGNu3tX5cjIb+uRZ7UkRJ6BPkLpg4hAu/6onKUg4lLsHAs9EBPT82L" crossorigin="anonymous"></script>
+    <script src="https://unpkg.com/react-dom@18.3.1/umd/react-dom.development.js" integrity="sha384-u6aeetuaXnQ38mYT8rp6sbXaQe3NL9t+IBXmnYxwkUI2Hw4bsp2Wvmx4yRQF1uAm" crossorigin="anonymous"></script>
+    <script src="https://unpkg.com/@babel/standalone@7.29.0/babel.min.js" integrity="sha384-m08KidiNqLdpJqLq95G/LEi8Qvjl/xUYll3QILypMoQ65QorJ9Lvtp2RXYGBFj1y" crossorigin="anonymous"></script>
+    <script type="text/babel" src="design-canvas.jsx"></script>
+
+    <script type="text/babel">
+      // 실제 claude-hunt.com 데이터
+      const PROJECTS = [
+        { rank: 1, img: 'screenshots/market-report.png',   title: '시장 리포트',          author: '토이크레인', votes: 1, desc: '한국/미국 주식 포트폴리오를 관리하고, AI가 매일 시장 마감 리포트를 자동 생성' },
+        { rank: 2, img: 'screenshots/pokemon-quiz.png',    title: '포켓몬 마스터 퀴즈',   author: '토이크레인', votes: 1, desc: '1세대 포켓몬 151종의 실루엣을 보고 4지선다로 이름을 맞추는 퀴즈 게임' },
+        { rank: 3, img: 'screenshots/vocab-builder.png',   title: 'Vocabulary Builder',   author: '토이크레인', votes: 1, desc: '영영사전 기반으로 단어를 학습하고 복습 퀴즈로 암기를 관리' },
+        { rank: 4, img: 'screenshots/sky-dodge.png',       title: 'Sky Dodge',             author: '토이크레인', votes: 0, desc: 'Flappy Bird 스타일의 비행기 장애물 회피 웹 게임' },
+        { rank: 5, img: 'screenshots/rampage.png',         title: 'Rampage',               author: '토이크레인', votes: 0, desc: 'SSH로 서버 메모리를 실시간 모니터링하는 대시보드' },
+        { rank: 6, img: 'screenshots/random-chat.png',     title: '랜덤채팅 + AI',         author: '토이크레인', votes: 0, desc: '상대가 AI인지 사람인지 판별하는 익명 채팅 게임' },
+      ];
+
+      // --- 옵션 1 · 터미널 세션 ---
+      function OgTerminal() {
+        const rows = PROJECTS.slice(0, 5).map((p) => ({
+          rank: p.rank,
+          dot: p.rank === 1 ? 'dot-1' : p.rank === 2 ? 'dot-2' : p.rank === 3 ? 'dot-3' : '',
+          title: p.title,
+          author: p.author,
+          votes: p.votes,
+        }));
+        return (
+          <div className="og og-term">
+            <div className="chrome">
+              <div className="dot" style={{ background: '#fb7185' }}></div>
+              <div className="dot" style={{ background: '#fbbf24' }}></div>
+              <div className="dot" style={{ background: '#34d399' }}></div>
+              <span className="path">~/cohort — claude-hunt.com — 120×36</span>
+            </div>
+
+            <div className="session">
+              <div className="line">
+                <span className="prompt">$</span>
+                <span className="cmd">claude-hunt --board</span>
+              </div>
+            </div>
+
+            <div className="wordmark-hero">
+              <span className="prompt">&gt;</span>claude-hunt_
+            </div>
+
+            <div className="output">
+              {rows.map((r) => (
+                <React.Fragment key={r.rank}>
+                  <span className={`rank ${r.dot}`}>
+                    {r.dot ? '●' : ' '} {String(r.rank).padStart(2, '0')}
+                  </span>
+                  <span className="votes">▲ {r.votes}</span>
+                  <span className="title">{r.title}</span>
+                  <span className="author">{r.author} · 작성</span>
+                </React.Fragment>
+              ))}
+            </div>
+
+            <div className="footer">
+              <span className="tag">함께 배우는 사람들의 프로젝트</span>
+              <span>claude-hunt.com</span>
+            </div>
+          </div>
+        );
+      }
+
+      // --- 옵션 2 · 프로젝트 그리드 (공통 왼쪽/오른쪽) ---
+      function Opt2Right() {
+        return (
+          <div className="right">
+            <div className="cards">
+              {PROJECTS.map((p) => (
+                <div className="card" key={p.rank}>
+                  <div className="thumb">
+                    <img src={p.img} alt="" />
+                    {p.rank <= 3 && (
+                      <div className="rank-badge" style={{
+                        color: p.rank === 1 ? '#f59e0b' : p.rank === 2 ? '#a1a1aa' : '#c2410c'
+                      }}>
+                        {p.rank === 1 ? '1st' : p.rank === 2 ? '2nd' : '3rd'}
+                      </div>
+                    )}
+                  </div>
+                  <div className="body">
+                    <div className="t">{p.title}</div>
+                    <div className="d">{p.desc}</div>
+                    <div className="foot">
+                      <span>{p.author} · 작성</span>
+                      <span className="vote">▲ {p.votes}</span>
+                    </div>
+                  </div>
+                </div>
+              ))}
+            </div>
+            <div className="fade"></div>
+          </div>
+        );
+      }
+
+      function Opt2Hero() {
+        return (
+          <div>
+            <div className="wordmark">
+              <span className="prompt">&gt;</span>claude-hunt<span className="prompt">_</span>
+            </div>
+            <div className="tagline-ko">함께 배우는 사람들의 프로젝트.</div>
+            <div className="sub">마음에 드는 프로젝트에 응원을 보내주세요.</div>
+          </div>
+        );
+      }
+
+      // 2A · 프롬프트 CTA
+      function OgGridA() {
+        return (
+          <div className="og og-grid">
+            <div className="left">
+              <Opt2Hero />
+              <div className="prompt-cta">
+                <span className="p">$</span>
+                <span>프로젝트를 공유해 보세요</span>
+                <span className="caret"></span>
+              </div>
+            </div>
+            <Opt2Right />
+          </div>
+        );
+      }
+
+      // 2B · 탑 3 프로젝트 티저
+      function OgGridB() {
+        return (
+          <div className="og og-grid">
+            <div className="left">
+              <Opt2Hero />
+              <div className="trend">
+                <div className="label">지금 인기 프로젝트</div>
+                <div className="list">
+                  <span style={{ color: '#f59e0b' }}>●</span>
+                  <span className="name">시장 리포트</span>
+                  <span className="sep">·</span>
+                  <span style={{ color: '#a1a1aa' }}>●</span>
+                  <span className="name">포켓몬 마스터 퀴즈</span>
+                  <span className="sep">·</span>
+                  <span style={{ color: '#c2410c' }}>●</span>
+                  <span className="name">Vocabulary Builder</span>
+                </div>
+                <div style={{ fontFamily: '"Geist Mono", monospace', fontSize: 13, color: 'var(--ink)', fontWeight: 600, marginTop: 6 }}>claude-hunt.com</div>
+              </div>
+            </div>
+            <Opt2Right />
+          </div>
+        );
+      }
+
+      // 2C · CTA 버튼
+      function OgGridC() {
+        return (
+          <div className="og og-grid">
+            <div className="left">
+              <Opt2Hero />
+              <div style={{ display: 'flex', flexDirection: 'column', gap: 14, alignItems: 'flex-start' }}>
+                <div className="cta">
+                  프로젝트 제출<span className="arrow">→</span>
+                </div>
+                <div style={{ fontFamily: '"Geist Mono", monospace', fontSize: 13, color: 'var(--muted)' }}>
+                  <span style={{ color: 'var(--ink)', fontWeight: 600 }}>claude-hunt.com</span>
+                </div>
+              </div>
+            </div>
+            <Opt2Right />
+          </div>
+        );
+      }
+
+      // --- 옵션 2 (기존) · 프로젝트 그리드 ---
+      function OgGridPeek() {
+        return (
+          <div className="og og-grid">
+            <div className="left">
+              <div>
+                <div className="wordmark">
+                  <span className="prompt">&gt;</span>claude-hunt<span className="prompt">_</span>
+                </div>
+                <div className="tagline-ko">함께 배우는 사람들의 프로젝트.</div>
+                <div className="sub">마음에 드는 프로젝트에 응원을 보내주세요.</div>
+              </div>
+              <div className="meta">
+                <div><span className="k">24</span>프로젝트</div>
+                <div><span className="k">6</span>코호트</div>
+                <div style={{ color: 'var(--ink)', fontWeight: 600 }}>claude-hunt.com</div>
+              </div>
+            </div>
+            <div className="right">
+              <div className="cards">
+                {PROJECTS.map((p) => (
+                  <div className="card" key={p.rank}>
+                    <div className="thumb">
+                      <img src={p.img} alt="" />
+                      {p.rank <= 3 && (
+                        <div className="rank-badge" style={{
+                          color: p.rank === 1 ? '#f59e0b' : p.rank === 2 ? '#a1a1aa' : '#c2410c'
+                        }}>
+                          {p.rank === 1 ? '1st' : p.rank === 2 ? '2nd' : '3rd'}
+                        </div>
+                      )}
+                    </div>
+                    <div className="body">
+                      <div className="t">{p.title}</div>
+                      <div className="d">{p.desc}</div>
+                      <div className="foot">
+                        <span>{p.author} · 작성</span>
+                        <span className="vote">▲ {p.votes}</span>
+                      </div>
+                    </div>
+                  </div>
+                ))}
+              </div>
+              <div className="fade"></div>
+            </div>
+          </div>
+        );
+      }
+
+      // --- 옵션 3 · 한글 히어로 ---
+      function OgKorean() {
+        const top3 = PROJECTS.slice(0, 3);
+        return (
+          <div className="og og-ko">
+            <div className="top">
+              <div className="mark">
+                <span className="prompt">&gt;</span>claude-hunt<span className="prompt">_</span>
+              </div>
+              <div className="meta-right">
+                <div>코호트 리더보드</div>
+                <div className="url">claude-hunt.com</div>
+              </div>
+            </div>
+
+            <div className="middle">
+              <div className="statement">
+                함께 배우는<br/>
+                사람들의 <span className="accent">프로젝트_</span>
+                <span className="sub">마음에 드는 프로젝트에 응원을 보내주세요.</span>
+              </div>
+              <div className="preview">
+                {top3.map((p) => (
+                  <div className="card" key={p.rank}>
+                    <div className="thumb">
+                      <img src={p.img} alt="" />
+                    </div>
+                    <div className="body">
+                      <div className={`rank r${p.rank}`}>
+                        ● {p.rank}위
+                      </div>
+                      <div className="t">{p.title}</div>
+                      <div className="v">▲ {p.votes} · {p.author}</div>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+
+            <div className="bottom">
+              <div className="credit">지금 올라온 <b>탑 3</b> · 이번 주 코호트 프로젝트</div>
+              <div className="stats">
+                <div className="stat">
+                  <span className="n">9</span>
+                  <span className="l">프로젝트</span>
+                </div>
+                <div className="stat">
+                  <span className="n">1</span>
+                  <span className="l">코호트</span>
+                </div>
+                <div className="stat">
+                  <span className="n">3</span>
+                  <span className="l">추천</span>
+                </div>
+              </div>
+            </div>
+          </div>
+        );
+      }
+
+      // --- 참고: 현재 OG ---
+      function OgCurrent() {
+        return (
+          <div className="og" style={{ padding: '96px 96px 72px', display: 'flex', flexDirection: 'column', justifyContent: 'center', alignItems: 'flex-start' }}>
+            <div style={{ display: 'flex', alignItems: 'baseline', fontSize: 140, fontWeight: 700, letterSpacing: -2, lineHeight: 1, fontFamily: '"Geist Mono", monospace' }}>
+              <span style={{ color: 'var(--terracotta)', marginRight: 8 }}>&gt;</span>
+              <span>claude-hunt</span>
+              <span style={{ color: 'var(--terracotta)' }}>_</span>
+            </div>
+            <div style={{ marginTop: 32, fontSize: 36, color: 'var(--ink)', maxWidth: '80%', fontFamily: '"Geist Mono", monospace' }}>
+              Discover what the cohort is building.
+            </div>
+            <div style={{ marginTop: 'auto', fontSize: 22, color: 'var(--muted)', fontFamily: '"Geist Mono", monospace' }}>
+              claude-hunt.app
+            </div>
+          </div>
+        );
+      }
+
+      // --- Canvas ---
+      function App() {
+        return (
+          <DesignCanvas title="claude-hunt · OG 이미지" subtitle="옵션 2 하단 영역 변형">
+            <DCSection id="og" title="OG 이미지 — 1200 × 630">
+              <DCArtboard id="opt2a" label="2A · 프롬프트 CTA" width={1200} height={630}>
+                <OgGridA />
+              </DCArtboard>
+
+              <DCArtboard id="opt2b" label="2B · 인기 프로젝트 티저" width={1200} height={630}>
+                <OgGridB />
+              </DCArtboard>
+
+              <DCArtboard id="opt2c" label="2C · 제출 버튼" width={1200} height={630}>
+                <OgGridC />
+              </DCArtboard>
+            </DCSection>
+
+            <DCSection id="ref" title="참고">
+              <DCArtboard id="current" label="현재 버전" width={1200} height={630}>
+                <OgCurrent />
+              </DCArtboard>
+
+              <DCArtboard id="opt1" label="옵션 1 · 터미널 세션" width={1200} height={630}>
+                <OgTerminal />
+              </DCArtboard>
+
+              <DCArtboard id="opt2orig" label="옵션 2 (원안 · 숫자 포함)" width={1200} height={630}>
+                <OgGridPeek />
+              </DCArtboard>
+
+              <DCArtboard id="opt3" label="옵션 3 · 한글 히어로" width={1200} height={630}>
+                <OgKorean />
+              </DCArtboard>
+            </DCSection>
+          </DesignCanvas>
+        );
+      }
+
+      ReactDOM.createRoot(document.getElementById('root')).render(<App />);
+    </script>
+  </body>
+</html>
