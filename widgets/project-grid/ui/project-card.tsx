@@ -5,6 +5,13 @@ import { RankDot } from "./rank-badge";
 
 export interface ProjectCardProps {
   /**
+   * Human-readable class label for this row's `cohort_id`. Shown on the
+   * mobile meta line (`{rank} · {cohortLabel}`). When `null` or `undefined`
+   * — e.g. the project has no cohort assignment — the meta line renders
+   * the rank number alone, with no trailing `·` or label.
+   */
+  cohortLabel?: string | null;
+  /**
    * Eagerly loads the screenshot and marks it as high-priority for LCP.
    * Set only on above-the-fold rows (top-3). Defaults to false.
    */
@@ -68,6 +75,7 @@ export function ProjectCard({
   viewerUserId,
   renderOwnerActions,
   renderVoteButton,
+  cohortLabel = null,
 }: ProjectCardProps) {
   const isOwner = viewerUserId != null && project.user_id === viewerUserId;
   const rankLabel = String(rank).padStart(2, "0");
@@ -163,13 +171,38 @@ export function ProjectCard({
         </div>
       </div>
 
-      {/* ─── Mobile row (< 720 px) ────────────────────────────── */}
+      {/* ─── Mobile stacked card (< 720 px) ────────────────────── */}
       <div
-        className="flex h-16 items-center gap-3 px-3 min-[720px]:hidden"
+        className="flex flex-col gap-3 px-3.5 py-4 min-[720px]:hidden"
         data-testid="project-card-mobile"
       >
+        {/* Meta line: rank · cohort */}
+        <div
+          className="flex items-center gap-2 font-mono text-[11px] tabular-nums"
+          data-testid="project-card-mobile-meta"
+        >
+          <RankDot rank={rank} />
+          <span
+            className={cn(
+              "font-semibold",
+              !hasRankDot && "text-muted-foreground"
+            )}
+          >
+            {rankLabel}
+          </span>
+          {cohortLabel ? (
+            <>
+              <span aria-hidden="true" className="text-muted-foreground">
+                ·
+              </span>
+              <span className="text-muted-foreground">{cohortLabel}</span>
+            </>
+          ) : null}
+        </div>
+
+        {/* Full-width 16:10 thumbnail */}
         <a
-          className="relative block size-12 shrink-0 overflow-hidden"
+          className="relative block aspect-[16/10] w-full overflow-hidden bg-muted"
           data-testid="project-card-mobile-preview"
           href={projectUrl}
           rel="noopener noreferrer"
@@ -178,54 +211,63 @@ export function ProjectCard({
           {screenshotUrl ? (
             <Image
               alt={`${project.title ?? "프로젝트"} 스크린샷`}
-              className="size-12 object-cover"
+              className="object-cover"
               data-testid="project-card-mobile-thumb"
-              height={48}
+              fill
               priority={priority}
-              sizes="48px"
+              sizes="(max-width: 720px) 100vw, 720px"
               src={screenshotUrl}
-              width={48}
             />
           ) : (
             <span
               aria-hidden="true"
-              className="block size-12 bg-muted"
+              className="block size-full bg-muted"
               data-testid="project-card-mobile-thumb"
             />
           )}
-          <span
-            className={cn(
-              "absolute top-0.5 left-0.5 inline-flex items-center gap-0.5 rounded-none border border-border bg-background px-1 py-px font-semibold text-[9px] tabular-nums leading-none",
-              !hasRankDot && "text-muted-foreground"
-            )}
-            data-testid="project-card-mobile-rank-badge"
-          >
-            <RankDot className="size-1" rank={rank} />
-            {rankLabel}
-          </span>
         </a>
 
-        <div className="flex min-w-0 flex-1 flex-col gap-0.5">
+        {/* Title + tagline */}
+        <div className="flex flex-col gap-1">
           <a
-            className="truncate font-heading font-medium text-[13px] leading-tight hover:underline"
+            className="font-heading font-medium text-base leading-snug hover:underline"
+            data-testid="project-card-mobile-title"
             href={projectUrl}
             rel="noopener noreferrer"
             target="_blank"
           >
             {project.title}
           </a>
-          <span className="truncate text-[11px] text-muted-foreground leading-tight">
+          <p
+            className="text-[13px] text-muted-foreground leading-snug"
+            data-testid="project-card-mobile-tagline"
+          >
             {project.tagline}
-          </span>
-          <span className="truncate text-[10px] text-muted-foreground leading-tight">
-            {author}
-            {submittedAt ? ` · ${submittedAt}` : ""}
-          </span>
+          </p>
         </div>
 
-        <div className="flex shrink-0 items-center gap-1">
-          {ownerSlot}
-          {voteSlot}
+        {/* Bottom row: author · time | owner actions + vote */}
+        <div
+          className="flex items-center justify-between gap-3"
+          data-testid="project-card-mobile-footer"
+        >
+          <div className="flex min-w-0 items-baseline gap-2">
+            <span className="truncate font-medium text-[13px]">{author}</span>
+            {submittedAt ? (
+              <>
+                <span aria-hidden="true" className="text-muted-foreground">
+                  ·
+                </span>
+                <span className="whitespace-nowrap text-muted-foreground text-xs">
+                  {submittedAt}
+                </span>
+              </>
+            ) : null}
+          </div>
+          <div className="flex shrink-0 items-center gap-1">
+            {ownerSlot}
+            {voteSlot}
+          </div>
         </div>
       </div>
     </li>

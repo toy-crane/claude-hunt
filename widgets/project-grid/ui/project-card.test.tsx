@@ -236,21 +236,36 @@ describe("ProjectCard (terminal row) — desktop branch", () => {
   });
 });
 
-describe("ProjectCard — mobile branch (< 720 px)", () => {
-  it("renders the compact 64-px-tall mobile row with gap-3 padding", () => {
+describe("ProjectCard — mobile stacked card (< 720 px)", () => {
+  it("stacks top-to-bottom: meta, thumb, title+tagline, footer", () => {
     render(
       <ProjectCard
+        cohortLabel="LG전자 1기"
         project={buildProject()}
         rank={5}
         screenshotUrl="https://cdn.example.com/shot.png"
       />
     );
     const mobile = screen.getByTestId("project-card-mobile");
-    expect(mobile.className).toContain("h-16");
+    expect(mobile.className).toContain("flex-col");
     expect(mobile.className).toContain("min-[720px]:hidden");
+
+    const children = Array.from(mobile.children);
+    expect(children[0]).toHaveAttribute(
+      "data-testid",
+      "project-card-mobile-meta"
+    );
+    expect(children[1]).toHaveAttribute(
+      "data-testid",
+      "project-card-mobile-preview"
+    );
+    expect(children[3]).toHaveAttribute(
+      "data-testid",
+      "project-card-mobile-footer"
+    );
   });
 
-  it("hides the mobile row at ≥ 720 px via Tailwind visibility classes", () => {
+  it("hides the mobile card at ≥ 720 px via Tailwind visibility classes", () => {
     render(
       <ProjectCard
         project={buildProject()}
@@ -265,35 +280,51 @@ describe("ProjectCard — mobile branch (< 720 px)", () => {
     expect(desktop.className).toContain("min-[720px]:grid");
   });
 
-  it("overlays the rank badge on the 48×48 thumb for ranks 1–3 (with dot)", () => {
+  it("shows rank + dot + class label on the meta line for ranks 1–3", () => {
     render(
       <ProjectCard
+        cohortLabel="LG전자 1기"
         project={buildProject()}
         rank={1}
         screenshotUrl="https://cdn.example.com/shot.png"
       />
     );
-    const badge = screen.getByTestId("project-card-mobile-rank-badge");
-    expect(badge.className).toContain("absolute");
-    expect(badge.textContent).toContain("01");
-    expect(within(badge).getByTestId("rank-dot")).toBeInTheDocument();
+    const meta = screen.getByTestId("project-card-mobile-meta");
+    expect(within(meta).getByTestId("rank-dot")).toBeInTheDocument();
+    expect(meta.textContent).toContain("01");
+    expect(meta.textContent).toContain("LG전자 1기");
   });
 
-  it("overlays a dim rank badge (no dot) for ranks 4+", () => {
+  it("dims the rank number and omits the dot for ranks 4+", () => {
     render(
       <ProjectCard
+        cohortLabel="LG전자 1기"
         project={buildProject()}
-        rank={5}
+        rank={7}
         screenshotUrl="https://cdn.example.com/shot.png"
       />
     );
-    const badge = screen.getByTestId("project-card-mobile-rank-badge");
-    expect(badge.textContent).toContain("05");
-    expect(within(badge).queryByTestId("rank-dot")).toBeNull();
-    expect(badge.className).toContain("text-muted-foreground");
+    const meta = screen.getByTestId("project-card-mobile-meta");
+    expect(within(meta).queryByTestId("rank-dot")).toBeNull();
+    const rankSpan = within(meta).getByText("07");
+    expect(rankSpan.className).toContain("text-muted-foreground");
   });
 
-  it("renders 48×48 thumbnail sizing on mobile", () => {
+  it("omits the class segment when cohortLabel is null (meta shows rank only)", () => {
+    render(
+      <ProjectCard
+        cohortLabel={null}
+        project={buildProject()}
+        rank={4}
+        screenshotUrl="https://cdn.example.com/shot.png"
+      />
+    );
+    const meta = screen.getByTestId("project-card-mobile-meta");
+    // Only the rank number is present; no trailing `·` or label.
+    expect(meta.textContent?.trim()).toBe("04");
+  });
+
+  it("renders a full-width 16:10 thumbnail", () => {
     render(
       <ProjectCard
         project={buildProject()}
@@ -301,28 +332,89 @@ describe("ProjectCard — mobile branch (< 720 px)", () => {
         screenshotUrl="https://cdn.example.com/shot.png"
       />
     );
-    const thumb = screen.getByTestId("project-card-mobile-thumb");
-    expect(thumb.className).toContain("size-12");
+    const preview = screen.getByTestId("project-card-mobile-preview");
+    expect(preview.className).toContain("w-full");
+    expect(preview.className).toContain("aspect-[16/10]");
   });
 
-  it("renders a 3-line text block: title, tagline, author · submittedAt", () => {
+  it("renders title in heading font at 16 px and tagline at 13 px muted", () => {
     render(
       <ProjectCard
         project={buildProject({
           title: "Mobile App",
           tagline: "Mobile tagline",
-          author_display_name: "Nari",
-          created_at: new Date(Date.now() - 3 * 60 * 60 * 1000).toISOString(),
         })}
         rank={2}
         screenshotUrl="https://cdn.example.com/shot.png"
       />
     );
-    const mobile = screen.getByTestId("project-card-mobile");
-    expect(within(mobile).getByText("Mobile App")).toBeInTheDocument();
-    expect(within(mobile).getByText("Mobile tagline")).toBeInTheDocument();
-    expect(
-      within(mobile).getByText((text) => text.startsWith("Nari · "))
-    ).toBeInTheDocument();
+    const title = screen.getByTestId("project-card-mobile-title");
+    expect(title.textContent).toBe("Mobile App");
+    expect(title.className).toContain("font-heading");
+    expect(title.className).toContain("text-base");
+
+    const tagline = screen.getByTestId("project-card-mobile-tagline");
+    expect(tagline.textContent).toBe("Mobile tagline");
+    expect(tagline.className).toContain("text-[13px]");
+    expect(tagline.className).toContain("text-muted-foreground");
+  });
+
+  it("shows `{author} · {submittedAt}` on the left and the vote slot on the right in the footer", () => {
+    render(
+      <ProjectCard
+        project={buildProject({
+          author_display_name: "Nari",
+          created_at: new Date(Date.now() - 3 * 60 * 60 * 1000).toISOString(),
+        })}
+        rank={2}
+        renderVoteButton={() => (
+          <button data-testid="mobile-vote-slot" type="button">
+            vote
+          </button>
+        )}
+        screenshotUrl="https://cdn.example.com/shot.png"
+      />
+    );
+    const footer = screen.getByTestId("project-card-mobile-footer");
+    expect(within(footer).getByText("Nari")).toBeInTheDocument();
+    expect(within(footer).getByText("3h")).toBeInTheDocument();
+    expect(within(footer).getByTestId("mobile-vote-slot")).toBeInTheDocument();
+  });
+
+  it("keeps the owner-row footer and non-owner-row footer structurally identical (no height shift)", () => {
+    const ownerSlot = () => <span data-testid="owner-icons">[edit][del]</span>;
+    const voteSlot = () => <span data-testid="vote-slot">v</span>;
+
+    const { rerender } = render(
+      <ProjectCard
+        project={buildProject({ user_id: "u1" })}
+        rank={5}
+        renderOwnerActions={ownerSlot}
+        renderVoteButton={voteSlot}
+        screenshotUrl="https://cdn.example.com/shot.png"
+        viewerUserId="u1"
+      />
+    );
+    const ownerFooter = screen.getByTestId("project-card-mobile-footer");
+    expect(within(ownerFooter).getByTestId("owner-icons")).toBeInTheDocument();
+    const ownerFooterClasses = ownerFooter.className;
+
+    rerender(
+      <ProjectCard
+        project={buildProject({ user_id: "u2" })}
+        rank={5}
+        renderOwnerActions={ownerSlot}
+        renderVoteButton={voteSlot}
+        screenshotUrl="https://cdn.example.com/shot.png"
+        viewerUserId="u1"
+      />
+    );
+    const nonOwnerFooter = screen.getByTestId("project-card-mobile-footer");
+    expect(within(nonOwnerFooter).queryByTestId("owner-icons")).toBeNull();
+
+    // The owner and non-owner footers share the same outer classes
+    // (same flexbox layout, same gaps) — icon slot sits inline with the
+    // vote slot on the right so the footer's height does not change.
+    expect(nonOwnerFooter.className).toBe(ownerFooterClasses);
   });
 });

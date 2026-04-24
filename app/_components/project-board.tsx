@@ -69,6 +69,14 @@ export function ProjectBoard({
     return counts;
   }, [projects]);
 
+  const cohortLabelsById = useMemo(() => {
+    const map: Record<string, string> = {};
+    for (const c of cohorts) {
+      map[c.id] = c.label;
+    }
+    return map;
+  }, [cohorts]);
+
   const screenshotUrlMap = useMemo(() => {
     const map = new Map<string, string>();
     for (const p of projects) {
@@ -127,6 +135,7 @@ export function ProjectBoard({
         value={cohortId}
       />
       <ProjectGrid
+        cohortLabelsById={cohortLabelsById}
         projects={filteredProjects}
         renderOwnerActions={(project) => (
           <>

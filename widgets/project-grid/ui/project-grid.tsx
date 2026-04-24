@@ -4,6 +4,12 @@ import { EmptyState } from "./empty-state";
 import { ProjectCard } from "./project-card";
 
 export interface ProjectGridProps {
+  /**
+   * Maps a cohort id to its human-readable label. Used by the mobile
+   * meta line inside `ProjectCard`. Optional — when omitted, rows render
+   * the rank number alone on mobile.
+   */
+  cohortLabelsById?: Record<string, string>;
   projects: ProjectWithVoteCount[];
   /** Owner-only actions slot forwarded to each row. */
   renderOwnerActions?: (project: ProjectWithVoteCount) => React.ReactNode;
@@ -22,6 +28,7 @@ export interface ProjectGridProps {
 const HEADER_GRID_COLS = "grid-cols-[52px_72px_minmax(0,1fr)_130px_auto]";
 
 export function ProjectGrid({
+  cohortLabelsById,
   projects,
   resolveScreenshotUrl,
   viewerUserId,
@@ -52,9 +59,13 @@ export function ProjectGrid({
       <ul className="flex flex-col">
         {projects.map((project, index) => {
           const rank = index + 1;
+          const cohortLabel = project.cohort_id
+            ? (cohortLabelsById?.[project.cohort_id] ?? null)
+            : null;
           return (
             <ViewTransition key={project.id}>
               <ProjectCard
+                cohortLabel={cohortLabel}
                 priority={rank <= 3}
                 project={project}
                 rank={rank}
