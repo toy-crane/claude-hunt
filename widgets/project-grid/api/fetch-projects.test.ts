@@ -111,3 +111,121 @@ describe("fetchProjects", () => {
     expect(rows.every((r) => r.viewer_has_voted === false)).toBe(true);
   });
 });
+
+// ──────────────────────────────────────────────────────────────────────────
+// fetchTopProjects: cookie-free variant used by the OG image. Uses the anon
+// server client and returns a narrow row shape — no viewer-vote merging.
+// ──────────────────────────────────────────────────────────────────────────
+
+const topProjectsSelectMock = vi.fn();
+const topStorageFromMock = vi.fn(() => ({
+  getPublicUrl: (path: string) => ({
+    data: { publicUrl: `https://cdn.example.com/${path}` },
+  }),
+}));
+
+vi.mock("@shared/api/supabase/anon-server", () => ({
+  createAnonServerClient: () => ({
+    from: (table: string) => {
+      if (table === "projects_with_vote_count") {
+        return { select: topProjectsSelectMock };
+      }
+      throw new Error(`unexpected table ${table}`);
+    },
+    storage: { from: topStorageFromMock },
+  }),
+}));
+
+describe("fetchTopProjects", () => {
+  beforeEach(() => {
+    vi.clearAllMocks();
+    topStorageFromMock.mockImplementation(() => ({
+      getPublicUrl: (path: string) => ({
+        data: { publicUrl: `https://cdn.example.com/${path}` },
+      }),
+    }));
+  });
+
+  it("orders by vote_count desc, then created_at desc, then limits by the given count", async () => {
+    const limitSpy = vi.fn().mockResolvedValue({ data: [], error: null });
+    const innerOrderSpy = vi.fn().mockReturnValue({ limit: limitSpy });
+    const outerOrderSpy = vi.fn().mockReturnValue({ order: innerOrderSpy });
+    topProjectsSelectMock.mockReturnValue({ order: outerOrderSpy });
+
+    const { fetchTopProjects } = await import("./fetch-projects");
+    await fetchTopProjects({ limit: 6 });
+
+    expect(outerOrderSpy).toHaveBeenCalledWith("vote_count", {
+      ascending: false,
+    });
+    expect(innerOrderSpy).toHaveBeenCalledWith("created_at", {
+      ascending: false,
+    });
+    expect(limitSpy).toHaveBeenCalledWith(6);
+  });
+
+  it("resolves each row's screenshot_path to a public URL", async () => {
+    topProjectsSelectMock.mockReturnValue({
+      order: vi.fn().mockReturnValue({
+        order: vi.fn().mockReturnValue({
+          limit: vi.fn().mockResolvedValue({
+            data: [ROW_A, ROW_B],
+            error: null,
+          }),
+        }),
+      }),
+    });
+
+    const { fetchTopProjects } = await import("./fetch-projects");
+    const rows = await fetchTopProjects({ limit: 6 });
+
+    expect(rows).toHaveLength(2);
+    expect(rows[0].screenshotUrl).toBe("https://cdn.example.com/u1/p1.png");
+    expect(rows[1].screenshotUrl).toBe("https://cdn.example.com/u1/p1.png");
+    expect(topStorageFromMock).toHaveBeenCalledWith("project-screenshots");
+  });
+
+  it("returns an empty string for rows with a null screenshot_path", async () => {
+    topProjectsSelectMock.mockReturnValue({
+      order: vi.fn().mockReturnValue({
+        order: vi.fn().mockReturnValue({
+          limit: vi.fn().mockResolvedValue({
+            data: [{ ...ROW_A, screenshot_path: null }],
+            error: null,
+          }),
+        }),
+      }),
+    });
+
+    const { fetchTopProjects } = await import("./fetch-projects");
+    const rows = await fetchTopProjects({ limit: 6 });
+    expect(rows[0].screenshotUrl).toBe("");
+  });
+
+  it("returns an empty array when the query returns no rows (does not throw)", async () => {
+    topProjectsSelectMock.mockReturnValue({
+      order: vi.fn().mockReturnValue({
+        order: vi.fn().mockReturnValue({
+          limit: vi.fn().mockResolvedValue({ data: [], error: null }),
+        }),
+      }),
+    });
+
+    const { fetchTopProjects } = await import("./fetch-projects");
+    const rows = await fetchTopProjects({ limit: 6 });
+    expect(rows).toEqual([]);
+  });
+
+  it("defaults the limit to 6 when no argument is provided", async () => {
+    const limitSpy = vi.fn().mockResolvedValue({ data: [], error: null });
+    topProjectsSelectMock.mockReturnValue({
+      order: vi.fn().mockReturnValue({
+        order: vi.fn().mockReturnValue({ limit: limitSpy }),
+      }),
+    });
+
+    const { fetchTopProjects } = await import("./fetch-projects");
+    await fetchTopProjects();
+    expect(limitSpy).toHaveBeenCalledWith(6);
+  });
+});
