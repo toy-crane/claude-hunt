@@ -212,6 +212,23 @@ describe("ProjectBoard", () => {
     );
   });
 
+  it("renders the prompt line reflecting the current cohort label", async () => {
+    await renderBoard({ initialCohortId: "cohort-a" });
+    expect(screen.getByTestId("prompt-line")).toHaveTextContent(
+      `$ claude-hunt ls --class="LG전자 1기" --sort=votes`
+    );
+
+    act(() => capturedOnValueChange?.(null));
+    expect(screen.getByTestId("prompt-line")).toHaveTextContent(
+      "$ claude-hunt ls --sort=votes"
+    );
+
+    act(() => capturedOnValueChange?.("cohort-b"));
+    expect(screen.getByTestId("prompt-line")).toHaveTextContent(
+      `$ claude-hunt ls --class="LG전자 2기" --sort=votes`
+    );
+  });
+
   it("calls history.replaceState without cohort param when null is selected", async () => {
     await renderBoard({ initialCohortId: "cohort-a" });
     act(() => capturedOnValueChange?.(null));

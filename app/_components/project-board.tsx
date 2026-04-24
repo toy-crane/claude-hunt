@@ -6,7 +6,7 @@ import { DeleteButton } from "@features/delete-project";
 import { EditDialog } from "@features/edit-project";
 import { VoteButton } from "@features/toggle-vote";
 import type { ProjectGridRow } from "@widgets/project-grid";
-import { ProjectGrid } from "@widgets/project-grid";
+import { ProjectGrid, PromptLine } from "@widgets/project-grid";
 import { useCallback, useMemo, useState } from "react";
 
 export interface ProjectBoardProps {
@@ -32,6 +32,11 @@ export function ProjectBoard({
   isAuthenticated,
 }: ProjectBoardProps) {
   const [cohortId, setCohortId] = useState(initialCohortId);
+
+  const cohortLabel = useMemo(
+    () => cohorts.find((c) => c.id === cohortId)?.label ?? null,
+    [cohorts, cohortId]
+  );
 
   const filteredProjects = useMemo(
     () =>
@@ -62,6 +67,7 @@ export function ProjectBoard({
 
   return (
     <>
+      <PromptLine cohortLabel={cohortLabel} />
       <div className="flex items-center justify-end gap-2">
         <CohortDropdown
           cohorts={cohorts}
