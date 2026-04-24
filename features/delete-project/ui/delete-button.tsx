@@ -1,5 +1,6 @@
 "use client";
 
+import { RiDeleteBinLine } from "@remixicon/react";
 import { Button } from "@shared/ui/button";
 import {
   Dialog,
@@ -13,12 +14,24 @@ import {
 import { useState } from "react";
 import { deleteProject } from "../api/actions";
 
+export type DeleteButtonVariant = "default" | "icon";
+
 export interface DeleteButtonProps {
   projectId: string;
   projectTitle: string;
+  /**
+   * Trigger appearance. `"default"` renders the labeled "삭제" button;
+   * `"icon"` renders a 28 px square icon-only button with the same
+   * confirmation flow (used inside the terminal row).
+   */
+  variant?: DeleteButtonVariant;
 }
 
-export function DeleteButton({ projectId, projectTitle }: DeleteButtonProps) {
+export function DeleteButton({
+  projectId,
+  projectTitle,
+  variant = "default",
+}: DeleteButtonProps) {
   const [open, setOpen] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [deleting, setDeleting] = useState(false);
@@ -38,13 +51,25 @@ export function DeleteButton({ projectId, projectTitle }: DeleteButtonProps) {
   return (
     <Dialog onOpenChange={setOpen} open={open}>
       <DialogTrigger asChild>
-        <Button
-          data-testid="delete-project-trigger"
-          size="sm"
-          variant="outline"
-        >
-          삭제
-        </Button>
+        {variant === "icon" ? (
+          <Button
+            aria-label="프로젝트 삭제"
+            className="size-7 rounded-none"
+            data-testid="delete-project-trigger"
+            size="icon"
+            variant="outline"
+          >
+            <RiDeleteBinLine className="size-3.5" />
+          </Button>
+        ) : (
+          <Button
+            data-testid="delete-project-trigger"
+            size="sm"
+            variant="outline"
+          >
+            삭제
+          </Button>
+        )}
       </DialogTrigger>
       <DialogContent>
         <DialogHeader>

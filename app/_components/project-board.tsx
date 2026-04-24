@@ -121,10 +121,12 @@ export function ProjectBoard({
                 tagline: project.tagline ?? "",
                 project_url: project.project_url ?? "",
               }}
+              variant="icon"
             />
             <DeleteButton
               projectId={project.id ?? ""}
               projectTitle={project.title ?? ""}
+              variant="icon"
             />
           </>
         )}
