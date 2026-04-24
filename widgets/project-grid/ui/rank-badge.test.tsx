@@ -14,26 +14,24 @@ describe("RankDot", () => {
     expect(hundred.firstChild).toBeNull();
   });
 
-  it("renders an amber dot for rank 1 in light, bright amber in dark", () => {
+  it("binds rank 1 to the --term-rank-1 terminal token with an amber fallback", () => {
     render(<RankDot rank={1} />);
     const dot = screen.getByTestId("rank-dot");
-    expect(dot.className).toContain("bg-amber-500");
-    expect(dot.className).toContain("dark:bg-amber-400");
+    expect(dot.className).toContain("var(--term-rank-1,#f59e0b)");
     expect(dot).toHaveAttribute("data-rank", "1");
   });
 
-  it("renders a zinc dot for rank 2", () => {
+  it("binds rank 2 to the --term-rank-2 terminal token with a zinc fallback", () => {
     render(<RankDot rank={2} />);
     const dot = screen.getByTestId("rank-dot");
-    expect(dot.className).toContain("bg-zinc-400");
+    expect(dot.className).toContain("var(--term-rank-2,#71717a)");
     expect(dot).toHaveAttribute("data-rank", "2");
   });
 
-  it("renders an orange dot for rank 3 in light, warmer orange in dark", () => {
+  it("binds rank 3 to the --term-rank-3 terminal token with an orange fallback", () => {
     render(<RankDot rank={3} />);
     const dot = screen.getByTestId("rank-dot");
-    expect(dot.className).toContain("bg-orange-700");
-    expect(dot.className).toContain("dark:bg-orange-400");
+    expect(dot.className).toContain("var(--term-rank-3,#c2410c)");
     expect(dot).toHaveAttribute("data-rank", "3");
   });
 

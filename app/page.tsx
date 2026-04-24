@@ -21,7 +21,7 @@ export default async function Page({ searchParams }: PageProps) {
   return (
     <>
       <Header />
-      <main className="mx-auto flex min-h-svh w-full max-w-6xl flex-col gap-6 p-6">
+      <main className="terminal-surface mx-auto flex min-h-svh w-full max-w-6xl flex-col gap-6 bg-background p-6 text-foreground">
         <ProjectBoard
           cohorts={cohorts}
           initialCohortId={selectedCohortId}

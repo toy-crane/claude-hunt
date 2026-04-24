@@ -1,9 +1,9 @@
 import { cn } from "@shared/lib/utils";
 
 const DOT_CLASS: Record<1 | 2 | 3, string> = {
-  1: "bg-amber-500 dark:bg-amber-400",
-  2: "bg-zinc-400 dark:bg-zinc-400",
-  3: "bg-orange-700 dark:bg-orange-400",
+  1: "bg-[var(--term-rank-1,#f59e0b)]",
+  2: "bg-[var(--term-rank-2,#71717a)]",
+  3: "bg-[var(--term-rank-3,#c2410c)]",
 };
 
 export interface RankDotProps {
@@ -14,8 +14,10 @@ export interface RankDotProps {
 
 /**
  * Small colored dot that marks the top-three ranks on the project list.
- * Renders `null` for any rank outside 1–3 so callers can unconditionally
- * drop it into their layout.
+ * Colors bind to the terminal-surface CSS variables when this element
+ * renders inside a `.terminal-surface` scope; otherwise the arbitrary
+ * fallback hex values keep the dot visible on the default shadcn
+ * palette as well.
  */
 export function RankDot({ rank, className }: RankDotProps) {
   if (rank < 1 || rank > 3) {
