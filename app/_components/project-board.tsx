@@ -8,7 +8,14 @@ import { SubmitDialog } from "@features/submit-project";
 import { VoteButton } from "@features/toggle-vote";
 import type { ProjectGridRow } from "@widgets/project-grid";
 import { ProjectGrid, PromptLine } from "@widgets/project-grid";
-import { useCallback, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
+
+function cohortIdFromLocation(): string | null {
+  if (typeof window === "undefined") {
+    return null;
+  }
+  return new URLSearchParams(window.location.search).get("cohort");
+}
 
 export interface ProjectBoardProps {
   cohorts: Cohort[];
@@ -25,7 +32,8 @@ export interface ProjectBoardProps {
  * Client component that owns the cohort filter state for the landing page.
  * All projects are passed in on first render; cohort switching filters in
  * memory so there are no additional network requests after the initial load.
- * URL is kept in sync via `history.replaceState` (no RSC re-render).
+ * URL is kept in sync via `history.pushState` so browser back/forward can
+ * restore the previously selected chip via a `popstate` listener.
  *
  * Owns the full landing layout (prompt line, H1, subtitle, submit button,
  * filter, list) so all three pieces stay synchronized with the filter state.
@@ -79,7 +87,15 @@ export function ProjectBoard({
   const handleCohortChange = useCallback((nextCohortId: string | null) => {
     setCohortId(nextCohortId);
     const href = nextCohortId ? `/?cohort=${nextCohortId}` : "/";
-    window.history.replaceState(null, "", href);
+    window.history.pushState(null, "", href);
+  }, []);
+
+  useEffect(() => {
+    const handlePopState = () => {
+      setCohortId(cohortIdFromLocation());
+    };
+    window.addEventListener("popstate", handlePopState);
+    return () => window.removeEventListener("popstate", handlePopState);
   }, []);
 
   return (

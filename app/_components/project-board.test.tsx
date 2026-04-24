@@ -197,7 +197,8 @@ async function renderBoard(
 describe("ProjectBoard", () => {
   beforeEach(() => {
     vi.clearAllMocks();
-    vi.spyOn(window.history, "replaceState").mockImplementation(vi.fn());
+    // Reset the URL before each test so popstate assertions are deterministic.
+    window.history.replaceState(null, "", "/");
   });
 
   afterEach(() => {
@@ -286,14 +287,11 @@ describe("ProjectBoard", () => {
     expect(screen.getAllByText("Beta One").length).toBeGreaterThanOrEqual(1);
   });
 
-  it("calls history.replaceState with ?cohort=<id> when a cohort is selected", async () => {
+  it("calls history.pushState with ?cohort=<id> when a cohort is selected", async () => {
+    const pushSpy = vi.spyOn(window.history, "pushState");
     await renderBoard();
     act(() => capturedOnValueChange?.("cohort-a"));
-    expect(window.history.replaceState).toHaveBeenCalledWith(
-      null,
-      "",
-      "/?cohort=cohort-a"
-    );
+    expect(pushSpy).toHaveBeenCalledWith(null, "", "/?cohort=cohort-a");
   });
 
   it("renders the prompt line reflecting the current cohort label", async () => {
@@ -313,10 +311,45 @@ describe("ProjectBoard", () => {
     );
   });
 
-  it("calls history.replaceState without cohort param when null is selected", async () => {
+  it("calls history.pushState without cohort param when null is selected", async () => {
+    const pushSpy = vi.spyOn(window.history, "pushState");
     await renderBoard({ initialCohortId: "cohort-a" });
     act(() => capturedOnValueChange?.(null));
-    expect(window.history.replaceState).toHaveBeenCalledWith(null, "", "/");
+    expect(pushSpy).toHaveBeenCalledWith(null, "", "/");
+  });
+
+  it("restores the selected cohort from the URL on a popstate event", async () => {
+    await renderBoard({ initialCohortId: null });
+    // All three projects visible initially.
+    expect(screen.getAllByText("Alpha One").length).toBeGreaterThanOrEqual(1);
+    expect(screen.getAllByText("Beta One").length).toBeGreaterThanOrEqual(1);
+
+    act(() => {
+      window.history.pushState(null, "", "/?cohort=cohort-a");
+      window.dispatchEvent(new PopStateEvent("popstate"));
+    });
+
+    expect(capturedChipsProps?.value).toBe("cohort-a");
+    expect(screen.getAllByText("Alpha One").length).toBeGreaterThanOrEqual(1);
+    expect(screen.queryByText("Beta One")).not.toBeInTheDocument();
+    expect(screen.getByTestId("project-board-subtitle")).toHaveTextContent(
+      "2개 프로젝트 · 마음에 드는 곳에 응원을 보내주세요."
+    );
+  });
+
+  it("returns to all projects on a popstate event when the URL has no cohort param", async () => {
+    await renderBoard({ initialCohortId: "cohort-a" });
+    // Only alpha projects visible initially.
+    expect(screen.queryByText("Beta One")).not.toBeInTheDocument();
+
+    act(() => {
+      window.history.pushState(null, "", "/");
+      window.dispatchEvent(new PopStateEvent("popstate"));
+    });
+
+    expect(capturedChipsProps?.value).toBeNull();
+    expect(screen.getAllByText("Alpha One").length).toBeGreaterThanOrEqual(1);
+    expect(screen.getAllByText("Beta One").length).toBeGreaterThanOrEqual(1);
   });
 
   it("preserves voted indicator for the correct projects per filter view", async () => {
