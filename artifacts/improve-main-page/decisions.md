@@ -25,3 +25,11 @@
 - T4 is the evidence walk; it depends on all three prior tasks having shipped.
 **Harness Signal**: N/A (this is the standard plan-order execution; not generalizable).
 **Result**: Pending
+
+## Chrome MCP unavailable for Task 4 screenshots
+
+**When**: Step 4, Task 4 (Evidence walk)
+**Decision**: Write `verification.md` with test-pointers for every Success Criterion that is provable by a unit test; flag purely visual items (Scenario 8 palette hex values, Scenario 3 hover animation feel, Scenario 7 mobile 16:10 appearance, Invariant a11y keyboard walk) as "browser verification pending" and defer screenshot capture to the user.
+**Why**: `mcp__claude-in-chrome__tabs_context_mcp` reports the browser extension is not connected in this session. Re-running browser verification would require toycrane to connect the extension; rather than block the entire task I can still prove ~80% of criteria via existing tests and record precisely which items still need manual confirmation.
+**Harness Signal**: `execute-plan` plan templates assume Chrome MCP is always available when `browser-testing-with-devtools` is listed as a required skill. A pre-check at plan start ("is the browser available?") would let the Team Lead choose between blocking vs. documenting-for-later deterministically.
+**Result**: Pending
