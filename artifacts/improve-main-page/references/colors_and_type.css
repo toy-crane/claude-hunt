@@ -1,0 +1,173 @@
+/* ============================================================
+   Claude Hunt — Colors & Type Tokens
+   Source of truth for any HTML artifact referencing this brand.
+   Mirrors app/globals.css from toy-crane/claude-hunt.
+   ============================================================ */
+
+/* ---- FONTS -------------------------------------------------- */
+/* Webfonts come from Google Fonts CDN (same as the Next.js app
+   via next/font/google). Keep the imports together at the top
+   so the body can render with the correct metrics. */
+@import url("https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600;700&family=Geist+Mono:wght@400;500;600;700&display=swap");
+
+:root {
+  /* === Base color palette (OKLCH — copied verbatim from globals.css) === */
+  --background: oklch(1 0 0);                /* pure white */
+  --foreground: oklch(0.145 0 0);            /* near-black ink */
+
+  --card: oklch(1 0 0);
+  --card-foreground: oklch(0.145 0 0);
+
+  --popover: oklch(1 0 0);
+  --popover-foreground: oklch(0.145 0 0);
+
+  --primary: oklch(0.205 0 0);               /* zinc-900-ish */
+  --primary-foreground: oklch(0.985 0 0);
+
+  --secondary: oklch(0.97 0 0);              /* zinc-50 */
+  --secondary-foreground: oklch(0.205 0 0);
+
+  --muted: oklch(0.97 0 0);
+  --muted-foreground: oklch(0.556 0 0);      /* zinc-500 */
+
+  --accent: oklch(0.97 0 0);
+  --accent-foreground: oklch(0.205 0 0);
+
+  --destructive: oklch(0.577 0.245 27.325);  /* red */
+
+  --border: oklch(0.922 0 0);                /* zinc-200 */
+  --input: oklch(0.922 0 0);
+  --ring: oklch(0.708 0 0);                  /* zinc-400 */
+
+  /* === Brand accent — terracotta "prompt" color ===
+     Used for the `>` and `_` in the wordmark, the apple-icon
+     background chip, and nowhere else. NEVER use this as a CTA
+     color — CTAs are always near-black primary. */
+  --accent-terracotta: #c15f3c;              /* light-mode accent */
+  --accent-terracotta-dark: #e88a67;         /* dark-mode accent */
+
+  /* === Icon / OG image specific raw hexes (reference only) === */
+  --ink-raw: #1a1512;                        /* deep near-black used by favicon */
+  --cream-raw: #fdf6ee;                      /* warm cream used by apple-icon bg */
+  --og-ink: #252525;
+  --og-muted: #8c8c8c;
+
+  /* === Rank-dot colors (only place chromatic color lands in UI) === */
+  --rank-1: #f59e0b;     /* amber-500   — 1st */
+  --rank-2: #a1a1aa;     /* zinc-400    — 2nd */
+  --rank-3: #c2410c;     /* orange-700  — 3rd */
+
+  /* === Radii. Base is small; the system leans toward square. ===
+     Note buttons/cards/inputs explicitly override to `rounded-none`
+     in code — radius only meaningfully applies to avatars, rank
+     pill, and dialog/popover surfaces. */
+  --radius: 0.625rem;                         /* 10px */
+  --radius-sm: calc(var(--radius) * 0.6);     /* 6px  */
+  --radius-md: calc(var(--radius) * 0.8);     /* 8px  */
+  --radius-lg: var(--radius);                 /* 10px */
+  --radius-xl: calc(var(--radius) * 1.4);     /* 14px */
+  --radius-2xl: calc(var(--radius) * 1.8);    /* 18px */
+
+  /* === Typography stack ===
+     Three families, all monospace-adjacent:
+       sans     — Inter (body, form text, nav)
+       heading  — JetBrains Mono (h1/h2/card titles — "code-like")
+       mono     — Geist Mono (code, logo wordmark, tabular numerics)
+  */
+  --font-sans: "Inter", ui-sans-serif, system-ui, -apple-system,
+    "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+  --font-heading: "JetBrains Mono", ui-monospace, SFMono-Regular,
+    Menlo, Consolas, "Liberation Mono", monospace;
+  --font-mono: "Geist Mono", ui-monospace, SFMono-Regular, Menlo,
+    Consolas, "Liberation Mono", monospace;
+
+  /* === Semantic type scale ===
+     Matches the actual rendered sizes in the codebase, which
+     runs VERY tight — text-xs is the workhorse size. */
+  --text-xs: 0.75rem;     /* 12px — body, taglines, card desc */
+  --text-sm: 0.875rem;    /* 14px — card titles, buttons (sm) */
+  --text-base: 1rem;      /* 16px */
+  --text-lg: 1.125rem;    /* 18px */
+  --text-xl: 1.25rem;     /* 20px */
+  --text-2xl: 1.5rem;     /* 24px — h1 on home page */
+  --text-3xl: 1.875rem;   /* 30px — Logo on auth layout */
+
+  /* === Spacing rhythm — 4px base, Tailwind-compatible === */
+  --space-1: 0.25rem;
+  --space-2: 0.5rem;
+  --space-3: 0.75rem;
+  --space-4: 1rem;
+  --space-6: 1.5rem;
+  --space-8: 2rem;
+
+  /* Header/footer container max width (max-w-6xl = 72rem) */
+  --container-max: 72rem;
+}
+
+.dark {
+  --background: oklch(0.145 0 0);
+  --foreground: oklch(0.985 0 0);
+  --card: oklch(0.205 0 0);
+  --card-foreground: oklch(0.985 0 0);
+  --popover: oklch(0.205 0 0);
+  --popover-foreground: oklch(0.985 0 0);
+  --primary: oklch(0.922 0 0);
+  --primary-foreground: oklch(0.205 0 0);
+  --secondary: oklch(0.269 0 0);
+  --secondary-foreground: oklch(0.985 0 0);
+  --muted: oklch(0.269 0 0);
+  --muted-foreground: oklch(0.708 0 0);
+  --accent: oklch(0.269 0 0);
+  --accent-foreground: oklch(0.985 0 0);
+  --destructive: oklch(0.704 0.191 22.216);
+  --border: oklch(1 0 0 / 10%);
+  --input: oklch(1 0 0 / 15%);
+  --ring: oklch(0.556 0 0);
+}
+
+/* ============================================================
+   Semantic element styles
+   ============================================================ */
+html { font-family: var(--font-sans); color: var(--foreground); background: var(--background); }
+body { font-family: var(--font-sans); font-size: var(--text-xs); line-height: 1.6; color: var(--foreground); }
+
+h1, .h1 {
+  font-family: var(--font-heading);
+  font-weight: 500;
+  font-size: var(--text-2xl);
+  letter-spacing: -0.01em;
+  line-height: 1.2;
+}
+h2, .h2 {
+  font-family: var(--font-heading);
+  font-weight: 500;
+  font-size: var(--text-xl);
+  line-height: 1.25;
+}
+h3, .h3 {
+  font-family: var(--font-heading);
+  font-weight: 500;
+  font-size: var(--text-sm);
+  line-height: 1.3;
+}
+p, .body {
+  font-family: var(--font-sans);
+  font-size: var(--text-xs);
+  line-height: 1.6;
+  color: var(--foreground);
+}
+.muted {
+  color: var(--muted-foreground);
+  font-size: var(--text-xs);
+}
+.mono, code, kbd, samp, pre {
+  font-family: var(--font-mono);
+  font-size: 0.9em;
+}
+.wordmark {
+  font-family: var(--font-mono);
+  font-weight: 600;
+  letter-spacing: -0.01em;
+}
+.wordmark .prompt { color: var(--accent-terracotta); }
+.dark .wordmark .prompt { color: var(--accent-terracotta-dark); }
