@@ -8,6 +8,11 @@ import OpenGraphImage, {
   size,
 } from "./opengraph-image";
 
+const fetchTopProjectsMock = vi.fn();
+vi.mock("@widgets/project-grid/server", () => ({
+  fetchTopProjects: (...args: unknown[]) => fetchTopProjectsMock(...args),
+}));
+
 interface ImageResponseOpts {
   fonts?: Array<{ name: string; weight?: number; style?: string }>;
   height: number;
@@ -216,6 +221,158 @@ describe("app/opengraph-image (1200x630)", () => {
   });
 
   it("default export resolves without throwing", async () => {
+    fetchTopProjectsMock.mockResolvedValueOnce([]);
     await expect(OpenGraphImage()).resolves.toBeDefined();
+  });
+});
+
+// ───────────────────────────────────────────────────────────────────────────
+// Task 3 — live data wiring + revalidation + sparse results
+// ───────────────────────────────────────────────────────────────────────────
+
+interface OgProjectRow {
+  author_display_name: string | null;
+  id: string;
+  screenshotUrl: string;
+  tagline: string | null;
+  title: string;
+  vote_count: number | null;
+}
+
+function makeRow(
+  idx: number,
+  overrides: Partial<OgProjectRow> = {}
+): OgProjectRow {
+  return {
+    id: `row-${idx}`,
+    title: `Project ${idx}`,
+    tagline: `Tagline ${idx}`,
+    author_display_name: `Author ${idx}`,
+    vote_count: 10 - idx,
+    screenshotUrl: `https://cdn.example.com/${idx}.png`,
+    ...overrides,
+  };
+}
+
+describe("app/opengraph-image — live data", () => {
+  beforeEach(() => {
+    capturedImageResponses.length = 0;
+    fetchTopProjectsMock.mockReset();
+  });
+
+  it("exports revalidate = 3600 so scrapers do not re-query the DB on every hit", async () => {
+    const mod = await import("./opengraph-image");
+    expect(mod.revalidate).toBe(3600);
+  });
+
+  it("is an async default export (returns a Promise)", () => {
+    fetchTopProjectsMock.mockResolvedValueOnce([]);
+    const result = OpenGraphImage();
+    expect(result).toBeInstanceOf(Promise);
+  });
+
+  it("renders top-3 names in the same order as the mock returns (ordering-consistency Invariant — names)", () => {
+    const rows = [
+      makeRow(1),
+      makeRow(2),
+      makeRow(3),
+      makeRow(4),
+      makeRow(5),
+      makeRow(6),
+    ];
+    const { container } = render(OgElement({ projects: rows }));
+    const trendTitles = Array.from(
+      container.querySelectorAll('[data-og-role="trend-dot"]')
+    ).map((dot) => (dot.nextElementSibling as HTMLElement).textContent);
+    expect(trendTitles).toEqual(["Project 1", "Project 2", "Project 3"]);
+  });
+
+  it("attaches 1st / 2nd / 3rd badges to the cards at grid positions 0, 1, 2 (ordering-consistency Invariant — badges)", () => {
+    const rows = [
+      makeRow(1),
+      makeRow(2),
+      makeRow(3),
+      makeRow(4),
+      makeRow(5),
+      makeRow(6),
+    ];
+    const { container } = render(OgElement({ projects: rows }));
+    const cards = Array.from(
+      container.querySelectorAll('[data-og-role="card"]')
+    );
+    expect(cards).toHaveLength(6);
+    expect(
+      cards[0].querySelector('[data-og-role="rank-badge"]')?.textContent
+    ).toBe("1st");
+    expect(
+      cards[1].querySelector('[data-og-role="rank-badge"]')?.textContent
+    ).toBe("2nd");
+    expect(
+      cards[2].querySelector('[data-og-role="rank-badge"]')?.textContent
+    ).toBe("3rd");
+    expect(cards[3].querySelector('[data-og-role="rank-badge"]')).toBeNull();
+    expect(cards[4].querySelector('[data-og-role="rank-badge"]')).toBeNull();
+    expect(cards[5].querySelector('[data-og-role="rank-badge"]')).toBeNull();
+  });
+
+  it("binds each card's <img src> to the row's screenshotUrl", () => {
+    const rows = [
+      makeRow(1),
+      makeRow(2),
+      makeRow(3),
+      makeRow(4),
+      makeRow(5),
+      makeRow(6),
+    ];
+    const { container } = render(OgElement({ projects: rows }));
+    const cards = Array.from(
+      container.querySelectorAll('[data-og-role="card"]')
+    );
+    cards.forEach((card, i) => {
+      const img = card.querySelector("img");
+      expect(img?.getAttribute("src")).toBe(rows[i].screenshotUrl);
+    });
+  });
+
+  it("renders each card's title, tagline (2-line-clamped), author · 작성, and ▲ vote_count pill", () => {
+    const rows = [makeRow(1)];
+    const { container } = render(OgElement({ projects: rows }));
+    const card = container.querySelector(
+      '[data-og-role="card"]'
+    ) as HTMLElement;
+    expect(card.textContent).toContain("Project 1");
+    expect(card.textContent).toContain("Tagline 1");
+    expect(card.textContent).toContain("Author 1 · 작성");
+    expect(card.textContent).toContain("▲ 9");
+  });
+
+  it("renders only the available cards when fewer than 6 projects exist", () => {
+    const rows = [makeRow(1), makeRow(2)];
+    const { container } = render(OgElement({ projects: rows }));
+    const cards = container.querySelectorAll('[data-og-role="card"]');
+    expect(cards).toHaveLength(2);
+    const dots = container.querySelectorAll('[data-og-role="trend-dot"]');
+    expect(dots).toHaveLength(2);
+    expect(container.textContent ?? "").not.toContain("TBD");
+    expect(container.textContent ?? "").not.toContain("N/A");
+  });
+
+  it("omits the 지금 인기 프로젝트 row entirely when no projects exist", () => {
+    const { container } = render(OgElement({ projects: [] }));
+    const text = container.textContent ?? "";
+    expect(text).not.toContain("지금 인기 프로젝트");
+    // Static copy still renders
+    expect(text).toContain("claude-hunt");
+    expect(text).toContain("함께 배우는 사람들의 프로젝트.");
+    expect(text).toContain("마음에 드는 프로젝트에 응원을 보내주세요.");
+    expect(text).toContain("claude-hunt.com");
+    const cards = container.querySelectorAll('[data-og-role="card"]');
+    expect(cards).toHaveLength(0);
+  });
+
+  it("calls fetchTopProjects({ limit: 6 }) from the default export", async () => {
+    fetchTopProjectsMock.mockResolvedValueOnce([]);
+    await OpenGraphImage();
+    expect(fetchTopProjectsMock).toHaveBeenCalledWith({ limit: 6 });
   });
 });
