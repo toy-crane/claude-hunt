@@ -1,11 +1,13 @@
 import { readFile } from "node:fs/promises";
 import path from "node:path";
+import { fetchTopProjects } from "@widgets/project-grid/server";
 import { ImageResponse } from "next/og";
 import type { CSSProperties, ReactElement } from "react";
 
 export const alt = "claude-hunt — 함께 배우는 사람들의 프로젝트";
 export const size = { width: 1200, height: 630 };
 export const contentType = "image/png";
+export const revalidate = 3600;
 
 // Colors — mirror artifacts/improve-og-image/references/project/colors_and_type.css.
 const TERRACOTTA = "#c15f3c";
@@ -24,10 +26,10 @@ const RANK_LABELS = ["1st", "2nd", "3rd"] as const;
 
 export interface OgProject {
   author_display_name: string | null;
-  id: string;
+  id: string | null;
   screenshotUrl: string;
   tagline: string | null;
-  title: string;
+  title: string | null;
   vote_count: number | null;
 }
 
@@ -166,7 +168,7 @@ function TrendRow({ projects }: { projects: OgProject[] }) {
             >
               ●
             </span>
-            <span style={{ fontFamily: "Inter", fontWeight: 500 }}>
+            <span style={{ fontFamily: "Inter, Pretendard", fontWeight: 500 }}>
               {p.title}
             </span>
             {i < top3.length - 1 && (
@@ -175,17 +177,21 @@ function TrendRow({ projects }: { projects: OgProject[] }) {
           </div>
         ))}
       </div>
-      <div
-        style={{
-          fontFamily: "Geist Mono",
-          fontSize: 16,
-          color: INK,
-          fontWeight: 600,
-          marginTop: 6,
-        }}
-      >
-        claude-hunt.com
-      </div>
+    </div>
+  );
+}
+
+function UrlFooter() {
+  return (
+    <div
+      style={{
+        fontFamily: "Geist Mono",
+        fontSize: 16,
+        color: INK,
+        fontWeight: 600,
+      }}
+    >
+      claude-hunt.com
     </div>
   );
 }
@@ -420,7 +426,10 @@ export function OgElement({
             마음에 드는 프로젝트에 응원을 보내주세요.
           </div>
         </div>
-        <TrendRow projects={projects} />
+        <div style={{ display: "flex", flexDirection: "column", gap: 14 }}>
+          <TrendRow projects={projects} />
+          <UrlFooter />
+        </div>
       </div>
       {/* Right half */}
       <RightGrid projects={projects} />
@@ -436,8 +445,21 @@ async function loadFont(file: string): Promise<ArrayBuffer> {
   ) as ArrayBuffer;
 }
 
+async function fetchProjectsOrEmpty(): Promise<OgProject[]> {
+  try {
+    return await fetchTopProjects({ limit: 6 });
+  } catch {
+    // Keep the image generating even when the DB is unreachable (build-time
+    // prerender without `supabase start`, transient network hiccup at ISR
+    // regeneration, etc.). The wordmark / tagline / subtitle / URL still
+    // render — the grid collapses to empty (Scenario 5, N = 0).
+    return [];
+  }
+}
+
 export default async function OpenGraphImage(): Promise<ImageResponse> {
   const [
+    projects,
     geistMono700,
     jetbrainsMono500,
     inter400,
@@ -445,6 +467,7 @@ export default async function OpenGraphImage(): Promise<ImageResponse> {
     pretendard400,
     pretendard500,
   ] = await Promise.all([
+    fetchProjectsOrEmpty(),
     loadFont("GeistMono-Bold.ttf"),
     loadFont("JetBrainsMono-Medium.ttf"),
     loadFont("Inter-Regular.ttf"),
@@ -453,7 +476,7 @@ export default async function OpenGraphImage(): Promise<ImageResponse> {
     loadFont("Pretendard-Medium.ttf"),
   ]);
 
-  return new ImageResponse(<OgElement />, {
+  return new ImageResponse(<OgElement projects={projects} />, {
     ...size,
     fonts: [
       { name: "Geist Mono", data: geistMono700, style: "normal", weight: 700 },
