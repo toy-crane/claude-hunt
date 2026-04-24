@@ -1,7 +1,7 @@
 import type { ProjectWithVoteCount } from "@entities/vote";
 import { cn } from "@shared/lib/utils";
 import Image from "next/image";
-import { RankDot } from "./rank-badge";
+import { RankDot, RankSlot } from "./rank-badge";
 
 export interface ProjectCardProps {
   /**
@@ -37,7 +37,12 @@ export interface ProjectCardProps {
   viewerUserId?: string | null;
 }
 
-const ROW_GRID_COLS = "grid-cols-[52px_72px_minmax(0,1fr)_130px_auto]";
+// Shared with `project-grid.tsx` HEADER_GRID_COLS. Fixed VOTES width
+// (last column) is load-bearing: with `auto`, VOTES sizes to its content
+// which differs between header ("VOTES" text) and rows (vote button),
+// causing the `1fr` NAME column to absorb different amounts and shifting
+// AUTHOR/VOTES columns out of alignment between header and rows.
+const ROW_GRID_COLS = "grid-cols-[52px_72px_minmax(0,1fr)_130px_72px]";
 
 const MINUTE_MS = 60_000;
 const HOUR_MS = 60 * MINUTE_MS;
@@ -97,7 +102,7 @@ export function ProjectCard({
 
   return (
     <li
-      className="group/row border-border border-t font-mono transition-colors hover:bg-muted"
+      className="group/row font-mono transition-colors hover:bg-muted"
       data-testid="project-card"
     >
       {/* ─── Desktop row (≥ 720 px) ────────────────────────────── */}
@@ -108,12 +113,12 @@ export function ProjectCard({
         )}
         data-testid="project-card-desktop"
       >
-        <div className="flex items-center gap-2">
-          <RankDot rank={rank} />
+        <div className="flex items-center gap-1.5">
+          <RankSlot rank={rank} />
           <span
             className={cn(
               "font-semibold text-xs tabular-nums",
-              rank > 3 && "text-muted-foreground"
+              !hasRankDot && "text-muted-foreground"
             )}
           >
             {rankLabel}

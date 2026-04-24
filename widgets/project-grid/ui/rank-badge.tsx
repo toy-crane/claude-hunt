@@ -14,10 +14,9 @@ export interface RankDotProps {
 
 /**
  * Small colored dot that marks the top-three ranks on the project list.
- * Colors bind to the terminal-surface CSS variables when this element
- * renders inside a `.terminal-surface` scope; otherwise the arbitrary
- * fallback hex values keep the dot visible on the default shadcn
- * palette as well.
+ * Colors bind to the app-level `--term-rank-1/2/3` CSS variables
+ * declared in `app/globals.css`; the arbitrary hex fallbacks keep the
+ * dot visible if rendered before the stylesheet loads.
  */
 export function RankDot({ rank, className }: RankDotProps) {
   if (rank < 1 || rank > 3) {
@@ -36,4 +35,25 @@ export function RankDot({ rank, className }: RankDotProps) {
       data-testid="rank-dot"
     />
   );
+}
+
+export interface RankSlotProps {
+  /**
+   * Project rank (1-based). Omit to render an invisible placeholder —
+   * used by the grid header so its text starts at the same horizontal
+   * offset as the row digits, regardless of whether any row has a dot.
+   */
+  rank?: number;
+}
+
+/**
+ * Fixed-width slot for the rank indicator. Renders the colored `RankDot`
+ * for top-3 ranks and an invisible placeholder of the same dimensions
+ * otherwise, so the digit that follows always starts at the same x.
+ */
+export function RankSlot({ rank }: RankSlotProps) {
+  if (rank != null && rank >= 1 && rank <= 3) {
+    return <RankDot rank={rank} />;
+  }
+  return <span aria-hidden="true" className="inline-block size-1.5 shrink-0" />;
 }
