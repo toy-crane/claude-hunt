@@ -79,7 +79,7 @@ Unchanged. Uses existing reads:
 
 ## Tasks
 
-### Task 1: Prompt line component + dynamic filter flag
+### ✅ Task 1: Prompt line component + dynamic filter flag
 
 - **Covers**: Scenario 1 (partial — prompt-line text), Scenario 2 (partial — prompt-line rewrites on class change)
 - **Size**: S (3–4 files)
@@ -110,7 +110,7 @@ Unchanged. Uses existing reads:
 
 ---
 
-### Task 2: Grid → list layout, rank dot, inline vote button, row hover
+### ✅ Task 2: Grid → list layout, rank dot, inline vote button, row hover
 
 - **Covers**: Scenario 1 (full — ranked list, two-digit rank, desktop table header), Scenario 3 (full — hover lift + thumb scale), Scenario 4 (full — inline vote button, auth/owner rules, re-sort after vote), Scenario 5 (partial — submit button stays at H1 right, square + fg/bg inverted)
 - **Size**: M (upper-edge; 6 direct file changes + tests)
@@ -165,7 +165,7 @@ Unchanged. Uses existing reads:
 
 ---
 
-### Task 3: Class filter chips replace dropdown + URL sync
+### ✅ Task 3: Class filter chips replace dropdown + URL sync
 
 - **Covers**: Scenario 2 (full — chip row, count, inverted selected, URL sync via `history.replaceState`, browser back/forward, no network fetch, subtitle count refresh)
 - **Size**: M (5 files)
@@ -203,7 +203,7 @@ Unchanged. Uses existing reads:
 
 ---
 
-### Task 4: Owner-only inline edit/delete icon actions
+### ✅ Task 4: Owner-only inline edit/delete icon actions
 
 - **Covers**: Scenario 6 (full — inline icons always visible to owner, invisible to non-owner, no layout shift, dialogs unchanged)
 - **Size**: M (5 files)
@@ -243,7 +243,7 @@ Unchanged. Uses existing reads:
 
 ---
 
-### Task 5: Mobile row layout (< 720 px) + chip wrap
+### ✅ Task 5: Mobile row layout (< 720 px) + chip wrap
 
 - **Covers**: Scenario 7 (full — stacked card row, rank overlay on thumb, horizontal vote button, chip wrap, no scrollbar)
 - **Size**: S (2–3 files)
@@ -272,7 +272,7 @@ Unchanged. Uses existing reads:
 
 ---
 
-### Task 6: Terminal palette — exact hex tokens, dark + light
+### ✅ Task 6: Terminal palette — exact hex tokens, dark + light
 
 - **Covers**: Scenario 8 (full — exact hex values in both modes, terracotta $ / `_` preserved, theme change without data refetch) + Scenario 5 (full remainder — submit button uses terminal fg/bg) + Invariant "Color discipline"
 - **Size**: S (3–4 files)

@@ -76,11 +76,11 @@ export function ProjectBoard({
     [screenshotUrlMap]
   );
 
-  const handleCohortChange = (nextCohortId: string | null) => {
+  const handleCohortChange = useCallback((nextCohortId: string | null) => {
     setCohortId(nextCohortId);
     const href = nextCohortId ? `/?cohort=${nextCohortId}` : "/";
     window.history.replaceState(null, "", href);
-  };
+  }, []);
 
   return (
     <>
