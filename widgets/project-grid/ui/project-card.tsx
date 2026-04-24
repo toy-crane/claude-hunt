@@ -72,7 +72,6 @@ export function ProjectCard({
   const isOwner = viewerUserId != null && project.user_id === viewerUserId;
   const rankLabel = String(rank).padStart(2, "0");
   const author = project.author_display_name ?? "익명";
-  const authorInitial = author.charAt(0);
   const projectUrl = project.project_url ?? "#";
   const submittedAt = formatRelative(project.created_at);
   const hasRankDot = rank >= 1 && rank <= 3;
@@ -154,14 +153,8 @@ export function ProjectCard({
           </p>
         </div>
 
-        <div className="flex min-w-0 items-center gap-2">
-          <span
-            aria-hidden="true"
-            className="inline-flex size-5 shrink-0 items-center justify-center rounded-full bg-muted font-medium text-[10px]"
-          >
-            {authorInitial}
-          </span>
-          <span className="truncate text-xs">{author}</span>
+        <div className="min-w-0">
+          <span className="block truncate text-xs">{author}</span>
         </div>
 
         <div className="flex items-center gap-1.5 justify-self-end">

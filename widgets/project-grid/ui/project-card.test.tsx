@@ -220,6 +220,20 @@ describe("ProjectCard (terminal row) — desktop branch", () => {
     );
     expect(screen.getAllByText("익명").length).toBeGreaterThanOrEqual(1);
   });
+
+  it("shows nickname only in the AUTHOR column (no avatar-initial bubble)", () => {
+    render(
+      <ProjectCard
+        project={buildProject({ author_display_name: "Alice" })}
+        rank={10}
+        screenshotUrl="https://cdn.example.com/shot.png"
+      />
+    );
+    const desktop = screen.getByTestId("project-card-desktop");
+    expect(within(desktop).getByText("Alice")).toBeInTheDocument();
+    // The AUTHOR cell should not render a circular avatar element.
+    expect(desktop.querySelectorAll('[class*="rounded-full"]').length).toBe(0);
+  });
 });
 
 describe("ProjectCard — mobile branch (< 720 px)", () => {
