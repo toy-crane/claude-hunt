@@ -3,20 +3,37 @@ import { act, render, screen } from "@testing-library/react";
 import type { ProjectGridRow } from "@widgets/project-grid";
 import { vi } from "vitest";
 
-// Capture the onValueChange callback that ProjectBoard passes to CohortDropdown
+// Capture the onValueChange callback and props that ProjectBoard passes
+// to CohortChips so tests can drive filtering and assert forwarded props.
 let capturedOnValueChange: ((id: string | null) => void) | undefined;
+let capturedChipsProps:
+  | {
+      allCount: number;
+      counts: Record<string, number>;
+      value: string | null;
+    }
+  | undefined;
 
 vi.mock("@features/cohort-filter", () => ({
-  CohortDropdown: ({
-    value,
+  CohortChips: ({
+    allCount,
+    counts,
     onValueChange,
+    value,
   }: {
-    value: string | null;
+    allCount: number;
+    counts: Record<string, number>;
     onValueChange: (id: string | null) => void;
+    value: string | null;
   }) => {
     capturedOnValueChange = onValueChange;
+    capturedChipsProps = { allCount, counts, value };
     return (
-      <div data-testid="cohort-dropdown-stub" data-value={value ?? "__all__"} />
+      <div
+        data-all-count={allCount}
+        data-testid="cohort-chips-stub"
+        data-value={value ?? "__all__"}
+      />
     );
   },
 }));
@@ -185,6 +202,16 @@ describe("ProjectBoard", () => {
 
   afterEach(() => {
     vi.restoreAllMocks();
+  });
+
+  it("forwards allCount and per-cohort counts to CohortChips", async () => {
+    await renderBoard();
+    expect(capturedChipsProps?.allCount).toBe(3);
+    expect(capturedChipsProps?.counts).toEqual({
+      "cohort-a": 2,
+      "cohort-b": 1,
+    });
+    expect(capturedChipsProps?.value).toBeNull();
   });
 
   it("renders the Korean H1 and the subtitle with the filtered project count", async () => {

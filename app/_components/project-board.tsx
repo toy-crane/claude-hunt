@@ -1,7 +1,7 @@
 "use client";
 
 import type { Cohort } from "@entities/cohort";
-import { CohortDropdown } from "@features/cohort-filter";
+import { CohortChips } from "@features/cohort-filter";
 import { DeleteButton } from "@features/delete-project";
 import { EditDialog } from "@features/edit-project";
 import { SubmitDialog } from "@features/submit-project";
@@ -51,6 +51,16 @@ export function ProjectBoard({
     [projects, cohortId]
   );
 
+  const cohortCounts = useMemo(() => {
+    const counts: Record<string, number> = {};
+    for (const p of projects) {
+      if (p.cohort_id) {
+        counts[p.cohort_id] = (counts[p.cohort_id] ?? 0) + 1;
+      }
+    }
+    return counts;
+  }, [projects]);
+
   const screenshotUrlMap = useMemo(() => {
     const map = new Map<string, string>();
     for (const p of projects) {
@@ -93,13 +103,13 @@ export function ProjectBoard({
           />
         </div>
       </section>
-      <div className="flex items-center justify-end gap-2">
-        <CohortDropdown
-          cohorts={cohorts}
-          onValueChange={handleCohortChange}
-          value={cohortId}
-        />
-      </div>
+      <CohortChips
+        allCount={projects.length}
+        cohorts={cohorts}
+        counts={cohortCounts}
+        onValueChange={handleCohortChange}
+        value={cohortId}
+      />
       <ProjectGrid
         projects={filteredProjects}
         renderOwnerActions={(project) => (
