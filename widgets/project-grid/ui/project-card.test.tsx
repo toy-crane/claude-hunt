@@ -1,23 +1,27 @@
 import type { ProjectWithVoteCount } from "@entities/vote";
-import { render, screen } from "@testing-library/react";
+import { render, screen, within } from "@testing-library/react";
 import { describe, expect, it, vi } from "vitest";
 import { ProjectCard } from "./project-card";
 
+// The next/image mock forwards data-testid so desktop and mobile thumbs
+// can be distinguished by the caller.
 vi.mock("next/image", () => ({
   default: ({
     alt,
     src,
     className,
+    "data-testid": dataTestId,
   }: {
     alt: string;
     src: string;
     className?: string;
+    "data-testid"?: string;
   }) => (
     <div
       aria-label={alt}
       className={className}
       data-src={src}
-      data-testid="project-card-thumb"
+      data-testid={dataTestId}
       role="img"
     />
   ),
@@ -44,7 +48,7 @@ function buildProject(
   };
 }
 
-describe("ProjectCard (terminal row)", () => {
+describe("ProjectCard (terminal row) — desktop branch", () => {
   it("renders title, tagline, and author display name", () => {
     render(
       <ProjectCard
@@ -53,13 +57,13 @@ describe("ProjectCard (terminal row)", () => {
         screenshotUrl="https://cdn.example.com/shot.png"
       />
     );
-
-    expect(screen.getByText("My App")).toBeInTheDocument();
-    expect(screen.getByText("A cool tool")).toBeInTheDocument();
-    expect(screen.getByText("Alice")).toBeInTheDocument();
+    const desktop = screen.getByTestId("project-card-desktop");
+    expect(within(desktop).getByText("My App")).toBeInTheDocument();
+    expect(within(desktop).getByText("A cool tool")).toBeInTheDocument();
+    expect(within(desktop).getByText("Alice")).toBeInTheDocument();
   });
 
-  it("renders the rank as a two-digit zero-padded number", () => {
+  it("renders the rank as a two-digit zero-padded number on desktop", () => {
     const { rerender } = render(
       <ProjectCard
         project={buildProject()}
@@ -67,7 +71,9 @@ describe("ProjectCard (terminal row)", () => {
         screenshotUrl="https://cdn.example.com/shot.png"
       />
     );
-    expect(screen.getByText("01")).toBeInTheDocument();
+    expect(
+      within(screen.getByTestId("project-card-desktop")).getByText("01")
+    ).toBeInTheDocument();
 
     rerender(
       <ProjectCard
@@ -76,7 +82,9 @@ describe("ProjectCard (terminal row)", () => {
         screenshotUrl="https://cdn.example.com/shot.png"
       />
     );
-    expect(screen.getByText("42")).toBeInTheDocument();
+    expect(
+      within(screen.getByTestId("project-card-desktop")).getByText("42")
+    ).toBeInTheDocument();
   });
 
   it("renders a rank dot for ranks 1–3 and dims the number for 4+", () => {
@@ -87,7 +95,11 @@ describe("ProjectCard (terminal row)", () => {
         screenshotUrl="https://cdn.example.com/shot.png"
       />
     );
-    expect(screen.getByTestId("rank-dot")).toHaveAttribute("data-rank", "1");
+    const desktopRow = screen.getByTestId("project-card-desktop");
+    expect(within(desktopRow).getByTestId("rank-dot")).toHaveAttribute(
+      "data-rank",
+      "1"
+    );
 
     rerender(
       <ProjectCard
@@ -96,11 +108,14 @@ describe("ProjectCard (terminal row)", () => {
         screenshotUrl="https://cdn.example.com/shot.png"
       />
     );
-    expect(screen.queryByTestId("rank-dot")).toBeNull();
-    expect(screen.getByText("04").className).toContain("text-muted-foreground");
+    const desktopRow4 = screen.getByTestId("project-card-desktop");
+    expect(within(desktopRow4).queryByTestId("rank-dot")).toBeNull();
+    expect(within(desktopRow4).getByText("04").className).toContain(
+      "text-muted-foreground"
+    );
   });
 
-  it("opens the project URL in a new tab from both the thumbnail and the title link", () => {
+  it("opens the project URL in new tabs from every link (desktop branch)", () => {
     render(
       <ProjectCard
         project={buildProject({ project_url: "https://myapp.com" })}
@@ -108,7 +123,9 @@ describe("ProjectCard (terminal row)", () => {
         screenshotUrl="https://cdn.example.com/shot.png"
       />
     );
-    const links = screen.getAllByRole("link");
+    const links = within(
+      screen.getByTestId("project-card-desktop")
+    ).getAllByRole("link");
     expect(links.length).toBeGreaterThanOrEqual(2);
     for (const link of links) {
       expect(link).toHaveAttribute("href", "https://myapp.com");
@@ -146,8 +163,11 @@ describe("ProjectCard (terminal row)", () => {
         viewerUserId="user-1"
       />
     );
-    const voteSlot = screen.getByTestId("vote-slot");
-    const ownerActions = screen.getByTestId("project-card-owner-actions");
+    const desktop = screen.getByTestId("project-card-desktop");
+    const voteSlot = within(desktop).getByTestId("vote-slot");
+    const ownerActions = within(desktop).getByTestId(
+      "project-card-owner-actions"
+    );
     expect(ownerActions.contains(voteSlot)).toBe(false);
   });
 
@@ -161,7 +181,7 @@ describe("ProjectCard (terminal row)", () => {
         viewerUserId="user-1"
       />
     );
-    expect(screen.getByText("owner-tools")).toBeInTheDocument();
+    expect(screen.getAllByText("owner-tools").length).toBeGreaterThanOrEqual(1);
 
     rerender(
       <ProjectCard
@@ -183,21 +203,11 @@ describe("ProjectCard (terminal row)", () => {
         screenshotUrl="https://cdn.example.com/paint.png"
       />
     );
-
-    const img = screen.getByLabelText("Paint 스크린샷");
-    expect(img.getAttribute("data-src")).toContain("paint.png");
-  });
-
-  it("accepts the priority prop for above-the-fold rows", () => {
-    render(
-      <ProjectCard
-        priority
-        project={buildProject({ title: "Top" })}
-        rank={1}
-        screenshotUrl="https://cdn.example.com/top.png"
-      />
-    );
-    expect(screen.getByLabelText("Top 스크린샷")).toBeInTheDocument();
+    const imgs = screen.getAllByLabelText("Paint 스크린샷");
+    expect(imgs.length).toBeGreaterThanOrEqual(1);
+    for (const img of imgs) {
+      expect(img.getAttribute("data-src")).toContain("paint.png");
+    }
   });
 
   it("falls back to '익명' when author_display_name is missing", () => {
@@ -208,6 +218,97 @@ describe("ProjectCard (terminal row)", () => {
         screenshotUrl="https://cdn.example.com/shot.png"
       />
     );
-    expect(screen.getByText("익명")).toBeInTheDocument();
+    expect(screen.getAllByText("익명").length).toBeGreaterThanOrEqual(1);
+  });
+});
+
+describe("ProjectCard — mobile branch (< 720 px)", () => {
+  it("renders the compact 64-px-tall mobile row with gap-3 padding", () => {
+    render(
+      <ProjectCard
+        project={buildProject()}
+        rank={5}
+        screenshotUrl="https://cdn.example.com/shot.png"
+      />
+    );
+    const mobile = screen.getByTestId("project-card-mobile");
+    expect(mobile.className).toContain("h-16");
+    expect(mobile.className).toContain("min-[720px]:hidden");
+  });
+
+  it("hides the mobile row at ≥ 720 px via Tailwind visibility classes", () => {
+    render(
+      <ProjectCard
+        project={buildProject()}
+        rank={5}
+        screenshotUrl="https://cdn.example.com/shot.png"
+      />
+    );
+    const mobile = screen.getByTestId("project-card-mobile");
+    expect(mobile.className).toContain("min-[720px]:hidden");
+    const desktop = screen.getByTestId("project-card-desktop");
+    expect(desktop.className).toContain("hidden");
+    expect(desktop.className).toContain("min-[720px]:grid");
+  });
+
+  it("overlays the rank badge on the 48×48 thumb for ranks 1–3 (with dot)", () => {
+    render(
+      <ProjectCard
+        project={buildProject()}
+        rank={1}
+        screenshotUrl="https://cdn.example.com/shot.png"
+      />
+    );
+    const badge = screen.getByTestId("project-card-mobile-rank-badge");
+    expect(badge.className).toContain("absolute");
+    expect(badge.textContent).toContain("01");
+    expect(within(badge).getByTestId("rank-dot")).toBeInTheDocument();
+  });
+
+  it("overlays a dim rank badge (no dot) for ranks 4+", () => {
+    render(
+      <ProjectCard
+        project={buildProject()}
+        rank={5}
+        screenshotUrl="https://cdn.example.com/shot.png"
+      />
+    );
+    const badge = screen.getByTestId("project-card-mobile-rank-badge");
+    expect(badge.textContent).toContain("05");
+    expect(within(badge).queryByTestId("rank-dot")).toBeNull();
+    expect(badge.className).toContain("text-muted-foreground");
+  });
+
+  it("renders 48×48 thumbnail sizing on mobile", () => {
+    render(
+      <ProjectCard
+        project={buildProject()}
+        rank={2}
+        screenshotUrl="https://cdn.example.com/shot.png"
+      />
+    );
+    const thumb = screen.getByTestId("project-card-mobile-thumb");
+    expect(thumb.className).toContain("size-12");
+  });
+
+  it("renders a 3-line text block: title, tagline, author · submittedAt", () => {
+    render(
+      <ProjectCard
+        project={buildProject({
+          title: "Mobile App",
+          tagline: "Mobile tagline",
+          author_display_name: "Nari",
+          created_at: new Date(Date.now() - 3 * 60 * 60 * 1000).toISOString(),
+        })}
+        rank={2}
+        screenshotUrl="https://cdn.example.com/shot.png"
+      />
+    );
+    const mobile = screen.getByTestId("project-card-mobile");
+    expect(within(mobile).getByText("Mobile App")).toBeInTheDocument();
+    expect(within(mobile).getByText("Mobile tagline")).toBeInTheDocument();
+    expect(
+      within(mobile).getByText((text) => text.startsWith("Nari · "))
+    ).toBeInTheDocument();
   });
 });

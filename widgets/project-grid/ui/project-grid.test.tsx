@@ -55,7 +55,7 @@ describe("ProjectGrid (terminal list)", () => {
     expect(rows[5]).toHaveTextContent("F");
   });
 
-  it("applies rank dots to the first three rows and none to ranks 4+", () => {
+  it("applies rank dots to the first three rows and none to ranks 4+ (desktop branch)", () => {
     const projects = [
       buildProject({ id: "p1", title: "A" }),
       buildProject({ id: "p2", title: "B" }),
@@ -71,14 +71,15 @@ describe("ProjectGrid (terminal list)", () => {
       />
     );
 
+    // Both the desktop branch (rank column) and the mobile branch (rank
+    // overlay on thumb) render a dot for ranks 1–3 → 6 dots total.
     const dots = screen.getAllByTestId("rank-dot");
-    expect(dots).toHaveLength(3);
-    expect(dots[0]).toHaveAttribute("data-rank", "1");
-    expect(dots[1]).toHaveAttribute("data-rank", "2");
-    expect(dots[2]).toHaveAttribute("data-rank", "3");
+    expect(dots).toHaveLength(6);
+    const ranks = dots.map((d) => d.getAttribute("data-rank")).sort();
+    expect(ranks).toEqual(["1", "1", "2", "2", "3", "3"]);
   });
 
-  it("renders zero-padded rank numbers 01 through 11", () => {
+  it("renders zero-padded rank numbers 01 through 11 (one per branch)", () => {
     const projects = Array.from({ length: 11 }, (_, i) =>
       buildProject({ id: `p${i + 1}`, title: `P${i + 1}` })
     );
@@ -103,7 +104,8 @@ describe("ProjectGrid (terminal list)", () => {
       "10",
       "11",
     ]) {
-      expect(screen.getByText(label)).toBeInTheDocument();
+      // Once in the desktop row, once in the mobile row's rank badge.
+      expect(screen.getAllByText(label)).toHaveLength(2);
     }
   });
 

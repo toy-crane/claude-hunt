@@ -254,9 +254,10 @@ describe("ProjectBoard", () => {
 
   it("shows all projects when no cohort is selected", async () => {
     await renderBoard();
-    expect(screen.getByText("Alpha One")).toBeInTheDocument();
-    expect(screen.getByText("Alpha Two")).toBeInTheDocument();
-    expect(screen.getByText("Beta One")).toBeInTheDocument();
+    // Each row renders the title in both desktop and mobile branches.
+    expect(screen.getAllByText("Alpha One").length).toBeGreaterThanOrEqual(1);
+    expect(screen.getAllByText("Alpha Two").length).toBeGreaterThanOrEqual(1);
+    expect(screen.getAllByText("Beta One").length).toBeGreaterThanOrEqual(1);
   });
 
   it("does not show English 'Filter by cohort' helper text", async () => {
@@ -266,23 +267,23 @@ describe("ProjectBoard", () => {
 
   it("shows only the selected cohort's projects on initial render", async () => {
     await renderBoard({ initialCohortId: "cohort-a" });
-    expect(screen.getByText("Alpha One")).toBeInTheDocument();
-    expect(screen.getByText("Alpha Two")).toBeInTheDocument();
+    expect(screen.getAllByText("Alpha One").length).toBeGreaterThanOrEqual(1);
+    expect(screen.getAllByText("Alpha Two").length).toBeGreaterThanOrEqual(1);
     expect(screen.queryByText("Beta One")).not.toBeInTheDocument();
   });
 
   it("filters to cohort B when onValueChange is called with cohort-b", async () => {
     await renderBoard();
     act(() => capturedOnValueChange?.("cohort-b"));
-    expect(screen.getByText("Beta One")).toBeInTheDocument();
+    expect(screen.getAllByText("Beta One").length).toBeGreaterThanOrEqual(1);
     expect(screen.queryByText("Alpha One")).not.toBeInTheDocument();
   });
 
   it("returns to all projects when onValueChange is called with null", async () => {
     await renderBoard({ initialCohortId: "cohort-a" });
     act(() => capturedOnValueChange?.(null));
-    expect(screen.getByText("Alpha One")).toBeInTheDocument();
-    expect(screen.getByText("Beta One")).toBeInTheDocument();
+    expect(screen.getAllByText("Alpha One").length).toBeGreaterThanOrEqual(1);
+    expect(screen.getAllByText("Beta One").length).toBeGreaterThanOrEqual(1);
   });
 
   it("calls history.replaceState with ?cohort=<id> when a cohort is selected", async () => {
