@@ -1,6 +1,6 @@
 import { cn } from "@shared/lib/utils";
 
-const ACCENT = "text-[#c15f3c] dark:text-[#e88a67]";
+const ACCENT = "text-[var(--accent-terracotta)]";
 
 export interface PromptLineProps {
   className?: string;

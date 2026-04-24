@@ -31,7 +31,7 @@ export function SubmitDialog({ isAuthenticated, cohortId }: SubmitDialogProps) {
 
   if (!isAuthenticated) {
     return (
-      <Button asChild className="rounded-none">
+      <Button asChild>
         <Link href="/login">
           <RiAddLine data-icon="inline-start" />
           <span>프로젝트 제출</span>
@@ -48,7 +48,7 @@ export function SubmitDialog({ isAuthenticated, cohortId }: SubmitDialogProps) {
   return (
     <Dialog onOpenChange={setOpen} open={open}>
       <DialogTrigger asChild>
-        <Button className="rounded-none" data-testid="submit-project-trigger">
+        <Button data-testid="submit-project-trigger">
           <RiAddLine data-icon="inline-start" />
           <span>프로젝트 제출</span>
         </Button>

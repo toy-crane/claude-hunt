@@ -98,7 +98,7 @@ export function EditDialog({ project, variant = "default" }: EditDialogProps) {
         {variant === "icon" ? (
           <Button
             aria-label="프로젝트 편집"
-            className="size-7 rounded-none"
+            className="size-7"
             data-testid="edit-project-trigger"
             size="icon"
             variant="outline"

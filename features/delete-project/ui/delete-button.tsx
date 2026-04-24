@@ -54,7 +54,7 @@ export function DeleteButton({
         {variant === "icon" ? (
           <Button
             aria-label="프로젝트 삭제"
-            className="size-7 rounded-none"
+            className="size-7"
             data-testid="delete-project-trigger"
             size="icon"
             variant="outline"

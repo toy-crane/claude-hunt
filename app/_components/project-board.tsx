@@ -1,6 +1,7 @@
 "use client";
 
 import type { Cohort } from "@entities/cohort";
+import type { ProjectWithVoteCount } from "@entities/vote";
 import { CohortChips } from "@features/cohort-filter";
 import { DeleteButton } from "@features/delete-project";
 import { EditDialog } from "@features/edit-project";
@@ -106,6 +107,44 @@ export function ProjectBoard({
     return () => window.removeEventListener("popstate", handlePopState);
   }, []);
 
+  const renderOwnerActions = useCallback(
+    (project: ProjectWithVoteCount) => (
+      <>
+        <EditDialog
+          project={{
+            id: project.id ?? "",
+            title: project.title ?? "",
+            tagline: project.tagline ?? "",
+            project_url: project.project_url ?? "",
+          }}
+          variant="icon"
+        />
+        <DeleteButton
+          projectId={project.id ?? ""}
+          projectTitle={project.title ?? ""}
+          variant="icon"
+        />
+      </>
+    ),
+    []
+  );
+
+  const renderVoteButton = useCallback(
+    (project: ProjectWithVoteCount) => (
+      <VoteButton
+        alreadyVoted={Boolean(
+          "viewer_has_voted" in project && project.viewer_has_voted
+        )}
+        isAuthenticated={isAuthenticated}
+        ownedByViewer={viewerUserId != null && project.user_id === viewerUserId}
+        projectId={project.id ?? ""}
+        variant="inline"
+        voteCount={project.vote_count ?? 0}
+      />
+    ),
+    [isAuthenticated, viewerUserId]
+  );
+
   return (
     <>
       <PromptLine cohortLabel={cohortLabel} />
@@ -137,38 +176,8 @@ export function ProjectBoard({
       <ProjectGrid
         cohortLabelsById={cohortLabelsById}
         projects={filteredProjects}
-        renderOwnerActions={(project) => (
-          <>
-            <EditDialog
-              project={{
-                id: project.id ?? "",
-                title: project.title ?? "",
-                tagline: project.tagline ?? "",
-                project_url: project.project_url ?? "",
-              }}
-              variant="icon"
-            />
-            <DeleteButton
-              projectId={project.id ?? ""}
-              projectTitle={project.title ?? ""}
-              variant="icon"
-            />
-          </>
-        )}
-        renderVoteButton={(project) => (
-          <VoteButton
-            alreadyVoted={Boolean(
-              "viewer_has_voted" in project && project.viewer_has_voted
-            )}
-            isAuthenticated={isAuthenticated}
-            ownedByViewer={
-              viewerUserId != null && project.user_id === viewerUserId
-            }
-            projectId={project.id ?? ""}
-            variant="inline"
-            voteCount={project.vote_count ?? 0}
-          />
-        )}
+        renderOwnerActions={renderOwnerActions}
+        renderVoteButton={renderVoteButton}
         resolveScreenshotUrl={resolveScreenshotUrl}
         viewerUserId={viewerUserId}
       />

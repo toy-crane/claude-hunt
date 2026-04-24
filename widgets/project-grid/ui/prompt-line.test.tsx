@@ -2,8 +2,7 @@ import { render, screen } from "@testing-library/react";
 import { describe, expect, it } from "vitest";
 import { PromptLine } from "./prompt-line";
 
-const ACCENT_LIGHT = /#c15f3c/;
-const ACCENT_DARK = /#e88a67/;
+const ACCENT_TOKEN = /--accent-terracotta/;
 
 describe("PromptLine", () => {
   it("renders the default command when no class is selected", () => {
@@ -29,8 +28,10 @@ describe("PromptLine", () => {
     expect(dollar).toHaveTextContent("$");
     // The Logo component uses the same pair; assert both are applied
     // (light class for :root, dark class for .dark).
-    expect(dollar.className).toMatch(ACCENT_LIGHT);
-    expect(dollar.className).toMatch(ACCENT_DARK);
+    // Terracotta is now emitted via the `--accent-terracotta` CSS var
+    // declared at `:root` (light) and `.dark` (dark), so the one class
+    // covers both themes without a `dark:` override.
+    expect(dollar.className).toMatch(ACCENT_TOKEN);
   });
 
   it("does not contain the English word `cohort` in any user-visible text", () => {
