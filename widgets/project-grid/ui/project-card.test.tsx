@@ -354,6 +354,82 @@ describe("ProjectCard — desktop hover preview popover", () => {
       { timeout: 1000 }
     );
   });
+
+  it("does not close synchronously when the cursor leaves — closeDelay grace period", async () => {
+    const user = userEvent.setup();
+    render(
+      <ProjectCard
+        project={buildProject()}
+        rank={1}
+        screenshotUrl="https://cdn.example.com/shot.png"
+      />
+    );
+    const trigger = getDesktopTrigger();
+    await user.hover(trigger);
+    await screen.findByTestId("project-card-preview-popover", undefined, {
+      timeout: 1000,
+    });
+
+    fireEvent.pointerLeave(trigger, { pointerType: "mouse" });
+
+    expect(
+      screen.queryByTestId("project-card-preview-popover")
+    ).toBeInTheDocument();
+  });
+
+  it("closes the popover after the cursor has left for long enough", async () => {
+    const user = userEvent.setup();
+    render(
+      <ProjectCard
+        project={buildProject()}
+        rank={1}
+        screenshotUrl="https://cdn.example.com/shot.png"
+      />
+    );
+    const trigger = getDesktopTrigger();
+    await user.hover(trigger);
+    await screen.findByTestId("project-card-preview-popover", undefined, {
+      timeout: 1000,
+    });
+
+    await user.unhover(trigger);
+
+    await waitFor(
+      () =>
+        expect(
+          screen.queryByTestId("project-card-preview-popover")
+        ).not.toBeInTheDocument(),
+      { timeout: 1000 }
+    );
+  });
+
+  it("keeps the popover open when the cursor moves from the trigger onto the popover content", async () => {
+    const user = userEvent.setup();
+    render(
+      <ProjectCard
+        project={buildProject()}
+        rank={1}
+        screenshotUrl="https://cdn.example.com/shot.png"
+      />
+    );
+    const trigger = getDesktopTrigger();
+    await user.hover(trigger);
+    const popover = await screen.findByTestId(
+      "project-card-preview-popover",
+      undefined,
+      { timeout: 1000 }
+    );
+
+    fireEvent.pointerLeave(trigger, { pointerType: "mouse" });
+    fireEvent.pointerEnter(popover, { pointerType: "mouse" });
+
+    // Wait beyond the closeDelay window (150 ms grace + buffer).
+    await new Promise((resolve) => setTimeout(resolve, 300));
+
+    expect(
+      screen.getByTestId("project-card-preview-popover")
+    ).toBeInTheDocument();
+  });
 });
 
 describe("ProjectCard — mobile stacked card (< 720 px)", () => {

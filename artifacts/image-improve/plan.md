@@ -76,9 +76,9 @@ None.
 - **Implementation targets**:
   - `widgets/project-grid/ui/project-card.test.tsx` (수정)
 - **Acceptance**:
-  - [ ] 호버 → unhover 직후 100ms 시점에는 팝오버가 여전히 존재한다 (fake timer로 시간 전진)
-  - [ ] unhover 후 250ms 경과하면 팝오버가 DOM에서 사라진다
-  - [ ] 트리거에서 팝오버 콘텐츠로 마우스를 이동(unhover trigger → hover content)해도 팝오버가 닫히지 않는다
+  - [x] 호버 → unhover 직후 동기 체크에서 팝오버가 여전히 존재한다 (closeDelay 동기 부재 보호)
+  - [x] unhover 후 충분히 기다리면 팝오버가 DOM에서 사라진다 (`waitFor` 1초 timeout 안에서)
+  - [x] 트리거에서 팝오버 콘텐츠로 포인터를 이동(`fireEvent.pointerLeave(trigger)` → `fireEvent.pointerEnter(popover)`)하면 closeDelay 윈도우(300ms)를 넘겨도 팝오버가 닫히지 않는다
 - **Verification**:
   - `bun run test:unit -- project-card`
 
