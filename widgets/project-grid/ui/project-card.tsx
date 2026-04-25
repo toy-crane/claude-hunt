@@ -95,12 +95,12 @@ export function ProjectCard({
 
   return (
     <li
-      className="group/row font-mono transition-colors hover:bg-muted min-[720px]:col-span-full min-[720px]:grid min-[720px]:grid-cols-subgrid"
+      className="group/row font-mono transition-colors hover:bg-muted min-[720px]:col-span-full min-[720px]:-mx-5 min-[720px]:grid min-[720px]:grid-cols-subgrid min-[720px]:px-5"
       data-testid="project-card"
     >
       {/* ─── Desktop row (≥ 720 px) ────────────────────────────── */}
       <div
-        className="col-span-full hidden grid-cols-subgrid items-center px-5 py-3.5 min-[720px]:grid"
+        className="col-span-full hidden grid-cols-subgrid items-center py-3.5 min-[720px]:grid"
         data-testid="project-card-desktop"
       >
         <div className="flex items-center gap-1.5">
