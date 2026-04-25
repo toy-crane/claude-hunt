@@ -1,5 +1,12 @@
 import type { ProjectWithVoteCount } from "@entities/vote";
-import { render, screen, within } from "@testing-library/react";
+import {
+  fireEvent,
+  render,
+  screen,
+  waitFor,
+  within,
+} from "@testing-library/react";
+import userEvent from "@testing-library/user-event";
 import { describe, expect, it, vi } from "vitest";
 import { ProjectCard } from "./project-card";
 
@@ -233,6 +240,119 @@ describe("ProjectCard (terminal row) — desktop branch", () => {
     expect(within(desktop).getByText("Alice")).toBeInTheDocument();
     // The AUTHOR cell should not render a circular avatar element.
     expect(desktop.querySelectorAll('[class*="rounded-full"]').length).toBe(0);
+  });
+});
+
+describe("ProjectCard — desktop hover preview popover", () => {
+  function getDesktopTrigger() {
+    const desktop = screen.getByTestId("project-card-desktop");
+    return within(desktop).getByTestId("project-card-preview");
+  }
+
+  it("opens the preview popover after hovering the desktop thumbnail", async () => {
+    const user = userEvent.setup();
+    render(
+      <ProjectCard
+        project={buildProject()}
+        rank={1}
+        screenshotUrl="https://cdn.example.com/shot.png"
+      />
+    );
+    await user.hover(getDesktopTrigger());
+
+    expect(
+      await screen.findByTestId("project-card-preview-popover", undefined, {
+        timeout: 1000,
+      })
+    ).toBeInTheDocument();
+  });
+
+  it("renders the popover image with the same source as the trigger thumbnail", async () => {
+    const user = userEvent.setup();
+    const screenshotUrl = "https://cdn.example.com/shot.png";
+    render(
+      <ProjectCard
+        project={buildProject()}
+        rank={1}
+        screenshotUrl={screenshotUrl}
+      />
+    );
+    const trigger = getDesktopTrigger();
+    const thumb = within(trigger).getByTestId("project-card-thumb");
+
+    await user.hover(trigger);
+
+    const popover = await screen.findByTestId(
+      "project-card-preview-popover",
+      undefined,
+      { timeout: 1000 }
+    );
+    expect(popover.getAttribute("data-src")).toBe(
+      thumb.getAttribute("data-src")
+    );
+    expect(popover.getAttribute("data-src")).toBe(screenshotUrl);
+  });
+
+  it("does not open synchronously on hover — openDelay protects against rapid-pass noise", async () => {
+    render(
+      <ProjectCard
+        project={buildProject()}
+        rank={1}
+        screenshotUrl="https://cdn.example.com/shot.png"
+      />
+    );
+    fireEvent.pointerEnter(getDesktopTrigger(), { pointerType: "mouse" });
+
+    expect(
+      screen.queryByTestId("project-card-preview-popover")
+    ).not.toBeInTheDocument();
+
+    expect(
+      await screen.findByTestId("project-card-preview-popover", undefined, {
+        timeout: 1000,
+      })
+    ).toBeInTheDocument();
+  });
+
+  it("opens the preview popover when keyboard focus lands on the trigger", async () => {
+    render(
+      <ProjectCard
+        project={buildProject()}
+        rank={1}
+        screenshotUrl="https://cdn.example.com/shot.png"
+      />
+    );
+    fireEvent.focus(getDesktopTrigger());
+
+    expect(
+      await screen.findByTestId("project-card-preview-popover", undefined, {
+        timeout: 1000,
+      })
+    ).toBeInTheDocument();
+  });
+
+  it("closes the preview popover when focus leaves the trigger", async () => {
+    render(
+      <ProjectCard
+        project={buildProject()}
+        rank={1}
+        screenshotUrl="https://cdn.example.com/shot.png"
+      />
+    );
+    const trigger = getDesktopTrigger();
+    fireEvent.focus(trigger);
+    await screen.findByTestId("project-card-preview-popover", undefined, {
+      timeout: 1000,
+    });
+
+    fireEvent.blur(trigger);
+    await waitFor(
+      () =>
+        expect(
+          screen.queryByTestId("project-card-preview-popover")
+        ).not.toBeInTheDocument(),
+      { timeout: 1000 }
+    );
   });
 });
 

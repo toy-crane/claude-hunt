@@ -1,5 +1,10 @@
 import type { ProjectWithVoteCount } from "@entities/vote";
 import { cn } from "@shared/lib/utils";
+import {
+  HoverCard,
+  HoverCardContent,
+  HoverCardTrigger,
+} from "@shared/ui/hover-card";
 import Image from "next/image";
 import { RankDot, RankSlot } from "./rank-badge";
 
@@ -115,32 +120,54 @@ export function ProjectCard({
           </span>
         </div>
 
-        <a
-          className="relative block h-10 w-16 overflow-visible"
-          data-testid="project-card-preview"
-          href={projectUrl}
-          rel="noopener noreferrer"
-          target="_blank"
-        >
+        <HoverCard closeDelay={150} openDelay={150}>
+          <HoverCardTrigger asChild>
+            <a
+              className="relative block h-10 w-16 overflow-visible"
+              data-testid="project-card-preview"
+              href={projectUrl}
+              rel="noopener noreferrer"
+              target="_blank"
+            >
+              {screenshotUrl ? (
+                <Image
+                  alt={`${project.title ?? "프로젝트"} 스크린샷`}
+                  className="h-10 w-16 origin-left object-cover transition-transform duration-200 ease-out group-hover/row:scale-[1.08]"
+                  data-testid="project-card-thumb"
+                  height={40}
+                  priority={priority}
+                  sizes="64px"
+                  src={screenshotUrl}
+                  width={64}
+                />
+              ) : (
+                <span
+                  aria-hidden="true"
+                  className="block h-10 w-16 bg-muted"
+                  data-testid="project-card-thumb"
+                />
+              )}
+            </a>
+          </HoverCardTrigger>
           {screenshotUrl ? (
-            <Image
-              alt={`${project.title ?? "프로젝트"} 스크린샷`}
-              className="h-10 w-16 origin-left object-cover transition-transform duration-200 ease-out group-hover/row:scale-[1.08]"
-              data-testid="project-card-thumb"
-              height={40}
-              priority={priority}
-              sizes="64px"
-              src={screenshotUrl}
-              width={64}
-            />
-          ) : (
-            <span
-              aria-hidden="true"
-              className="block h-10 w-16 bg-muted"
-              data-testid="project-card-thumb"
-            />
-          )}
-        </a>
+            <HoverCardContent
+              align="start"
+              className="data-open:zoom-in-[0.97] data-closed:zoom-out-[0.97] w-auto border-border bg-popover p-0 duration-200 ease-out data-closed:duration-150 data-closed:ease-in"
+              side="right"
+              sideOffset={12}
+            >
+              <Image
+                alt={`${project.title ?? "프로젝트"} 스크린샷 미리보기`}
+                className="block h-auto w-[320px] object-cover"
+                data-testid="project-card-preview-popover"
+                height={200}
+                sizes="320px"
+                src={screenshotUrl}
+                width={320}
+              />
+            </HoverCardContent>
+          ) : null}
+        </HoverCard>
 
         <div className="flex min-w-0 flex-col gap-0.5">
           <a
