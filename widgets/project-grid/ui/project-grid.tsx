@@ -2,6 +2,7 @@ import type { ProjectWithVoteCount } from "@entities/vote";
 import { ViewTransition } from "react";
 import { EmptyState } from "./empty-state";
 import { ProjectCard } from "./project-card";
+import { RankSlot } from "./rank-badge";
 
 export interface ProjectGridProps {
   /**
@@ -25,8 +26,6 @@ export interface ProjectGridProps {
   viewerUserId?: string | null;
 }
 
-const HEADER_GRID_COLS = "grid-cols-[52px_72px_minmax(0,1fr)_130px_auto]";
-
 export function ProjectGrid({
   cohortLabelsById,
   projects,
@@ -42,21 +41,24 @@ export function ProjectGrid({
   return (
     <section
       aria-label="프로젝트 목록"
-      className="border border-border"
+      className="border border-border min-[720px]:grid min-[720px]:grid-cols-[52px_72px_minmax(0,1fr)_130px_auto]"
       data-testid="project-grid"
     >
       <div
         aria-hidden="true"
-        className={`hidden gap-4 bg-muted px-5 py-2 font-mono text-[10px] text-muted-foreground uppercase tracking-[0.08em] min-[720px]:grid ${HEADER_GRID_COLS}`}
+        className="col-span-full hidden grid-cols-subgrid gap-4 bg-muted px-5 py-2 font-mono text-[10px] text-muted-foreground uppercase tracking-[0.08em] min-[720px]:grid"
         data-testid="project-grid-header"
       >
-        <div>RANK</div>
+        <div className="flex items-center gap-1.5">
+          <RankSlot />
+          <span>RANK</span>
+        </div>
         <div>PREVIEW</div>
         <div>NAME</div>
         <div>AUTHOR</div>
-        <div className="justify-self-end">VOTES</div>
+        <div>VOTES</div>
       </div>
-      <ul className="flex flex-col divide-y divide-border">
+      <ul className="flex flex-col min-[720px]:col-span-full min-[720px]:grid min-[720px]:grid-cols-subgrid [&>li:not(:first-of-type)]:border-border [&>li:not(:first-of-type)]:border-t">
         {projects.map((project, index) => {
           const rank = index + 1;
           const cohortLabel = project.cohort_id

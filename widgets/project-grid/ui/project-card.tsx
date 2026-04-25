@@ -1,7 +1,7 @@
 import type { ProjectWithVoteCount } from "@entities/vote";
 import { cn } from "@shared/lib/utils";
 import Image from "next/image";
-import { RankDot } from "./rank-badge";
+import { RankDot, RankSlot } from "./rank-badge";
 
 export interface ProjectCardProps {
   /**
@@ -36,8 +36,6 @@ export interface ProjectCardProps {
    */
   viewerUserId?: string | null;
 }
-
-const ROW_GRID_COLS = "grid-cols-[52px_72px_minmax(0,1fr)_130px_auto]";
 
 const MINUTE_MS = 60_000;
 const HOUR_MS = 60 * MINUTE_MS;
@@ -97,28 +95,20 @@ export function ProjectCard({
 
   return (
     <li
-      className="group/row font-mono transition-colors hover:bg-muted"
+      className="group/row font-mono transition-colors hover:bg-muted min-[720px]:col-span-full min-[720px]:grid min-[720px]:grid-cols-subgrid"
       data-testid="project-card"
     >
       {/* ─── Desktop row (≥ 720 px) ────────────────────────────── */}
       <div
-        className={cn(
-          "hidden items-center gap-4 px-5 py-3.5 min-[720px]:grid",
-          ROW_GRID_COLS
-        )}
+        className="col-span-full hidden grid-cols-subgrid items-center gap-4 px-5 py-3.5 min-[720px]:grid"
         data-testid="project-card-desktop"
       >
-        <div className="relative flex items-center">
-          {/* Rank dot floats decoratively to the left of the column so
-              the number (and the "RANK" header) stays at col-left. */}
-          <RankDot
-            className="absolute top-1/2 -left-3.5 -translate-y-1/2"
-            rank={rank}
-          />
+        <div className="flex items-center gap-1.5">
+          <RankSlot rank={rank} />
           <span
             className={cn(
               "font-semibold text-xs tabular-nums",
-              rank > 3 && "text-muted-foreground"
+              !hasRankDot && "text-muted-foreground"
             )}
           >
             {rankLabel}
@@ -170,7 +160,7 @@ export function ProjectCard({
           <span className="block truncate text-xs">{author}</span>
         </div>
 
-        <div className="flex items-center gap-1.5 justify-self-end">
+        <div className="flex items-center gap-1.5">
           {ownerSlot}
           {voteSlot}
         </div>
