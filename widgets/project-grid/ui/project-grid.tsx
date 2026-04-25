@@ -39,6 +39,10 @@ export function ProjectGrid({
   }
 
   return (
+    // Section is the desktop grid host. Horizontal padding lives here so
+    // every column track is laid out inside the padded area; bg-bearing
+    // children (header `bg-muted`, row `hover:bg-muted`) use `-mx-5 px-5`
+    // to break back out to the section edge for full-width fill.
     <section
       aria-label="프로젝트 목록"
       className="border border-border min-[720px]:grid min-[720px]:grid-cols-[52px_72px_minmax(0,1fr)_130px_auto] min-[720px]:gap-x-4 min-[720px]:px-5"
@@ -58,7 +62,7 @@ export function ProjectGrid({
         <div>AUTHOR</div>
         <div>VOTES</div>
       </div>
-      <ul className="flex flex-col min-[720px]:col-span-full min-[720px]:grid min-[720px]:grid-cols-subgrid [&>li:not(:first-of-type)]:border-border [&>li:not(:first-of-type)]:border-t">
+      <ul className="flex flex-col divide-y divide-border min-[720px]:col-span-full min-[720px]:grid min-[720px]:grid-cols-subgrid">
         {projects.map((project, index) => {
           const rank = index + 1;
           const cohortLabel = project.cohort_id
