@@ -158,7 +158,7 @@ export function ProjectCard({
             >
               <Image
                 alt={`${project.title ?? "프로젝트"} 스크린샷 미리보기`}
-                className="block h-auto w-[320px] object-cover"
+                className="block h-[200px] w-[320px] object-cover"
                 data-testid="project-card-preview-popover"
                 height={200}
                 sizes="320px"

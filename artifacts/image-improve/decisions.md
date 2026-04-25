@@ -34,3 +34,21 @@
 - 시간 정밀도(150ms 경계)를 고집하면 테스트가 React 내부 스케줄링과 결합돼 깨지기 쉬움. 회귀 보호 목적은 "openDelay > 0" 만 보장하면 충분.
 **Harness Signal**: plan-reviewer가 "X ms 시점 정밀 assertion"을 요구하는 패턴은 jsdom + React 19 + Radix 조합에서 자주 비용이 큼. `draft-plan` 스킬 또는 `test-driven-development` 스킬에 "타이밍 정밀도가 spec의 본질이 아니면 동기-부재 + 비동기-존재 패턴을 우선 권장" 가이드를 추가할 만함.
 **Result**: Success — 24/24 unit tests pass.
+
+---
+
+## Reviewer 결과 (Step 5)
+
+**When**: Step 5, Evaluation Loop
+**Decision**: 3개 reviewer 결과를 다음과 같이 처리:
+- **ui-quality-reviewer**: PASS with 3 Warnings.
+  - W1 (NAME 컬럼 가림): 사용자 판단 항목으로 surface. Task 4 evidence에서 이미 노출됨.
+  - **W2 (높이 320×240, spec=320×200): 즉시 수정.** `h-auto` → `h-[200px]`로 변경해 spec과 일치.
+  - W3 (다크모드 팝오버 경계 invisibility): 사용자 판단 항목으로 surface. 추가 className 오버라이드가 필요한데 design-reviewer 우려와 충돌해 자동 수정 보류.
+  - 3개 Advisory(border-radius, 캡션, 애니메이션 클래스 충돌)는 Step 6 보고에서 surface.
+- **design-reviewer**: FAIL(conditional) — className 오버라이드가 shadcn-guard 4단계(user confirmation) 충족하지만 literal rule엔 위반. Reviewer 권장은 `ProjectScreenshotHoverCardContent` wrapper 추출.
+  - **즉시 수정 보류** — 사용자 사전 승인으로 escalation 충족됨. Wrapper 추출은 코드 중복 없는 단일 호출처에 대한 과한 추상화로 판단. follow-up으로 surface.
+- **react-reviewer**: PASS — Critical/High 차단 없음. 1 HIGH advisory(render prop boundary)는 본 feature 도입이 아닌 기존 패턴. 2 Medium/Low advisory(테스트 setTimeout 슬립, fireEvent/userEvent 일관성)는 follow-up으로 surface.
+**Why**: 명백한 spec 위반(W2 높이)만 즉시 수정. UX 판단(W1 컬럼 가림)과 다크모드 가시성(W3)은 사용자 디자인 의도 영역 — 사용자에게 surface해 다음 라운드 결정으로 미룸. design-reviewer FAIL은 user confirmation으로 이미 승인된 boundary case이므로 wrapper 추출은 follow-up에 양보.
+**Harness Signal**: 사용자 prior approval이 shadcn-guard step 4를 충족했는지 명시적으로 인식하는 가이드가 design-reviewer에 추가되면 좋음. 본 사례처럼 "literal violation but conditionally approved"가 흔할 수 있음.
+**Result**: Pending → Mixed — W2 즉시 수정 후 30/30 unit tests pass. 나머지는 사용자 판단으로 이전.
