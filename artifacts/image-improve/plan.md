@@ -94,9 +94,9 @@ None.
 - **Implementation targets**:
   - `widgets/project-grid/ui/project-card.test.tsx` (수정)
 - **Acceptance**:
-  - [ ] `screenshotUrl=""`로 렌더하면, 호버 후에도 `project-card-preview-popover` testid가 결코 DOM에 등장하지 않는다 (waitFor + 충분한 timeout)
-  - [ ] 빈 썸네일 트리거 `<a>` 요소는 여전히 `href={project_url}`과 `target="_blank"`을 가진다
-  - [ ] **팝오버가 열린 상태에서도** 트리거 `<a>`의 `href={project_url}`과 `target="_blank"`이 유지된다 (호버 후 팝오버 표시 → 트리거 링크 속성 재검증) — Scenario 5의 신규 조건. 기존 `opens the project URL in new tabs from every link` 테스트(line 118)는 정적 상태만 검증하므로 보완임
+  - [x] `screenshotUrl=""`로 렌더하면, 호버 후 400ms 경과해도 `project-card-preview-popover` testid가 등장하지 않는다
+  - [x] 빈 썸네일 트리거 `<a>` 요소는 `href={project_url}`과 `target="_blank"`을 유지한다
+  - [x] 팝오버가 열린 상태에서도 트리거 `<a>`의 `href={project_url}`과 `target="_blank"`이 유지된다
 - **Verification**:
   - `bun run test:unit -- project-card`
 

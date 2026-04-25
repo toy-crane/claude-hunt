@@ -403,6 +403,59 @@ describe("ProjectCard — desktop hover preview popover", () => {
     );
   });
 
+  it("does not render a popover when the project has no screenshot", async () => {
+    const user = userEvent.setup();
+    render(
+      <ProjectCard
+        project={buildProject({ screenshot_path: null })}
+        rank={1}
+        screenshotUrl=""
+      />
+    );
+    await user.hover(getDesktopTrigger());
+
+    await new Promise((resolve) => setTimeout(resolve, 400));
+
+    expect(
+      screen.queryByTestId("project-card-preview-popover")
+    ).not.toBeInTheDocument();
+  });
+
+  it("keeps the trigger link href and target intact for empty-screenshot rows", () => {
+    render(
+      <ProjectCard
+        project={buildProject({
+          screenshot_path: null,
+          project_url: "https://myapp.com",
+        })}
+        rank={1}
+        screenshotUrl=""
+      />
+    );
+    const trigger = getDesktopTrigger();
+    expect(trigger).toHaveAttribute("href", "https://myapp.com");
+    expect(trigger).toHaveAttribute("target", "_blank");
+  });
+
+  it("keeps the trigger link href and target intact while the popover is open", async () => {
+    const user = userEvent.setup();
+    render(
+      <ProjectCard
+        project={buildProject({ project_url: "https://myapp.com" })}
+        rank={1}
+        screenshotUrl="https://cdn.example.com/shot.png"
+      />
+    );
+    const trigger = getDesktopTrigger();
+    await user.hover(trigger);
+    await screen.findByTestId("project-card-preview-popover", undefined, {
+      timeout: 1000,
+    });
+
+    expect(trigger).toHaveAttribute("href", "https://myapp.com");
+    expect(trigger).toHaveAttribute("target", "_blank");
+  });
+
   it("keeps the popover open when the cursor moves from the trigger onto the popover content", async () => {
     const user = userEvent.setup();
     render(
