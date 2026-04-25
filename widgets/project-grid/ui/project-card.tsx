@@ -100,7 +100,7 @@ export function ProjectCard({
     >
       {/* ─── Desktop row (≥ 720 px) ────────────────────────────── */}
       <div
-        className="col-span-full hidden grid-cols-subgrid items-center gap-4 px-5 py-3.5 min-[720px]:grid"
+        className="col-span-full hidden grid-cols-subgrid items-center px-5 py-3.5 min-[720px]:grid"
         data-testid="project-card-desktop"
       >
         <div className="flex items-center gap-1.5">
