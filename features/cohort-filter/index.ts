@@ -1,2 +1,2 @@
-export type { CohortDropdownProps } from "./ui/cohort-dropdown";
-export { CohortDropdown } from "./ui/cohort-dropdown";
+export type { CohortChipsProps } from "./ui/cohort-chips";
+export { CohortChips } from "./ui/cohort-chips";

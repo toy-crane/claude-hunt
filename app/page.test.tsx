@@ -1,6 +1,6 @@
 import type { Cohort } from "@entities/cohort";
 import { createMockSupabaseClient } from "@shared/lib/test-utils";
-import { render, screen } from "@testing-library/react";
+import { render } from "@testing-library/react";
 import type { ProjectGridRow } from "@widgets/project-grid";
 import { vi } from "vitest";
 
@@ -27,23 +27,19 @@ vi.mock("next/navigation", () => ({
 
 // ProjectBoard is a client component; stub it so we can assert the props
 // passed from the server page without rendering the grid tree.
-const boardMock = vi.fn(
-  (_props: {
-    cohorts: Cohort[];
-    initialCohortId: string | null;
-    isAuthenticated: boolean;
-    projects: unknown[];
-    viewerUserId: string | null;
-  }) => <div data-testid="project-board-stub" />
-);
+interface BoardProps {
+  cohorts: Cohort[];
+  initialCohortId: string | null;
+  isAuthenticated: boolean;
+  projects: unknown[];
+  viewerCohortId: string | null;
+  viewerUserId: string | null;
+}
+const boardMock = vi.fn((_props: BoardProps) => (
+  <div data-testid="project-board-stub" />
+));
 vi.mock("./_components/project-board", () => ({
-  ProjectBoard: (props: {
-    cohorts: Cohort[];
-    initialCohortId: string | null;
-    isAuthenticated: boolean;
-    projects: unknown[];
-    viewerUserId: string | null;
-  }) => boardMock(props),
+  ProjectBoard: (props: BoardProps) => boardMock(props),
 }));
 
 const fetchCohortsMock = vi.fn<() => Promise<Cohort[]>>();
@@ -162,17 +158,20 @@ describe("home page", () => {
     );
   });
 
-  it("renders the SubmitDialog trigger for signed-out visitors", async () => {
+  it("passes isAuthenticated=false and viewerCohortId=null to ProjectBoard for signed-out visitors", async () => {
     profileSingle.mockResolvedValue({ data: null, error: null });
 
     await renderPage();
 
-    const trigger = screen.getByTestId("submit-dialog-stub");
-    expect(trigger).toHaveAttribute("data-authenticated", "no");
-    expect(trigger).toHaveAttribute("data-cohort-id", "");
+    expect(boardMock).toHaveBeenCalledWith(
+      expect.objectContaining({
+        isAuthenticated: false,
+        viewerCohortId: null,
+      })
+    );
   });
 
-  it("renders the SubmitDialog trigger for signed-in students with a cohort", async () => {
+  it("passes isAuthenticated=true and the viewer's cohortId for signed-in students with a cohort", async () => {
     vi.mocked(mockClient.auth.getUser).mockResolvedValueOnce({
       data: { user: { id: "user-1" } },
       error: null,
@@ -184,12 +183,15 @@ describe("home page", () => {
 
     await renderPage();
 
-    const trigger = screen.getByTestId("submit-dialog-stub");
-    expect(trigger).toHaveAttribute("data-authenticated", "yes");
-    expect(trigger).toHaveAttribute("data-cohort-id", "cohort-1");
+    expect(boardMock).toHaveBeenCalledWith(
+      expect.objectContaining({
+        isAuthenticated: true,
+        viewerCohortId: "cohort-1",
+      })
+    );
   });
 
-  it("renders the SubmitDialog trigger for signed-in students without a cohort", async () => {
+  it("passes isAuthenticated=true and viewerCohortId=null for signed-in students without a cohort", async () => {
     vi.mocked(mockClient.auth.getUser).mockResolvedValueOnce({
       data: { user: { id: "user-2" } },
       error: null,
@@ -201,8 +203,11 @@ describe("home page", () => {
 
     await renderPage();
 
-    const trigger = screen.getByTestId("submit-dialog-stub");
-    expect(trigger).toHaveAttribute("data-authenticated", "yes");
-    expect(trigger).toHaveAttribute("data-cohort-id", "");
+    expect(boardMock).toHaveBeenCalledWith(
+      expect.objectContaining({
+        isAuthenticated: true,
+        viewerCohortId: null,
+      })
+    );
   });
 });

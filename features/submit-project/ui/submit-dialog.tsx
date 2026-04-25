@@ -1,5 +1,6 @@
 "use client";
 
+import { RiAddLine } from "@remixicon/react";
 import { Button } from "@shared/ui/button";
 import {
   Dialog,
@@ -31,7 +32,10 @@ export function SubmitDialog({ isAuthenticated, cohortId }: SubmitDialogProps) {
   if (!isAuthenticated) {
     return (
       <Button asChild>
-        <Link href="/login">프로젝트 제출</Link>
+        <Link href="/login">
+          <RiAddLine data-icon="inline-start" />
+          <span>프로젝트 제출</span>
+        </Link>
       </Button>
     );
   }
@@ -44,7 +48,10 @@ export function SubmitDialog({ isAuthenticated, cohortId }: SubmitDialogProps) {
   return (
     <Dialog onOpenChange={setOpen} open={open}>
       <DialogTrigger asChild>
-        <Button data-testid="submit-project-trigger">프로젝트 제출</Button>
+        <Button data-testid="submit-project-trigger">
+          <RiAddLine data-icon="inline-start" />
+          <span>프로젝트 제출</span>
+        </Button>
       </DialogTrigger>
       <DialogContent>
         <DialogHeader>

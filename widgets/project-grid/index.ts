@@ -5,4 +5,6 @@ export type {
 export { ProjectCard } from "./ui/project-card";
 export type { ProjectGridProps } from "./ui/project-grid";
 export { ProjectGrid } from "./ui/project-grid";
-export { RankBadge } from "./ui/rank-badge";
+export type { PromptLineProps } from "./ui/prompt-line";
+export { PromptLine } from "./ui/prompt-line";
+export { RankDot } from "./ui/rank-badge";

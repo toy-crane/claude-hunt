@@ -7,7 +7,7 @@ interface LogoProps {
   className?: string;
 }
 
-const ACCENT = "text-[#c15f3c] dark:text-[#e88a67]";
+const ACCENT = "text-[var(--accent-terracotta)]";
 
 export function Logo({ blink = false, className }: LogoProps) {
   return (

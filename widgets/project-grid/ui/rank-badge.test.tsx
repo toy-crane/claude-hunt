@@ -1,20 +1,74 @@
 import { render, screen } from "@testing-library/react";
 import { describe, expect, it } from "vitest";
-import { RankBadge } from "./rank-badge";
+import { RankDot, RankSlot } from "./rank-badge";
 
-describe("RankBadge", () => {
-  it.each([
-    [1, "1st"],
-    [2, "2nd"],
-    [3, "3rd"],
-  ])("renders the label and dot for rank %s", (rank, label) => {
-    render(<RankBadge rank={rank} />);
-    expect(screen.getByText(label)).toBeInTheDocument();
-    expect(screen.getByTestId("rank-dot")).toBeInTheDocument();
+describe("RankSlot", () => {
+  it("renders the colored RankDot for ranks 1–3", () => {
+    for (const rank of [1, 2, 3]) {
+      const { unmount } = render(<RankSlot rank={rank} />);
+      const dot = screen.getByTestId("rank-dot");
+      expect(dot).toHaveAttribute("data-rank", String(rank));
+      unmount();
+    }
   });
 
-  it.each([0, 4, 5, 99, -1])("renders nothing for rank %s", (rank) => {
-    const { container } = render(<RankBadge rank={rank} />);
-    expect(container).toBeEmptyDOMElement();
+  it("renders an invisible 6 px placeholder for ranks 4+ and when no rank is supplied", () => {
+    const cases = [{ rank: 4 }, { rank: 99 }, {}];
+    for (const props of cases) {
+      const { container, unmount } = render(<RankSlot {...props} />);
+      // No dot — the slot reserves the same horizontal space as a dot.
+      expect(screen.queryByTestId("rank-dot")).toBeNull();
+      const placeholder = container.firstChild as HTMLElement;
+      expect(placeholder).not.toBeNull();
+      expect(placeholder.className).toContain("size-1.5");
+      expect(placeholder.getAttribute("aria-hidden")).toBe("true");
+      unmount();
+    }
+  });
+});
+
+describe("RankDot", () => {
+  it("renders nothing for ranks outside 1–3", () => {
+    const { container: zero } = render(<RankDot rank={0} />);
+    expect(zero.firstChild).toBeNull();
+
+    const { container: four } = render(<RankDot rank={4} />);
+    expect(four.firstChild).toBeNull();
+
+    const { container: hundred } = render(<RankDot rank={100} />);
+    expect(hundred.firstChild).toBeNull();
+  });
+
+  it("binds rank 1 to the --term-rank-1 terminal token with an amber fallback", () => {
+    render(<RankDot rank={1} />);
+    const dot = screen.getByTestId("rank-dot");
+    expect(dot.className).toContain("var(--term-rank-1,#f59e0b)");
+    expect(dot).toHaveAttribute("data-rank", "1");
+  });
+
+  it("binds rank 2 to the --term-rank-2 terminal token with a zinc fallback", () => {
+    render(<RankDot rank={2} />);
+    const dot = screen.getByTestId("rank-dot");
+    expect(dot.className).toContain("var(--term-rank-2,#71717a)");
+    expect(dot).toHaveAttribute("data-rank", "2");
+  });
+
+  it("binds rank 3 to the --term-rank-3 terminal token with an orange fallback", () => {
+    render(<RankDot rank={3} />);
+    const dot = screen.getByTestId("rank-dot");
+    expect(dot.className).toContain("var(--term-rank-3,#c2410c)");
+    expect(dot).toHaveAttribute("data-rank", "3");
+  });
+
+  it("does not render any text label (no '1st', '2nd', '3rd')", () => {
+    const { container } = render(<RankDot rank={1} />);
+    expect(container.textContent).toBe("");
+  });
+
+  it("is a 6 px round element (size-1.5 rounded-full)", () => {
+    render(<RankDot rank={1} />);
+    const dot = screen.getByTestId("rank-dot");
+    expect(dot.className).toContain("size-1.5");
+    expect(dot.className).toContain("rounded-full");
   });
 });

@@ -64,18 +64,8 @@ describe("home page (/)", () => {
     expect(screen.getByRole("contentinfo")).toBeInTheDocument();
   });
 
-  it("renders the Korean heading and subheading", async () => {
-    fetchViewerMock.mockResolvedValue(null);
-
-    const { default: Page } = await import("../page");
-    const jsx = await Page({ searchParams: Promise.resolve({}) });
-    render(jsx);
-
-    expect(
-      screen.getByRole("heading", { name: "프로젝트 보드", level: 1 })
-    ).toBeInTheDocument();
-    expect(
-      screen.getByText("마음에 드는 프로젝트에 응원을 보내주세요.")
-    ).toBeInTheDocument();
-  });
+  // The "프로젝트 보드" heading + subtitle now live inside ProjectBoard
+  // (the client-side board owns them so the subtitle can reflect the
+  // filtered project count). Corresponding assertions live in
+  // `app/_components/project-board.test.tsx`.
 });

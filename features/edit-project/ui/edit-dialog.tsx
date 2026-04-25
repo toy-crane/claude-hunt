@@ -5,6 +5,7 @@ import {
   MAX_TITLE_LENGTH,
   type Project,
 } from "@entities/project";
+import { RiPencilLine } from "@remixicon/react";
 import { uploadScreenshot } from "@shared/lib/screenshot-upload";
 import { Button } from "@shared/ui/button";
 import {
@@ -22,11 +23,19 @@ import { Textarea } from "@shared/ui/textarea";
 import { useId, useState } from "react";
 import { editProject } from "../api/actions";
 
+export type EditDialogVariant = "default" | "icon";
+
 export interface EditDialogProps {
   project: Pick<Project, "id" | "title" | "tagline" | "project_url">;
+  /**
+   * Trigger appearance. `"default"` renders the labeled "수정" button;
+   * `"icon"` renders a 28 px square icon-only button with the same
+   * dialog behavior (used inside the terminal row).
+   */
+  variant?: EditDialogVariant;
 }
 
-export function EditDialog({ project }: EditDialogProps) {
+export function EditDialog({ project, variant = "default" }: EditDialogProps) {
   const titleId = useId();
   const taglineId = useId();
   const urlId = useId();
@@ -86,9 +95,25 @@ export function EditDialog({ project }: EditDialogProps) {
   return (
     <Dialog onOpenChange={setOpen} open={open}>
       <DialogTrigger asChild>
-        <Button data-testid="edit-project-trigger" size="sm" variant="outline">
-          수정
-        </Button>
+        {variant === "icon" ? (
+          <Button
+            aria-label="프로젝트 편집"
+            className="size-7"
+            data-testid="edit-project-trigger"
+            size="icon"
+            variant="outline"
+          >
+            <RiPencilLine className="size-3.5" />
+          </Button>
+        ) : (
+          <Button
+            data-testid="edit-project-trigger"
+            size="sm"
+            variant="outline"
+          >
+            수정
+          </Button>
+        )}
       </DialogTrigger>
       <DialogContent>
         <DialogHeader>

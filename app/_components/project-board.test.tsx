@@ -3,20 +3,37 @@ import { act, render, screen } from "@testing-library/react";
 import type { ProjectGridRow } from "@widgets/project-grid";
 import { vi } from "vitest";
 
-// Capture the onValueChange callback that ProjectBoard passes to CohortDropdown
+// Capture the onValueChange callback and props that ProjectBoard passes
+// to CohortChips so tests can drive filtering and assert forwarded props.
 let capturedOnValueChange: ((id: string | null) => void) | undefined;
+let capturedChipsProps:
+  | {
+      allCount: number;
+      counts: Record<string, number>;
+      value: string | null;
+    }
+  | undefined;
 
 vi.mock("@features/cohort-filter", () => ({
-  CohortDropdown: ({
-    value,
+  CohortChips: ({
+    allCount,
+    counts,
     onValueChange,
+    value,
   }: {
-    value: string | null;
+    allCount: number;
+    counts: Record<string, number>;
     onValueChange: (id: string | null) => void;
+    value: string | null;
   }) => {
     capturedOnValueChange = onValueChange;
+    capturedChipsProps = { allCount, counts, value };
     return (
-      <div data-testid="cohort-dropdown-stub" data-value={value ?? "__all__"} />
+      <div
+        data-all-count={allCount}
+        data-testid="cohort-chips-stub"
+        data-value={value ?? "__all__"}
+      />
     );
   },
 }));
@@ -47,6 +64,24 @@ vi.mock("@features/edit-project", () => ({
 }));
 vi.mock("@features/delete-project", () => ({
   DeleteButton: () => null,
+}));
+vi.mock("@features/submit-project", () => ({
+  SubmitDialog: ({
+    cohortId,
+    isAuthenticated,
+  }: {
+    cohortId: string | null;
+    isAuthenticated: boolean;
+  }) => (
+    <button
+      data-authenticated={String(isAuthenticated)}
+      data-cohort-id={cohortId ?? ""}
+      data-testid="submit-dialog-stub"
+      type="button"
+    >
+      프로젝트 제출
+    </button>
+  ),
 }));
 
 vi.mock("@shared/api/supabase/server", () => ({
@@ -162,18 +197,68 @@ async function renderBoard(
 describe("ProjectBoard", () => {
   beforeEach(() => {
     vi.clearAllMocks();
-    vi.spyOn(window.history, "replaceState").mockImplementation(vi.fn());
+    // Reset the URL before each test so popstate assertions are deterministic.
+    window.history.replaceState(null, "", "/");
   });
 
   afterEach(() => {
     vi.restoreAllMocks();
   });
 
+  it("forwards allCount and per-cohort counts to CohortChips", async () => {
+    await renderBoard();
+    expect(capturedChipsProps?.allCount).toBe(3);
+    expect(capturedChipsProps?.counts).toEqual({
+      "cohort-a": 2,
+      "cohort-b": 1,
+    });
+    expect(capturedChipsProps?.value).toBeNull();
+  });
+
+  it("renders the Korean H1 and the subtitle with the filtered project count", async () => {
+    await renderBoard();
+    expect(
+      screen.getByRole("heading", { name: "프로젝트 보드", level: 1 })
+    ).toBeInTheDocument();
+    expect(screen.getByTestId("project-board-subtitle")).toHaveTextContent(
+      "3개 프로젝트 · 마음에 드는 곳에 응원을 보내주세요."
+    );
+
+    act(() => capturedOnValueChange?.("cohort-a"));
+    expect(screen.getByTestId("project-board-subtitle")).toHaveTextContent(
+      "2개 프로젝트 · 마음에 드는 곳에 응원을 보내주세요."
+    );
+
+    act(() => capturedOnValueChange?.("cohort-b"));
+    expect(screen.getByTestId("project-board-subtitle")).toHaveTextContent(
+      "1개 프로젝트 · 마음에 드는 곳에 응원을 보내주세요."
+    );
+  });
+
+  it("forwards viewerCohortId + isAuthenticated to the inline SubmitDialog trigger", async () => {
+    capturedOnValueChange = undefined;
+    const { ProjectBoard } = await import("./project-board");
+    render(
+      <ProjectBoard
+        cohorts={cohorts}
+        initialCohortId={null}
+        isAuthenticated={true}
+        projects={allProjects}
+        viewerCohortId="cohort-a"
+        viewerUserId="user-1"
+      />
+    );
+    const submit = screen.getByTestId("submit-dialog-stub");
+    expect(submit).toHaveAttribute("data-authenticated", "true");
+    expect(submit).toHaveAttribute("data-cohort-id", "cohort-a");
+  });
+
   it("shows all projects when no cohort is selected", async () => {
     await renderBoard();
-    expect(screen.getByText("Alpha One")).toBeInTheDocument();
-    expect(screen.getByText("Alpha Two")).toBeInTheDocument();
-    expect(screen.getByText("Beta One")).toBeInTheDocument();
+    // Each row renders the title in both desktop and mobile branches.
+    expect(screen.getAllByText("Alpha One").length).toBeGreaterThanOrEqual(1);
+    expect(screen.getAllByText("Alpha Two").length).toBeGreaterThanOrEqual(1);
+    expect(screen.getAllByText("Beta One").length).toBeGreaterThanOrEqual(1);
   });
 
   it("does not show English 'Filter by cohort' helper text", async () => {
@@ -183,39 +268,88 @@ describe("ProjectBoard", () => {
 
   it("shows only the selected cohort's projects on initial render", async () => {
     await renderBoard({ initialCohortId: "cohort-a" });
-    expect(screen.getByText("Alpha One")).toBeInTheDocument();
-    expect(screen.getByText("Alpha Two")).toBeInTheDocument();
+    expect(screen.getAllByText("Alpha One").length).toBeGreaterThanOrEqual(1);
+    expect(screen.getAllByText("Alpha Two").length).toBeGreaterThanOrEqual(1);
     expect(screen.queryByText("Beta One")).not.toBeInTheDocument();
   });
 
   it("filters to cohort B when onValueChange is called with cohort-b", async () => {
     await renderBoard();
     act(() => capturedOnValueChange?.("cohort-b"));
-    expect(screen.getByText("Beta One")).toBeInTheDocument();
+    expect(screen.getAllByText("Beta One").length).toBeGreaterThanOrEqual(1);
     expect(screen.queryByText("Alpha One")).not.toBeInTheDocument();
   });
 
   it("returns to all projects when onValueChange is called with null", async () => {
     await renderBoard({ initialCohortId: "cohort-a" });
     act(() => capturedOnValueChange?.(null));
-    expect(screen.getByText("Alpha One")).toBeInTheDocument();
-    expect(screen.getByText("Beta One")).toBeInTheDocument();
+    expect(screen.getAllByText("Alpha One").length).toBeGreaterThanOrEqual(1);
+    expect(screen.getAllByText("Beta One").length).toBeGreaterThanOrEqual(1);
   });
 
-  it("calls history.replaceState with ?cohort=<id> when a cohort is selected", async () => {
+  it("calls history.pushState with ?cohort=<id> when a cohort is selected", async () => {
+    const pushSpy = vi.spyOn(window.history, "pushState");
     await renderBoard();
     act(() => capturedOnValueChange?.("cohort-a"));
-    expect(window.history.replaceState).toHaveBeenCalledWith(
-      null,
-      "",
-      "/?cohort=cohort-a"
+    expect(pushSpy).toHaveBeenCalledWith(null, "", "/?cohort=cohort-a");
+  });
+
+  it("renders the prompt line reflecting the current cohort label", async () => {
+    await renderBoard({ initialCohortId: "cohort-a" });
+    expect(screen.getByTestId("prompt-line")).toHaveTextContent(
+      `$ claude-hunt ls --class="LG전자 1기" --sort=votes`
+    );
+
+    act(() => capturedOnValueChange?.(null));
+    expect(screen.getByTestId("prompt-line")).toHaveTextContent(
+      "$ claude-hunt ls --sort=votes"
+    );
+
+    act(() => capturedOnValueChange?.("cohort-b"));
+    expect(screen.getByTestId("prompt-line")).toHaveTextContent(
+      `$ claude-hunt ls --class="LG전자 2기" --sort=votes`
     );
   });
 
-  it("calls history.replaceState without cohort param when null is selected", async () => {
+  it("calls history.pushState without cohort param when null is selected", async () => {
+    const pushSpy = vi.spyOn(window.history, "pushState");
     await renderBoard({ initialCohortId: "cohort-a" });
     act(() => capturedOnValueChange?.(null));
-    expect(window.history.replaceState).toHaveBeenCalledWith(null, "", "/");
+    expect(pushSpy).toHaveBeenCalledWith(null, "", "/");
+  });
+
+  it("restores the selected cohort from the URL on a popstate event", async () => {
+    await renderBoard({ initialCohortId: null });
+    // All three projects visible initially.
+    expect(screen.getAllByText("Alpha One").length).toBeGreaterThanOrEqual(1);
+    expect(screen.getAllByText("Beta One").length).toBeGreaterThanOrEqual(1);
+
+    act(() => {
+      window.history.pushState(null, "", "/?cohort=cohort-a");
+      window.dispatchEvent(new PopStateEvent("popstate"));
+    });
+
+    expect(capturedChipsProps?.value).toBe("cohort-a");
+    expect(screen.getAllByText("Alpha One").length).toBeGreaterThanOrEqual(1);
+    expect(screen.queryByText("Beta One")).not.toBeInTheDocument();
+    expect(screen.getByTestId("project-board-subtitle")).toHaveTextContent(
+      "2개 프로젝트 · 마음에 드는 곳에 응원을 보내주세요."
+    );
+  });
+
+  it("returns to all projects on a popstate event when the URL has no cohort param", async () => {
+    await renderBoard({ initialCohortId: "cohort-a" });
+    // Only alpha projects visible initially.
+    expect(screen.queryByText("Beta One")).not.toBeInTheDocument();
+
+    act(() => {
+      window.history.pushState(null, "", "/");
+      window.dispatchEvent(new PopStateEvent("popstate"));
+    });
+
+    expect(capturedChipsProps?.value).toBeNull();
+    expect(screen.getAllByText("Alpha One").length).toBeGreaterThanOrEqual(1);
+    expect(screen.getAllByText("Beta One").length).toBeGreaterThanOrEqual(1);
   });
 
   it("preserves voted indicator for the correct projects per filter view", async () => {

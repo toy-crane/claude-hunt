@@ -181,6 +181,54 @@ describe("VoteButton (unauthenticated)", () => {
   });
 });
 
+describe("VoteButton (variant='inline')", () => {
+  it("renders a horizontal, square-cornered button with tabular count", () => {
+    render(<VoteButton {...baseProps} variant="inline" voteCount={42} />);
+    const button = screen.getByRole("button");
+    expect(button.className).toContain("flex-row");
+    expect(button.className).toContain("rounded-none");
+    expect(button.className).toContain("font-mono");
+    expect(button.textContent).toContain("42");
+  });
+
+  it("flips to the filled primary fill when voted", () => {
+    render(<VoteButton {...baseProps} alreadyVoted={true} variant="inline" />);
+    const button = screen.getByRole("button");
+    expect(button.className).toContain("bg-primary");
+    expect(button.className).toContain("text-primary-foreground");
+    expect(button).toHaveAttribute("aria-pressed", "true");
+  });
+
+  it("keeps optimistic toggling + server revert behavior in inline variant", async () => {
+    toggleVoteMock.mockResolvedValue({ ok: false });
+    const user = userEvent.setup();
+    render(<VoteButton {...baseProps} variant="inline" voteCount={12} />);
+    const button = screen.getByRole("button");
+
+    await user.click(button);
+
+    expect(button).toHaveAttribute("aria-pressed", "false");
+    expect(button.textContent).toContain("12");
+  });
+
+  it("renders the owner indicator as a compact inline row (no button)", () => {
+    render(
+      <VoteButton
+        {...baseProps}
+        ownedByViewer={true}
+        variant="inline"
+        voteCount={9}
+      />
+    );
+    const indicator = screen
+      .getByText("9")
+      .closest("[data-testid='vote-owner-count']");
+    expect(indicator).not.toBeNull();
+    expect(indicator?.className).toContain("flex-row");
+    expect(indicator?.className).toContain("rounded-none");
+  });
+});
+
 describe("VoteButton (owner)", () => {
   it("renders no control with the vote accessible name when owned by the viewer", () => {
     render(<VoteButton {...baseProps} ownedByViewer={true} voteCount={7} />);

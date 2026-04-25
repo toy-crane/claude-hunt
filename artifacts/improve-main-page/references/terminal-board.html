@@ -1,0 +1,87 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>claude-hunt — Terminal Board</title>
+<link rel="stylesheet" href="shared/colors_and_type.css">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/remixicon@4.5.0/fonts/remixicon.css">
+<style>
+  @keyframes blink { 0%,49%{opacity:1} 50%,100%{opacity:0} }
+  @keyframes slide-in { from { opacity: 0; transform: translateY(4px); } to { opacity: 1; transform: translateY(0); } }
+  *{box-sizing:border-box}
+  html,body{margin:0}
+  body{font-family:var(--font-mono);font-size:12px;color:var(--foreground);background:var(--background)}
+
+  /* ANSI-like terminal palette — IDE dark by default */
+  :root {
+    --term-bg: #0d1117;
+    --term-surface: #161b22;
+    --term-surface-2: #1f262e;
+    --term-border: #30363d;
+    --term-border-soft: #21262d;
+    --term-fg: #e6edf3;
+    --term-dim: #7d8590;
+    --term-muted: #484f58;
+
+    --ansi-red: #ff7b72;
+    --ansi-green: #7ee787;
+    --ansi-yellow: #f0b84c;
+    --ansi-blue: #79c0ff;
+    --ansi-magenta: #d2a8ff;
+    --ansi-cyan: #a5d6ff;
+    --ansi-orange: #ffa657;
+
+    --accent-terracotta: #ff9d7a;
+    --rank-1: #f0b84c;
+    --rank-2: #a1a1aa;
+    --rank-3: #ffa657;
+  }
+
+  body.light {
+    --term-bg: #fafaf9;
+    --term-surface: #ffffff;
+    --term-surface-2: #f4f4f3;
+    --term-border: #e5e5e3;
+    --term-border-soft: #eeeeec;
+    --term-fg: #1a1512;
+    --term-dim: #6b6b68;
+    --term-muted: #a8a8a4;
+
+    --ansi-red: #cf222e;
+    --ansi-green: #1a7f37;
+    --ansi-yellow: #9a6700;
+    --ansi-blue: #0969da;
+    --ansi-magenta: #8250df;
+    --ansi-cyan: #0a6f9e;
+    --ansi-orange: #bc4c00;
+
+    --accent-terracotta: #c15f3c;
+    --rank-1: #f59e0b;
+    --rank-2: #71717a;
+    --rank-3: #c2410c;
+  }
+
+  body { background: var(--term-bg); color: var(--term-fg); }
+  a { color: inherit; }
+  button { font-family: inherit; }
+
+  .sans { font-family: var(--font-sans); }
+  .heading { font-family: var(--font-heading); }
+</style>
+<script src="https://unpkg.com/react@18.3.1/umd/react.development.js" integrity="sha384-hD6/rw4ppMLGNu3tX5cjIb+uRZ7UkRJ6BPkLpg4hAu/6onKUg4lLsHAs9EBPT82L" crossorigin="anonymous"></script>
+<script src="https://unpkg.com/react-dom@18.3.1/umd/react-dom.development.js" integrity="sha384-u6aeetuaXnQ38mYT8rp6sbXaQe3NL9t+IBXmnYxwkUI2Hw4bsp2Wvmx4yRQF1uAm" crossorigin="anonymous"></script>
+<script src="https://unpkg.com/@babel/standalone@7.29.0/babel.min.js" integrity="sha384-m08KidiNqLdpJqLq95G/LEi8Qvjl/xUYll3QILypMoQ65QorJ9Lvtp2RXYGBFj1y" crossorigin="anonymous"></script>
+</head>
+<body>
+<div id="root"></div>
+
+<script type="text/babel" src="shared/data.jsx"></script>
+<script type="text/babel" src="terminal/TerminalBoard.jsx"></script>
+
+<script type="text/babel">
+  const root = ReactDOM.createRoot(document.getElementById('root'));
+  root.render(<TerminalBoard />);
+</script>
+</body>
+</html>

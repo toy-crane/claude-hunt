@@ -18,7 +18,6 @@ vi.mock("next/link", () => ({
 }));
 
 const TERRACOTTA_LIGHT = "#c15f3c";
-const TERRACOTTA_DARK = "#e88a67";
 
 /** WCAG relative luminance. */
 function relativeLuminance(hex: string): number {
@@ -54,13 +53,14 @@ describe("Logo", () => {
     expect(link).toHaveAttribute("href", "/");
   });
 
-  it("applies terracotta light/dark classes to '>' and '_' glyphs", () => {
+  it("binds '>' and '_' glyphs to the --accent-terracotta CSS variable", () => {
     render(<Logo />);
     const prompt = screen.getByText(">");
     const cursor = screen.getByText("_");
+    // `--accent-terracotta` is declared at `:root` (#c15f3c) and `.dark`
+    // (#e88a67) in globals.css, so a single class covers both themes.
     for (const el of [prompt, cursor]) {
-      expect(el.className).toContain(`text-[${TERRACOTTA_LIGHT}]`);
-      expect(el.className).toContain(`dark:text-[${TERRACOTTA_DARK}]`);
+      expect(el.className).toContain("text-[var(--accent-terracotta)]");
     }
   });
 

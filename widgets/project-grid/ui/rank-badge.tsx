@@ -1,29 +1,59 @@
-import { Badge } from "@shared/ui/badge";
+import { cn } from "@shared/lib/utils";
 
-const RANK: Record<1 | 2 | 3, { label: string; dotClass: string }> = {
-  1: { label: "1st", dotClass: "bg-amber-500" },
-  2: { label: "2nd", dotClass: "bg-zinc-400" },
-  3: { label: "3rd", dotClass: "bg-orange-700" },
+const DOT_CLASS: Record<1 | 2 | 3, string> = {
+  1: "bg-[var(--term-rank-1,#f59e0b)]",
+  2: "bg-[var(--term-rank-2,#71717a)]",
+  3: "bg-[var(--term-rank-3,#c2410c)]",
 };
 
-export interface RankBadgeProps {
+export interface RankDotProps {
   className?: string;
+  /** Rank position (1-based). Only ranks 1–3 render a dot; others return null. */
   rank: number;
 }
 
-export function RankBadge({ rank, className }: RankBadgeProps) {
+/**
+ * Small colored dot that marks the top-three ranks on the project list.
+ * Colors bind to the app-level `--term-rank-1/2/3` CSS variables
+ * declared in `app/globals.css`; the arbitrary hex fallbacks keep the
+ * dot visible if rendered before the stylesheet loads.
+ */
+export function RankDot({ rank, className }: RankDotProps) {
   if (rank < 1 || rank > 3) {
     return null;
   }
-  const { label, dotClass } = RANK[rank as 1 | 2 | 3];
+  const colorClass = DOT_CLASS[rank as 1 | 2 | 3];
   return (
-    <Badge className={className} variant="secondary">
-      <span
-        aria-hidden="true"
-        className={`size-1.5 rounded-full ${dotClass}`}
-        data-testid="rank-dot"
-      />
-      {label}
-    </Badge>
+    <span
+      aria-hidden="true"
+      className={cn(
+        "inline-block size-1.5 rounded-full",
+        colorClass,
+        className
+      )}
+      data-rank={rank}
+      data-testid="rank-dot"
+    />
   );
+}
+
+export interface RankSlotProps {
+  /**
+   * Project rank (1-based). Omit to render an invisible placeholder —
+   * used by the grid header so its text starts at the same horizontal
+   * offset as the row digits, regardless of whether any row has a dot.
+   */
+  rank?: number;
+}
+
+/**
+ * Fixed-width slot for the rank indicator. Renders the colored `RankDot`
+ * for top-3 ranks and an invisible placeholder of the same dimensions
+ * otherwise, so the digit that follows always starts at the same x.
+ */
+export function RankSlot({ rank }: RankSlotProps) {
+  if (rank != null && rank >= 1 && rank <= 3) {
+    return <RankDot rank={rank} />;
+  }
+  return <span aria-hidden="true" className="inline-block size-1.5 shrink-0" />;
 }
