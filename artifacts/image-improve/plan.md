@@ -120,10 +120,10 @@ None.
 - **Implementation targets**:
   - `artifacts/image-improve/evidence/task-4-hover-preview.png` (스크린샷)
 - **Acceptance**:
-  - [ ] 로컬 dev (`http://localhost:3000`)의 프로젝트 보드에서 첫 행 썸네일 호버 시, 우측에 320px 폭 팝오버가 등장하고 우측 컬럼(이름·작성자·투표 버튼)을 가리지 않는다
-  - [ ] 빈 스크린샷 행을 호버해도 팝오버가 등장하지 않는다 (시드 데이터에 빈 스크린샷 행이 없으면 본 항목은 N/A로 표기하고 spec scenario 3은 unit test 결과로 갈음)
+  - [~] 로컬 dev에서 첫 행 썸네일 호버 시 우측에 팝오버가 등장 — **위치/사이즈 확인됨**, 단 동일 행 NAME 컬럼과 아래 행 일부를 시각적으로 덮는 것이 발견됨 (`evidence/task-4-hover-preview.md` 참조). 사용자 판단 필요.
+  - [N/A] 빈 스크린샷 행 — 시드 데이터에 빈 스크린샷 행이 없어 unit test로 갈음
 - **Verification**:
-  - Browser MCP로 페이지 진입 → 호버 → 스크린샷 캡처 → `artifacts/image-improve/evidence/`에 저장
+  - 완료: `evidence/task-4-hover-preview.md` (관찰 기록)
 
 ---
 
@@ -135,13 +135,13 @@ None.
 - **References**: 없음 (디자인 판단)
 - **Implementation targets**:
   - `artifacts/image-improve/evidence/task-5-animation.gif` 또는 `.mov` (브라우저 MCP gif_creator 또는 OS 화면 녹화)
-- **Acceptance**:
+- **Acceptance**: (사용자 라이브 검토 대기 — `evidence/task-5-animation.md` 참조)
   - [ ] 호버 → 등장이 부드럽게 보임 (확확 뜨지 않음)
   - [ ] unhover → 사라짐이 자연스러움 (튐 없음)
   - [ ] 행을 빠르게 옮겨다닐 때 깜빡이지 않음 (open/close delay가 노이즈 흡수)
 - **Verification**:
-  - Reviewer: 사용자(toy-crane) — 디자인 판단
-  - Artifact: `artifacts/image-improve/evidence/task-5-animation.gif` (호버 → 머무름 → 이탈을 한 번에 캡처)
+  - Reviewer: 사용자(toy-crane) — 디자인 판단 (라이브 dev 서버에서 직접 호버 확인)
+  - Artifact: `evidence/task-5-animation.gif` (4프레임 시퀀스 — 트랜지션 자체는 라이브 확인 필요)
   - Criterion: 위 3개 Acceptance bullet에 대해 OK/NG 코멘트를 남김
 
 ---
