@@ -1,7 +1,7 @@
 import type { ProjectWithVoteCount } from "@entities/vote";
 import { cn } from "@shared/lib/utils";
 import Image from "next/image";
-import { RankDot, RankSlot } from "./rank-badge";
+import { RankDot } from "./rank-badge";
 
 export interface ProjectCardProps {
   /**
@@ -37,12 +37,7 @@ export interface ProjectCardProps {
   viewerUserId?: string | null;
 }
 
-// Shared with `project-grid.tsx` HEADER_GRID_COLS. Fixed VOTES width
-// (last column) is load-bearing: with `auto`, VOTES sizes to its content
-// which differs between header ("VOTES" text) and rows (vote button),
-// causing the `1fr` NAME column to absorb different amounts and shifting
-// AUTHOR/VOTES columns out of alignment between header and rows.
-const ROW_GRID_COLS = "grid-cols-[52px_72px_minmax(0,1fr)_130px_72px]";
+const ROW_GRID_COLS = "grid-cols-[52px_72px_minmax(0,1fr)_130px_auto]";
 
 const MINUTE_MS = 60_000;
 const HOUR_MS = 60 * MINUTE_MS;
@@ -113,12 +108,17 @@ export function ProjectCard({
         )}
         data-testid="project-card-desktop"
       >
-        <div className="flex items-center gap-1.5">
-          <RankSlot rank={rank} />
+        <div className="relative flex items-center">
+          {/* Rank dot floats decoratively to the left of the column so
+              the number (and the "RANK" header) stays at col-left. */}
+          <RankDot
+            className="absolute top-1/2 -left-3.5 -translate-y-1/2"
+            rank={rank}
+          />
           <span
             className={cn(
               "font-semibold text-xs tabular-nums",
-              !hasRankDot && "text-muted-foreground"
+              rank > 3 && "text-muted-foreground"
             )}
           >
             {rankLabel}

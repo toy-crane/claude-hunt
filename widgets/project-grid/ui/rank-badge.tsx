@@ -36,24 +36,3 @@ export function RankDot({ rank, className }: RankDotProps) {
     />
   );
 }
-
-export interface RankSlotProps {
-  /**
-   * Project rank (1-based). Omit to render an invisible placeholder —
-   * used by the grid header so its text starts at the same horizontal
-   * offset as the row digits, regardless of whether any row has a dot.
-   */
-  rank?: number;
-}
-
-/**
- * Fixed-width slot for the rank indicator. Renders the colored `RankDot`
- * for top-3 ranks and an invisible placeholder of the same dimensions
- * otherwise, so the digit that follows always starts at the same x.
- */
-export function RankSlot({ rank }: RankSlotProps) {
-  if (rank != null && rank >= 1 && rank <= 3) {
-    return <RankDot rank={rank} />;
-  }
-  return <span aria-hidden="true" className="inline-block size-1.5 shrink-0" />;
-}

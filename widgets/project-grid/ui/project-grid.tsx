@@ -2,7 +2,6 @@ import type { ProjectWithVoteCount } from "@entities/vote";
 import { ViewTransition } from "react";
 import { EmptyState } from "./empty-state";
 import { ProjectCard } from "./project-card";
-import { RankSlot } from "./rank-badge";
 
 export interface ProjectGridProps {
   /**
@@ -26,9 +25,7 @@ export interface ProjectGridProps {
   viewerUserId?: string | null;
 }
 
-// Must match `ROW_GRID_COLS` in project-card.tsx. Fixed VOTES width (last
-// column) is load-bearing — see that file for the full rationale.
-const HEADER_GRID_COLS = "grid-cols-[52px_72px_minmax(0,1fr)_130px_72px]";
+const HEADER_GRID_COLS = "grid-cols-[52px_72px_minmax(0,1fr)_130px_auto]";
 
 export function ProjectGrid({
   cohortLabelsById,
@@ -53,13 +50,7 @@ export function ProjectGrid({
         className={`hidden gap-4 bg-muted px-5 py-2 font-mono text-[10px] text-muted-foreground uppercase tracking-[0.08em] min-[720px]:grid ${HEADER_GRID_COLS}`}
         data-testid="project-grid-header"
       >
-        {/* Mirrors the row's rank cell (see project-card.tsx). The invisible
-            `RankSlot` reserves the same 6 px gutter as the dot on top-3
-            rows, so the header text and every row digit share the same x. */}
-        <div className="flex items-center gap-1.5">
-          <RankSlot />
-          <span>RANK</span>
-        </div>
+        <div>RANK</div>
         <div>PREVIEW</div>
         <div>NAME</div>
         <div>AUTHOR</div>
