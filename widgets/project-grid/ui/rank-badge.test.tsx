@@ -1,6 +1,31 @@
 import { render, screen } from "@testing-library/react";
 import { describe, expect, it } from "vitest";
-import { RankDot } from "./rank-badge";
+import { RankDot, RankSlot } from "./rank-badge";
+
+describe("RankSlot", () => {
+  it("renders the colored RankDot for ranks 1–3", () => {
+    for (const rank of [1, 2, 3]) {
+      const { unmount } = render(<RankSlot rank={rank} />);
+      const dot = screen.getByTestId("rank-dot");
+      expect(dot).toHaveAttribute("data-rank", String(rank));
+      unmount();
+    }
+  });
+
+  it("renders an invisible 6 px placeholder for ranks 4+ and when no rank is supplied", () => {
+    const cases = [{ rank: 4 }, { rank: 99 }, {}];
+    for (const props of cases) {
+      const { container, unmount } = render(<RankSlot {...props} />);
+      // No dot — the slot reserves the same horizontal space as a dot.
+      expect(screen.queryByTestId("rank-dot")).toBeNull();
+      const placeholder = container.firstChild as HTMLElement;
+      expect(placeholder).not.toBeNull();
+      expect(placeholder.className).toContain("size-1.5");
+      expect(placeholder.getAttribute("aria-hidden")).toBe("true");
+      unmount();
+    }
+  });
+});
 
 describe("RankDot", () => {
   it("renders nothing for ranks outside 1–3", () => {
