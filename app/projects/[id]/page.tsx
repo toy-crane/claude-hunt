@@ -1,4 +1,5 @@
 import { fetchViewer } from "@shared/api/supabase/viewer";
+import { CommentList, fetchCommentThreads } from "@widgets/comment-list";
 import { Footer } from "@widgets/footer";
 import { Header } from "@widgets/header";
 import { fetchProjectDetail, Hero } from "@widgets/project-detail";
@@ -11,7 +12,11 @@ interface PageProps {
 export default async function Page({ params }: PageProps) {
   const { id } = await params;
   const viewer = await fetchViewer();
-  const project = await fetchProjectDetail(id, viewer?.id ?? null);
+  const viewerId = viewer?.id ?? null;
+  const [project, threads] = await Promise.all([
+    fetchProjectDetail(id, viewerId),
+    fetchCommentThreads(id, viewerId),
+  ]);
   if (!project) {
     notFound();
   }
@@ -23,7 +28,12 @@ export default async function Page({ params }: PageProps) {
         <Hero
           isAuthenticated={Boolean(viewer)}
           project={project}
-          viewerUserId={viewer?.id ?? null}
+          viewerUserId={viewerId}
+        />
+        <CommentList
+          isAuthenticated={Boolean(viewer)}
+          projectId={project.id}
+          threads={threads}
         />
       </main>
       <Footer />
