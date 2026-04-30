@@ -64,10 +64,14 @@ vi.mock("@features/upload-project-images", () => ({
 
 const { SubmitForm } = await import("./submit-form");
 
+const LABEL_TITLE = /제목/;
+const LABEL_TAGLINE = /한 줄 소개/;
+const LABEL_URL = /프로젝트 URL/;
+
 function fillTextFields() {
-  const title = screen.getByLabelText("제목") as HTMLInputElement;
-  const tagline = screen.getByLabelText("한 줄 소개") as HTMLTextAreaElement;
-  const url = screen.getByLabelText("프로젝트 URL") as HTMLInputElement;
+  const title = screen.getByLabelText(LABEL_TITLE) as HTMLInputElement;
+  const tagline = screen.getByLabelText(LABEL_TAGLINE) as HTMLTextAreaElement;
+  const url = screen.getByLabelText(LABEL_URL) as HTMLInputElement;
   fireEvent.change(title, { target: { value: "My App" } });
   fireEvent.change(tagline, { target: { value: "A cool tool" } });
   fireEvent.change(url, { target: { value: "https://myapp.com" } });
