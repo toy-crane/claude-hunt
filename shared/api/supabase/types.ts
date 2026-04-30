@@ -313,6 +313,7 @@ export type Database = {
           author_avatar_url: string | null
           author_display_name: string | null
           cohort_id: string | null
+          cohort_label: string | null
           cohort_name: string | null
           created_at: string | null
           github_url: string | null
