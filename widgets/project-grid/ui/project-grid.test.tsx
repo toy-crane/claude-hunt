@@ -19,7 +19,6 @@ function buildProject(
     cohort_name: "LGE-1",
     tagline: `${overrides.title} tagline`,
     project_url: "https://example.com",
-    screenshot_path: `user-1/${overrides.id}.png`,
     images: [{ path: `user-1/${overrides.id}.png` }],
     primary_image_path: `user-1/${overrides.id}.png`,
     github_url: null,

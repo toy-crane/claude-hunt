@@ -69,19 +69,13 @@ export async function fetchProjects(
 
   const rows = projectsResult.data ?? [];
   const screenshots = supabase.storage.from(SCREENSHOT_BUCKET);
-  return rows.map((row) => {
-    // Prefer the new view-derived primary_image_path. The view's
-    // coalesce shim falls back to the legacy screenshot_path during
-    // the Expand-Contract transition window.
-    const primaryPath = row.primary_image_path ?? row.screenshot_path ?? null;
-    return {
-      ...row,
-      screenshotUrl: primaryPath
-        ? screenshots.getPublicUrl(primaryPath).data.publicUrl
-        : "",
-      viewer_has_voted: row.id != null && votedProjectIds.has(row.id),
-    };
-  });
+  return rows.map((row) => ({
+    ...row,
+    screenshotUrl: row.primary_image_path
+      ? screenshots.getPublicUrl(row.primary_image_path).data.publicUrl
+      : "",
+    viewer_has_voted: row.id != null && votedProjectIds.has(row.id),
+  }));
 }
 
 /**
@@ -108,13 +102,10 @@ export async function fetchTopProjects(
 
   const rows = result.data ?? [];
   const screenshots = supabase.storage.from(SCREENSHOT_BUCKET);
-  return rows.map((row) => {
-    const primaryPath = row.primary_image_path ?? row.screenshot_path ?? null;
-    return {
-      ...row,
-      screenshotUrl: primaryPath
-        ? screenshots.getPublicUrl(primaryPath).data.publicUrl
-        : "",
-    };
-  });
+  return rows.map((row) => ({
+    ...row,
+    screenshotUrl: row.primary_image_path
+      ? screenshots.getPublicUrl(row.primary_image_path).data.publicUrl
+      : "",
+  }));
 }

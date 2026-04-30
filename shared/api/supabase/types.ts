@@ -321,7 +321,6 @@ export type Database = {
           images: Json | null
           primary_image_path: string | null
           project_url: string | null
-          screenshot_path: string | null
           tagline: string | null
           title: string | null
           updated_at: string | null
