@@ -18,7 +18,7 @@ export interface DeleteProjectResult {
  * RLS gates the DELETE, so a spoofed projectId returns 0 rows and
  * surfaces as a forbidden error. Storage removal is best-effort: a
  * missing/cleaned object must not block row deletion. Removes every
- * path in `images[]` plus any remaining `screenshot_path` value.
+ * path in `images[]`.
  */
 export async function deleteProject(
   input: DeleteProjectInput
@@ -36,7 +36,7 @@ export async function deleteProject(
 
   const { data: project } = await supabase
     .from("projects")
-    .select("images, screenshot_path")
+    .select("images")
     .eq("id", projectId)
     .maybeSingle();
 
@@ -63,9 +63,6 @@ export async function deleteProject(
         orphans.add(img.path);
       }
     }
-  }
-  if (project?.screenshot_path) {
-    orphans.add(project.screenshot_path);
   }
   if (orphans.size > 0) {
     await supabase.storage.from(SCREENSHOT_BUCKET).remove([...orphans]);

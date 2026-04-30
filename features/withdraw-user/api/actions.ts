@@ -1,5 +1,6 @@
 "use server";
 
+import type { ProjectImage } from "@entities/project";
 import { createAdminClient } from "@shared/api/supabase/admin";
 import { requireAuth } from "@shared/api/supabase/require-auth";
 import { SCREENSHOT_BUCKET } from "@shared/config/storage";
@@ -22,19 +23,26 @@ export async function withdrawAccount(): Promise<WithdrawAccountResult> {
 
   const { data: projects, error: listError } = await supabase
     .from("projects")
-    .select("screenshot_path")
+    .select("images")
     .eq("user_id", user.id);
 
   if (listError) {
     return { ok: false, error: listError.message };
   }
 
-  const paths = (projects ?? [])
-    .map((row) => row.screenshot_path)
-    .filter((path): path is string => Boolean(path));
+  const paths = new Set<string>();
+  for (const row of projects ?? []) {
+    if (Array.isArray(row.images)) {
+      for (const img of row.images as unknown as ProjectImage[]) {
+        if (img && typeof img.path === "string") {
+          paths.add(img.path);
+        }
+      }
+    }
+  }
 
-  if (paths.length > 0) {
-    await supabase.storage.from(SCREENSHOT_BUCKET).remove(paths);
+  if (paths.size > 0) {
+    await supabase.storage.from(SCREENSHOT_BUCKET).remove([...paths]);
   }
 
   const admin = createAdminClient();

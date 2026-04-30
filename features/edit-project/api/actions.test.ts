@@ -41,15 +41,17 @@ beforeEach(() => {
 });
 
 function stubFrom(options: {
-  currentScreenshotPath?: string | null;
+  currentImagePaths?: string[];
   updateRows?: Array<{ id: string }>;
   updateError?: { message: string };
 }) {
   const maybeSingle = vi.fn().mockResolvedValue({
     data:
-      options.currentScreenshotPath === undefined
+      options.currentImagePaths === undefined
         ? null
-        : { screenshot_path: options.currentScreenshotPath },
+        : {
+            images: options.currentImagePaths.map((path) => ({ path })),
+          },
     error: null,
   });
   const selectEq = vi.fn().mockReturnValue({ maybeSingle });
@@ -108,7 +110,7 @@ describe("editProject server action", () => {
   it("includes the new image array in the update payload", async () => {
     getUser.mockResolvedValue({ data: { user: { id: "u1" } }, error: null });
     const { update } = stubFrom({
-      currentScreenshotPath: "u1/old-shot.webp",
+      currentImagePaths: ["u1/old-shot.webp"],
       updateRows: [{ id: validInput.projectId }],
     });
 
@@ -127,7 +129,7 @@ describe("editProject server action", () => {
   it("removes the previous screenshot from storage after a successful replace", async () => {
     getUser.mockResolvedValue({ data: { user: { id: "u1" } }, error: null });
     stubFrom({
-      currentScreenshotPath: "u1/old-shot.webp",
+      currentImagePaths: ["u1/old-shot.webp"],
       updateRows: [{ id: validInput.projectId }],
     });
 
@@ -157,7 +159,7 @@ describe("editProject server action", () => {
   it("does not remove storage when RLS rejects the update (owner-gated)", async () => {
     getUser.mockResolvedValue({ data: { user: { id: "u1" } }, error: null });
     stubFrom({
-      currentScreenshotPath: "u1/old-shot.webp",
+      currentImagePaths: ["u1/old-shot.webp"],
       updateRows: [],
     });
 
@@ -174,7 +176,7 @@ describe("editProject server action", () => {
   it("still returns ok when storage removal fails (non-blocking cleanup)", async () => {
     getUser.mockResolvedValue({ data: { user: { id: "u1" } }, error: null });
     stubFrom({
-      currentScreenshotPath: "u1/old-shot.webp",
+      currentImagePaths: ["u1/old-shot.webp"],
       updateRows: [{ id: validInput.projectId }],
     });
     storageRemove.mockResolvedValueOnce({

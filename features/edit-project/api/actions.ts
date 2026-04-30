@@ -38,7 +38,7 @@ export async function editProject(
   // Read the current images so we can diff and remove orphans.
   const { data: current } = await supabase
     .from("projects")
-    .select("images, screenshot_path")
+    .select("images")
     .eq("id", input.projectId)
     .maybeSingle();
   const previousPaths = new Set<string>();
@@ -48,9 +48,6 @@ export async function editProject(
         previousPaths.add(img.path);
       }
     }
-  }
-  if (current?.screenshot_path) {
-    previousPaths.add(current.screenshot_path);
   }
 
   const nextPaths = new Set(input.imagePaths);
