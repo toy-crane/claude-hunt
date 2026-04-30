@@ -95,11 +95,8 @@ export function Hero({ project, isAuthenticated, viewerUserId }: HeroProps) {
         <ImageGallery imageUrls={project.imageUrls} title={project.title} />
       ) : null}
 
-      <div
-        className="flex flex-col items-start gap-2"
-        data-testid="project-detail-actions"
-      >
-        <Button asChild className="gap-2">
+      <div className="flex flex-col gap-2" data-testid="project-detail-actions">
+        <Button asChild className="gap-2 self-end" size="lg">
           <a
             href={project.project_url}
             rel="noopener noreferrer"
