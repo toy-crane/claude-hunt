@@ -1,14 +1,10 @@
 "use client";
 
 import { MAX_TAGLINE_LENGTH, MAX_TITLE_LENGTH } from "@entities/project";
+import { type ImageSlot, ImageSlots } from "@features/upload-project-images";
 import { uploadScreenshot } from "@shared/lib/screenshot-upload";
 import { Button } from "@shared/ui/button";
-import {
-  Field,
-  FieldDescription,
-  FieldGroup,
-  FieldLabel,
-} from "@shared/ui/field";
+import { Field, FieldGroup, FieldLabel } from "@shared/ui/field";
 import { Input } from "@shared/ui/input";
 import { Spinner } from "@shared/ui/spinner";
 import { Textarea } from "@shared/ui/textarea";
@@ -34,7 +30,7 @@ export function SubmitForm({ cohortId: _cohortId }: SubmitFormProps) {
   const titleId = useId();
   const taglineId = useId();
   const urlId = useId();
-  const screenshotId = useId();
+  const [images, setImages] = useState<ImageSlot[]>([]);
   const [fieldError, setFieldError] = useState<string | null>(null);
   const [submitError, setSubmitError] = useState<string | null>(null);
   const [submitting, setSubmitting] = useState(false);
@@ -51,36 +47,41 @@ export function SubmitForm({ cohortId: _cohortId }: SubmitFormProps) {
       "tagline"
     ) as HTMLTextAreaElement | null;
     const urlEl = elements.namedItem("projectUrl") as HTMLInputElement | null;
-    const fileEl = elements.namedItem("screenshot") as HTMLInputElement | null;
     const title = titleEl?.value ?? "";
     const tagline = taglineEl?.value ?? "";
     const projectUrl = urlEl?.value ?? "";
-    const screenshot = fileEl?.files?.[0];
 
-    if (!screenshot || screenshot.size === 0) {
-      setFieldError("스크린샷을 첨부해 주세요.");
+    if (images.length === 0) {
+      setFieldError("스크린샷을 1장 이상 첨부해 주세요.");
       return;
     }
 
     setSubmitting(true);
     try {
-      const upload = await uploadScreenshot(screenshot);
-      if (upload.error || !upload.path) {
-        setFieldError(upload.error ?? "업로드에 실패했어요.");
+      // Upload every image in parallel; abort the whole submit on
+      // the first failure so the user can fix and retry.
+      const uploads = await Promise.all(
+        images.map((slot) => uploadScreenshot(slot.file))
+      );
+      const failed = uploads.find((u) => u.error || !u.path);
+      if (failed) {
+        setFieldError(failed.error ?? "업로드에 실패했어요.");
         return;
       }
+      const imagePaths = uploads.map((u) => u.path as string);
 
       const result = await submitProject({
         title,
         tagline,
         projectUrl,
-        screenshotPath: upload.path,
+        imagePaths,
       });
       if (!result.ok) {
         setSubmitError(result.error ?? "프로젝트를 제출할 수 없어요.");
         return;
       }
       form.reset();
+      setImages([]);
       toast.success("프로젝트가 제출되었어요.");
       if (result.projectId) {
         router.push(`/projects/${result.projectId}`);
@@ -137,16 +138,13 @@ export function SubmitForm({ cohortId: _cohortId }: SubmitFormProps) {
         </Field>
 
         <Field>
-          <FieldLabel htmlFor={screenshotId}>스크린샷</FieldLabel>
-          <Input
-            accept="image/jpeg,image/png,image/webp"
+          <FieldLabel>스크린샷</FieldLabel>
+          <ImageSlots
             disabled={submitting}
-            id={screenshotId}
-            name="screenshot"
-            required
-            type="file"
+            onChange={setImages}
+            onError={setFieldError}
+            value={images}
           />
-          <FieldDescription>JPEG, PNG, WebP — 최대 25 MB.</FieldDescription>
         </Field>
       </FieldGroup>
 

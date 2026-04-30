@@ -1,10 +1,14 @@
-import { MAX_TAGLINE_LENGTH, MAX_TITLE_LENGTH } from "@entities/project";
+import {
+  MAX_PROJECT_IMAGES,
+  MAX_TAGLINE_LENGTH,
+  MAX_TITLE_LENGTH,
+} from "@entities/project";
 import { z } from "zod";
 
 /**
- * Text-side fields submitted via the form. The screenshot itself goes
- * through the browser upload helper first, then only its storage path
- * reaches the server action via `screenshot_path`.
+ * Text-side fields submitted via the form. Screenshots go through the
+ * browser upload helper first; only their storage paths reach this
+ * action via `imagePaths` (1..5 entries, primary first).
  */
 export const submitProjectInputSchema = z.object({
   title: z
@@ -27,7 +31,13 @@ export const submitProjectInputSchema = z.object({
     .string()
     .trim()
     .url("http:// 또는 https:// 로 시작하는 URL을 입력해 주세요."),
-  screenshotPath: z.string().trim().min(1, "스크린샷을 첨부해 주세요."),
+  imagePaths: z
+    .array(z.string().trim().min(1))
+    .min(1, "스크린샷을 1장 이상 첨부해 주세요.")
+    .max(
+      MAX_PROJECT_IMAGES,
+      `최대 ${MAX_PROJECT_IMAGES}장까지 업로드할 수 있어요.`
+    ),
 });
 
 export type SubmitProjectInput = z.infer<typeof submitProjectInputSchema>;
