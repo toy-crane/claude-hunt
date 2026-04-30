@@ -30,6 +30,7 @@ export function SubmitForm({ cohortId: _cohortId }: SubmitFormProps) {
   const titleId = useId();
   const taglineId = useId();
   const urlId = useId();
+  const githubUrlId = useId();
   const [images, setImages] = useState<ImageSlot[]>([]);
   const [fieldError, setFieldError] = useState<string | null>(null);
   const [submitError, setSubmitError] = useState<string | null>(null);
@@ -47,9 +48,13 @@ export function SubmitForm({ cohortId: _cohortId }: SubmitFormProps) {
       "tagline"
     ) as HTMLTextAreaElement | null;
     const urlEl = elements.namedItem("projectUrl") as HTMLInputElement | null;
+    const githubUrlEl = elements.namedItem(
+      "githubUrl"
+    ) as HTMLInputElement | null;
     const title = titleEl?.value ?? "";
     const tagline = taglineEl?.value ?? "";
     const projectUrl = urlEl?.value ?? "";
+    const githubUrl = githubUrlEl?.value ?? "";
 
     if (images.length === 0) {
       setFieldError("스크린샷을 1장 이상 첨부해 주세요.");
@@ -74,6 +79,7 @@ export function SubmitForm({ cohortId: _cohortId }: SubmitFormProps) {
         title,
         tagline,
         projectUrl,
+        githubUrl: githubUrl.trim() === "" ? undefined : githubUrl,
         imagePaths,
       });
       if (!result.ok) {
@@ -133,6 +139,20 @@ export function SubmitForm({ cohortId: _cohortId }: SubmitFormProps) {
             name="projectUrl"
             placeholder="https://myapp.com"
             required
+            type="url"
+          />
+        </Field>
+
+        <Field>
+          <FieldLabel htmlFor={githubUrlId}>
+            GitHub 저장소{" "}
+            <span className="font-normal text-muted-foreground">(선택)</span>
+          </FieldLabel>
+          <Input
+            disabled={submitting}
+            id={githubUrlId}
+            name="githubUrl"
+            placeholder="https://github.com/owner/repo"
             type="url"
           />
         </Field>
