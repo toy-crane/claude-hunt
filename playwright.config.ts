@@ -10,8 +10,13 @@ if (existsSync(".env.local")) {
 export default defineConfig({
   testDir: "./e2e",
   testMatch: /.*\.spec\.ts$/,
-  fullyParallel: true,
-  retries: process.env.CI ? 2 : 0,
+  // Several student-flow specs share LGE-1 seed cohort state (votes,
+  // projects, comments) and race when run in parallel. Keep parallel
+  // *across* files (workers > 1) but serialize *within* a file so
+  // setup/teardown windows don't overlap on the same DB rows.
+  fullyParallel: false,
+  workers: 1,
+  retries: process.env.CI ? 2 : 1,
   reporter: process.env.CI
     ? [["html"], ["github"]]
     : [["html", { open: "never" }]],
