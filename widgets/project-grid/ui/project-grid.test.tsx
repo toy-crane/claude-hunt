@@ -1,6 +1,6 @@
-import type { ProjectWithVoteCount } from "@entities/vote";
 import { render, screen } from "@testing-library/react";
 import { describe, expect, it, vi } from "vitest";
+import type { ProjectGridRow } from "../api/fetch-projects";
 import { ProjectGrid } from "./project-grid";
 
 vi.mock("next/image", () => ({
@@ -10,8 +10,8 @@ vi.mock("next/image", () => ({
 }));
 
 function buildProject(
-  overrides: Partial<ProjectWithVoteCount> & { id: string; title: string }
-): ProjectWithVoteCount {
+  overrides: Partial<ProjectGridRow> & { id: string; title: string }
+): ProjectGridRow {
   return {
     user_id: "user-1",
     cohort_id: "cohort-1",
@@ -27,12 +27,11 @@ function buildProject(
     vote_count: 0,
     author_display_name: "Author",
     author_avatar_url: null,
+    screenshotUrl: `https://cdn.example.com/user-1/${overrides.id}.png`,
+    viewer_has_voted: false,
     ...overrides,
   };
 }
-
-const resolveScreenshotUrl = (path: string) =>
-  `https://cdn.example.com/${path}`;
 
 describe("ProjectGrid (terminal list)", () => {
   it("renders one row per project in the supplied order", () => {
@@ -45,12 +44,7 @@ describe("ProjectGrid (terminal list)", () => {
       buildProject({ id: "p6", title: "F", vote_count: 0 }),
     ];
 
-    render(
-      <ProjectGrid
-        projects={projects}
-        resolveScreenshotUrl={resolveScreenshotUrl}
-      />
-    );
+    render(<ProjectGrid projects={projects} />);
 
     const rows = screen.getAllByTestId("project-card");
     expect(rows).toHaveLength(6);
@@ -67,12 +61,7 @@ describe("ProjectGrid (terminal list)", () => {
       buildProject({ id: "p5", title: "E" }),
     ];
 
-    render(
-      <ProjectGrid
-        projects={projects}
-        resolveScreenshotUrl={resolveScreenshotUrl}
-      />
-    );
+    render(<ProjectGrid projects={projects} />);
 
     // Both the desktop branch (rank column) and the mobile branch (rank
     // overlay on thumb) render a dot for ranks 1–3 → 6 dots total.
@@ -87,12 +76,7 @@ describe("ProjectGrid (terminal list)", () => {
       buildProject({ id: `p${i + 1}`, title: `P${i + 1}` })
     );
 
-    render(
-      <ProjectGrid
-        projects={projects}
-        resolveScreenshotUrl={resolveScreenshotUrl}
-      />
-    );
+    render(<ProjectGrid projects={projects} />);
 
     for (const label of [
       "01",
@@ -113,32 +97,20 @@ describe("ProjectGrid (terminal list)", () => {
   });
 
   it("renders a desktop table header strip labelled RANK PREVIEW NAME AUTHOR VOTES", () => {
-    render(
-      <ProjectGrid
-        projects={[buildProject({ id: "p1", title: "A" })]}
-        resolveScreenshotUrl={resolveScreenshotUrl}
-      />
-    );
+    render(<ProjectGrid projects={[buildProject({ id: "p1", title: "A" })]} />);
     const header = screen.getByTestId("project-grid-header");
     expect(header.textContent).toBe("RANKPREVIEWNAMEAUTHORVOTES");
   });
 
   it("hides the desktop header strip below 720 px (min-[720px]:grid, hidden otherwise)", () => {
-    render(
-      <ProjectGrid
-        projects={[buildProject({ id: "p1", title: "A" })]}
-        resolveScreenshotUrl={resolveScreenshotUrl}
-      />
-    );
+    render(<ProjectGrid projects={[buildProject({ id: "p1", title: "A" })]} />);
     const header = screen.getByTestId("project-grid-header");
     expect(header.className).toContain("hidden");
     expect(header.className).toContain("min-[720px]:grid");
   });
 
   it("renders the empty state when there are no projects", () => {
-    render(
-      <ProjectGrid projects={[]} resolveScreenshotUrl={resolveScreenshotUrl} />
-    );
+    render(<ProjectGrid projects={[]} />);
 
     expect(screen.getByTestId("project-grid-empty")).toBeInTheDocument();
     expect(screen.queryByTestId("project-grid")).not.toBeInTheDocument();
