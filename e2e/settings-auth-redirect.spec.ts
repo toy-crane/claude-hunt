@@ -1,11 +1,15 @@
 import { expect, test } from "@playwright/test";
 import { fetchMagicLink } from "./helpers/mailpit";
-import { createAdminClient, uniqueTestEmail } from "./helpers/supabase-admin";
+import {
+  createAdminClient,
+  findUserIdByEmail,
+  uniqueTestEmail,
+} from "./helpers/supabase-admin";
 
-const EMAIL_LABEL_RE = /email/i;
-const CONTINUE_BTN_RE = /continue/i;
-const MAGIC_LINK_TEXT_RE = /magic link/i;
-const SETTINGS_HEADING = /^settings$/i;
+const EMAIL_LABEL_RE = /이메일/;
+const CONTINUE_BTN_RE = /계속/;
+const MAGIC_LINK_TEXT_RE = /매직 링크/;
+const SETTINGS_HEADING = /^설정$/;
 
 test("signed-out visitor to /settings is bounced to /login and returned after sign-in", async ({
   page,
@@ -36,8 +40,7 @@ test("signed-out visitor to /settings is bounced to /login and returned after si
       page.getByRole("heading", { name: SETTINGS_HEADING })
     ).toBeVisible();
 
-    const { data: usersData } = await admin.auth.admin.listUsers();
-    userId = usersData.users.find((u) => u.email === email)?.id;
+    userId = (await findUserIdByEmail(admin, email)) ?? undefined;
   } finally {
     if (userId) {
       await admin.auth.admin.deleteUser(userId).catch(() => {

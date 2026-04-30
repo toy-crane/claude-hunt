@@ -1,10 +1,14 @@
 import { expect, test } from "@playwright/test";
 import { fetchMagicLink } from "../helpers/mailpit";
-import { createAdminClient, uniqueTestEmail } from "../helpers/supabase-admin";
+import {
+  createAdminClient,
+  findUserIdByEmail,
+  uniqueTestEmail,
+} from "../helpers/supabase-admin";
 
-const EMAIL_LABEL_RE = /email/i;
-const CONTINUE_BTN_RE = /continue/i;
-const MAGIC_LINK_TEXT_RE = /magic link/i;
+const EMAIL_LABEL_RE = /이메일/;
+const CONTINUE_BTN_RE = /계속/;
+const MAGIC_LINK_TEXT_RE = /매직 링크/;
 
 test("new user lands on main page authenticated after clicking magic link", async ({
   page,
@@ -39,8 +43,7 @@ test("new user lands on main page authenticated after clicking magic link", asyn
     await expect(page.getByTestId("submit-form-cohort-warning")).toBeVisible();
 
     // Capture user id for targeted cleanup
-    const { data: usersData } = await admin.auth.admin.listUsers();
-    userId = usersData.users.find((u) => u.email === email)?.id;
+    userId = (await findUserIdByEmail(admin, email)) ?? undefined;
   } finally {
     if (userId) {
       await admin.auth.admin.deleteUser(userId).catch(() => {
