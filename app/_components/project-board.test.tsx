@@ -127,11 +127,9 @@ const cohorts: Cohort[] = [
   },
 ];
 
-type ProjectBoardRow = ProjectGridRow & { screenshotUrl: string };
-
 function buildProject(
-  overrides: Partial<ProjectBoardRow> & { id: string; title: string }
-): ProjectBoardRow {
+  overrides: Partial<ProjectGridRow> & { id: string; title: string }
+): ProjectGridRow {
   return {
     user_id: "user-1",
     cohort_id: "cohort-a",
@@ -173,7 +171,7 @@ const allProjects = [projectA1, projectA2, projectB1];
 async function renderBoard(
   opts: {
     initialCohortId?: string | null;
-    projects?: ProjectBoardRow[];
+    projects?: ProjectGridRow[];
     viewerUserId?: string | null;
   } = {}
 ) {

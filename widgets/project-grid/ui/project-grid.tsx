@@ -1,5 +1,6 @@
 import type { ProjectWithVoteCount } from "@entities/vote";
 import { ViewTransition } from "react";
+import type { ProjectGridRow } from "../api/fetch-projects";
 import { EmptyState } from "./empty-state";
 import { ProjectCard } from "./project-card";
 import { RankSlot } from "./rank-badge";
@@ -11,17 +12,11 @@ export interface ProjectGridProps {
    * the rank number alone on mobile.
    */
   cohortLabelsById?: Record<string, string>;
-  projects: ProjectWithVoteCount[];
+  projects: ProjectGridRow[];
   /** Owner-only actions slot forwarded to each row. */
   renderOwnerActions?: (project: ProjectWithVoteCount) => React.ReactNode;
   /** Vote button slot forwarded to each row. */
   renderVoteButton?: (project: ProjectWithVoteCount) => React.ReactNode;
-  /**
-   * Maps a `primary_image_path` from the view to a fetchable URL. Injected
-   * by the RSC page so this component can stay framework-agnostic and
-   * testable without a supabase client.
-   */
-  resolveScreenshotUrl: (path: string) => string;
   /** Current viewer's `auth.uid()` (null for anonymous). */
   viewerUserId?: string | null;
 }
@@ -29,7 +24,6 @@ export interface ProjectGridProps {
 export function ProjectGrid({
   cohortLabelsById,
   projects,
-  resolveScreenshotUrl,
   viewerUserId,
   renderOwnerActions,
   renderVoteButton,
@@ -77,9 +71,7 @@ export function ProjectGrid({
                 rank={rank}
                 renderOwnerActions={renderOwnerActions}
                 renderVoteButton={renderVoteButton}
-                screenshotUrl={resolveScreenshotUrl(
-                  project.primary_image_path ?? ""
-                )}
+                screenshotUrl={project.screenshotUrl}
                 viewerUserId={viewerUserId}
               />
             </ViewTransition>

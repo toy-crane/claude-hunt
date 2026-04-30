@@ -73,21 +73,6 @@ export function ProjectBoard({
     return map;
   }, [cohorts]);
 
-  const screenshotUrlMap = useMemo(() => {
-    const map = new Map<string, string>();
-    for (const p of projects) {
-      if (p.primary_image_path) {
-        map.set(p.primary_image_path, p.screenshotUrl);
-      }
-    }
-    return map;
-  }, [projects]);
-
-  const resolveScreenshotUrl = useCallback(
-    (path: string) => screenshotUrlMap.get(path) ?? "",
-    [screenshotUrlMap]
-  );
-
   const handleCohortChange = useCallback((nextCohortId: string | null) => {
     setCohortId(nextCohortId);
     const href = nextCohortId ? `/?cohort=${nextCohortId}` : "/";
@@ -147,7 +132,6 @@ export function ProjectBoard({
         cohortLabelsById={cohortLabelsById}
         projects={filteredProjects}
         renderVoteButton={renderVoteButton}
-        resolveScreenshotUrl={resolveScreenshotUrl}
         viewerUserId={viewerUserId}
       />
     </>
