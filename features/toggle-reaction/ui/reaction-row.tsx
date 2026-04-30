@@ -89,7 +89,7 @@ export function ReactionRow({
             className={cn(
               "inline-flex items-center gap-1 rounded-full border px-2 py-0.5 text-xs",
               summary.viewerReacted
-                ? "border-foreground bg-foreground text-background"
+                ? "border-primary/40 bg-primary/10 text-foreground"
                 : "border-border bg-muted text-foreground hover:bg-muted/80"
             )}
             data-testid="reaction-chip"
@@ -129,7 +129,7 @@ export function ReactionRow({
             {REACTION_EMOJI.map((emoji) => (
               <button
                 aria-label={`${emoji} 반응`}
-                className="inline-flex size-9 items-center justify-center rounded-md text-lg hover:bg-muted"
+                className="inline-flex size-7 items-center justify-center rounded-md text-base hover:bg-muted"
                 data-testid="reaction-popover-emoji"
                 disabled={pending}
                 key={emoji}
