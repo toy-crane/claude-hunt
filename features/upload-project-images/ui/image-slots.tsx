@@ -185,6 +185,7 @@ export function ImageSlots({
       />
 
       <Sortable
+        className="flex flex-col gap-3"
         getItemValue={(slot: ImageSlot) => slot.id}
         onValueChange={onChange}
         strategy="grid"
