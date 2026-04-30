@@ -135,7 +135,7 @@ select is(
   'LGE-3 has zero seeded projects'
 );
 
--- 11. Every demo project's screenshot_path resolves to a row in
+-- 11. Every demo project's primary image path resolves to a row in
 --     storage.objects under the project-screenshots bucket.
 select is(
   (select count(*)::int
@@ -148,10 +148,10 @@ select is(
        and exists (
          select 1 from storage.objects o
          where o.bucket_id = 'project-screenshots'
-           and o.name = p.screenshot_path
+           and o.name = p.images->0->>'path'
        )),
   3,
-  'every demo project screenshot_path matches an uploaded storage object'
+  'every demo project primary image path matches an uploaded storage object'
 );
 
 select * from finish();
