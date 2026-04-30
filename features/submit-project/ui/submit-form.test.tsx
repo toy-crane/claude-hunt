@@ -4,12 +4,19 @@ import { beforeEach, describe, expect, it, vi } from "vitest";
 
 const uploadScreenshot = vi.fn();
 const submitProject = vi.fn();
+const routerPush = vi.fn();
 
 vi.mock("@shared/lib/screenshot-upload", () => ({
   uploadScreenshot,
 }));
 vi.mock("../api/actions.ts", () => ({
   submitProject,
+}));
+vi.mock("next/navigation", () => ({
+  useRouter: () => ({ push: routerPush }),
+}));
+vi.mock("sonner", () => ({
+  toast: { success: vi.fn() },
 }));
 
 const { SubmitForm } = await import("./submit-form");
@@ -35,6 +42,7 @@ describe("SubmitForm", () => {
   beforeEach(() => {
     uploadScreenshot.mockReset();
     submitProject.mockReset();
+    routerPush.mockReset();
   });
 
   it("renders an enabled Submit button when cohortId is set", () => {
@@ -66,66 +74,47 @@ describe("SubmitForm", () => {
     expect(uploadScreenshot).toHaveBeenCalledTimes(1);
   });
 
-  it("calls onSuccess exactly once after a successful submission", async () => {
-    uploadScreenshot.mockResolvedValue({ path: "user-1/shot.png" });
-    submitProject.mockResolvedValue({ ok: true, projectId: "p1" });
-    const onSuccess = vi.fn();
-
-    render(<SubmitForm cohortId="cohort-1" onSuccess={onSuccess} />);
-    await fillAndSubmit();
-
-    await vi.waitFor(() => {
-      expect(onSuccess).toHaveBeenCalledTimes(1);
-    });
-  });
-
-  it("does not render an inline 'Project submitted!' success text", async () => {
+  it("redirects to the new project's detail page on success", async () => {
     uploadScreenshot.mockResolvedValue({ path: "user-1/shot.png" });
     submitProject.mockResolvedValue({ ok: true, projectId: "p1" });
 
-    const onSuccess = vi.fn();
-    render(<SubmitForm cohortId="cohort-1" onSuccess={onSuccess} />);
+    render(<SubmitForm cohortId="cohort-1" />);
     await fillAndSubmit();
 
     await vi.waitFor(() => {
-      expect(submitProject).toHaveBeenCalled();
+      expect(routerPush).toHaveBeenCalledWith("/projects/p1");
     });
-    expect(
-      screen.queryByText("프로젝트가 제출되었어요.")
-    ).not.toBeInTheDocument();
   });
 
-  it("does not call onSuccess when the server action returns ok: false", async () => {
+  it("does not redirect when the server action returns ok: false", async () => {
     uploadScreenshot.mockResolvedValue({ path: "user-1/shot.png" });
     submitProject.mockResolvedValue({
       ok: false,
       error: "Could not submit project",
     });
-    const onSuccess = vi.fn();
 
-    render(<SubmitForm cohortId="cohort-1" onSuccess={onSuccess} />);
+    render(<SubmitForm cohortId="cohort-1" />);
     await fillAndSubmit();
 
     expect(
       await screen.findByTestId("submit-form-submit-error")
     ).toHaveTextContent("Could not submit project");
-    expect(onSuccess).not.toHaveBeenCalled();
+    expect(routerPush).not.toHaveBeenCalled();
   });
 
   it("surfaces an upload error without calling the server action", async () => {
     uploadScreenshot.mockResolvedValue({
       error: "File must be 25 MB or smaller",
     });
-    const onSuccess = vi.fn();
 
-    render(<SubmitForm cohortId="cohort-1" onSuccess={onSuccess} />);
+    render(<SubmitForm cohortId="cohort-1" />);
     await fillAndSubmit();
 
     expect(
       await screen.findByTestId("submit-form-field-error")
     ).toHaveTextContent("File must be 25 MB or smaller");
     expect(submitProject).not.toHaveBeenCalled();
-    expect(onSuccess).not.toHaveBeenCalled();
+    expect(routerPush).not.toHaveBeenCalled();
   });
 
   it("surfaces the decode-failure error without calling the server action", async () => {

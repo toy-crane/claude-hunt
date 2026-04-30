@@ -32,7 +32,6 @@ interface BoardProps {
   initialCohortId: string | null;
   isAuthenticated: boolean;
   projects: unknown[];
-  viewerCohortId: string | null;
   viewerUserId: string | null;
 }
 const boardMock = vi.fn((_props: BoardProps) => (
@@ -49,17 +48,10 @@ vi.mock("@features/cohort-filter/server", () => ({
 }));
 
 vi.mock("@features/submit-project", () => ({
-  SubmitDialog: ({
-    cohortId,
-    isAuthenticated,
-  }: {
-    cohortId: string | null;
-    isAuthenticated: boolean;
-  }) => (
+  SubmitTrigger: ({ isAuthenticated }: { isAuthenticated: boolean }) => (
     <div
       data-authenticated={isAuthenticated ? "yes" : "no"}
-      data-cohort-id={cohortId ?? ""}
-      data-testid="submit-dialog-stub"
+      data-testid="submit-trigger-stub"
     >
       Submit a project
     </div>
@@ -158,7 +150,7 @@ describe("home page", () => {
     );
   });
 
-  it("passes isAuthenticated=false and viewerCohortId=null to ProjectBoard for signed-out visitors", async () => {
+  it("passes isAuthenticated=false to ProjectBoard for signed-out visitors", async () => {
     profileSingle.mockResolvedValue({ data: null, error: null });
 
     await renderPage();
@@ -166,12 +158,11 @@ describe("home page", () => {
     expect(boardMock).toHaveBeenCalledWith(
       expect.objectContaining({
         isAuthenticated: false,
-        viewerCohortId: null,
       })
     );
   });
 
-  it("passes isAuthenticated=true and the viewer's cohortId for signed-in students with a cohort", async () => {
+  it("passes isAuthenticated=true to ProjectBoard for signed-in students", async () => {
     vi.mocked(mockClient.auth.getUser).mockResolvedValueOnce({
       data: { user: { id: "user-1" } },
       error: null,
@@ -186,27 +177,6 @@ describe("home page", () => {
     expect(boardMock).toHaveBeenCalledWith(
       expect.objectContaining({
         isAuthenticated: true,
-        viewerCohortId: "cohort-1",
-      })
-    );
-  });
-
-  it("passes isAuthenticated=true and viewerCohortId=null for signed-in students without a cohort", async () => {
-    vi.mocked(mockClient.auth.getUser).mockResolvedValueOnce({
-      data: { user: { id: "user-2" } },
-      error: null,
-    });
-    profileSingle.mockResolvedValue({
-      data: { cohort_id: null },
-      error: null,
-    });
-
-    await renderPage();
-
-    expect(boardMock).toHaveBeenCalledWith(
-      expect.objectContaining({
-        isAuthenticated: true,
-        viewerCohortId: null,
       })
     );
   });

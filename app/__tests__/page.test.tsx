@@ -18,7 +18,7 @@ vi.mock("@widgets/project-grid/server", () => ({
 }));
 
 vi.mock("@features/submit-project", () => ({
-  SubmitDialog: () => null,
+  SubmitTrigger: () => null,
 }));
 
 vi.mock("@widgets/header", () => ({

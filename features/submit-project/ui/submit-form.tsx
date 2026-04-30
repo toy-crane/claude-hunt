@@ -12,32 +12,25 @@ import {
 import { Input } from "@shared/ui/input";
 import { Spinner } from "@shared/ui/spinner";
 import { Textarea } from "@shared/ui/textarea";
+import Link from "next/link";
+import { useRouter } from "next/navigation";
 import { useId, useState } from "react";
+import { toast } from "sonner";
 import { submitProject } from "../api/actions";
 
 export interface SubmitFormProps {
   /**
    * `cohort_id` of the signed-in student's profile. At runtime the
    * onboarding gate (`proxy.ts` + `/onboarding` route) guarantees this
-   * is non-null for any user who reaches the form — but the prop type
-   * stays nullable because `SubmitDialog` passes `null` through in the
-   * unauthenticated branch (that branch never actually renders
-   * `<SubmitForm>`, but the type must still compile). The server
-   * action keeps its own defensive null-check.
+   * is non-null for any user who reaches the form. Kept nullable here
+   * because the page-level auth gate may pass null defensively; the
+   * server action also checks.
    */
   cohortId: string | null;
-  /**
-   * Called once after the server action returns `ok: true`. The parent
-   * owns post-success UI (closing a dialog, showing a toast, etc.) —
-   * the form itself no longer renders a success message.
-   */
-  onSuccess?: () => void;
 }
 
-export function SubmitForm({
-  cohortId: _cohortId,
-  onSuccess,
-}: SubmitFormProps) {
+export function SubmitForm({ cohortId: _cohortId }: SubmitFormProps) {
+  const router = useRouter();
   const titleId = useId();
   const taglineId = useId();
   const urlId = useId();
@@ -88,7 +81,12 @@ export function SubmitForm({
         return;
       }
       form.reset();
-      onSuccess?.();
+      toast.success("프로젝트가 제출되었어요.");
+      if (result.projectId) {
+        router.push(`/projects/${result.projectId}`);
+      } else {
+        router.push("/");
+      }
     } finally {
       setSubmitting(false);
     }
@@ -171,10 +169,15 @@ export function SubmitForm({
         </p>
       ) : null}
 
-      <Button disabled={submitting} type="submit">
-        {submitting ? <Spinner data-icon="inline-start" /> : null}
-        {submitting ? "제출 중..." : "프로젝트 제출"}
-      </Button>
+      <div className="flex items-stretch gap-2">
+        <Button asChild variant="outline">
+          <Link href="/">취소</Link>
+        </Button>
+        <Button className="flex-1" disabled={submitting} type="submit">
+          {submitting ? <Spinner data-icon="inline-start" /> : null}
+          {submitting ? "제출 중..." : "프로젝트 제출"}
+        </Button>
+      </div>
     </form>
   );
 }
