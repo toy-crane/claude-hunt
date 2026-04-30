@@ -1,10 +1,10 @@
 import { expect, test } from "@playwright/test";
 
-const ALL_COHORTS_RE = /all cohorts/i;
-const LGE_1_RE = /LGE-1/;
-const LGE_2_RE = /LGE-2/;
-const LGE_3_RE = /LGE-3/;
-const INFLEARN_RE = /Inflearn/;
+const ALL_COHORTS_RE = /모든 클래스/;
+const LGE_1_RE = /LG전자 1기/;
+const LGE_2_RE = /LG전자 2기/;
+const LGE_3_RE = /LG전자 3기/;
+const INFLEARN_RE = /인프런/;
 
 const SEEDED_COHORTS: readonly { name: string; re: RegExp }[] = [
   { name: "LGE-1", re: LGE_1_RE },
@@ -58,9 +58,8 @@ test.describe("seed demo data — home page renders three cards", () => {
       page,
     }) => {
       await page.goto("/");
-      const dropdown = page.getByTestId("cohort-dropdown");
-      await dropdown.click();
-      await page.getByRole("option", { name: cohort.re }).click();
+      const chips = page.getByTestId("cohort-chips");
+      await chips.getByRole("button", { name: cohort.re }).click();
 
       const cards = page.getByTestId("project-card");
       await expect(cards).toHaveCount(1);
@@ -69,23 +68,20 @@ test.describe("seed demo data — home page renders three cards", () => {
 
   test("cohort filter 'LGE-3' returns zero cards", async ({ page }) => {
     await page.goto("/");
-    const dropdown = page.getByTestId("cohort-dropdown");
-    await dropdown.click();
-    await page.getByRole("option", { name: LGE_3_RE }).click();
+    const chips = page.getByTestId("cohort-chips");
+    await chips.getByRole("button", { name: LGE_3_RE }).click();
 
     await expect(page.getByTestId("project-card")).toHaveCount(0);
   });
 
   test("restoring 'All cohorts' restores all three cards", async ({ page }) => {
     await page.goto("/");
-    const dropdown = page.getByTestId("cohort-dropdown");
+    const chips = page.getByTestId("cohort-chips");
 
-    await dropdown.click();
-    await page.getByRole("option", { name: LGE_1_RE }).click();
+    await chips.getByRole("button", { name: LGE_1_RE }).click();
     await expect(page.getByTestId("project-card")).toHaveCount(1);
 
-    await dropdown.click();
-    await page.getByRole("option", { name: ALL_COHORTS_RE }).click();
+    await chips.getByRole("button", { name: ALL_COHORTS_RE }).click();
     await expect(page.getByTestId("project-card")).toHaveCount(3);
   });
 });

@@ -6,22 +6,24 @@ import {
 
 export default async function globalTeardown() {
   const admin = createAdminClient();
-  const { data, error } = await admin.auth.admin.listUsers({ perPage: 200 });
+  // Sweep leftover e2e users via the public.profiles mirror — admin
+  // listUsers() can 500 in older bundled GoTrue (NULL confirmation_token
+  // scan), and deleting via auth.admin still works given the user id.
+  const { data: profiles, error } = await admin
+    .from("profiles")
+    .select("id, email")
+    .like("email", `${E2E_EMAIL_PREFIX}%@${E2E_EMAIL_DOMAIN}`);
   if (error) {
-    console.warn("[e2e teardown] listUsers failed:", error.message);
+    console.warn("[e2e teardown] profile sweep failed:", error.message);
     return;
   }
-  const leftovers = data.users.filter(
-    (u) =>
-      u.email?.startsWith(E2E_EMAIL_PREFIX) &&
-      u.email?.endsWith(`@${E2E_EMAIL_DOMAIN}`)
-  );
+  const leftovers = profiles ?? [];
   await Promise.all(
-    leftovers.map((u) =>
+    leftovers.map((p) =>
       admin.auth.admin
-        .deleteUser(u.id)
+        .deleteUser(p.id)
         .catch((err) =>
-          console.warn(`[e2e teardown] delete ${u.email} failed:`, err.message)
+          console.warn(`[e2e teardown] delete ${p.email} failed:`, err.message)
         )
     )
   );

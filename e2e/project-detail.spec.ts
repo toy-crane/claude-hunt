@@ -1,10 +1,14 @@
 import { expect, type Page, test } from "@playwright/test";
 import { fetchMagicLink } from "./helpers/mailpit";
-import { createAdminClient, uniqueTestEmail } from "./helpers/supabase-admin";
+import {
+  createAdminClient,
+  findUserIdByEmail,
+  uniqueTestEmail,
+} from "./helpers/supabase-admin";
 
-const EMAIL_LABEL_RE = /email/i;
-const CONTINUE_BTN_RE = /continue/i;
-const MAGIC_LINK_TEXT_RE = /magic link/i;
+const EMAIL_LABEL_RE = /이메일/;
+const CONTINUE_BTN_RE = /계속/;
+const MAGIC_LINK_TEXT_RE = /매직 링크/;
 const COMMENT_PLACEHOLDER_RE = /의견을 남겨주세요/;
 const SUBMIT_COMMENT_BTN_RE = /^등록$/;
 const EDIT_MENU_RE = /^편집$/;
@@ -41,8 +45,7 @@ async function signInStudent(
   await page.goto(magicLink);
   await page.waitForLoadState("networkidle");
 
-  const { data: usersData } = await admin.auth.admin.listUsers();
-  const userId = usersData.users.find((u) => u.email === email)?.id;
+  const userId = await findUserIdByEmail(admin, email);
   if (!userId) {
     throw new Error("Could not resolve user id after magic-link sign-in");
   }

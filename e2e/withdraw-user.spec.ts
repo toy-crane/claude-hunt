@@ -1,15 +1,19 @@
 import { expect, type Page, test } from "@playwright/test";
 import { fetchMagicLink } from "./helpers/mailpit";
-import { createAdminClient, uniqueTestEmail } from "./helpers/supabase-admin";
+import {
+  createAdminClient,
+  findUserIdByEmail,
+  uniqueTestEmail,
+} from "./helpers/supabase-admin";
 
-const EMAIL_LABEL_RE = /email/i;
-const CONTINUE_BTN_RE = /continue/i;
-const MAGIC_LINK_TEXT_RE = /magic link/i;
-const WITHDRAW_LABEL = /^withdraw$/i;
-const DELETE_ACCOUNT_BTN_RE = /^delete account$/i;
-const CANCEL_LABEL = /^cancel$/i;
-const TYPE_PROMPT_REGEX = /type .* to confirm/i;
-const USER_MENU_RE = /account menu|sign out|log out/i;
+const EMAIL_LABEL_RE = /이메일/;
+const CONTINUE_BTN_RE = /계속/;
+const MAGIC_LINK_TEXT_RE = /매직 링크/;
+const WITHDRAW_LABEL = /^탈퇴$/;
+const DELETE_ACCOUNT_BTN_RE = /^계정 삭제$/;
+const CANCEL_LABEL = /^취소$/;
+const TYPE_PROMPT_REGEX = /확인을 위해 .* 입력해 주세요/;
+const USER_MENU_RE = /계정 메뉴 열기|로그아웃/;
 
 interface PeerFixture {
   cleanup: () => Promise<void>;
@@ -109,8 +113,7 @@ async function signInAndSeedWithdrawStudent(
   await page.goto(magicLink);
   await page.waitForLoadState("networkidle");
 
-  const { data: usersData } = await admin.auth.admin.listUsers();
-  const userId = usersData.users.find((u) => u.email === email)?.id;
+  const userId = await findUserIdByEmail(admin, email);
   if (!userId) {
     throw new Error("Could not resolve user id after magic-link sign-in");
   }
@@ -242,12 +245,9 @@ test("withdraw cascade-deletes the account, screenshots, and votes", async ({
     await expect(page.getByText(MAGIC_LINK_TEXT_RE)).toBeVisible();
 
     // Capture the post-resurrection id so teardown cleans it up.
-    const { data: resurrectedUsers } = await admin.auth.admin.listUsers();
-    const resurrected = resurrectedUsers.users.find(
-      (u) => u.email === student.email
-    );
+    const resurrected = await findUserIdByEmail(admin, student.email);
     if (resurrected) {
-      withdrawnUserId = resurrected.id;
+      withdrawnUserId = resurrected;
     }
   } finally {
     if (withdrawnUserId) {

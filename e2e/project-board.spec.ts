@@ -2,21 +2,25 @@ import path from "node:path";
 import { fileURLToPath } from "node:url";
 import { expect, type Page, test } from "@playwright/test";
 import { fetchMagicLink } from "./helpers/mailpit";
-import { createAdminClient, uniqueTestEmail } from "./helpers/supabase-admin";
+import {
+  createAdminClient,
+  findUserIdByEmail,
+  uniqueTestEmail,
+} from "./helpers/supabase-admin";
 
-const EMAIL_LABEL_RE = /email/i;
-const CONTINUE_BTN_RE = /continue/i;
-const MAGIC_LINK_TEXT_RE = /magic link/i;
-const SUBMIT_PROJECT_BTN_RE = /submit project/i;
-const SUBMIT_PROJECT_TRIGGER_RE = /^submit a project$/i;
-const PROJECT_SUBMITTED_TOAST_RE = /project submitted/i;
-const SAVE_CHANGES_BTN_RE = /save changes/i;
+const EMAIL_LABEL_RE = /이메일/;
+const CONTINUE_BTN_RE = /계속/;
+const MAGIC_LINK_TEXT_RE = /매직 링크/;
+const SUBMIT_PROJECT_BTN_RE = /프로젝트 제출/;
+const SUBMIT_PROJECT_TRIGGER_RE = /프로젝트 제출/;
+const PROJECT_SUBMITTED_TOAST_RE = /프로젝트가 제출되었어요/;
+const SAVE_CHANGES_BTN_RE = /저장/;
 const LOGIN_URL_RE = /\/login$/;
 const SUPABASE_STORAGE_URL_RE =
   /\/storage\/v1\/object\/(?:public\/)?project-screenshots\//;
 const PROJECT_LIST_URL_RE = /\/rest\/v1\/projects_with_vote_count/;
-const ALL_COHORTS_RE = /all cohorts/i;
-const VOTE_BTN_RE = /vote/i;
+const ALL_COHORTS_RE = /모든 클래스/;
+const VOTE_BTN_RE = /추천/;
 const DIGITS_RE = /\d+/;
 
 const dirname = path.dirname(fileURLToPath(import.meta.url));
@@ -66,8 +70,7 @@ async function signInStudentWithCohort(
   // admin, and navigate home ourselves.
   await page.waitForLoadState("networkidle");
 
-  const { data: usersData } = await admin.auth.admin.listUsers();
-  const userId = usersData.users.find((u) => u.email === email)?.id;
+  const userId = await findUserIdByEmail(admin, email);
   if (!userId) {
     throw new Error("Could not resolve user id after magic-link sign-in");
   }
@@ -168,16 +171,14 @@ test("student submits, edits, and deletes their own project end-to-end", async (
     await page.getByRole("button", { name: SUBMIT_PROJECT_TRIGGER_RE }).click();
     const submitDialog = page.getByRole("dialog");
     await expect(submitDialog).toBeVisible();
-    await submitDialog.getByLabel("Title").fill("E2E Test App");
+    await submitDialog.getByLabel("제목").fill("E2E Test App");
     await submitDialog
-      .getByLabel("Tagline")
+      .getByLabel("한 줄 소개")
       .fill("Built during the project-board e2e spec");
     await submitDialog
-      .getByLabel("Project URL")
+      .getByLabel("프로젝트 URL")
       .fill("https://e2e-test.example.com");
-    await submitDialog
-      .getByLabel("Screenshot")
-      .setInputFiles(SCREENSHOT_FIXTURE);
+    await submitDialog.getByLabel("스크린샷").setInputFiles(SCREENSHOT_FIXTURE);
     await submitDialog
       .getByRole("button", { name: SUBMIT_PROJECT_BTN_RE })
       .click();
@@ -207,10 +208,10 @@ test("student submits, edits, and deletes their own project end-to-end", async (
     // update the tagline, then re-check the invariants on the new URL.
     await page.getByTestId("edit-project-trigger").click();
     const editDialog = page.getByRole("dialog");
-    await editDialog.getByLabel("Tagline").fill("Updated during the e2e spec");
     await editDialog
-      .getByLabel("Screenshot (optional)")
-      .setInputFiles(SCREENSHOT_FIXTURE);
+      .getByLabel("한 줄 소개")
+      .fill("Updated during the e2e spec");
+    await editDialog.getByLabel("스크린샷").setInputFiles(SCREENSHOT_FIXTURE);
     await editDialog.getByRole("button", { name: SAVE_CHANGES_BTN_RE }).click();
     await expect(
       page.getByTestId("project-card").getByText("Updated during the e2e spec")
@@ -249,7 +250,7 @@ test("student submits, edits, and deletes their own project end-to-end", async (
     // input. The stored image must be untouched and still serve.
     await page.getByTestId("edit-project-trigger").click();
     const metaDialog = page.getByRole("dialog");
-    await metaDialog.getByLabel("Title").fill("E2E Test App (renamed)");
+    await metaDialog.getByLabel("제목").fill("E2E Test App (renamed)");
     await metaDialog.getByRole("button", { name: SAVE_CHANGES_BTN_RE }).click();
     await expect(
       page.getByTestId("project-card").getByText("E2E Test App (renamed)")
@@ -292,12 +293,10 @@ test("small sources are still served as WebP", async ({ page }) => {
 
     await page.getByRole("button", { name: SUBMIT_PROJECT_TRIGGER_RE }).click();
     const dialog = page.getByRole("dialog");
-    await dialog.getByLabel("Title").fill("Small Image Test");
-    await dialog.getByLabel("Tagline").fill("An 800x600 source");
-    await dialog.getByLabel("Project URL").fill("https://small.example.com");
-    await dialog
-      .getByLabel("Screenshot")
-      .setInputFiles(SMALL_SCREENSHOT_FIXTURE);
+    await dialog.getByLabel("제목").fill("Small Image Test");
+    await dialog.getByLabel("한 줄 소개").fill("An 800x600 source");
+    await dialog.getByLabel("프로젝트 URL").fill("https://small.example.com");
+    await dialog.getByLabel("스크린샷").setInputFiles(SMALL_SCREENSHOT_FIXTURE);
     await dialog.getByRole("button", { name: SUBMIT_PROJECT_BTN_RE }).click();
 
     await expect(dialog).toBeHidden({ timeout: 15_000 });
@@ -329,15 +328,15 @@ test("edit upload failure keeps the original screenshot on the card", async ({
     // Seed the project with a successful submit using the small fixture.
     await page.getByRole("button", { name: SUBMIT_PROJECT_TRIGGER_RE }).click();
     const submitDialog = page.getByRole("dialog");
-    await submitDialog.getByLabel("Title").fill("Edit Failure Test");
+    await submitDialog.getByLabel("제목").fill("Edit Failure Test");
     await submitDialog
-      .getByLabel("Tagline")
+      .getByLabel("한 줄 소개")
       .fill("Will attempt a failing edit");
     await submitDialog
-      .getByLabel("Project URL")
+      .getByLabel("프로젝트 URL")
       .fill("https://edit-fail.example.com");
     await submitDialog
-      .getByLabel("Screenshot")
+      .getByLabel("스크린샷")
       .setInputFiles(SMALL_SCREENSHOT_FIXTURE);
     await submitDialog
       .getByRole("button", { name: SUBMIT_PROJECT_BTN_RE })
@@ -367,9 +366,7 @@ test("edit upload failure keeps the original screenshot on the card", async ({
 
     await page.getByTestId("edit-project-trigger").click();
     const editDialog = page.getByRole("dialog");
-    await editDialog
-      .getByLabel("Screenshot (optional)")
-      .setInputFiles(SCREENSHOT_FIXTURE);
+    await editDialog.getByLabel("스크린샷").setInputFiles(SCREENSHOT_FIXTURE);
     await editDialog.getByRole("button", { name: SAVE_CHANGES_BTN_RE }).click();
 
     // Regardless of whether the dialog surfaces an error or stays open,
@@ -395,15 +392,13 @@ test("switching cohorts fires no project-list network requests after initial loa
   });
 
   await page.goto("/");
-  await expect(page.getByTestId("cohort-dropdown")).toBeVisible();
+  const chips = page.getByTestId("cohort-chips");
+  await expect(chips).toBeVisible();
   ready = true;
 
-  const trigger = page.getByTestId("cohort-dropdown");
-  await trigger.click();
-  const firstCohort = page.getByRole("option").nth(1);
-  await firstCohort.click();
-  await trigger.click();
-  await page.getByRole("option", { name: ALL_COHORTS_RE }).click();
+  // Click the first non-"All" chip (index 0 is "모든 클래스"), then back to All.
+  await chips.getByRole("button").nth(1).click();
+  await chips.getByRole("button", { name: ALL_COHORTS_RE }).click();
 
   expect(requestsAfterReady).toEqual([]);
 });
@@ -422,9 +417,10 @@ test("deep-linked cohort URL renders the filtered grid on first paint", async ({
   }
 
   await page.goto(`/?cohort=${cohort.id}`);
-  await expect(page.getByTestId("cohort-dropdown")).toHaveText(
-    new RegExp(cohort.label)
-  );
+  const chips = page.getByTestId("cohort-chips");
+  await expect(
+    chips.getByRole("button", { name: new RegExp(cohort.label), pressed: true })
+  ).toBeVisible();
 });
 
 test("voted project keeps its count and indicator across cohort filter toggles", async ({
@@ -438,14 +434,12 @@ test("voted project keeps its count and indicator across cohort filter toggles",
 
     await page.getByRole("button", { name: SUBMIT_PROJECT_TRIGGER_RE }).click();
     const dialog = page.getByRole("dialog");
-    await dialog.getByLabel("Title").fill("Vote Persist Test");
-    await dialog.getByLabel("Tagline").fill("Filter persistence check");
+    await dialog.getByLabel("제목").fill("Vote Persist Test");
+    await dialog.getByLabel("한 줄 소개").fill("Filter persistence check");
     await dialog
-      .getByLabel("Project URL")
+      .getByLabel("프로젝트 URL")
       .fill("https://vote-persist.example.com");
-    await dialog
-      .getByLabel("Screenshot")
-      .setInputFiles(SMALL_SCREENSHOT_FIXTURE);
+    await dialog.getByLabel("스크린샷").setInputFiles(SMALL_SCREENSHOT_FIXTURE);
     await dialog.getByRole("button", { name: SUBMIT_PROJECT_BTN_RE }).click();
     await expect(dialog).toBeHidden({ timeout: 15_000 });
 
@@ -467,11 +461,9 @@ test("voted project keeps its count and indicator across cohort filter toggles",
       throw new Error("LGE-1 seed missing");
     }
 
-    const dropdown = page.getByTestId("cohort-dropdown");
-    await dropdown.click();
-    await page.getByRole("option", { name: ALL_COHORTS_RE }).click();
-    await dropdown.click();
-    await page.getByRole("option").nth(1).click();
+    const chips = page.getByTestId("cohort-chips");
+    await chips.getByRole("button", { name: ALL_COHORTS_RE }).click();
+    await chips.getByRole("button").nth(1).click();
 
     const afterCard = page
       .getByTestId("project-card")
