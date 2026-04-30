@@ -74,7 +74,7 @@ export function Hero({ project, isAuthenticated, viewerUserId }: HeroProps) {
         data-testid="project-detail-meta"
       >
         {project.cohort_label ? (
-          <Badge className="gap-1" variant="secondary">
+          <Badge className="gap-1" variant="outline">
             <RiGroupLine aria-hidden="true" className="size-3" />
             {project.cohort_label}
           </Badge>
