@@ -20,7 +20,7 @@ export default async function Image({ params }: PageProps) {
   const project = await fetchProjectDetail(params.id, null);
   const title = project?.title ?? "claude-hunt";
   const tagline = project?.tagline ?? "";
-  const cohort = project?.cohort_name ?? "";
+  const cohort = project?.cohort_label ?? "";
   const author = project?.author_display_name ?? "익명";
   const primary = project?.primaryImageUrl ?? "";
 

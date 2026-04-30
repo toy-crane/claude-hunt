@@ -15,6 +15,7 @@ function buildProject(
   return {
     user_id: "user-1",
     cohort_id: "cohort-1",
+    cohort_label: "LG전자 1기",
     cohort_name: "LGE-1",
     tagline: `${overrides.title} tagline`,
     project_url: "https://example.com",

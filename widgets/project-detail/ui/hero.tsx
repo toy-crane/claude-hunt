@@ -3,10 +3,8 @@ import {
   RiExternalLinkLine,
   RiGithubLine,
   RiGroupLine,
-  RiUserLine,
 } from "@remixicon/react";
 import { formatRelativeKo } from "@shared/lib/format-relative";
-import { Avatar, AvatarFallback, AvatarImage } from "@shared/ui/avatar";
 import { Badge } from "@shared/ui/badge";
 import { Button } from "@shared/ui/button";
 import Link from "next/link";
@@ -23,16 +21,14 @@ export interface HeroProps {
 /**
  * Read-only header for the project detail page. Lays out the title,
  * full tagline, meta line (cohort · author · time), the primary
- * image gallery, the action row (vote + Visit project, Pattern A),
- * and a conditional GitHub text link below. Owner edit/delete
- * controls render in the top-right when the viewer owns the project.
- * Anonymous visitors see exactly the same DOM minus the controls.
+ * image gallery, and the Visit-project CTA. The upvote sits in the
+ * header's top-right next to optional owner controls so the primary
+ * action is visible immediately.
  */
 export function Hero({ project, isAuthenticated, viewerUserId }: HeroProps) {
   const ownedByViewer =
     viewerUserId != null && project.user_id === viewerUserId;
   const submittedAt = formatRelativeKo(project.created_at);
-  const authorInitial = (project.author_display_name ?? "익명").charAt(0);
 
   return (
     <article className="flex flex-col gap-4">
@@ -55,41 +51,37 @@ export function Hero({ project, isAuthenticated, viewerUserId }: HeroProps) {
             {project.tagline}
           </p>
         </div>
-        {ownedByViewer ? (
-          <OwnerControls projectId={project.id} projectTitle={project.title} />
-        ) : null}
+        <div className="flex shrink-0 items-start gap-2">
+          <VoteButton
+            alreadyVoted={project.viewer_has_voted}
+            isAuthenticated={isAuthenticated}
+            ownedByViewer={ownedByViewer}
+            projectId={project.id}
+            variant="inline"
+            voteCount={project.vote_count}
+          />
+          {ownedByViewer ? (
+            <OwnerControls
+              projectId={project.id}
+              projectTitle={project.title}
+            />
+          ) : null}
+        </div>
       </header>
 
       <div
         className="flex flex-wrap items-center gap-2 text-muted-foreground text-sm"
         data-testid="project-detail-meta"
       >
-        {project.cohort_name ? (
-          <Badge className="gap-1" variant="secondary">
+        {project.cohort_label ? (
+          <Badge className="gap-1" variant="outline">
             <RiGroupLine aria-hidden="true" className="size-3" />
-            {project.cohort_name}
+            {project.cohort_label}
           </Badge>
         ) : null}
         <span aria-hidden="true">·</span>
-        <span className="inline-flex items-center gap-1.5">
-          <Avatar className="size-5">
-            {project.author_avatar_url ? (
-              <AvatarImage
-                alt={project.author_display_name ?? ""}
-                src={project.author_avatar_url}
-              />
-            ) : null}
-            <AvatarFallback>
-              {authorInitial === "" ? (
-                <RiUserLine aria-label="작성자" />
-              ) : (
-                authorInitial
-              )}
-            </AvatarFallback>
-          </Avatar>
-          <span className="text-foreground">
-            {project.author_display_name ?? "익명"}
-          </span>
+        <span className="text-foreground">
+          {project.author_display_name ?? "익명"}
         </span>
         {submittedAt ? (
           <>
@@ -104,26 +96,16 @@ export function Hero({ project, isAuthenticated, viewerUserId }: HeroProps) {
       ) : null}
 
       <div className="flex flex-col gap-2" data-testid="project-detail-actions">
-        <div className="flex items-stretch gap-3">
-          <VoteButton
-            alreadyVoted={project.viewer_has_voted}
-            isAuthenticated={isAuthenticated}
-            ownedByViewer={ownedByViewer}
-            projectId={project.id}
-            variant="stacked"
-            voteCount={project.vote_count}
-          />
-          <Button asChild className="gap-2">
-            <a
-              href={project.project_url}
-              rel="noopener noreferrer"
-              target="_blank"
-            >
-              <RiExternalLinkLine aria-hidden="true" />
-              Visit project
-            </a>
-          </Button>
-        </div>
+        <Button asChild className="gap-2 self-end" size="lg">
+          <a
+            href={project.project_url}
+            rel="noopener noreferrer"
+            target="_blank"
+          >
+            <RiExternalLinkLine aria-hidden="true" />
+            프로젝트 방문하기
+          </a>
+        </Button>
         {project.github_url ? (
           <a
             className="inline-flex w-fit items-center gap-1.5 text-muted-foreground text-sm hover:text-foreground"

@@ -21,7 +21,7 @@ export async function generateMetadata({
     };
   }
   const description = project.tagline;
-  const cohort = project.cohort_name ? ` · ${project.cohort_name}` : "";
+  const cohort = project.cohort_label ? ` · ${project.cohort_label}` : "";
   return {
     title: `${project.title}${cohort} — claude-hunt`,
     description,
@@ -58,7 +58,7 @@ export default async function Page({ params }: PageProps) {
   return (
     <>
       <Header />
-      <main className="mx-auto flex min-h-svh w-full max-w-3xl flex-col gap-6 bg-background p-6 text-foreground">
+      <main className="mx-auto flex min-h-svh w-full max-w-3xl flex-col gap-6 bg-background p-6 pb-24 text-foreground">
         <Hero
           isAuthenticated={Boolean(viewer)}
           project={project}

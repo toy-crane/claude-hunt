@@ -11,6 +11,7 @@ select
   p.user_id,
   p.cohort_id,
   c.name as cohort_name,
+  c.label as cohort_label,
   p.title,
   p.tagline,
   p.project_url,
