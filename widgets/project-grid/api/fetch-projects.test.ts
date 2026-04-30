@@ -29,7 +29,7 @@ const ROW_A = {
   title: "Alpha",
   tagline: "tag",
   project_url: "https://a.example.com",
-  screenshot_path: "u1/p1.png",
+  primary_image_path: "u1/p1.png",
   vote_count: 5,
   author_display_name: "Alice",
   author_avatar_url: null,
@@ -164,7 +164,7 @@ describe("fetchTopProjects", () => {
     expect(limitSpy).toHaveBeenCalledWith(6);
   });
 
-  it("resolves each row's screenshot_path to a public URL", async () => {
+  it("resolves each row's primary_image_path to a public URL", async () => {
     topProjectsSelectMock.mockReturnValue({
       order: vi.fn().mockReturnValue({
         order: vi.fn().mockReturnValue({
@@ -185,12 +185,12 @@ describe("fetchTopProjects", () => {
     expect(topStorageFromMock).toHaveBeenCalledWith("project-screenshots");
   });
 
-  it("returns an empty string for rows with a null screenshot_path", async () => {
+  it("returns an empty string for rows with a null primary_image_path", async () => {
     topProjectsSelectMock.mockReturnValue({
       order: vi.fn().mockReturnValue({
         order: vi.fn().mockReturnValue({
           limit: vi.fn().mockResolvedValue({
-            data: [{ ...ROW_A, screenshot_path: null }],
+            data: [{ ...ROW_A, primary_image_path: null }],
             error: null,
           }),
         }),

@@ -98,14 +98,16 @@ select throws_ok(
   'invalid github_url (not a github.com address) is rejected by CHECK'
 );
 
--- ─── primary_image_path coalesce behavior ──────────────────────────
--- A row with screenshot_path but empty images should expose screenshot_path
--- via the view's coalesce shim.
+-- ─── primary_image_path projection ─────────────────────────────────
+-- The view derives primary_image_path solely from images[0].path.
+-- The legacy screenshot_path column on the base table is intentionally
+-- ignored — a row with screenshot_path set but images empty exposes
+-- a NULL primary_image_path.
 
 select results_eq(
   $$select primary_image_path from public.projects_with_vote_count where id = current_setting('test.project_id')::uuid$$,
-  $$values ('seed/x.webp')$$,
-  'primary_image_path falls back to screenshot_path when images is empty'
+  $$values (cast(null as text))$$,
+  'primary_image_path is null when images is empty (no fallback to screenshot_path)'
 );
 
 -- After populating images[0], primary_image_path should reflect that.

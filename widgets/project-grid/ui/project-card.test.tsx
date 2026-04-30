@@ -46,7 +46,6 @@ function buildProject(
     title: "My App",
     tagline: "A cool tool",
     project_url: "https://myapp.com",
-    screenshot_path: "user-1/screenshot.png",
     images: [{ path: "user-1/screenshot.png" }],
     primary_image_path: "user-1/screenshot.png",
     github_url: null,
@@ -413,7 +412,7 @@ describe("ProjectCard — desktop hover preview popover", () => {
     const user = userEvent.setup();
     render(
       <ProjectCard
-        project={buildProject({ screenshot_path: null })}
+        project={buildProject({ images: [] })}
         rank={1}
         screenshotUrl=""
       />
@@ -433,7 +432,7 @@ describe("ProjectCard — desktop hover preview popover", () => {
         project={buildProject({
           id: "proj-empty",
           project_url: "https://myapp.com",
-          screenshot_path: null,
+          images: [],
         })}
         rank={1}
         screenshotUrl=""

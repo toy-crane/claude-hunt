@@ -75,13 +75,6 @@ async function _fetchProjectDetail(
   const imageUrls = images.map(
     (img) => screenshots.getPublicUrl(img.path).data.publicUrl
   );
-  // Fallback for legacy rows that might still rely on screenshot_path
-  // before the backfill completes.
-  if (imageUrls.length === 0 && row.primary_image_path) {
-    imageUrls.push(
-      screenshots.getPublicUrl(row.primary_image_path).data.publicUrl
-    );
-  }
 
   return {
     id: row.id,
