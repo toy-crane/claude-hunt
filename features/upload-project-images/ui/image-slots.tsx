@@ -1,7 +1,12 @@
 "use client";
 
 import { MAX_PROJECT_IMAGES } from "@entities/project";
-import { RiAddLine, RiCloseLine, RiDraggable } from "@remixicon/react";
+import {
+  RiAddLine,
+  RiCloseLine,
+  RiDraggable,
+  RiUploadCloud2Line,
+} from "@remixicon/react";
 import {
   ALLOWED_SCREENSHOT_MIME_TYPES,
   validateScreenshotFile,
@@ -13,7 +18,7 @@ import {
   SortableItemHandle,
 } from "@shared/ui/sortable";
 import NextImage from "next/image";
-import { useCallback, useEffect, useId, useRef } from "react";
+import { useCallback, useEffect, useId, useRef, useState } from "react";
 
 export interface ImageSlot {
   file: File;
@@ -29,10 +34,6 @@ export interface ImageSlotsProps {
 }
 
 const ACCEPT = ALLOWED_SCREENSHOT_MIME_TYPES.join(",");
-
-// Stable string keys for the empty trailing thumb slots. Indexes
-// would change when items reorder, so we use named placeholders.
-const EMPTY_THUMB_KEYS = ["empty-1", "empty-2", "empty-3", "empty-4"] as const;
 
 function makeSlotId(): string {
   return `slot-${Date.now().toString(36)}-${Math.random()
@@ -62,6 +63,7 @@ export function ImageSlots({
 }: ImageSlotsProps) {
   const inputId = useId();
   const inputRef = useRef<HTMLInputElement | null>(null);
+  const [dragging, setDragging] = useState(false);
 
   // Track every preview URL we've created so we can revoke on remove
   // and on unmount. revokeObjectURL is a no-op for non-blob URLs, so
@@ -123,7 +125,43 @@ export function ImageSlots({
     [value, onChange]
   );
 
-  const empties = MAX_PROJECT_IMAGES - value.length;
+  const canAddMore = value.length < MAX_PROJECT_IMAGES;
+
+  const handleDragOver = useCallback(
+    (e: React.DragEvent) => {
+      if (disabled || !canAddMore) {
+        return;
+      }
+      // Required so the browser doesn't open the file in a new tab on drop.
+      e.preventDefault();
+      setDragging(true);
+    },
+    [disabled, canAddMore]
+  );
+
+  const handleDragLeave = useCallback((e: React.DragEvent) => {
+    // dragleave fires when crossing into a child element too — ignore
+    // those by checking whether the cursor is still inside the box.
+    if (e.currentTarget.contains(e.relatedTarget as Node | null)) {
+      return;
+    }
+    setDragging(false);
+  }, []);
+
+  const handleDrop = useCallback(
+    (e: React.DragEvent) => {
+      e.preventDefault();
+      setDragging(false);
+      if (disabled) {
+        return;
+      }
+      if (e.dataTransfer.files && e.dataTransfer.files.length > 0) {
+        handleAdd(e.dataTransfer.files);
+      }
+    },
+    [disabled, handleAdd]
+  );
+
   const primary = value[0] ?? null;
   const thumbs = value.slice(1);
 
@@ -152,7 +190,6 @@ export function ImageSlots({
         strategy="grid"
         value={value}
       >
-        {/* Primary slot (16:10) — when filled, renders SortableItem; when empty, renders an upload placeholder */}
         {primary ? (
           <SortableItem
             className="relative block aspect-[16/10] w-full overflow-hidden rounded-md border bg-muted"
@@ -184,72 +221,83 @@ export function ImageSlots({
           </SortableItem>
         ) : (
           <button
-            className="relative flex aspect-[16/10] w-full flex-col items-center justify-center gap-1 rounded-md border border-dashed bg-muted/40 text-muted-foreground hover:bg-muted/60"
+            className={cn(
+              "relative flex aspect-[16/10] w-full flex-col items-center justify-center gap-2 rounded-md border border-dashed bg-muted/40 text-muted-foreground transition-colors hover:bg-muted/60",
+              dragging && "border-primary bg-primary/5 text-primary"
+            )}
             data-testid="image-slot-primary-empty"
             disabled={disabled}
             onClick={() => inputRef.current?.click()}
+            onDragLeave={handleDragLeave}
+            onDragOver={handleDragOver}
+            onDrop={handleDrop}
             type="button"
           >
-            <RiAddLine className="size-6" />
-            <span className="text-xs">대표 이미지 추가 (필수)</span>
+            <RiUploadCloud2Line className="size-8" />
+            <span className="font-medium text-sm">
+              이미지를 끌어다 놓거나 클릭해서 추가
+            </span>
+            <span className="text-xs">최대 {MAX_PROJECT_IMAGES}장</span>
           </button>
         )}
 
-        {/* Secondary slots — 4 in a row */}
-        <div className="grid grid-cols-4 gap-2">
-          {thumbs.map((slot) => (
-            <SortableItem
-              className="relative block aspect-square overflow-hidden rounded-md border bg-muted"
-              data-testid="image-slot-thumb-filled"
-              key={slot.id}
-              value={slot.id}
-            >
-              <NextImage
-                alt="썸네일"
-                className="object-cover"
-                fill
-                sizes="120px"
-                src={slot.preview}
-              />
-              <SortableItemHandle className="absolute top-1 left-1 inline-flex size-5 items-center justify-center rounded-sm bg-background/80 text-foreground backdrop-blur hover:bg-background">
-                <RiDraggable aria-label="순서 변경" className="size-3" />
-              </SortableItemHandle>
+        {primary ? (
+          <div className="grid grid-cols-4 gap-2">
+            {thumbs.map((slot) => (
+              <SortableItem
+                className="relative block aspect-square overflow-hidden rounded-md border bg-muted"
+                data-testid="image-slot-thumb-filled"
+                key={slot.id}
+                value={slot.id}
+              >
+                <NextImage
+                  alt="썸네일"
+                  className="object-cover"
+                  fill
+                  sizes="120px"
+                  src={slot.preview}
+                />
+                <SortableItemHandle className="absolute top-1 left-1 inline-flex size-5 items-center justify-center rounded-sm bg-background/80 text-foreground backdrop-blur hover:bg-background">
+                  <RiDraggable aria-label="순서 변경" className="size-3" />
+                </SortableItemHandle>
+                <button
+                  aria-label="썸네일 이미지 제거"
+                  className="absolute top-1 right-1 inline-flex size-5 items-center justify-center rounded-sm bg-background/80 text-foreground backdrop-blur hover:bg-background"
+                  disabled={disabled}
+                  onClick={() => handleRemove(slot.id)}
+                  type="button"
+                >
+                  <RiCloseLine className="size-3" />
+                </button>
+              </SortableItem>
+            ))}
+            {canAddMore ? (
               <button
-                aria-label="썸네일 이미지 제거"
-                className="absolute top-1 right-1 inline-flex size-5 items-center justify-center rounded-sm bg-background/80 text-foreground backdrop-blur hover:bg-background"
+                aria-label="이미지 추가"
+                className={cn(
+                  "flex aspect-square items-center justify-center rounded-md border border-dashed bg-muted/40 text-muted-foreground transition-colors hover:bg-muted/60",
+                  dragging && "border-primary bg-primary/5 text-primary"
+                )}
+                data-testid="image-slot-thumb-empty"
                 disabled={disabled}
-                onClick={() => handleRemove(slot.id)}
+                onClick={() => inputRef.current?.click()}
+                onDragLeave={handleDragLeave}
+                onDragOver={handleDragOver}
+                onDrop={handleDrop}
                 type="button"
               >
-                <RiCloseLine className="size-3" />
+                <RiAddLine className="size-5" />
               </button>
-            </SortableItem>
-          ))}
-          {EMPTY_THUMB_KEYS.slice(
-            0,
-            Math.max(0, empties - (primary ? 0 : 1))
-          ).map((emptyKey) => (
-            <button
-              className={cn(
-                "flex aspect-square flex-col items-center justify-center gap-0.5 rounded-md border border-dashed bg-muted/40 text-muted-foreground hover:bg-muted/60"
-              )}
-              data-testid="image-slot-thumb-empty"
-              disabled={disabled || empties === 0}
-              key={emptyKey}
-              onClick={() => inputRef.current?.click()}
-              type="button"
-            >
-              <RiAddLine className="size-4" />
-              <span className="text-[10px]">추가</span>
-            </button>
-          ))}
-        </div>
+            ) : null}
+          </div>
+        ) : null}
       </Sortable>
 
-      <p className="text-muted-foreground text-xs">
-        첫 번째 이미지가 대표 이미지(보드 썸네일·공유 카드)로 쓰여요. 드래그로
-        순서를 바꿀 수 있어요. JPEG · PNG · WebP, 한 장당 최대 25 MB.
-      </p>
+      {primary ? (
+        <p className="text-right text-muted-foreground text-xs tabular-nums">
+          {value.length} / {MAX_PROJECT_IMAGES}
+        </p>
+      ) : null}
     </div>
   );
 }
