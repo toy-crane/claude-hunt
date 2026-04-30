@@ -8,9 +8,9 @@ import {
 import { Avatar, AvatarFallback, AvatarImage } from "@shared/ui/avatar";
 import { Badge } from "@shared/ui/badge";
 import { Button } from "@shared/ui/button";
-import NextImage from "next/image";
 import Link from "next/link";
 import type { ProjectDetail } from "../api/queries";
+import { ImageGallery } from "./image-gallery";
 
 const MINUTE_MS = 60_000;
 const HOUR_MS = 60 * MINUTE_MS;
@@ -124,19 +124,9 @@ export function Hero({ project, isAuthenticated, viewerUserId }: HeroProps) {
         ) : null}
       </div>
 
-      {/* Primary image — full gallery comes in T9 */}
-      {project.primaryImageUrl ? (
-        <div className="relative aspect-[16/10] w-full overflow-hidden rounded-md border">
-          <NextImage
-            alt={`${project.title} 스크린샷`}
-            className="object-cover"
-            data-testid="project-detail-primary-image"
-            fill
-            priority
-            sizes="(max-width: 768px) 100vw, 768px"
-            src={project.primaryImageUrl}
-          />
-        </div>
+      {/* Image gallery (primary + thumb strip + arrows; arrows wrap) */}
+      {project.imageUrls.length > 0 ? (
+        <ImageGallery imageUrls={project.imageUrls} title={project.title} />
       ) : null}
 
       {/* Action row (Pattern A): vote pill + Visit project. GitHub link below. */}
