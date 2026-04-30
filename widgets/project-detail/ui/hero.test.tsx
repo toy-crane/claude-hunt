@@ -37,6 +37,14 @@ vi.mock("@features/toggle-vote", () => ({
   ),
 }));
 
+// Mock OwnerControls so the test doesn't pull in the deleteProject
+// server action (which loads env at import time).
+vi.mock("./owner-controls", () => ({
+  OwnerControls: () => (
+    <div data-testid="project-detail-owner-controls">owner-controls</div>
+  ),
+}));
+
 function buildProject(overrides: Partial<ProjectDetail> = {}): ProjectDetail {
   return {
     id: "proj-1",

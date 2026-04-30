@@ -1,5 +1,6 @@
 "use server";
 
+import type { ProjectImage } from "@entities/project";
 import { requireAuth } from "@shared/api/supabase/require-auth";
 import { SCREENSHOT_BUCKET } from "@shared/config/storage";
 import { getZodErrorMessage } from "@shared/lib/validation";
@@ -13,8 +14,8 @@ export interface EditProjectResult {
 
 /**
  * RLS authorizes the UPDATE (ownership), so spoofed ids return 0 rows.
- * Previous screenshot cleanup is best-effort: storage errors must not
- * fail the user-visible save (spec invariant).
+ * Diffs old vs. new images and best-effort removes orphaned storage
+ * objects — failures must not fail the user-visible save.
  */
 export async function editProject(
   raw: EditProjectInput
@@ -34,28 +35,35 @@ export async function editProject(
   }
   const { supabase } = auth;
 
-  let previousScreenshotPath: string | null = null;
-  if (input.screenshotPath) {
-    const { data: current } = await supabase
-      .from("projects")
-      .select("screenshot_path")
-      .eq("id", input.projectId)
-      .maybeSingle();
-    previousScreenshotPath = current?.screenshot_path ?? null;
+  // Read the current images so we can diff and remove orphans.
+  const { data: current } = await supabase
+    .from("projects")
+    .select("images, screenshot_path")
+    .eq("id", input.projectId)
+    .maybeSingle();
+  const previousPaths = new Set<string>();
+  if (Array.isArray(current?.images)) {
+    for (const img of current.images as unknown as ProjectImage[]) {
+      if (img && typeof img.path === "string") {
+        previousPaths.add(img.path);
+      }
+    }
+  }
+  if (current?.screenshot_path) {
+    previousPaths.add(current.screenshot_path);
   }
 
-  const update: Record<string, string> = {
-    title: input.title,
-    tagline: input.tagline,
-    project_url: input.projectUrl,
-  };
-  if (input.screenshotPath) {
-    update.screenshot_path = input.screenshotPath;
-  }
+  const nextPaths = new Set(input.imagePaths);
 
   const { data, error } = await supabase
     .from("projects")
-    .update(update)
+    .update({
+      title: input.title,
+      tagline: input.tagline,
+      project_url: input.projectUrl,
+      github_url: input.githubUrl ?? null,
+      images: input.imagePaths.map((path) => ({ path })),
+    })
     .eq("id", input.projectId)
     .select("id");
 
@@ -69,16 +77,14 @@ export async function editProject(
     };
   }
 
-  if (
-    input.screenshotPath &&
-    previousScreenshotPath &&
-    previousScreenshotPath !== input.screenshotPath
-  ) {
-    await supabase.storage
-      .from(SCREENSHOT_BUCKET)
-      .remove([previousScreenshotPath]);
+  // Best-effort: remove storage objects that no longer appear in the
+  // saved image list.
+  const orphans = [...previousPaths].filter((p) => !nextPaths.has(p));
+  if (orphans.length > 0) {
+    await supabase.storage.from(SCREENSHOT_BUCKET).remove(orphans);
   }
 
   revalidatePath("/");
+  revalidatePath(`/projects/${input.projectId}`);
   return { ok: true };
 }

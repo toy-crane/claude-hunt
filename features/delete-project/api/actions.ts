@@ -1,8 +1,13 @@
 "use server";
 
+import type { ProjectImage } from "@entities/project";
 import { requireAuth } from "@shared/api/supabase/require-auth";
 import { SCREENSHOT_BUCKET } from "@shared/config/storage";
 import { revalidatePath } from "next/cache";
+
+export interface DeleteProjectInput {
+  projectId: string;
+}
 
 export interface DeleteProjectResult {
   error?: string;
@@ -12,11 +17,14 @@ export interface DeleteProjectResult {
 /**
  * RLS gates the DELETE, so a spoofed projectId returns 0 rows and
  * surfaces as a forbidden error. Storage removal is best-effort: a
- * missing/cleaned object must not block row deletion.
+ * missing/cleaned object must not block row deletion. Removes every
+ * path in `images[]` plus the legacy `screenshot_path` if present.
  */
 export async function deleteProject(
-  projectId: string
+  input: DeleteProjectInput | string
 ): Promise<DeleteProjectResult> {
+  // Backwards-compat: callers used to pass projectId as a bare string.
+  const projectId = typeof input === "string" ? input : input.projectId;
   if (!projectId || typeof projectId !== "string") {
     return { ok: false, error: "Invalid project id" };
   }
@@ -29,7 +37,7 @@ export async function deleteProject(
 
   const { data: project } = await supabase
     .from("projects")
-    .select("screenshot_path")
+    .select("images, screenshot_path")
     .eq("id", projectId)
     .maybeSingle();
 
@@ -49,10 +57,19 @@ export async function deleteProject(
     };
   }
 
+  const orphans = new Set<string>();
+  if (Array.isArray(project?.images)) {
+    for (const img of project.images as unknown as ProjectImage[]) {
+      if (img && typeof img.path === "string") {
+        orphans.add(img.path);
+      }
+    }
+  }
   if (project?.screenshot_path) {
-    await supabase.storage
-      .from(SCREENSHOT_BUCKET)
-      .remove([project.screenshot_path]);
+    orphans.add(project.screenshot_path);
+  }
+  if (orphans.size > 0) {
+    await supabase.storage.from(SCREENSHOT_BUCKET).remove([...orphans]);
   }
 
   revalidatePath("/");

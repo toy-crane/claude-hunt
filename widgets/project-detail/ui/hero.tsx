@@ -11,6 +11,7 @@ import { Button } from "@shared/ui/button";
 import Link from "next/link";
 import type { ProjectDetail } from "../api/queries";
 import { ImageGallery } from "./image-gallery";
+import { OwnerControls } from "./owner-controls";
 
 const MINUTE_MS = 60_000;
 const HOUR_MS = 60 * MINUTE_MS;
@@ -73,15 +74,20 @@ export function Hero({ project, isAuthenticated, viewerUserId }: HeroProps) {
         </Link>
       </div>
 
-      {/* Title + tagline */}
-      <header className="flex flex-col gap-2">
-        <h1 className="font-heading font-medium text-2xl">{project.title}</h1>
-        <p
-          className="whitespace-pre-line text-base leading-relaxed"
-          data-testid="project-detail-tagline"
-        >
-          {project.tagline}
-        </p>
+      {/* Title + tagline + owner controls (icons top-right) */}
+      <header className="flex items-start justify-between gap-3">
+        <div className="flex min-w-0 flex-col gap-2">
+          <h1 className="font-heading font-medium text-2xl">{project.title}</h1>
+          <p
+            className="whitespace-pre-line text-base leading-relaxed"
+            data-testid="project-detail-tagline"
+          >
+            {project.tagline}
+          </p>
+        </div>
+        {ownedByViewer ? (
+          <OwnerControls projectId={project.id} projectTitle={project.title} />
+        ) : null}
       </header>
 
       {/* Meta line: cohort · author · time */}
