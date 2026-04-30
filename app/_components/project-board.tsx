@@ -76,8 +76,8 @@ export function ProjectBoard({
   const screenshotUrlMap = useMemo(() => {
     const map = new Map<string, string>();
     for (const p of projects) {
-      if (p.screenshot_path) {
-        map.set(p.screenshot_path, p.screenshotUrl);
+      if (p.primary_image_path) {
+        map.set(p.primary_image_path, p.screenshotUrl);
       }
     }
     return map;

@@ -17,8 +17,8 @@ export interface ProjectGridProps {
   /** Vote button slot forwarded to each row. */
   renderVoteButton?: (project: ProjectWithVoteCount) => React.ReactNode;
   /**
-   * Maps a `screenshot_path` from the view to a fetchable URL. Injected by
-   * the RSC page so this component can stay framework-agnostic and
+   * Maps a `primary_image_path` from the view to a fetchable URL. Injected
+   * by the RSC page so this component can stay framework-agnostic and
    * testable without a supabase client.
    */
   resolveScreenshotUrl: (path: string) => string;
@@ -78,7 +78,7 @@ export function ProjectGrid({
                 renderOwnerActions={renderOwnerActions}
                 renderVoteButton={renderVoteButton}
                 screenshotUrl={resolveScreenshotUrl(
-                  project.screenshot_path ?? ""
+                  project.primary_image_path ?? ""
                 )}
                 viewerUserId={viewerUserId}
               />
