@@ -7,6 +7,7 @@ export interface ProjectDetail {
   author_avatar_url: string | null;
   author_display_name: string | null;
   cohort_id: string | null;
+  cohort_label: string | null;
   cohort_name: string | null;
   created_at: string;
   github_url: string | null;
@@ -86,6 +87,7 @@ async function _fetchProjectDetail(
     id: row.id,
     user_id: row.user_id ?? "",
     cohort_id: row.cohort_id ?? null,
+    cohort_label: row.cohort_label ?? null,
     cohort_name: row.cohort_name ?? null,
     title: row.title ?? "",
     tagline: row.tagline ?? "",

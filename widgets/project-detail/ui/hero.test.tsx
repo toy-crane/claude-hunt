@@ -50,6 +50,7 @@ function buildProject(overrides: Partial<ProjectDetail> = {}): ProjectDetail {
     id: "proj-1",
     user_id: "user-alice",
     cohort_id: "cohort-1",
+    cohort_label: "LG전자 1기",
     cohort_name: "LGE-1",
     title: "My App",
     tagline: "A cool tool for tracking habits",
