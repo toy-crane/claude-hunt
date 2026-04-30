@@ -13,11 +13,12 @@ const ACCENT = "#c15f3c";
 const BORDER = "rgba(0,0,0,.1)";
 
 interface PageProps {
-  params: { id: string };
+  params: Promise<{ id: string }>;
 }
 
 export default async function Image({ params }: PageProps) {
-  const project = await fetchProjectDetail(params.id, null);
+  const { id } = await params;
+  const project = await fetchProjectDetail(id, null);
   const title = project?.title ?? "claude-hunt";
   const tagline = project?.tagline ?? "";
   const cohort = project?.cohort_label ?? "";
@@ -66,7 +67,7 @@ export default async function Image({ params }: PageProps) {
             {cohort ? (
               <div
                 style={{
-                  display: "inline-flex",
+                  display: "flex",
                   alignSelf: "flex-start",
                   fontSize: 22,
                   color: ACCENT,
