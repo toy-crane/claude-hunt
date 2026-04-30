@@ -14,7 +14,7 @@ export default async function Page() {
   return (
     <>
       <Header />
-      <main className="mx-auto flex min-h-svh w-full max-w-2xl flex-col gap-6 bg-background p-6 text-foreground">
+      <main className="mx-auto flex min-h-svh w-full max-w-2xl flex-col gap-6 bg-background px-6 pt-6 pb-24 text-foreground">
         <Link
           className="inline-flex w-fit items-center gap-1 text-muted-foreground text-sm hover:text-foreground"
           href="/"
