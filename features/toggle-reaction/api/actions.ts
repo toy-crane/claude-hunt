@@ -14,9 +14,9 @@ export interface ToggleReactionResult {
 
 /**
  * Adds the reaction if the (comment, viewer, emoji) row is missing,
- * removes it otherwise. The DB CHECK + UNIQUE from T3 ensures
- * crafted requests with non-allowlisted emojis or duplicate keys
- * fail at the storage layer.
+ * removes it otherwise. The DB-level CHECK and UNIQUE constraints
+ * reject non-allowlisted emojis or duplicate keys regardless of
+ * what the client sends.
  */
 export async function toggleReaction(
   raw: ToggleReactionInput

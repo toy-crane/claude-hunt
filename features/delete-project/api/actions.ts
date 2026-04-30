@@ -18,13 +18,12 @@ export interface DeleteProjectResult {
  * RLS gates the DELETE, so a spoofed projectId returns 0 rows and
  * surfaces as a forbidden error. Storage removal is best-effort: a
  * missing/cleaned object must not block row deletion. Removes every
- * path in `images[]` plus the legacy `screenshot_path` if present.
+ * path in `images[]` plus any remaining `screenshot_path` value.
  */
 export async function deleteProject(
-  input: DeleteProjectInput | string
+  input: DeleteProjectInput
 ): Promise<DeleteProjectResult> {
-  // Backwards-compat: callers used to pass projectId as a bare string.
-  const projectId = typeof input === "string" ? input : input.projectId;
+  const projectId = input.projectId;
   if (!projectId || typeof projectId !== "string") {
     return { ok: false, error: "Invalid project id" };
   }

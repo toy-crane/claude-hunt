@@ -6,6 +6,7 @@ import { EditCommentInline } from "@features/edit-comment";
 import { CommentForm } from "@features/leave-comment";
 import { ReactionRow } from "@features/toggle-reaction";
 import { RiMoreLine } from "@remixicon/react";
+import { formatRelativeKo } from "@shared/lib/format-relative";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -27,34 +28,6 @@ import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { toast } from "sonner";
 import type { CommentRow } from "../api/queries";
-
-const MINUTE_MS = 60_000;
-const HOUR_MS = 60 * MINUTE_MS;
-const DAY_MS = 24 * HOUR_MS;
-
-function formatRelative(iso: string): string {
-  if (!iso) {
-    return "";
-  }
-  const then = new Date(iso).getTime();
-  if (Number.isNaN(then)) {
-    return "";
-  }
-  const diff = Math.max(0, Date.now() - then);
-  const days = Math.floor(diff / DAY_MS);
-  if (days > 0) {
-    return `${days}일 전`;
-  }
-  const hours = Math.floor(diff / HOUR_MS);
-  if (hours > 0) {
-    return `${hours}시간 전`;
-  }
-  const mins = Math.floor(diff / MINUTE_MS);
-  if (mins > 0) {
-    return `${mins}분 전`;
-  }
-  return "방금";
-}
 
 export interface CommentItemProps {
   /** Hides the "답글하기" button. Replies use this to enforce depth-1. */
@@ -80,7 +53,7 @@ export function CommentItem({
   const [confirmOpen, setConfirmOpen] = useState(false);
   const author = comment.author_display_name ?? "익명";
   const initial = author.charAt(0);
-  const submittedAt = formatRelative(comment.created_at);
+  const submittedAt = formatRelativeKo(comment.created_at);
   const edited = isCommentEdited({
     created_at: comment.created_at,
     updated_at: comment.updated_at,

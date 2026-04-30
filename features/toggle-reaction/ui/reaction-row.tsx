@@ -67,14 +67,6 @@ export function ReactionRow({
     }
   }
 
-  function handleChipClick(emoji: ReactionEmoji) {
-    if (!isAuthenticated) {
-      router.push("/login");
-      return;
-    }
-    handleSelect(emoji);
-  }
-
   const visibleChips = REACTION_EMOJI.filter((e) => {
     const summary = byEmoji.get(e);
     return summary && summary.count > 0;
@@ -103,7 +95,7 @@ export function ReactionRow({
             data-testid="reaction-chip"
             disabled={pending}
             key={emoji}
-            onClick={() => handleChipClick(emoji)}
+            onClick={() => handleSelect(emoji)}
             type="button"
           >
             <span aria-hidden="true">{emoji}</span>

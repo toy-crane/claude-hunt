@@ -1,6 +1,7 @@
 import type { ProjectImage } from "@entities/project";
 import { createClient } from "@shared/api/supabase/server";
 import { SCREENSHOT_BUCKET } from "@shared/config/storage";
+import { cache } from "react";
 
 export interface ProjectDetail {
   author_avatar_url: string | null;
@@ -33,7 +34,9 @@ export interface ProjectDetail {
  *
  * Returns `null` when no row matches the id.
  */
-export async function fetchProjectDetail(
+export const fetchProjectDetail = cache(_fetchProjectDetail);
+
+async function _fetchProjectDetail(
   id: string,
   viewerUserId: string | null
 ): Promise<ProjectDetail | null> {

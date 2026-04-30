@@ -10,7 +10,7 @@ import { Spinner } from "@shared/ui/spinner";
 import { Textarea } from "@shared/ui/textarea";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { useEffect, useId, useState } from "react";
+import { useId, useState } from "react";
 import { toast } from "sonner";
 import { editProject } from "../api/actions";
 
@@ -102,19 +102,6 @@ export function EditForm({ initial }: EditFormProps) {
     });
     setSlots(reconciled);
   }
-
-  // Cleanup any object URLs whenever the slot set changes; safe to
-  // also call on existing public URLs (revokeObjectURL is a no-op
-  // for non-blob URLs).
-  useEffect(() => {
-    return () => {
-      for (const slot of slots) {
-        if (slot.kind === "new") {
-          URL.revokeObjectURL(slot.preview);
-        }
-      }
-    };
-  }, [slots]);
 
   async function handleSubmit(event: React.FormEvent<HTMLFormElement>) {
     event.preventDefault();

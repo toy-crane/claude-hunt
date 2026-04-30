@@ -54,10 +54,10 @@ export async function submitProject(
       tagline: input.tagline,
       project_url: input.projectUrl,
       github_url: input.githubUrl ?? null,
-      // New code writes images jsonb. screenshot_path is left null
-      // (T1 made it nullable). The board-side view's coalesce shim
-      // surfaces images[0] for new rows and screenshot_path for
-      // legacy rows during the transition window.
+      // screenshot_path stays null on new rows; the board view's
+      // coalesce shim surfaces images[0] for new rows and falls back
+      // to screenshot_path for legacy rows that haven't been
+      // re-saved yet.
       images: input.imagePaths.map((path) => ({ path })),
     })
     .select("id")

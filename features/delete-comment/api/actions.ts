@@ -14,10 +14,10 @@ export interface DeleteCommentResult {
 }
 
 /**
- * Deletes a comment owned by the signed-in viewer. Cascades remove
- * the comment's replies and reactions via FKs declared in T2/T3.
- * RLS gates the DELETE, so a crafted request from another visitor
- * affects 0 rows.
+ * Deletes a comment owned by the signed-in viewer. The cascade FKs
+ * on parent_comment_id and comment_reactions take care of replies +
+ * reactions. RLS gates the DELETE, so a crafted request from another
+ * visitor affects 0 rows.
  */
 export async function deleteComment(
   input: DeleteCommentInput

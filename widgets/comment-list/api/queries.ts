@@ -130,31 +130,48 @@ export async function fetchCommentThreads(
   viewerUserId: string | null
 ): Promise<CommentThread[]> {
   const supabase = await createClient();
-  const [commentsResult, reactionsResult] = await Promise.all([
-    supabase
-      .from("comments")
-      .select("id, user_id, parent_comment_id, body, created_at, updated_at")
-      .eq("project_id", projectId)
-      .order("created_at", { ascending: false }),
-    supabase.from("comment_reactions").select("comment_id, emoji, user_id"),
-  ]);
+  const commentsResult = await supabase
+    .from("comments")
+    .select("id, user_id, parent_comment_id, body, created_at, updated_at")
+    .eq("project_id", projectId)
+    .order("created_at", { ascending: false });
 
   if (commentsResult.error) {
     throw commentsResult.error;
   }
-  if (reactionsResult.error) {
-    throw reactionsResult.error;
-  }
 
   const commentRows = (commentsResult.data ?? []) as RawComment[];
+  const commentIds = commentRows.map((c) => c.id);
   const userIds = Array.from(
     new Set(commentRows.map((c) => c.user_id).filter(Boolean) as string[])
   );
 
-  const [profileMap, reactionMap] = [
-    await fetchProfileMap(supabase, userIds),
-    aggregateReactions(reactionsResult.data ?? [], viewerUserId),
-  ];
+  // Scope reactions to this project's comments. Without this filter the
+  // SELECT pulls every comment_reactions row in the database.
+  const reactionsResult =
+    commentIds.length === 0
+      ? {
+          data: [] as {
+            comment_id: string | null;
+            emoji: string | null;
+            user_id: string | null;
+          }[],
+          error: null,
+        }
+      : await supabase
+          .from("comment_reactions")
+          .select("comment_id, emoji, user_id")
+          .in("comment_id", commentIds);
+
+  if (reactionsResult.error) {
+    throw reactionsResult.error;
+  }
+
+  const profileMap = await fetchProfileMap(supabase, userIds);
+  const reactionMap = aggregateReactions(
+    reactionsResult.data ?? [],
+    viewerUserId
+  );
 
   const tops: CommentRow[] = [];
   const repliesByParent = new Map<string, CommentRow[]>();

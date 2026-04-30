@@ -39,7 +39,7 @@ export function DeleteButton({
   async function handleConfirm() {
     setError(null);
     setDeleting(true);
-    const result = await deleteProject(projectId);
+    const result = await deleteProject({ projectId });
     setDeleting(false);
     if (!result.ok) {
       setError(result.error ?? "프로젝트를 삭제할 수 없어요.");

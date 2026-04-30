@@ -5,6 +5,7 @@ import {
   RiGroupLine,
   RiUserLine,
 } from "@remixicon/react";
+import { formatRelativeKo } from "@shared/lib/format-relative";
 import { Avatar, AvatarFallback, AvatarImage } from "@shared/ui/avatar";
 import { Badge } from "@shared/ui/badge";
 import { Button } from "@shared/ui/button";
@@ -12,34 +13,6 @@ import Link from "next/link";
 import type { ProjectDetail } from "../api/queries";
 import { ImageGallery } from "./image-gallery";
 import { OwnerControls } from "./owner-controls";
-
-const MINUTE_MS = 60_000;
-const HOUR_MS = 60 * MINUTE_MS;
-const DAY_MS = 24 * HOUR_MS;
-
-function formatRelative(iso: string | null): string {
-  if (!iso) {
-    return "";
-  }
-  const then = new Date(iso).getTime();
-  if (Number.isNaN(then)) {
-    return "";
-  }
-  const diff = Math.max(0, Date.now() - then);
-  const days = Math.floor(diff / DAY_MS);
-  if (days > 0) {
-    return `${days}일 전`;
-  }
-  const hours = Math.floor(diff / HOUR_MS);
-  if (hours > 0) {
-    return `${hours}시간 전`;
-  }
-  const mins = Math.floor(diff / MINUTE_MS);
-  if (mins > 0) {
-    return `${mins}분 전`;
-  }
-  return "방금";
-}
 
 export interface HeroProps {
   isAuthenticated: boolean;
@@ -49,22 +22,20 @@ export interface HeroProps {
 
 /**
  * Read-only header for the project detail page. Lays out the title,
- * full tagline, meta line (cohort · author · time), the primary image,
- * the action row (vote + Visit project, Pattern A), and a conditional
- * GitHub text link below.
- *
- * Owner edit/delete affordances and the multi-image gallery land in
- * later tasks (T10, T9). Anonymous visitors see exactly the same DOM.
+ * full tagline, meta line (cohort · author · time), the primary
+ * image gallery, the action row (vote + Visit project, Pattern A),
+ * and a conditional GitHub text link below. Owner edit/delete
+ * controls render in the top-right when the viewer owns the project.
+ * Anonymous visitors see exactly the same DOM minus the controls.
  */
 export function Hero({ project, isAuthenticated, viewerUserId }: HeroProps) {
   const ownedByViewer =
     viewerUserId != null && project.user_id === viewerUserId;
-  const submittedAt = formatRelative(project.created_at);
+  const submittedAt = formatRelativeKo(project.created_at);
   const authorInitial = (project.author_display_name ?? "익명").charAt(0);
 
   return (
     <article className="flex flex-col gap-4">
-      {/* Back link */}
       <div>
         <Link
           className="inline-flex items-center gap-1 text-muted-foreground text-sm hover:text-foreground"
@@ -74,7 +45,6 @@ export function Hero({ project, isAuthenticated, viewerUserId }: HeroProps) {
         </Link>
       </div>
 
-      {/* Title + tagline + owner controls (icons top-right) */}
       <header className="flex items-start justify-between gap-3">
         <div className="flex min-w-0 flex-col gap-2">
           <h1 className="font-heading font-medium text-2xl">{project.title}</h1>
@@ -90,7 +60,6 @@ export function Hero({ project, isAuthenticated, viewerUserId }: HeroProps) {
         ) : null}
       </header>
 
-      {/* Meta line: cohort · author · time */}
       <div
         className="flex flex-wrap items-center gap-2 text-muted-foreground text-sm"
         data-testid="project-detail-meta"
@@ -130,12 +99,10 @@ export function Hero({ project, isAuthenticated, viewerUserId }: HeroProps) {
         ) : null}
       </div>
 
-      {/* Image gallery (primary + thumb strip + arrows; arrows wrap) */}
       {project.imageUrls.length > 0 ? (
         <ImageGallery imageUrls={project.imageUrls} title={project.title} />
       ) : null}
 
-      {/* Action row (Pattern A): vote pill + Visit project. GitHub link below. */}
       <div className="flex flex-col gap-2" data-testid="project-detail-actions">
         <div className="flex items-stretch gap-3">
           <VoteButton

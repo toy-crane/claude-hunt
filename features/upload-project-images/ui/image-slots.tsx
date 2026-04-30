@@ -63,7 +63,10 @@ export function ImageSlots({
   const inputId = useId();
   const inputRef = useRef<HTMLInputElement | null>(null);
 
-  // Cleanup object URLs when slots are removed.
+  // Track every preview URL we've created so we can revoke on remove
+  // and on unmount. revokeObjectURL is a no-op for non-blob URLs, so
+  // it's safe to call even on the public storage URLs that EditForm
+  // seeds in.
   const previewsRef = useRef(new Set<string>());
   useEffect(() => {
     const next = new Set(value.map((s) => s.preview));
@@ -74,6 +77,15 @@ export function ImageSlots({
     }
     previewsRef.current = next;
   }, [value]);
+  useEffect(
+    () => () => {
+      for (const url of previewsRef.current) {
+        URL.revokeObjectURL(url);
+      }
+      previewsRef.current = new Set();
+    },
+    []
+  );
 
   const handleAdd = useCallback(
     (incoming: FileList | File[]) => {

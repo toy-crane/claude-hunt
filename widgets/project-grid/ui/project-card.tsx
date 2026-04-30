@@ -1,4 +1,5 @@
 import type { ProjectWithVoteCount } from "@entities/vote";
+import { formatRelativeShort } from "@shared/lib/format-relative";
 import { cn } from "@shared/lib/utils";
 import {
   HoverCard,
@@ -43,34 +44,6 @@ export interface ProjectCardProps {
   viewerUserId?: string | null;
 }
 
-const MINUTE_MS = 60_000;
-const HOUR_MS = 60 * MINUTE_MS;
-const DAY_MS = 24 * HOUR_MS;
-
-function formatRelative(iso: string | null): string {
-  if (!iso) {
-    return "";
-  }
-  const then = new Date(iso).getTime();
-  if (Number.isNaN(then)) {
-    return "";
-  }
-  const diff = Math.max(0, Date.now() - then);
-  const days = Math.floor(diff / DAY_MS);
-  if (days > 0) {
-    return `${days}d`;
-  }
-  const hours = Math.floor(diff / HOUR_MS);
-  if (hours > 0) {
-    return `${hours}h`;
-  }
-  const mins = Math.floor(diff / MINUTE_MS);
-  if (mins > 0) {
-    return `${mins}m`;
-  }
-  return "방금";
-}
-
 export function ProjectCard({
   project,
   rank,
@@ -87,7 +60,7 @@ export function ProjectCard({
   // Card click navigates to the internal detail page. The external
   // project URL is exposed there via the "Visit project" CTA.
   const detailHref = project.id ? `/projects/${project.id}` : "/";
-  const submittedAt = formatRelative(project.created_at);
+  const submittedAt = formatRelativeShort(project.created_at);
   const hasRankDot = rank >= 1 && rank <= 3;
 
   const voteSlot = renderVoteButton ? renderVoteButton(project) : null;
