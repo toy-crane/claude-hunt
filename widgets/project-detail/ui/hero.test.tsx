@@ -3,7 +3,7 @@ import { describe, expect, it, vi } from "vitest";
 import type { ProjectDetail } from "../api/queries";
 import { Hero } from "./hero";
 
-const VISIT_BUTTON_NAME = /Visit project/i;
+const VISIT_BUTTON_NAME = /프로젝트 방문하기/;
 
 vi.mock("next/image", () => ({
   default: ({
@@ -84,12 +84,12 @@ describe("<Hero />", () => {
     expect(screen.getByTestId("project-detail-tagline")).toHaveTextContent(
       "A cool tool for tracking habits"
     );
-    expect(screen.getByText("LGE-1")).toBeInTheDocument();
+    expect(screen.getByText("LG전자 1기")).toBeInTheDocument();
     expect(screen.getByText("Alice")).toBeInTheDocument();
     expect(screen.getByTestId("vote-button")).toHaveTextContent("128");
   });
 
-  it("opens the project URL in a new tab via the Visit project button", () => {
+  it("opens the project URL in a new tab via the visit button", () => {
     render(
       <Hero
         isAuthenticated={false}
