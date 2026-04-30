@@ -1,0 +1,1003 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Wireframe: improve-project-detail-page</title>
+<script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
+<script src="https://unpkg.com/lucide@latest"></script>
+<style>
+  :root {
+    --w-bg: #f5f5f5;
+    --w-border: #ccc;
+    --w-text: #555;
+    --w-muted: #aaa;
+    --w-fill: #eee;
+  }
+
+  * {
+    font-family: ui-monospace, SFMono-Regular, "SF Mono", Menlo, Consolas, monospace;
+    color: var(--w-text);
+  }
+
+  body { background: var(--w-bg); }
+
+  /* Screen nav */
+  nav { position: sticky; top: 0; z-index: 40; background: var(--w-bg); border-bottom: 1px solid var(--w-border); }
+  nav button { cursor: pointer; font-size: 13px; }
+  nav button:hover { background: var(--w-fill); border-radius: 4px; }
+  nav button.active { font-weight: bold; border-bottom: 2px solid var(--w-text); }
+
+  .screen { display: none; }
+  .screen.active { display: block; }
+
+  /* Viewport toggle */
+  .vp-toggle button {
+    font-size: 12px; padding: 2px 8px;
+    border: 1px solid var(--w-border); cursor: pointer; background: white;
+  }
+  .vp-toggle button:first-child { border-radius: 4px 0 0 4px; }
+  .vp-toggle button:last-child { border-radius: 0 4px 4px 0; border-left: none; }
+  .vp-toggle button.active { background: var(--w-text); color: white; }
+
+  /* Mobile viewport frame */
+  body.viewport-mobile .screen-content {
+    max-width: 375px !important;
+    margin: 24px auto !important;
+    border: 2px solid var(--w-border);
+    border-radius: 24px;
+    min-height: 667px;
+    background: white;
+    box-shadow: 0 4px 24px rgba(0,0,0,0.08);
+    padding: 32px 16px !important;
+  }
+
+  /* Screen Notes */
+  .screen-notes {
+    background: #fffde7;
+    border-left: 3px solid #ffd54f;
+    padding: 12px 16px;
+    margin-top: 24px;
+    font-size: 13px;
+    border-radius: 0 4px 4px 0;
+  }
+  .screen-notes summary {
+    cursor: pointer;
+    font-weight: bold;
+    font-size: 12px;
+    color: #b0a050;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+  }
+  .screen-notes p { margin: 6px 0 2px; color: #777; }
+  .screen-notes ul { margin: 4px 0 0 16px; padding: 0; color: #777; }
+  .screen-notes li { margin: 2px 0; }
+
+  /* Wireframe-specific */
+  .w-page-card {
+    background: white;
+    border: 1px solid var(--w-border);
+    border-radius: 6px;
+  }
+  .w-input {
+    width: 100%;
+    border: 1px solid var(--w-border);
+    background: white;
+    border-radius: 4px;
+    padding: 8px 10px;
+    font-size: 13px;
+    color: var(--w-text);
+  }
+  .w-input.placeholder { color: var(--w-muted); }
+  .w-textarea { min-height: 56px; resize: vertical; }
+  .w-label { font-size: 12px; font-weight: 600; color: var(--w-text); }
+  .w-helper { font-size: 11px; color: var(--w-muted); }
+  .w-error { font-size: 11px; color: #c44; }
+  .w-btn-primary {
+    background: var(--w-text);
+    color: white !important;
+    border: none;
+    padding: 10px 14px;
+    border-radius: 6px;
+    font-size: 13px;
+    font-weight: 600;
+    width: 100%;
+    cursor: pointer;
+  }
+  .w-btn-primary * { color: white; }
+  .w-btn-ghost {
+    background: white;
+    border: 1px solid var(--w-border);
+    padding: 8px 10px;
+    border-radius: 4px;
+    font-size: 12px;
+    cursor: pointer;
+  }
+  /* Image slots */
+  .w-slot {
+    border: 1px dashed var(--w-border);
+    background: var(--w-fill);
+    border-radius: 4px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-direction: column;
+    gap: 4px;
+    color: var(--w-muted);
+    font-size: 11px;
+    position: relative;
+    aspect-ratio: 1 / 1;
+  }
+  .w-slot.primary { aspect-ratio: 16 / 10; }
+  .w-slot.filled {
+    border-style: solid;
+    background: var(--w-fill);
+    color: var(--w-text);
+  }
+  .w-slot.filled::after {
+    content: "× remove";
+    position: absolute;
+    top: 4px;
+    right: 4px;
+    font-size: 10px;
+    background: white;
+    border: 1px solid var(--w-border);
+    border-radius: 3px;
+    padding: 1px 5px;
+  }
+  .w-slot .w-badge {
+    position: absolute;
+    bottom: 4px;
+    left: 4px;
+    background: var(--w-text);
+    color: white;
+    font-size: 9px;
+    padding: 2px 5px;
+    border-radius: 3px;
+    letter-spacing: 0.05em;
+  }
+  .w-counter {
+    font-size: 11px;
+    color: var(--w-muted);
+    text-align: right;
+  }
+  /* Detail page bits */
+  .w-hero-image {
+    aspect-ratio: 16 / 10;
+    background: var(--w-fill);
+    border: 1px solid var(--w-border);
+    border-radius: 6px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--w-muted);
+    font-size: 12px;
+    position: relative;
+  }
+  .w-hero-image .w-arrow {
+    position: absolute;
+    top: 50%;
+    transform: translateY(-50%);
+    background: white;
+    border: 1px solid var(--w-border);
+    border-radius: 999px;
+    width: 32px;
+    height: 32px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+  }
+  .w-hero-image .w-arrow.left { left: 8px; }
+  .w-hero-image .w-arrow.right { right: 8px; }
+  .w-thumb-strip {
+    display: flex;
+    gap: 6px;
+    margin-top: 8px;
+  }
+  .w-thumb-strip .w-thumb {
+    width: 56px;
+    aspect-ratio: 1 / 1;
+    background: var(--w-fill);
+    border: 1px solid var(--w-border);
+    border-radius: 4px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--w-muted);
+    font-size: 10px;
+    cursor: pointer;
+  }
+  .w-thumb-strip .w-thumb.active { border: 2px solid var(--w-text); }
+  .w-vote-pill {
+    border: 1px solid var(--w-border);
+    background: white;
+    border-radius: 8px;
+    padding: 6px 10px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 2px;
+    min-width: 56px;
+    cursor: pointer;
+    font-size: 11px;
+  }
+  .w-vote-pill .count {
+    font-size: 14px;
+    font-weight: 700;
+    color: var(--w-text);
+  }
+  .w-vote-pill.voted {
+    background: var(--w-text);
+    border-color: var(--w-text);
+  }
+  .w-vote-pill.voted *, .w-vote-pill.voted .count { color: white; }
+  .w-cta-primary {
+    flex: 1;
+    background: var(--w-text);
+    color: white !important;
+    border: none;
+    padding: 10px 14px;
+    border-radius: 6px;
+    font-size: 13px;
+    font-weight: 600;
+    cursor: pointer;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+  }
+  .w-cta-primary * { color: white; }
+  .w-cta-secondary {
+    flex: 1;
+    background: white;
+    border: 1px solid var(--w-border);
+    color: var(--w-text);
+    padding: 10px 14px;
+    border-radius: 6px;
+    font-size: 13px;
+    font-weight: 600;
+    cursor: pointer;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+  }
+  .w-meta-line {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 12px;
+    color: var(--w-muted);
+    flex-wrap: wrap;
+  }
+  .w-avatar {
+    width: 18px;
+    height: 18px;
+    border-radius: 999px;
+    background: var(--w-fill);
+    border: 1px solid var(--w-border);
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 9px;
+    color: var(--w-text);
+  }
+  .w-tag {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    border: 1px solid var(--w-border);
+    padding: 2px 6px;
+    border-radius: 999px;
+    font-size: 11px;
+    background: white;
+  }
+  .w-callout {
+    border: 1px dashed var(--w-border);
+    border-radius: 4px;
+    padding: 12px;
+    text-align: center;
+    color: var(--w-muted);
+    font-size: 12px;
+  }
+  .w-icon-btn {
+    width: 28px;
+    height: 28px;
+    border: 1px solid var(--w-border);
+    background: white;
+    border-radius: 4px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+  }
+  /* Comments */
+  .w-comment {
+    padding: 14px 0;
+    border-bottom: 1px solid var(--w-border);
+    display: flex;
+    gap: 10px;
+  }
+  .w-comment:last-child { border-bottom: none; }
+  .w-comment-body { flex: 1; min-width: 0; }
+  .w-comment-meta {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 11px;
+    color: var(--w-muted);
+    margin-bottom: 4px;
+  }
+  .w-comment-meta strong { font-size: 12px; color: var(--w-text); font-weight: 600; }
+  .w-comment-text {
+    font-size: 13px;
+    line-height: 1.5;
+    color: var(--w-text);
+    margin-bottom: 6px;
+    white-space: pre-wrap;
+    word-break: break-word;
+  }
+  .w-reaction-row {
+    display: flex;
+    gap: 4px;
+    align-items: center;
+    justify-content: space-between;
+  }
+  .w-reaction-group { display: flex; gap: 4px; flex-wrap: wrap; align-items: center; }
+  .w-reaction {
+    border: 1px solid var(--w-border);
+    background: var(--w-fill);
+    border-radius: 999px;
+    padding: 2px 8px;
+    font-size: 11px;
+    cursor: pointer;
+    display: inline-flex;
+    align-items: center;
+    gap: 3px;
+    color: var(--w-text);
+  }
+  .w-reaction.own {
+    background: var(--w-text);
+    border-color: var(--w-text);
+  }
+  .w-reaction.own, .w-reaction.own * { color: white; }
+  .w-reaction-add {
+    border: 1px dashed var(--w-border);
+    background: transparent;
+    border-radius: 999px;
+    padding: 2px 8px;
+    font-size: 11px;
+    cursor: pointer;
+    display: inline-flex;
+    align-items: center;
+    gap: 3px;
+    color: var(--w-muted);
+  }
+  .w-reaction-row .w-reply-link {
+    font-size: 11px;
+    color: var(--w-muted);
+    text-decoration: underline;
+    text-underline-offset: 2px;
+    cursor: pointer;
+    background: none;
+    border: none;
+    flex-shrink: 0;
+  }
+  .w-reply-thread {
+    margin-left: 36px;
+    padding-left: 12px;
+    border-left: 2px solid var(--w-border);
+  }
+  .w-comment-input {
+    border: 1px solid var(--w-border);
+    background: white;
+    border-radius: 6px;
+    padding: 10px 12px;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    min-height: 80px;
+  }
+  .w-comment-input textarea {
+    border: none;
+    outline: none;
+    width: 100%;
+    resize: none;
+    font-size: 13px;
+    color: var(--w-text);
+    background: transparent;
+    min-height: 36px;
+  }
+  .w-comment-input .w-input-footer {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    border-top: 1px dashed var(--w-border);
+    padding-top: 8px;
+  }
+  .w-anon-prompt {
+    border: 1px dashed var(--w-border);
+    background: var(--w-fill);
+    border-radius: 6px;
+    padding: 14px;
+    text-align: center;
+    color: var(--w-muted);
+    font-size: 12px;
+  }
+  .w-kebab {
+    border: none;
+    background: transparent;
+    cursor: pointer;
+    padding: 2px 4px;
+    color: var(--w-muted);
+    font-size: 16px;
+    line-height: 1;
+  }
+  .w-edited-tag {
+    font-size: 10px;
+    color: var(--w-muted);
+    font-style: italic;
+  }
+  /* Emoji picker popover (reaction add trigger) */
+  .w-emoji-popover {
+    background: white;
+    border: 1px solid var(--w-border);
+    border-radius: 8px;
+    box-shadow: 0 6px 20px rgba(0,0,0,0.1);
+    padding: 6px;
+    display: inline-flex;
+    gap: 2px;
+  }
+  .w-emoji-popover button {
+    width: 36px;
+    height: 36px;
+    border: none;
+    background: transparent;
+    border-radius: 4px;
+    font-size: 20px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+  .w-emoji-popover button:hover { background: var(--w-fill); }
+</style>
+</head>
+<body class="p-0 m-0 viewport-mobile">
+
+<nav class="flex items-center gap-4 px-6 py-2">
+  <span class="text-xs" style="color:var(--w-muted)">wireframe</span>
+  <button id="nav-0" onclick="show(0)" class="px-2 py-1">제출 페이지</button>
+  <button id="nav-1" onclick="show(1)" class="px-2 py-1">상세 페이지 (본문)</button>
+  <button id="nav-2" onclick="show(2)" class="px-2 py-1">상세 페이지 (댓글)</button>
+  <div class="vp-toggle flex ml-auto">
+    <button id="vp-desktop" onclick="setViewport('desktop')">Desktop</button>
+    <button id="vp-mobile" onclick="setViewport('mobile')" class="active">Mobile</button>
+  </div>
+</nav>
+
+<!-- ───────────────────────────────────────────────
+  Screen 0 — Submit page (multi-image + GitHub)
+─────────────────────────────────────────────── -->
+<div id="screen-0" class="screen" data-scenario="scenario-2">
+  <div class="screen-content @container max-w-2xl mx-auto p-6">
+
+    <h2 class="text-lg font-bold mb-5" style="color:var(--w-muted); border-bottom:1px solid var(--w-border); padding-bottom:8px;">
+      제출 페이지 — /projects/new (max-w-2xl, 672px)
+    </h2>
+
+    <!-- Mock site header -->
+    <header class="flex items-center justify-between pb-3 mb-4" style="border-bottom:1px solid var(--w-border)">
+      <a class="text-sm font-bold" style="color:var(--w-text)">claude-hunt</a>
+      <div class="flex items-center gap-2">
+        <button class="w-btn-ghost"><i data-lucide="user" class="w-3.5 h-3.5 inline-block"></i> Alice</button>
+      </div>
+    </header>
+
+    <!-- Back link -->
+    <a class="inline-flex items-center gap-1 text-xs mb-4" style="color:var(--w-muted)">
+      <i data-lucide="arrow-left" class="w-3.5 h-3.5"></i>
+      <span>보드로 돌아가기</span>
+    </a>
+
+    <!-- Page header -->
+    <div class="mb-6">
+      <h1 class="text-xl font-bold" style="color:var(--w-text)">프로젝트 제출</h1>
+      <p class="text-xs mt-1" style="color:var(--w-muted)">
+        코호트 <strong style="color:var(--w-text)">LGE-1</strong> · 제출하면 상세 페이지가 만들어지고 보드에 노출돼요
+      </p>
+    </div>
+
+    <!-- Form (no dialog wrapper) -->
+    <div class="w-page-card p-5">
+      <form class="flex flex-col gap-4">
+
+        <!-- 1. 제목 -->
+        <div class="flex flex-col gap-1.5">
+          <label class="w-label" for="f-title">제목</label>
+          <input id="f-title" class="w-input" value="My App">
+          <div class="flex items-center justify-between">
+            <span class="w-helper">최대 80자</span>
+            <span class="w-counter">6 / 80</span>
+          </div>
+        </div>
+
+        <!-- 2. 한 줄 소개 -->
+        <div class="flex flex-col gap-1.5">
+          <label class="w-label" for="f-tagline">한 줄 소개</label>
+          <textarea id="f-tagline" class="w-input w-textarea">A cool tool for tracking habits</textarea>
+          <div class="flex items-center justify-between">
+            <span class="w-helper">최대 140자</span>
+            <span class="w-counter">31 / 140</span>
+          </div>
+        </div>
+
+        <!-- 3. 프로젝트 URL -->
+        <div class="flex flex-col gap-1.5">
+          <label class="w-label" for="f-url">프로젝트 URL</label>
+          <input id="f-url" class="w-input" value="https://myapp.com">
+          <span class="w-helper">사용자가 실제로 들어가서 써볼 수 있는 주소</span>
+        </div>
+
+        <!-- 4. GitHub URL (옵션) — 신규 -->
+        <div class="flex flex-col gap-1.5">
+          <label class="w-label" for="f-github">
+            GitHub 저장소 <span class="font-normal" style="color:var(--w-muted)">(선택)</span>
+          </label>
+          <input id="f-github" class="w-input placeholder" value="https://github.com/" placeholder="https://github.com/owner/repo">
+          <span class="w-helper">상세 페이지에 'GitHub' 버튼이 추가돼요</span>
+        </div>
+
+        <!-- 5. 이미지 갤러리 (1 필수 + 4 옵션) — 신규 -->
+        <div class="flex flex-col gap-2">
+          <div class="flex items-center justify-between">
+            <label class="w-label">스크린샷</label>
+            <span class="w-counter">2 / 5</span>
+          </div>
+
+          <!-- Primary slot (full width, 16:10) -->
+          <div class="w-slot primary filled">
+            <i data-lucide="image" class="w-6 h-6"></i>
+            <span>screenshot-1.png</span>
+            <span class="w-badge">대표</span>
+          </div>
+
+          <!-- Secondary slots (row of 4 thumbs) -->
+          <div class="grid grid-cols-4 gap-2">
+            <div class="w-slot filled">
+              <i data-lucide="image" class="w-4 h-4"></i>
+              <span class="text-[10px]">img-2</span>
+            </div>
+            <div class="w-slot">
+              <i data-lucide="plus" class="w-4 h-4"></i>
+              <span>추가</span>
+            </div>
+            <div class="w-slot">
+              <i data-lucide="plus" class="w-4 h-4"></i>
+              <span>추가</span>
+            </div>
+            <div class="w-slot">
+              <i data-lucide="plus" class="w-4 h-4"></i>
+              <span>추가</span>
+            </div>
+          </div>
+
+          <span class="w-helper">첫 번째 이미지가 대표 이미지(보드 썸네일·공유 카드)로 쓰여요. 드래그로 순서 변경.</span>
+          <span class="w-helper">JPEG · PNG · WebP, 한 장당 최대 25 MB</span>
+        </div>
+
+        <!-- Submit -->
+        <div class="flex items-center gap-2 mt-2">
+          <button type="button" class="w-btn-ghost flex-1">취소</button>
+          <button type="submit" class="w-btn-primary flex-[2]">
+            프로젝트 제출
+          </button>
+        </div>
+
+      </form>
+    </div>
+
+    <div class="screen-notes">
+      <details open>
+        <summary>Notes</summary>
+        <p>인증된 학생이 프로젝트를 제출하는 페이지. 모달이 아닌 독립 라우트(`/projects/new`)로 분리.</p>
+        <ul>
+          <li>트리거: 보드의 "프로젝트 제출" 버튼 클릭 → 인증된 사용자면 이 페이지로 이동, 비인증이면 로그인 페이지로</li>
+          <li>인터랙션:
+            <ul>
+              <li>제목, 한 줄 소개, 프로젝트 URL, 스크린샷 1장은 필수</li>
+              <li>GitHub URL은 선택 — 입력 시 상세 페이지에 "GitHub" CTA가 추가됨</li>
+              <li>스크린샷은 첫 슬롯(대표)이 필수, 추가 4장은 옵션. 첫 장이 보드 썸네일/OG 이미지로 사용됨</li>
+              <li>썸네일을 드래그해 순서 변경 가능 (대표 이미지 변경 = 1번 슬롯에 놓기)</li>
+              <li>각 썸네일 우상단의 × 버튼으로 제거. 1번이 비면 2번이 자동으로 1번으로 승격</li>
+            </ul>
+          </li>
+          <li>전환:
+            <ul>
+              <li>제출 성공 → 새로 만들어진 상세 페이지(/projects/[id])로 리다이렉트</li>
+              <li>유효성 실패 → 해당 필드 아래 인라인 에러 메시지 노출, 입력값 유지 (페이지 이동 없음)</li>
+              <li>"취소" 또는 "보드로 돌아가기" → 보드(/)로 이동, 입력값 폐기</li>
+            </ul>
+          </li>
+        </ul>
+      </details>
+    </div>
+
+  </div>
+</div>
+
+<!-- ───────────────────────────────────────────────
+  Screen 1 — Project detail page (body)
+─────────────────────────────────────────────── -->
+<div id="screen-1" class="screen" data-scenario="scenario-1, scenario-5">
+  <div class="screen-content @container max-w-3xl mx-auto p-6">
+
+    <h2 class="text-lg font-bold mb-5" style="color:var(--w-muted); border-bottom:1px solid var(--w-border); padding-bottom:8px;">
+      상세 페이지 본문 — /projects/[id]
+    </h2>
+
+    <!-- Mock site header -->
+    <header class="flex items-center justify-between pb-3 mb-4" style="border-bottom:1px solid var(--w-border)">
+      <a class="text-sm font-bold" style="color:var(--w-text)">claude-hunt</a>
+      <button class="w-btn-ghost"><i data-lucide="user" class="w-3.5 h-3.5 inline-block"></i> Alice</button>
+    </header>
+
+    <!-- Back link -->
+    <a class="inline-flex items-center gap-1 text-xs mb-4" style="color:var(--w-muted)">
+      <i data-lucide="arrow-left" class="w-3.5 h-3.5"></i>
+      <span>보드로 돌아가기</span>
+    </a>
+
+    <!-- Hero block: title, tagline, meta + owner controls -->
+    <div class="flex items-start justify-between gap-3 mb-3">
+      <div class="min-w-0">
+        <h1 class="text-xl font-bold mb-1" style="color:var(--w-text)">My App</h1>
+        <p class="text-sm leading-relaxed" style="color:var(--w-text)">
+          A cool tool for tracking habits. Built with Next.js and Supabase, designed for the LGE-1 cohort showcase.
+        </p>
+      </div>
+      <!-- Owner-only edit/delete -->
+      <div class="flex items-center gap-1 shrink-0" title="작성자에게만 보임">
+        <button class="w-icon-btn" aria-label="편집"><i data-lucide="pencil" class="w-3.5 h-3.5"></i></button>
+        <button class="w-icon-btn" aria-label="삭제"><i data-lucide="trash-2" class="w-3.5 h-3.5"></i></button>
+      </div>
+    </div>
+
+    <!-- Meta line: cohort • author • time -->
+    <div class="w-meta-line mb-4">
+      <span class="w-tag"><i data-lucide="users" class="w-3 h-3"></i> LGE-1</span>
+      <span style="color:var(--w-muted)">·</span>
+      <span class="inline-flex items-center gap-1.5">
+        <span class="w-avatar">A</span>
+        <span style="color:var(--w-text)">Alice</span>
+      </span>
+      <span style="color:var(--w-muted)">·</span>
+      <span>2시간 전</span>
+    </div>
+
+    <!-- Gallery -->
+    <div class="mb-5">
+      <div class="w-hero-image">
+        <span>screenshot-1.png (대표, 16:10)</span>
+        <button class="w-arrow left" aria-label="이전"><i data-lucide="chevron-left" class="w-4 h-4"></i></button>
+        <button class="w-arrow right" aria-label="다음"><i data-lucide="chevron-right" class="w-4 h-4"></i></button>
+      </div>
+      <!-- Thumbnail strip (only when >1 image) -->
+      <div class="w-thumb-strip">
+        <div class="w-thumb active">1</div>
+        <div class="w-thumb">2</div>
+        <div class="w-thumb">3</div>
+      </div>
+    </div>
+
+    <!-- Action row (Pattern A, natural width, left-aligned): vote + Visit project. GitHub as text link below -->
+    <div class="flex items-stretch gap-3 mb-2">
+      <button class="w-vote-pill" aria-label="추천 128">
+        <i data-lucide="chevron-up" class="w-4 h-4"></i>
+        <span class="count">128</span>
+      </button>
+      <button class="w-cta-primary" style="flex: 0 0 auto; padding-left: 20px; padding-right: 20px;">
+        <i data-lucide="external-link" class="w-4 h-4"></i>
+        <span>Visit project</span>
+      </button>
+    </div>
+    <a class="inline-flex items-center gap-1.5 text-xs mb-6" style="color:var(--w-muted)">
+      <i data-lucide="github" class="w-3.5 h-3.5"></i>
+      <span style="color:var(--w-text); text-decoration: underline; text-underline-offset: 2px;">GitHub 저장소 보기</span>
+      <i data-lucide="external-link" class="w-3 h-3"></i>
+    </a>
+
+    <!-- Comments placeholder -->
+    <div class="w-callout">
+      <i data-lucide="message-square" class="w-4 h-4 inline-block"></i>
+      <span class="ml-1">댓글 영역은 다음 화면에서 디자인합니다</span>
+    </div>
+
+    <div class="screen-notes">
+      <details open>
+        <summary>Notes</summary>
+        <p>프로젝트 상세 페이지. 보드에서 카드 클릭으로 진입. 비로그인 포함 누구나 열람 가능.</p>
+        <ul>
+          <li>트리거: 보드의 프로젝트 카드 클릭 (썸네일/제목/행 어디든) → /projects/[id]</li>
+          <li>레이아웃:
+            <ul>
+              <li>상단: 사이트 헤더 + "← 보드로 돌아가기"</li>
+              <li>제목 + 한 줄 소개(잘림 없음, 전체 노출)</li>
+              <li>메타 라인: 코호트 태그 · 작성자(아바타+이름) · 등록 시간(상대 표기)</li>
+              <li>갤러리: 16:10 대표 이미지 + (이미지가 2장 이상일 때만) 하단 썸네일 스트립. 썸네일 클릭 또는 좌우 화살표로 메인 이미지 전환. 메인 이미지 클릭 시 라이트박스로 확대(별도 시나리오 아님)</li>
+              <li>액션 row (Pattern A): vote 핫필 + 메인 CTA "Visit project"가 한 줄. 그 아래에 "GitHub 저장소 보기" 텍스트 링크. GitHub URL 미등록 시 텍스트 링크 자체가 사라짐</li>
+              <li>작성자 컨트롤(편집·삭제): 우상단 아이콘 버튼. <strong>작성자에게만</strong> 노출</li>
+            </ul>
+          </li>
+          <li>인터랙션:
+            <ul>
+              <li>vote 클릭: 인증된 사용자면 토글, 비인증이면 로그인 안내(보드와 동일)</li>
+              <li>자기 프로젝트면 vote 버튼은 비활성(개수만 표시) — self-vote 차단 룰 그대로</li>
+              <li>"Visit project" 클릭: 외부 project_url을 새 탭으로 (target="_blank", rel="noopener noreferrer")</li>
+              <li>"GitHub" 클릭: github_url을 새 탭으로</li>
+              <li>편집 클릭: 편집 다이얼로그 오픈 (기존 EditDialog 흐름)</li>
+              <li>삭제 클릭: 확인 후 삭제, 보드(/)로 리다이렉트</li>
+            </ul>
+          </li>
+          <li>OG (Scenario 5): HTML head에 og:title=제목, og:description=한 줄 소개, og:image=대표 이미지 absolute URL, og:url=canonical 상세 URL. 시각적 요소 없음</li>
+        </ul>
+      </details>
+    </div>
+
+  </div>
+</div>
+
+<!-- ───────────────────────────────────────────────
+  Screen 2 — Comments / replies / reactions / edit-delete
+─────────────────────────────────────────────── -->
+<div id="screen-2" class="screen" data-scenario="scenario-3, scenario-4">
+  <div class="screen-content @container max-w-3xl mx-auto p-6">
+
+    <h2 class="text-lg font-bold mb-5" style="color:var(--w-muted); border-bottom:1px solid var(--w-border); padding-bottom:8px;">
+      상세 페이지 댓글 영역 — /projects/[id] (스크롤 하단)
+    </h2>
+
+    <!-- Section header: count + sort -->
+    <div class="flex items-center justify-between mb-3">
+      <div class="text-sm font-bold" style="color:var(--w-text)">
+        댓글 <span style="color:var(--w-muted)">5</span>
+      </div>
+      <button class="w-btn-ghost text-xs">
+        <i data-lucide="arrow-down-narrow-wide" class="w-3 h-3 inline-block mr-1"></i>
+        최신순
+      </button>
+    </div>
+
+    <!-- Comment input — authenticated branch -->
+    <div class="flex gap-2 mb-6">
+      <span class="w-avatar shrink-0" style="width: 28px; height: 28px;">A</span>
+      <div class="w-comment-input flex-1">
+        <textarea placeholder="의견을 남겨주세요" rows="2">정말 잘 만드셨네요!</textarea>
+        <div class="w-input-footer">
+          <span class="w-helper">최대 1000자</span>
+          <div class="flex items-center gap-2">
+            <span class="w-counter">9 / 1000</span>
+            <button class="w-btn-ghost text-xs">취소</button>
+            <button class="w-btn-primary text-xs" style="width:auto; padding: 6px 14px;">등록</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Comment list -->
+    <div>
+
+      <!-- Comment 1: viewer's OWN comment, edited (Scenario 4 — kebab + 수정됨) -->
+      <div class="w-comment">
+        <span class="w-avatar shrink-0" style="width: 28px; height: 28px;">A</span>
+        <div class="w-comment-body">
+          <div class="flex items-start justify-between">
+            <div class="w-comment-meta">
+              <strong>Alice</strong>
+              <span>·</span>
+              <span>2시간 전</span>
+              <span>·</span>
+              <span class="w-edited-tag">수정됨</span>
+            </div>
+            <button class="w-kebab" aria-label="더보기">⋯</button>
+          </div>
+          <p class="w-comment-text">처음 만들 때 영감 주신 분들 모두 감사합니다. 피드백 주시면 v2에 반영할게요!</p>
+          <div class="w-reaction-row">
+            <div class="w-reaction-group">
+              <button class="w-reaction own">👍 <span>3</span></button>
+              <button class="w-reaction">💡 <span>1</span></button>
+              <button class="w-reaction">❤️ <span>2</span></button>
+              <button class="w-reaction-add" aria-label="반응 추가">
+                <i data-lucide="smile-plus" class="w-3 h-3"></i>
+              </button>
+            </div>
+            <button class="w-reply-link">답글하기</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Comment 2: another visitor's comment with a reply -->
+      <div class="w-comment">
+        <span class="w-avatar shrink-0" style="width: 28px; height: 28px;">B</span>
+        <div class="w-comment-body">
+          <div class="w-comment-meta">
+            <strong>Bob</strong>
+            <span>·</span>
+            <span>30분 전</span>
+          </div>
+          <p class="w-comment-text">Next.js로 빌드하셨다고 하셨는데 어떤 라이브러리 쓰셨나요? 저도 비슷한 거 만들고 싶어서요.</p>
+          <div class="w-reaction-row">
+            <div class="w-reaction-group">
+              <button class="w-reaction">👍 <span>2</span></button>
+              <button class="w-reaction-add" aria-label="반응 추가">
+                <i data-lucide="smile-plus" class="w-3 h-3"></i>
+              </button>
+            </div>
+            <button class="w-reply-link">답글하기</button>
+          </div>
+
+          <!-- Reply (1 depth, no further reply button) -->
+          <div class="w-reply-thread mt-3">
+            <div class="w-comment" style="padding-top: 10px; padding-bottom: 4px; border: none;">
+              <span class="w-avatar shrink-0" style="width: 24px; height: 24px;">A</span>
+              <div class="w-comment-body">
+                <div class="flex items-start justify-between">
+                  <div class="w-comment-meta">
+                    <strong>Alice</strong>
+                    <span>·</span>
+                    <span>20분 전</span>
+                  </div>
+                  <button class="w-kebab" aria-label="더보기">⋯</button>
+                </div>
+                <p class="w-comment-text">@Bob 주로 next-safe-action + Supabase RLS 조합이었어요!</p>
+                <div class="w-reaction-row">
+                  <div class="w-reaction-group">
+                    <button class="w-reaction">👍 <span>1</span></button>
+                    <button class="w-reaction-add" aria-label="반응 추가">
+                      <i data-lucide="smile-plus" class="w-3 h-3"></i>
+                    </button>
+                  </div>
+                  <!-- No "답글하기" — reply-to-reply blocked -->
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Comment 3: short comment, no reply, no reactions -->
+      <div class="w-comment">
+        <span class="w-avatar shrink-0" style="width: 28px; height: 28px;">C</span>
+        <div class="w-comment-body">
+          <div class="w-comment-meta">
+            <strong>Charlie</strong>
+            <span>·</span>
+            <span>5분 전</span>
+          </div>
+          <p class="w-comment-text">잘 봤어요 👏</p>
+          <div class="w-reaction-row">
+            <div class="w-reaction-group">
+              <button class="w-reaction-add" aria-label="반응 추가">
+                <i data-lucide="smile-plus" class="w-3 h-3"></i>
+                <span>반응</span>
+              </button>
+            </div>
+            <button class="w-reply-link">답글하기</button>
+          </div>
+        </div>
+      </div>
+
+    </div>
+
+    <!-- State variants reference (not part of the live screen, just visual reference) -->
+    <div class="mt-10">
+      <h3 class="text-xs font-bold mb-3" style="color:var(--w-muted); border-top: 1px dashed var(--w-border); padding-top: 12px;">
+        상태 변형 참고 (실제 페이지엔 동시에 안 보임)
+      </h3>
+
+      <!-- Anon input replacement -->
+      <div class="mb-4">
+        <div class="text-[11px] mb-1" style="color:var(--w-muted)">비로그인 시 — 입력 영역만 다름</div>
+        <div class="w-anon-prompt">
+          <i data-lucide="lock" class="w-4 h-4 inline-block mr-1"></i>
+          로그인하고 의견 남기기
+        </div>
+      </div>
+
+      <!-- Emoji picker popover -->
+      <div class="mb-4">
+        <div class="text-[11px] mb-1" style="color:var(--w-muted)">[😊+] 트리거 클릭 시 — 4개 이모지 팝오버</div>
+        <div class="flex items-end gap-3">
+          <div class="w-emoji-popover">
+            <button>👍</button>
+            <button>💡</button>
+            <button>🎉</button>
+            <button>❤️</button>
+          </div>
+          <span class="text-[10px]" style="color:var(--w-muted)">위치: 트리거 위/아래 (자동 flip)</span>
+        </div>
+      </div>
+
+      <!-- Empty state -->
+      <div>
+        <div class="text-[11px] mb-1" style="color:var(--w-muted)">댓글 0개일 때</div>
+        <div class="w-callout">
+          <i data-lucide="message-square" class="w-4 h-4 inline-block"></i>
+          <span class="ml-1">아직 댓글이 없어요. 첫 의견을 남겨주세요</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="screen-notes">
+      <details open>
+        <summary>Notes</summary>
+        <p>상세 페이지 하단의 댓글 섹션. 시나리오 3·4를 모두 커버. 스크롤하면 본문 화면 아래에 이어짐.</p>
+        <ul>
+          <li>레이아웃:
+            <ul>
+              <li>섹션 헤더: "댓글 N" + 정렬 표시(최신순). 정렬은 v1엔 토글만 시각화, 변경 옵션은 미정</li>
+              <li>입력 영역(인증 시): 아바타 + textarea + 카운터 + [취소][등록]. 비로그인 시엔 textarea 대신 "로그인하고 의견 남기기" 안내</li>
+              <li>댓글 카드: 아바타 / [이름 · 시간 (· 수정됨)] / 본문 / 반응 row</li>
+              <li>반응 row 패턴 (Slack/Reddit 스타일): count ≥ 1인 이모지 chip만 노출 + 점선 테두리의 [😊+] 트리거. 반응 0개일 땐 [😊+ 반응] 한 개만 보임. 트리거 클릭 → 4개(👍 💡 🎉 ❤️) 이모지 팝오버 → 선택 시 chip이 row에 추가/토글됨</li>
+              <li>"답글하기"는 반응 row의 *우측 정렬 텍스트 링크* — 좌측 반응 그룹과 시각적으로 분리</li>
+              <li>답글: 부모 댓글 본문 안에 좌측 보더 + 들여쓰기로 1뎁스 노출. 답글 자체에는 "답글하기" 없음 (depth = 1)</li>
+              <li>본인 댓글에만 우상단 ⋯(더보기) 메뉴 → 편집 / 삭제</li>
+              <li>"수정됨" 인디케이터: 시간 옆에 작은 italic 라벨</li>
+            </ul>
+          </li>
+          <li>인터랙션:
+            <ul>
+              <li>이모지 chip 클릭: 토글 (이미 누른 거면 취소). count = 0이면 라벨만 보임, 1+이면 숫자 표시. 본인이 누른 chip은 검정 배경(.own)</li>
+              <li>"답글하기" 클릭: 부모 댓글 아래로 답글 입력 영역 펼쳐짐 (toplevel 입력과 동일 형태, 더 작게)</li>
+              <li>⋯ 클릭: 작은 메뉴 — "편집" / "삭제(확인)". 다른 사용자 댓글에는 ⋯ 자체가 안 보임</li>
+              <li>편집 클릭: textarea로 인라인 변환 → 저장하면 "수정됨" 라벨 추가</li>
+              <li>삭제 클릭: 확인 다이얼로그 → 삭제 시 답글·반응까지 함께 사라짐 (스펙 invariant)</li>
+              <li>비로그인 사용자: 댓글·답글·반응 모두 *읽기*만, chip 클릭은 무반응(또는 로그인 안내)</li>
+              <li>1000자 초과: 등록 버튼 비활성 + 카운터 색 변화 + 인라인 에러 노출</li>
+            </ul>
+          </li>
+          <li>고려 안 한 항목 (스펙의 Excluded와 일치):
+            <ul>
+              <li>알림: 새 댓글이 달려도 작성자에게 알림 없음 (v1)</li>
+              <li>멘션 자동변환: @Bob을 작성자가 직접 타이핑하면 단순 텍스트로 저장</li>
+              <li>신고/모더레이션: 없음</li>
+            </ul>
+          </li>
+        </ul>
+      </details>
+    </div>
+
+  </div>
+</div>
+
+<script>
+var currentScreen = 0;
+var screenIds = [];
+
+function show(id) {
+  document.querySelectorAll('.screen').forEach(function(s) { s.classList.remove('active'); });
+  document.getElementById('screen-' + id).classList.add('active');
+  document.querySelectorAll('nav button[id^="nav-"]').forEach(function(b) { b.classList.remove('active'); });
+  document.getElementById('nav-' + id).classList.add('active');
+  currentScreen = screenIds.indexOf(id);
+}
+
+function setViewport(mode) {
+  document.body.classList.remove('viewport-mobile', 'viewport-desktop');
+  document.body.classList.add('viewport-' + mode);
+  document.querySelectorAll('.vp-toggle button').forEach(function(b) { b.classList.remove('active'); });
+  document.getElementById('vp-' + mode).classList.add('active');
+}
+
+document.addEventListener('DOMContentLoaded', function() {
+  document.querySelectorAll('nav button[id^="nav-"]').forEach(function(b) {
+    screenIds.push(parseInt(b.id.replace('nav-', '')));
+  });
+  var first = document.querySelector('nav button[id^="nav-"]');
+  if (first) first.click();
+  lucide.createIcons();
+});
+</script>
+</body>
+</html>

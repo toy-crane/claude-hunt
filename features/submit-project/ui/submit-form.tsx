@@ -1,47 +1,37 @@
 "use client";
 
 import { MAX_TAGLINE_LENGTH, MAX_TITLE_LENGTH } from "@entities/project";
+import { type ImageSlot, ImageSlots } from "@features/upload-project-images";
 import { uploadScreenshot } from "@shared/lib/screenshot-upload";
 import { Button } from "@shared/ui/button";
-import {
-  Field,
-  FieldDescription,
-  FieldGroup,
-  FieldLabel,
-} from "@shared/ui/field";
+import { Field, FieldGroup, FieldLabel } from "@shared/ui/field";
 import { Input } from "@shared/ui/input";
 import { Spinner } from "@shared/ui/spinner";
 import { Textarea } from "@shared/ui/textarea";
+import Link from "next/link";
+import { useRouter } from "next/navigation";
 import { useId, useState } from "react";
+import { toast } from "sonner";
 import { submitProject } from "../api/actions";
 
 export interface SubmitFormProps {
   /**
    * `cohort_id` of the signed-in student's profile. At runtime the
    * onboarding gate (`proxy.ts` + `/onboarding` route) guarantees this
-   * is non-null for any user who reaches the form — but the prop type
-   * stays nullable because `SubmitDialog` passes `null` through in the
-   * unauthenticated branch (that branch never actually renders
-   * `<SubmitForm>`, but the type must still compile). The server
-   * action keeps its own defensive null-check.
+   * is non-null for any user who reaches the form. Kept nullable here
+   * because the page-level auth gate may pass null defensively; the
+   * server action also checks.
    */
   cohortId: string | null;
-  /**
-   * Called once after the server action returns `ok: true`. The parent
-   * owns post-success UI (closing a dialog, showing a toast, etc.) —
-   * the form itself no longer renders a success message.
-   */
-  onSuccess?: () => void;
 }
 
-export function SubmitForm({
-  cohortId: _cohortId,
-  onSuccess,
-}: SubmitFormProps) {
+export function SubmitForm({ cohortId: _cohortId }: SubmitFormProps) {
+  const router = useRouter();
   const titleId = useId();
   const taglineId = useId();
   const urlId = useId();
-  const screenshotId = useId();
+  const githubUrlId = useId();
+  const [images, setImages] = useState<ImageSlot[]>([]);
   const [fieldError, setFieldError] = useState<string | null>(null);
   const [submitError, setSubmitError] = useState<string | null>(null);
   const [submitting, setSubmitting] = useState(false);
@@ -58,37 +48,52 @@ export function SubmitForm({
       "tagline"
     ) as HTMLTextAreaElement | null;
     const urlEl = elements.namedItem("projectUrl") as HTMLInputElement | null;
-    const fileEl = elements.namedItem("screenshot") as HTMLInputElement | null;
+    const githubUrlEl = elements.namedItem(
+      "githubUrl"
+    ) as HTMLInputElement | null;
     const title = titleEl?.value ?? "";
     const tagline = taglineEl?.value ?? "";
     const projectUrl = urlEl?.value ?? "";
-    const screenshot = fileEl?.files?.[0];
+    const githubUrl = githubUrlEl?.value ?? "";
 
-    if (!screenshot || screenshot.size === 0) {
-      setFieldError("스크린샷을 첨부해 주세요.");
+    if (images.length === 0) {
+      setFieldError("스크린샷을 1장 이상 첨부해 주세요.");
       return;
     }
 
     setSubmitting(true);
     try {
-      const upload = await uploadScreenshot(screenshot);
-      if (upload.error || !upload.path) {
-        setFieldError(upload.error ?? "업로드에 실패했어요.");
+      // Upload every image in parallel; abort the whole submit on
+      // the first failure so the user can fix and retry.
+      const uploads = await Promise.all(
+        images.map((slot) => uploadScreenshot(slot.file))
+      );
+      const failed = uploads.find((u) => u.error || !u.path);
+      if (failed) {
+        setFieldError(failed.error ?? "업로드에 실패했어요.");
         return;
       }
+      const imagePaths = uploads.map((u) => u.path as string);
 
       const result = await submitProject({
         title,
         tagline,
         projectUrl,
-        screenshotPath: upload.path,
+        githubUrl: githubUrl.trim() === "" ? undefined : githubUrl,
+        imagePaths,
       });
       if (!result.ok) {
         setSubmitError(result.error ?? "프로젝트를 제출할 수 없어요.");
         return;
       }
       form.reset();
-      onSuccess?.();
+      setImages([]);
+      toast.success("프로젝트가 제출되었어요.");
+      if (result.projectId) {
+        router.push(`/projects/${result.projectId}`);
+      } else {
+        router.push("/");
+      }
     } finally {
       setSubmitting(false);
     }
@@ -139,16 +144,27 @@ export function SubmitForm({
         </Field>
 
         <Field>
-          <FieldLabel htmlFor={screenshotId}>스크린샷</FieldLabel>
+          <FieldLabel htmlFor={githubUrlId}>
+            GitHub 저장소{" "}
+            <span className="font-normal text-muted-foreground">(선택)</span>
+          </FieldLabel>
           <Input
-            accept="image/jpeg,image/png,image/webp"
             disabled={submitting}
-            id={screenshotId}
-            name="screenshot"
-            required
-            type="file"
+            id={githubUrlId}
+            name="githubUrl"
+            placeholder="https://github.com/owner/repo"
+            type="url"
           />
-          <FieldDescription>JPEG, PNG, WebP — 최대 25 MB.</FieldDescription>
+        </Field>
+
+        <Field>
+          <FieldLabel>스크린샷</FieldLabel>
+          <ImageSlots
+            disabled={submitting}
+            onChange={setImages}
+            onError={setFieldError}
+            value={images}
+          />
         </Field>
       </FieldGroup>
 
@@ -171,10 +187,15 @@ export function SubmitForm({
         </p>
       ) : null}
 
-      <Button disabled={submitting} type="submit">
-        {submitting ? <Spinner data-icon="inline-start" /> : null}
-        {submitting ? "제출 중..." : "프로젝트 제출"}
-      </Button>
+      <div className="flex items-stretch gap-2">
+        <Button asChild variant="outline">
+          <Link href="/">취소</Link>
+        </Button>
+        <Button className="flex-1" disabled={submitting} type="submit">
+          {submitting ? <Spinner data-icon="inline-start" /> : null}
+          {submitting ? "제출 중..." : "프로젝트 제출"}
+        </Button>
+      </div>
     </form>
   );
 }

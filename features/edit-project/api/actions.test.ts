@@ -28,6 +28,7 @@ const validInput = {
   title: "Edited Title",
   tagline: "Edited tagline",
   projectUrl: "https://edited.example.com",
+  imagePaths: ["u1/old-shot.webp"],
 };
 
 beforeEach(() => {
@@ -104,7 +105,7 @@ describe("editProject server action", () => {
     expect(result.error).toMatch(PERMISSION_ERROR_REGEX);
   });
 
-  it("includes screenshot_path in the update when supplied", async () => {
+  it("includes the new image array in the update payload", async () => {
     getUser.mockResolvedValue({ data: { user: { id: "u1" } }, error: null });
     const { update } = stubFrom({
       currentScreenshotPath: "u1/old-shot.webp",
@@ -113,11 +114,13 @@ describe("editProject server action", () => {
 
     await editProject({
       ...validInput,
-      screenshotPath: "u1/new-shot.webp",
+      imagePaths: ["u1/new-shot.webp"],
     });
 
     expect(update).toHaveBeenCalledWith(
-      expect.objectContaining({ screenshot_path: "u1/new-shot.webp" })
+      expect.objectContaining({
+        images: [{ path: "u1/new-shot.webp" }],
+      })
     );
   });
 
@@ -130,7 +133,7 @@ describe("editProject server action", () => {
 
     const result = await editProject({
       ...validInput,
-      screenshotPath: "u1/new-shot.webp",
+      imagePaths: ["u1/new-shot.webp"],
     });
 
     expect(result.ok).toBe(true);
@@ -160,7 +163,7 @@ describe("editProject server action", () => {
 
     const result = await editProject({
       ...validInput,
-      screenshotPath: "u1/new-shot.webp",
+      imagePaths: ["u1/new-shot.webp"],
     });
 
     expect(result.ok).toBe(false);
@@ -181,7 +184,7 @@ describe("editProject server action", () => {
 
     const result = await editProject({
       ...validInput,
-      screenshotPath: "u1/new-shot.webp",
+      imagePaths: ["u1/new-shot.webp"],
     });
 
     expect(result.ok).toBe(true);

@@ -27,7 +27,6 @@ export default async function Page({ searchParams }: PageProps) {
           initialCohortId={selectedCohortId}
           isAuthenticated={Boolean(viewer)}
           projects={projects}
-          viewerCohortId={viewer?.cohortId ?? null}
           viewerUserId={viewer?.id ?? null}
         />
       </main>

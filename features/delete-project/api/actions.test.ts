@@ -68,7 +68,7 @@ describe("deleteProject server action", () => {
   it("rejects signed-out callers", async () => {
     getUser.mockResolvedValue({ data: { user: null }, error: null });
 
-    const result = await deleteProject("proj-1");
+    const result = await deleteProject({ projectId: "proj-1" });
 
     expect(result.ok).toBe(false);
   });
@@ -80,7 +80,7 @@ describe("deleteProject server action", () => {
       deleted: [{ id: "proj-1" }],
     });
 
-    const result = await deleteProject("proj-1");
+    const result = await deleteProject({ projectId: "proj-1" });
 
     expect(result.ok).toBe(true);
     expect(storageRemove).toHaveBeenCalledWith(["u1/shot.png"]);
@@ -91,7 +91,7 @@ describe("deleteProject server action", () => {
     getUser.mockResolvedValue({ data: { user: { id: "u1" } }, error: null });
     stubDelete({ screenshotPath: "u1/shot.png", deleted: [] });
 
-    const result = await deleteProject("proj-1");
+    const result = await deleteProject({ projectId: "proj-1" });
 
     expect(result.ok).toBe(false);
     expect(result.error).toMatch(FORBIDDEN_REGEX);
@@ -101,7 +101,7 @@ describe("deleteProject server action", () => {
     getUser.mockResolvedValue({ data: { user: { id: "u1" } }, error: null });
     stubDelete({ screenshotPath: null, deleted: [{ id: "proj-1" }] });
 
-    const result = await deleteProject("proj-1");
+    const result = await deleteProject({ projectId: "proj-1" });
 
     expect(result.ok).toBe(true);
     expect(storageRemove).not.toHaveBeenCalled();
@@ -118,7 +118,7 @@ describe("deleteProject server action", () => {
       error: { message: "storage down" },
     });
 
-    const result = await deleteProject("proj-1");
+    const result = await deleteProject({ projectId: "proj-1" });
 
     expect(result.ok).toBe(true);
     expect(storageRemove).toHaveBeenCalledTimes(1);

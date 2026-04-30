@@ -1,4 +1,5 @@
 import type { ProjectWithVoteCount } from "@entities/vote";
+import { formatRelativeShort } from "@shared/lib/format-relative";
 import { cn } from "@shared/lib/utils";
 import {
   HoverCard,
@@ -6,6 +7,7 @@ import {
   HoverCardTrigger,
 } from "@shared/ui/hover-card";
 import Image from "next/image";
+import Link from "next/link";
 import { RankDot, RankSlot } from "./rank-badge";
 
 export interface ProjectCardProps {
@@ -42,34 +44,6 @@ export interface ProjectCardProps {
   viewerUserId?: string | null;
 }
 
-const MINUTE_MS = 60_000;
-const HOUR_MS = 60 * MINUTE_MS;
-const DAY_MS = 24 * HOUR_MS;
-
-function formatRelative(iso: string | null): string {
-  if (!iso) {
-    return "";
-  }
-  const then = new Date(iso).getTime();
-  if (Number.isNaN(then)) {
-    return "";
-  }
-  const diff = Math.max(0, Date.now() - then);
-  const days = Math.floor(diff / DAY_MS);
-  if (days > 0) {
-    return `${days}d`;
-  }
-  const hours = Math.floor(diff / HOUR_MS);
-  if (hours > 0) {
-    return `${hours}h`;
-  }
-  const mins = Math.floor(diff / MINUTE_MS);
-  if (mins > 0) {
-    return `${mins}m`;
-  }
-  return "방금";
-}
-
 export function ProjectCard({
   project,
   rank,
@@ -83,8 +57,10 @@ export function ProjectCard({
   const isOwner = viewerUserId != null && project.user_id === viewerUserId;
   const rankLabel = String(rank).padStart(2, "0");
   const author = project.author_display_name ?? "익명";
-  const projectUrl = project.project_url ?? "#";
-  const submittedAt = formatRelative(project.created_at);
+  // Card click navigates to the internal detail page. The external
+  // project URL is exposed there via the "Visit project" CTA.
+  const detailHref = project.id ? `/projects/${project.id}` : "/";
+  const submittedAt = formatRelativeShort(project.created_at);
   const hasRankDot = rank >= 1 && rank <= 3;
 
   const voteSlot = renderVoteButton ? renderVoteButton(project) : null;
@@ -122,12 +98,10 @@ export function ProjectCard({
 
         <HoverCard closeDelay={150} openDelay={150}>
           <HoverCardTrigger asChild>
-            <a
+            <Link
               className="relative block h-10 w-16 overflow-visible"
               data-testid="project-card-preview"
-              href={projectUrl}
-              rel="noopener noreferrer"
-              target="_blank"
+              href={detailHref}
             >
               {screenshotUrl ? (
                 <Image
@@ -147,7 +121,7 @@ export function ProjectCard({
                   data-testid="project-card-thumb"
                 />
               )}
-            </a>
+            </Link>
           </HoverCardTrigger>
           {screenshotUrl ? (
             <HoverCardContent
@@ -170,14 +144,12 @@ export function ProjectCard({
         </HoverCard>
 
         <div className="flex min-w-0 flex-col gap-0.5">
-          <a
+          <Link
             className="truncate font-heading font-medium text-sm leading-tight hover:underline"
-            href={projectUrl}
-            rel="noopener noreferrer"
-            target="_blank"
+            href={detailHref}
           >
             {project.title}
-          </a>
+          </Link>
           <p className="truncate text-muted-foreground text-xs leading-tight">
             {project.tagline}
           </p>
@@ -223,12 +195,10 @@ export function ProjectCard({
         </div>
 
         {/* Full-width 16:10 thumbnail */}
-        <a
+        <Link
           className="relative block aspect-[16/10] w-full overflow-hidden bg-muted"
           data-testid="project-card-mobile-preview"
-          href={projectUrl}
-          rel="noopener noreferrer"
-          target="_blank"
+          href={detailHref}
         >
           {screenshotUrl ? (
             <Image
@@ -247,19 +217,17 @@ export function ProjectCard({
               data-testid="project-card-mobile-thumb"
             />
           )}
-        </a>
+        </Link>
 
         {/* Title + tagline */}
         <div className="flex flex-col gap-1">
-          <a
+          <Link
             className="font-heading font-medium text-base leading-snug hover:underline"
             data-testid="project-card-mobile-title"
-            href={projectUrl}
-            rel="noopener noreferrer"
-            target="_blank"
+            href={detailHref}
           >
             {project.title}
-          </a>
+          </Link>
           <p
             className="text-[13px] text-muted-foreground leading-snug"
             data-testid="project-card-mobile-tagline"

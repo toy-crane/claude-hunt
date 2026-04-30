@@ -5,7 +5,15 @@ create table public.projects (
   title text not null check (char_length(title) between 1 and 80),
   tagline text not null check (char_length(tagline) between 1 and 140),
   project_url text not null check (project_url ~* '^https?://'),
-  screenshot_path text not null check (char_length(screenshot_path) > 0),
+  -- Legacy single screenshot path; new code writes to `images` instead.
+  -- Made nullable in the Expand phase of the multi-image migration.
+  -- Will be dropped in a follow-up Contract scope.
+  screenshot_path text null check (screenshot_path is null or char_length(screenshot_path) > 0),
+  -- Multi-image gallery, ordered. images[0] is the primary (board thumbnail, OG image).
+  -- Length CHECK (1..5) added in the follow-up Contract scope after all writes go through this column.
+  images jsonb not null default '[]',
+  -- Optional GitHub repository URL — when set, the detail page exposes a "GitHub 저장소 보기" link.
+  github_url text null check (github_url is null or github_url ~ '^https://github\.com/[^/[:space:]]+/[^/[:space:]]+/?$'),
   vote_count bigint not null default 0,
   created_at timestamptz not null default now(),
   updated_at timestamptz not null default now()

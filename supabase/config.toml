@@ -61,6 +61,8 @@ schema_paths = [
   "./schemas/projects.sql",
   "./schemas/votes.sql",
   "./schemas/projects_with_vote_count.sql",
+  "./schemas/comments.sql",
+  "./schemas/comment_reactions.sql",
 ]
 
 [db.seed]

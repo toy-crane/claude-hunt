@@ -7,7 +7,7 @@ describe("submitProjectInputSchema", () => {
       title: "My App",
       tagline: "A cool tool",
       projectUrl: "https://myapp.com",
-      screenshotPath: "user-1/shot.png",
+      imagePaths: ["user-1/shot.png"],
     });
     expect(result.success).toBe(true);
   });
@@ -17,7 +17,7 @@ describe("submitProjectInputSchema", () => {
       title: "   ",
       tagline: "A cool tool",
       projectUrl: "https://myapp.com",
-      screenshotPath: "user-1/shot.png",
+      imagePaths: ["user-1/shot.png"],
     });
     expect(result.success).toBe(false);
   });
@@ -27,7 +27,7 @@ describe("submitProjectInputSchema", () => {
       title: "My App",
       tagline: "A cool tool",
       projectUrl: "not-a-url",
-      screenshotPath: "user-1/shot.png",
+      imagePaths: ["user-1/shot.png"],
     });
     expect(result.success).toBe(false);
   });
@@ -37,7 +37,7 @@ describe("submitProjectInputSchema", () => {
       title: "x".repeat(81),
       tagline: "A cool tool",
       projectUrl: "https://myapp.com",
-      screenshotPath: "user-1/shot.png",
+      imagePaths: ["user-1/shot.png"],
     });
     expect(result.success).toBe(false);
   });

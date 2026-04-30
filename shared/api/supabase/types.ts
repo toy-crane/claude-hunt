@@ -58,6 +58,107 @@ export type Database = {
         }
         Relationships: []
       }
+      comment_reactions: {
+        Row: {
+          comment_id: string
+          created_at: string
+          emoji: string
+          id: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          comment_id: string
+          created_at?: string
+          emoji: string
+          id?: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          comment_id?: string
+          created_at?: string
+          emoji?: string
+          id?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "comment_reactions_comment_id_fkey"
+            columns: ["comment_id"]
+            isOneToOne: false
+            referencedRelation: "comments"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "comment_reactions_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      comments: {
+        Row: {
+          body: string
+          created_at: string
+          id: string
+          parent_comment_id: string | null
+          project_id: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          body: string
+          created_at?: string
+          id?: string
+          parent_comment_id?: string | null
+          project_id: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          body?: string
+          created_at?: string
+          id?: string
+          parent_comment_id?: string | null
+          project_id?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "comments_parent_comment_id_fkey"
+            columns: ["parent_comment_id"]
+            isOneToOne: false
+            referencedRelation: "comments"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "comments_project_id_fkey"
+            columns: ["project_id"]
+            isOneToOne: false
+            referencedRelation: "projects"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "comments_project_id_fkey"
+            columns: ["project_id"]
+            isOneToOne: false
+            referencedRelation: "projects_with_vote_count"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "comments_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       profiles: {
         Row: {
           avatar_url: string | null
@@ -103,35 +204,44 @@ export type Database = {
         Row: {
           cohort_id: string
           created_at: string
+          github_url: string | null
           id: string
+          images: Json
           project_url: string
-          screenshot_path: string
+          screenshot_path: string | null
           tagline: string
           title: string
           updated_at: string
           user_id: string
+          vote_count: number
         }
         Insert: {
           cohort_id: string
           created_at?: string
+          github_url?: string | null
           id?: string
+          images?: Json
           project_url: string
-          screenshot_path: string
+          screenshot_path?: string | null
           tagline: string
           title: string
           updated_at?: string
           user_id: string
+          vote_count?: number
         }
         Update: {
           cohort_id?: string
           created_at?: string
+          github_url?: string | null
           id?: string
+          images?: Json
           project_url?: string
-          screenshot_path?: string
+          screenshot_path?: string | null
           tagline?: string
           title?: string
           updated_at?: string
           user_id?: string
+          vote_count?: number
         }
         Relationships: [
           {
@@ -205,7 +315,10 @@ export type Database = {
           cohort_id: string | null
           cohort_name: string | null
           created_at: string | null
+          github_url: string | null
           id: string | null
+          images: Json | null
+          primary_image_path: string | null
           project_url: string | null
           screenshot_path: string | null
           tagline: string | null

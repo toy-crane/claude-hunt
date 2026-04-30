@@ -1,9 +1,9 @@
 import { fireEvent, render, screen } from "@testing-library/react";
-import userEvent from "@testing-library/user-event";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
 const uploadScreenshot = vi.fn();
 const submitProject = vi.fn();
+const routerPush = vi.fn();
 
 vi.mock("@shared/lib/screenshot-upload", () => ({
   uploadScreenshot,
@@ -11,157 +11,108 @@ vi.mock("@shared/lib/screenshot-upload", () => ({
 vi.mock("../api/actions.ts", () => ({
   submitProject,
 }));
+vi.mock("next/navigation", () => ({
+  useRouter: () => ({ push: routerPush }),
+}));
+vi.mock("sonner", () => ({
+  toast: { success: vi.fn() },
+}));
+
+// Stub ImageSlots: render a fake "add image" button so tests can put
+// the form in any image-state without driving the real DnD UI. The
+// stub also forwards the latest value via a data attribute so we can
+// inspect it.
+let nextSlotId = 0;
+function makeFile(name = "shot.png") {
+  return new File([new Uint8Array(8)], name, { type: "image/png" });
+}
+vi.mock("@features/upload-project-images", () => ({
+  ImageSlots: ({
+    value,
+    onChange,
+    onError,
+  }: {
+    value: { id: string; file: File; preview: string }[];
+    onChange: (next: { id: string; file: File; preview: string }[]) => void;
+    onError?: (msg: string) => void;
+  }) => (
+    <div data-image-count={value.length} data-testid="image-slots-stub">
+      <button
+        data-testid="image-slots-stub-add"
+        onClick={() => {
+          const slot = {
+            id: `s-${++nextSlotId}`,
+            file: makeFile(`shot-${nextSlotId}.png`),
+            preview: `blob:${nextSlotId}`,
+          };
+          onChange([...value, slot]);
+        }}
+        type="button"
+      >
+        add
+      </button>
+      <button
+        data-testid="image-slots-stub-error"
+        onClick={() => onError?.("최대 5장까지 업로드할 수 있어요")}
+        type="button"
+      >
+        trigger error
+      </button>
+    </div>
+  ),
+}));
 
 const { SubmitForm } = await import("./submit-form");
 
-function makePng(name = "shot.png", size = 1024) {
-  return new File([new Uint8Array(size)], name, { type: "image/png" });
-}
-
-async function fillAndSubmit() {
-  const user = userEvent.setup();
+function fillTextFields() {
   const title = screen.getByLabelText("제목") as HTMLInputElement;
   const tagline = screen.getByLabelText("한 줄 소개") as HTMLTextAreaElement;
   const url = screen.getByLabelText("프로젝트 URL") as HTMLInputElement;
-  const file = screen.getByLabelText("스크린샷") as HTMLInputElement;
   fireEvent.change(title, { target: { value: "My App" } });
   fireEvent.change(tagline, { target: { value: "A cool tool" } });
   fireEvent.change(url, { target: { value: "https://myapp.com" } });
-  await user.upload(file, makePng());
-  fireEvent.submit(title.form as HTMLFormElement);
+  return title.form as HTMLFormElement;
+}
+
+function addOneImage() {
+  fireEvent.click(screen.getByTestId("image-slots-stub-add"));
 }
 
 describe("SubmitForm", () => {
   beforeEach(() => {
     uploadScreenshot.mockReset();
     submitProject.mockReset();
+    routerPush.mockReset();
+    nextSlotId = 0;
   });
 
   it("renders an enabled Submit button when cohortId is set", () => {
-    // The onboarding gate (middleware + /onboarding) guarantees cohortId
-    // is non-null when this form renders.
     render(<SubmitForm cohortId="cohort-1" />);
-
-    expect(
-      screen.queryByTestId("submit-form-cohort-warning")
-    ).not.toBeInTheDocument();
     expect(screen.getByRole("button", { name: "프로젝트 제출" })).toBeEnabled();
   });
 
-  it("uploads the screenshot then calls the server action on valid submit", async () => {
-    uploadScreenshot.mockResolvedValue({ path: "user-1/shot.png" });
-    submitProject.mockResolvedValue({ ok: true, projectId: "p1" });
-
+  it("rejects submit when no images are attached", async () => {
     render(<SubmitForm cohortId="cohort-1" />);
-    await fillAndSubmit();
-
-    await vi.waitFor(() => {
-      expect(submitProject).toHaveBeenCalledWith({
-        title: "My App",
-        tagline: "A cool tool",
-        projectUrl: "https://myapp.com",
-        screenshotPath: "user-1/shot.png",
-      });
-    });
-    expect(uploadScreenshot).toHaveBeenCalledTimes(1);
-  });
-
-  it("calls onSuccess exactly once after a successful submission", async () => {
-    uploadScreenshot.mockResolvedValue({ path: "user-1/shot.png" });
-    submitProject.mockResolvedValue({ ok: true, projectId: "p1" });
-    const onSuccess = vi.fn();
-
-    render(<SubmitForm cohortId="cohort-1" onSuccess={onSuccess} />);
-    await fillAndSubmit();
-
-    await vi.waitFor(() => {
-      expect(onSuccess).toHaveBeenCalledTimes(1);
-    });
-  });
-
-  it("does not render an inline 'Project submitted!' success text", async () => {
-    uploadScreenshot.mockResolvedValue({ path: "user-1/shot.png" });
-    submitProject.mockResolvedValue({ ok: true, projectId: "p1" });
-
-    const onSuccess = vi.fn();
-    render(<SubmitForm cohortId="cohort-1" onSuccess={onSuccess} />);
-    await fillAndSubmit();
-
-    await vi.waitFor(() => {
-      expect(submitProject).toHaveBeenCalled();
-    });
-    expect(
-      screen.queryByText("프로젝트가 제출되었어요.")
-    ).not.toBeInTheDocument();
-  });
-
-  it("does not call onSuccess when the server action returns ok: false", async () => {
-    uploadScreenshot.mockResolvedValue({ path: "user-1/shot.png" });
-    submitProject.mockResolvedValue({
-      ok: false,
-      error: "Could not submit project",
-    });
-    const onSuccess = vi.fn();
-
-    render(<SubmitForm cohortId="cohort-1" onSuccess={onSuccess} />);
-    await fillAndSubmit();
-
-    expect(
-      await screen.findByTestId("submit-form-submit-error")
-    ).toHaveTextContent("Could not submit project");
-    expect(onSuccess).not.toHaveBeenCalled();
-  });
-
-  it("surfaces an upload error without calling the server action", async () => {
-    uploadScreenshot.mockResolvedValue({
-      error: "File must be 25 MB or smaller",
-    });
-    const onSuccess = vi.fn();
-
-    render(<SubmitForm cohortId="cohort-1" onSuccess={onSuccess} />);
-    await fillAndSubmit();
+    const form = fillTextFields();
+    fireEvent.submit(form);
 
     expect(
       await screen.findByTestId("submit-form-field-error")
-    ).toHaveTextContent("File must be 25 MB or smaller");
-    expect(submitProject).not.toHaveBeenCalled();
-    expect(onSuccess).not.toHaveBeenCalled();
-  });
-
-  it("surfaces the decode-failure error without calling the server action", async () => {
-    uploadScreenshot.mockResolvedValue({
-      error: "Could not process this image. Try a different file.",
-    });
-
-    render(<SubmitForm cohortId="cohort-1" />);
-    await fillAndSubmit();
-
-    expect(
-      await screen.findByTestId("submit-form-field-error")
-    ).toHaveTextContent("Could not process this image. Try a different file.");
+    ).toHaveTextContent("스크린샷을 1장 이상");
+    expect(uploadScreenshot).not.toHaveBeenCalled();
     expect(submitProject).not.toHaveBeenCalled();
   });
 
-  it("lets the user retry after a decode failure without a page refresh", async () => {
+  it("uploads each attached image then calls the server action with the path array", async () => {
     uploadScreenshot
-      .mockResolvedValueOnce({
-        error: "Could not process this image. Try a different file.",
-      })
-      .mockResolvedValueOnce({ path: "user-1/retry.webp" });
-    submitProject.mockResolvedValue({ ok: true, projectId: "p-retry" });
+      .mockResolvedValueOnce({ path: "user-1/a.webp" })
+      .mockResolvedValueOnce({ path: "user-1/b.webp" });
+    submitProject.mockResolvedValue({ ok: true, projectId: "p1" });
 
     render(<SubmitForm cohortId="cohort-1" />);
-
-    await fillAndSubmit();
-    expect(
-      await screen.findByTestId("submit-form-field-error")
-    ).toHaveTextContent("Could not process this image");
-    expect(submitProject).not.toHaveBeenCalled();
-
-    const form = (screen.getByLabelText("제목") as HTMLInputElement).form;
-    if (!form) {
-      throw new Error("form not found");
-    }
+    addOneImage();
+    addOneImage();
+    const form = fillTextFields();
     fireEvent.submit(form);
 
     await vi.waitFor(() => {
@@ -169,32 +120,64 @@ describe("SubmitForm", () => {
         title: "My App",
         tagline: "A cool tool",
         projectUrl: "https://myapp.com",
-        screenshotPath: "user-1/retry.webp",
+        imagePaths: ["user-1/a.webp", "user-1/b.webp"],
       });
     });
     expect(uploadScreenshot).toHaveBeenCalledTimes(2);
   });
 
-  it("preserves title, tagline, and URL values after a size rejection", async () => {
+  it("redirects to the new project's detail page on success", async () => {
+    uploadScreenshot.mockResolvedValue({ path: "user-1/a.webp" });
+    submitProject.mockResolvedValue({ ok: true, projectId: "p1" });
+
+    render(<SubmitForm cohortId="cohort-1" />);
+    addOneImage();
+    fireEvent.submit(fillTextFields());
+
+    await vi.waitFor(() => {
+      expect(routerPush).toHaveBeenCalledWith("/projects/p1");
+    });
+  });
+
+  it("does not redirect when the server action returns ok: false", async () => {
+    uploadScreenshot.mockResolvedValue({ path: "user-1/a.webp" });
+    submitProject.mockResolvedValue({
+      ok: false,
+      error: "Could not submit project",
+    });
+
+    render(<SubmitForm cohortId="cohort-1" />);
+    addOneImage();
+    fireEvent.submit(fillTextFields());
+
+    expect(
+      await screen.findByTestId("submit-form-submit-error")
+    ).toHaveTextContent("Could not submit project");
+    expect(routerPush).not.toHaveBeenCalled();
+  });
+
+  it("surfaces an upload error without calling the server action", async () => {
     uploadScreenshot.mockResolvedValue({
       error: "File must be 25 MB or smaller",
     });
 
     render(<SubmitForm cohortId="cohort-1" />);
-    await fillAndSubmit();
+    addOneImage();
+    fireEvent.submit(fillTextFields());
 
     expect(
       await screen.findByTestId("submit-form-field-error")
     ).toHaveTextContent("25 MB");
+    expect(submitProject).not.toHaveBeenCalled();
+    expect(routerPush).not.toHaveBeenCalled();
+  });
 
-    expect((screen.getByLabelText("제목") as HTMLInputElement).value).toBe(
-      "My App"
-    );
+  it("displays validation errors raised by the image-slots component", async () => {
+    render(<SubmitForm cohortId="cohort-1" />);
+    fireEvent.click(screen.getByTestId("image-slots-stub-error"));
+
     expect(
-      (screen.getByLabelText("한 줄 소개") as HTMLTextAreaElement).value
-    ).toBe("A cool tool");
-    expect(
-      (screen.getByLabelText("프로젝트 URL") as HTMLInputElement).value
-    ).toBe("https://myapp.com");
+      await screen.findByTestId("submit-form-field-error")
+    ).toHaveTextContent("최대 5장까지");
   });
 });

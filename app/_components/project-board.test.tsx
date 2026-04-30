@@ -66,17 +66,10 @@ vi.mock("@features/delete-project", () => ({
   DeleteButton: () => null,
 }));
 vi.mock("@features/submit-project", () => ({
-  SubmitDialog: ({
-    cohortId,
-    isAuthenticated,
-  }: {
-    cohortId: string | null;
-    isAuthenticated: boolean;
-  }) => (
+  SubmitTrigger: ({ isAuthenticated }: { isAuthenticated: boolean }) => (
     <button
       data-authenticated={String(isAuthenticated)}
-      data-cohort-id={cohortId ?? ""}
-      data-testid="submit-dialog-stub"
+      data-testid="submit-trigger-stub"
       type="button"
     >
       프로젝트 제출
@@ -146,6 +139,9 @@ function buildProject(
     tagline: `${overrides.title} tagline`,
     project_url: "https://example.com",
     screenshot_path: `${overrides.id}.png`,
+    images: [{ path: `${overrides.id}.png` }],
+    primary_image_path: `${overrides.id}.png`,
+    github_url: null,
     screenshotUrl: `https://cdn.example.com/${overrides.id}.png`,
     created_at: "2026-01-01T00:00:00Z",
     updated_at: "2026-01-01T00:00:00Z",
@@ -235,7 +231,7 @@ describe("ProjectBoard", () => {
     );
   });
 
-  it("forwards viewerCohortId + isAuthenticated to the inline SubmitDialog trigger", async () => {
+  it("forwards isAuthenticated to the inline SubmitTrigger", async () => {
     capturedOnValueChange = undefined;
     const { ProjectBoard } = await import("./project-board");
     render(
@@ -244,13 +240,11 @@ describe("ProjectBoard", () => {
         initialCohortId={null}
         isAuthenticated={true}
         projects={allProjects}
-        viewerCohortId="cohort-a"
         viewerUserId="user-1"
       />
     );
-    const submit = screen.getByTestId("submit-dialog-stub");
+    const submit = screen.getByTestId("submit-trigger-stub");
     expect(submit).toHaveAttribute("data-authenticated", "true");
-    expect(submit).toHaveAttribute("data-cohort-id", "cohort-a");
   });
 
   it("shows all projects when no cohort is selected", async () => {

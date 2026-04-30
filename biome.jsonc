@@ -63,7 +63,25 @@
           },
           "suspicious": {
             "noDoubleEquals": "off",
-            "noArrayIndexKey": "off"
+            "noArrayIndexKey": "off",
+            "noExplicitAny": "off"
+          },
+          "style": {
+            "noNestedTernary": "off"
+          }
+        }
+      }
+    },
+    {
+      // @reui/use-file-upload registry hook lives in shared/lib because
+      // shadcn's "hooks" alias maps there. The hook's internals contain
+      // a few rule violations the upstream maintainer accepted; we don't
+      // hand-edit registry files (parity with shadcn-guard.md spirit).
+      "includes": ["shared/lib/use-file-upload.ts"],
+      "linter": {
+        "rules": {
+          "complexity": {
+            "noExcessiveCognitiveComplexity": "off"
           }
         }
       }

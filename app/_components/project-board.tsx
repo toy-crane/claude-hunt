@@ -3,9 +3,7 @@
 import type { Cohort } from "@entities/cohort";
 import type { ProjectWithVoteCount } from "@entities/vote";
 import { CohortChips } from "@features/cohort-filter";
-import { DeleteButton } from "@features/delete-project";
-import { EditDialog } from "@features/edit-project";
-import { SubmitDialog } from "@features/submit-project";
+import { SubmitTrigger } from "@features/submit-project";
 import { VoteButton } from "@features/toggle-vote";
 import type { ProjectGridRow } from "@widgets/project-grid";
 import { ProjectGrid, PromptLine } from "@widgets/project-grid";
@@ -24,8 +22,6 @@ export interface ProjectBoardProps {
   initialCohortId: string | null;
   isAuthenticated: boolean;
   projects: ProjectGridRow[];
-  /** Signed-in viewer's cohort id (for the submit form's default). */
-  viewerCohortId?: string | null;
   viewerUserId: string | null;
 }
 
@@ -44,7 +40,6 @@ export function ProjectBoard({
   cohorts,
   projects,
   viewerUserId,
-  viewerCohortId = null,
   isAuthenticated,
 }: ProjectBoardProps) {
   const [cohortId, setCohortId] = useState(initialCohortId);
@@ -107,28 +102,6 @@ export function ProjectBoard({
     return () => window.removeEventListener("popstate", handlePopState);
   }, []);
 
-  const renderOwnerActions = useCallback(
-    (project: ProjectWithVoteCount) => (
-      <>
-        <EditDialog
-          project={{
-            id: project.id ?? "",
-            title: project.title ?? "",
-            tagline: project.tagline ?? "",
-            project_url: project.project_url ?? "",
-          }}
-          variant="icon"
-        />
-        <DeleteButton
-          projectId={project.id ?? ""}
-          projectTitle={project.title ?? ""}
-          variant="icon"
-        />
-      </>
-    ),
-    []
-  );
-
   const renderVoteButton = useCallback(
     (project: ProjectWithVoteCount) => (
       <VoteButton
@@ -160,10 +133,7 @@ export function ProjectBoard({
           </p>
         </div>
         <div className="w-fit self-end">
-          <SubmitDialog
-            cohortId={viewerCohortId}
-            isAuthenticated={isAuthenticated}
-          />
+          <SubmitTrigger isAuthenticated={isAuthenticated} />
         </div>
       </section>
       <CohortChips
@@ -176,7 +146,6 @@ export function ProjectBoard({
       <ProjectGrid
         cohortLabelsById={cohortLabelsById}
         projects={filteredProjects}
-        renderOwnerActions={renderOwnerActions}
         renderVoteButton={renderVoteButton}
         resolveScreenshotUrl={resolveScreenshotUrl}
         viewerUserId={viewerUserId}

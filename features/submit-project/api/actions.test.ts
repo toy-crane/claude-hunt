@@ -25,7 +25,7 @@ const validInput = {
   title: "My App",
   tagline: "A cool tool",
   projectUrl: "https://myapp.com",
-  screenshotPath: "user-1/shot.png",
+  imagePaths: ["user-1/shot.png"],
 };
 
 beforeEach(() => {
@@ -124,7 +124,7 @@ describe("submitProject server action", () => {
         title: "My App",
         tagline: "A cool tool",
         project_url: "https://myapp.com",
-        screenshot_path: "user-1/shot.png",
+        images: [{ path: "user-1/shot.png" }],
       })
     );
     expect(revalidatePathMock).toHaveBeenCalledWith("/");

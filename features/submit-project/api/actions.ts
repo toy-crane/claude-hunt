@@ -53,7 +53,12 @@ export async function submitProject(
       title: input.title,
       tagline: input.tagline,
       project_url: input.projectUrl,
-      screenshot_path: input.screenshotPath,
+      github_url: input.githubUrl ?? null,
+      // screenshot_path stays null on new rows; the board view's
+      // coalesce shim surfaces images[0] for new rows and falls back
+      // to screenshot_path for legacy rows that haven't been
+      // re-saved yet.
+      images: input.imagePaths.map((path) => ({ path })),
     })
     .select("id")
     .single();
