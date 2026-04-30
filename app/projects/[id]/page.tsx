@@ -34,6 +34,7 @@ export default async function Page({ params }: PageProps) {
           isAuthenticated={Boolean(viewer)}
           projectId={project.id}
           threads={threads}
+          viewerUserId={viewerId}
         />
       </main>
       <Footer />

@@ -12,12 +12,14 @@ export interface CommentListProps {
   isAuthenticated: boolean;
   projectId: string;
   threads: CommentThread[];
+  viewerUserId: string | null;
 }
 
 export function CommentList({
   threads,
   projectId,
   isAuthenticated,
+  viewerUserId,
 }: CommentListProps) {
   const total = threads.reduce((sum, t) => sum + 1 + t.replies.length, 0);
 
@@ -51,6 +53,7 @@ export function CommentList({
                 comment={thread.comment}
                 isAuthenticated={isAuthenticated}
                 projectId={projectId}
+                viewerUserId={viewerUserId}
               />
               {thread.replies.length > 0 ? (
                 <ul
@@ -64,6 +67,7 @@ export function CommentList({
                         comment={reply}
                         isAuthenticated={isAuthenticated}
                         projectId={projectId}
+                        viewerUserId={viewerUserId}
                       />
                     </li>
                   ))}
