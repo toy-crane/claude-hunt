@@ -103,35 +103,44 @@ export type Database = {
         Row: {
           cohort_id: string
           created_at: string
+          github_url: string | null
           id: string
+          images: Json
           project_url: string
-          screenshot_path: string
+          screenshot_path: string | null
           tagline: string
           title: string
           updated_at: string
           user_id: string
+          vote_count: number
         }
         Insert: {
           cohort_id: string
           created_at?: string
+          github_url?: string | null
           id?: string
+          images?: Json
           project_url: string
-          screenshot_path: string
+          screenshot_path?: string | null
           tagline: string
           title: string
           updated_at?: string
           user_id: string
+          vote_count?: number
         }
         Update: {
           cohort_id?: string
           created_at?: string
+          github_url?: string | null
           id?: string
+          images?: Json
           project_url?: string
-          screenshot_path?: string
+          screenshot_path?: string | null
           tagline?: string
           title?: string
           updated_at?: string
           user_id?: string
+          vote_count?: number
         }
         Relationships: [
           {
@@ -205,7 +214,10 @@ export type Database = {
           cohort_id: string | null
           cohort_name: string | null
           created_at: string | null
+          github_url: string | null
           id: string | null
+          images: Json | null
+          primary_image_path: string | null
           project_url: string | null
           screenshot_path: string | null
           tagline: string | null

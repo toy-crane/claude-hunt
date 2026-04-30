@@ -14,7 +14,14 @@ select
   p.title,
   p.tagline,
   p.project_url,
+  p.github_url,
   p.screenshot_path,
+  p.images,
+  -- Primary image path: prefer the new `images[0]`, fall back to the legacy
+  -- `screenshot_path` for rows that haven't been re-written yet. Once the
+  -- follow-up Contract scope drops `screenshot_path`, this becomes simply
+  -- `images->0->>'path'`.
+  coalesce(p.images->0->>'path', p.screenshot_path) as primary_image_path,
   p.created_at,
   p.updated_at,
   p.vote_count,
