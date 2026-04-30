@@ -4,6 +4,7 @@ import { isCommentEdited } from "@entities/comment";
 import { deleteComment } from "@features/delete-comment";
 import { EditCommentInline } from "@features/edit-comment";
 import { CommentForm } from "@features/leave-comment";
+import { ReactionRow } from "@features/toggle-reaction";
 import { RiMoreLine } from "@remixicon/react";
 import {
   AlertDialog,
@@ -180,18 +181,26 @@ export function CommentItem({
               {comment.body}
             </p>
           )}
-          <div className="flex items-center justify-end gap-2">
-            {allowReply && !editing ? (
-              <button
-                className="text-muted-foreground text-xs underline underline-offset-2 hover:text-foreground"
-                data-testid="comment-reply-trigger"
-                onClick={() => setReplyOpen((v) => !v)}
-                type="button"
-              >
-                {replyOpen ? "답글 닫기" : "답글하기"}
-              </button>
-            ) : null}
-          </div>
+          {editing ? null : (
+            <div className="flex flex-wrap items-center justify-between gap-2">
+              <ReactionRow
+                commentId={comment.id}
+                isAuthenticated={isAuthenticated}
+                projectId={projectId}
+                reactions={comment.reactions}
+              />
+              {allowReply ? (
+                <button
+                  className="text-muted-foreground text-xs underline underline-offset-2 hover:text-foreground"
+                  data-testid="comment-reply-trigger"
+                  onClick={() => setReplyOpen((v) => !v)}
+                  type="button"
+                >
+                  {replyOpen ? "답글 닫기" : "답글하기"}
+                </button>
+              ) : null}
+            </div>
+          )}
           {replyOpen ? (
             <div className="mt-1">
               <CommentForm
