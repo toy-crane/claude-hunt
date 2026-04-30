@@ -4,7 +4,13 @@ import { MAX_TAGLINE_LENGTH, MAX_TITLE_LENGTH } from "@entities/project";
 import { type ImageSlot, ImageSlots } from "@features/upload-project-images";
 import { uploadScreenshot } from "@shared/lib/screenshot-upload";
 import { Button } from "@shared/ui/button";
-import { Field, FieldGroup, FieldLabel } from "@shared/ui/field";
+import {
+  Field,
+  FieldDescription,
+  FieldError,
+  FieldGroup,
+  FieldLabel,
+} from "@shared/ui/field";
 import { Input } from "@shared/ui/input";
 import { Spinner } from "@shared/ui/spinner";
 import { Textarea } from "@shared/ui/textarea";
@@ -23,6 +29,14 @@ export interface SubmitFormProps {
    * server action also checks.
    */
   cohortId: string | null;
+}
+
+function RequiredMark() {
+  return (
+    <span aria-hidden="true" className="text-destructive">
+      *
+    </span>
+  );
 }
 
 export function SubmitForm({ cohortId: _cohortId }: SubmitFormProps) {
@@ -102,13 +116,16 @@ export function SubmitForm({ cohortId: _cohortId }: SubmitFormProps) {
   return (
     <form
       aria-label="프로젝트 제출"
-      className="flex flex-col gap-4"
+      className="flex flex-col gap-6"
       onSubmit={handleSubmit}
     >
       <FieldGroup>
         <Field>
-          <FieldLabel htmlFor={titleId}>제목</FieldLabel>
+          <FieldLabel htmlFor={titleId}>
+            제목 <RequiredMark />
+          </FieldLabel>
           <Input
+            aria-required="true"
             disabled={submitting}
             id={titleId}
             maxLength={MAX_TITLE_LENGTH}
@@ -116,11 +133,15 @@ export function SubmitForm({ cohortId: _cohortId }: SubmitFormProps) {
             placeholder="내 앱"
             required
           />
+          <FieldDescription>상세 페이지 헤더에 표시돼요.</FieldDescription>
         </Field>
 
         <Field>
-          <FieldLabel htmlFor={taglineId}>한 줄 소개</FieldLabel>
+          <FieldLabel htmlFor={taglineId}>
+            한 줄 소개 <RequiredMark />
+          </FieldLabel>
           <Textarea
+            aria-required="true"
             disabled={submitting}
             id={taglineId}
             maxLength={MAX_TAGLINE_LENGTH}
@@ -129,11 +150,15 @@ export function SubmitForm({ cohortId: _cohortId }: SubmitFormProps) {
             required
             rows={2}
           />
+          <FieldDescription>보드 카드와 공유 카드에 사용돼요.</FieldDescription>
         </Field>
 
         <Field>
-          <FieldLabel htmlFor={urlId}>프로젝트 URL</FieldLabel>
+          <FieldLabel htmlFor={urlId}>
+            프로젝트 URL <RequiredMark />
+          </FieldLabel>
           <Input
+            aria-required="true"
             disabled={submitting}
             id={urlId}
             name="projectUrl"
@@ -141,13 +166,13 @@ export function SubmitForm({ cohortId: _cohortId }: SubmitFormProps) {
             required
             type="url"
           />
+          <FieldDescription>
+            사용자가 직접 접속할 수 있는 주소를 적어주세요.
+          </FieldDescription>
         </Field>
 
         <Field>
-          <FieldLabel htmlFor={githubUrlId}>
-            GitHub 저장소{" "}
-            <span className="font-normal text-muted-foreground">(선택)</span>
-          </FieldLabel>
+          <FieldLabel htmlFor={githubUrlId}>GitHub 저장소</FieldLabel>
           <Input
             disabled={submitting}
             id={githubUrlId}
@@ -155,43 +180,44 @@ export function SubmitForm({ cohortId: _cohortId }: SubmitFormProps) {
             placeholder="https://github.com/owner/repo"
             type="url"
           />
+          <FieldDescription>
+            선택 — 코드를 공개했다면 링크해 주세요.
+          </FieldDescription>
         </Field>
 
         <Field>
-          <FieldLabel>스크린샷</FieldLabel>
+          <FieldLabel>
+            스크린샷 <RequiredMark />
+          </FieldLabel>
           <ImageSlots
             disabled={submitting}
             onChange={setImages}
             onError={setFieldError}
             value={images}
           />
+          <FieldDescription>
+            첫 번째 이미지가 대표(보드 썸네일·공유 카드)로 쓰여요. 드래그로
+            순서를 바꿀 수 있어요. JPEG · PNG · WebP, 한 장당 최대 25 MB.
+          </FieldDescription>
+          {fieldError ? (
+            <FieldError data-testid="submit-form-field-error">
+              {fieldError}
+            </FieldError>
+          ) : null}
         </Field>
       </FieldGroup>
 
-      {fieldError ? (
-        <p
-          className="text-destructive text-xs"
-          data-testid="submit-form-field-error"
-          role="alert"
-        >
-          {fieldError}
-        </p>
-      ) : null}
       {submitError ? (
-        <p
-          className="text-destructive text-xs"
-          data-testid="submit-form-submit-error"
-          role="alert"
-        >
+        <FieldError data-testid="submit-form-submit-error">
           {submitError}
-        </p>
+        </FieldError>
       ) : null}
 
-      <div className="flex items-stretch gap-2">
+      <div className="flex justify-end gap-2">
         <Button asChild variant="outline">
           <Link href="/">취소</Link>
         </Button>
-        <Button className="flex-1" disabled={submitting} type="submit">
+        <Button disabled={submitting} size="lg" type="submit">
           {submitting ? <Spinner data-icon="inline-start" /> : null}
           {submitting ? "제출 중..." : "프로젝트 제출"}
         </Button>
