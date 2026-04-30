@@ -10,7 +10,7 @@
 | Reaction storage | Dedicated `comment_reactions` table; `emoji` text column with CHECK in `('👍','💡','🎉','❤️')`; UNIQUE `(comment_id, user_id, emoji)` | Lets each user have at most one of each emoji per comment; toggle = INSERT-or-DELETE. |
 | Submit/Edit UX | Both become pages: `/projects/new` and `/projects/[id]/edit` (no longer dialogs) | User decision in wireframe phase. Page route enables redirect-on-success to `/projects/[id]`. |
 | Detail-page action row | Pattern A: vote pill + "Visit project" primary button on one row (natural width, left-aligned); GitHub as a small text link below — only when `github_url` is set | Single primary CTA, conditional secondary doesn't shift layout. |
-| Reaction UI | Slack/Reddit-style: only emojis with count ≥ 1 render as chips; a `[😊+]` trigger opens a popover with the 4 fixed emojis | Avoids placeholder-clutter; progressive disclosure. |
+| Reaction UI | Slack/Reddit-style. Each existing reaction renders as a filled rounded-pill **chip** (`emoji + count`). The "add reaction" trigger is the same pill shape with a **dashed border** and a Lucide `smile-plus` icon — when no chips are present it shows `icon + "반응"` text; once at least one chip exists, it collapses to icon-only. Clicking the trigger opens a `Popover` with the 4 fixed emojis | Matches wireframe Screen 2. Single shape family (pills) keeps the row visually coherent; dashed border + icon-only collapse keeps the trigger discoverable without dominating. |
 | File upload | `@reui/use-file-upload` hook for selection/drag-drop/validation; `@reui/sortable` (Sortable + SortableItem + SortableItemHandle, `layout="grid"`) for reorder | Wireframe layout (1 primary + 4 thumb slots) is preserved; hook+sortable provide tested mechanics. dnd-kit is the most-used React DnD lib. |
 | Owner-only controls on detail | Two icon buttons (pencil = Edit link, trash = Delete confirm) at top-right of hero, mirroring the wireframe | Wireframe-decided (Screen 1, user-accepted). Matches the existing board-card owner action pair. |
 | Comment edit/delete | Author-only via `dropdown-menu` on each own comment; `updated_at != created_at` derives the "수정됨" tag | Uses existing column; no extra `edited_at` field. |
@@ -557,11 +557,12 @@ Change Type: New | Modify | Delete
   - `bunx --bun shadcn@latest add @shadcn/popover`
   - `features/toggle-reaction/api/schema.ts`
   - `features/toggle-reaction/api/actions.ts` (+ test) — `toggleReaction({commentId, emoji})`: if exists, DELETE; else INSERT (RLS owns the auth check)
-  - `features/toggle-reaction/ui/reaction-row.tsx` (+ test) — given `reactions[]` and `viewerReactions[]`, render only chips with count ≥ 1; "+" trigger opens `Popover` with the 4 emojis; clicking an emoji calls the action with optimistic state
+  - `features/toggle-reaction/ui/reaction-row.tsx` (+ test) — given `reactions[]` and `viewerReactions[]`, render filled chips for each emoji with count ≥ 1 (`emoji + count`, `Badge`-shaped pill, viewer's own reactions visually flagged via filled accent). The "add reaction" trigger is a same-shaped pill with **dashed border** + Lucide `smile-plus`: shows `icon + "반응"` when no chips exist, **collapses to icon-only when ≥ 1 chip is present** (matches wireframe Screen 2). Clicking the trigger opens `Popover` with the 4 emojis; clicking an emoji calls the action with optimistic state
   - `widgets/comment-list/ui/comment-item.tsx` — render `<ReactionRow />` for both comments and replies
   - `widgets/comment-list/api/queries.ts` — include `reactions` aggregated per comment (group by emoji with count + viewer flag)
 - **Acceptance**:
-  - [ ] On a comment with no reactions, only the `[😊+]` trigger renders
+  - [ ] On a comment with no reactions, only the trigger pill renders, showing `smile-plus` icon + "반응" text with a dashed border
+  - [ ] On a comment with at least one reaction, the trigger collapses to icon-only (still a dashed-border pill); existing reactions render as filled chips before it
   - [ ] Clicking the trigger opens a popover containing exactly four buttons: 👍 💡 🎉 ❤️
   - [ ] Tapping 💡 closes the popover; a `💡 1` chip appears; the chip styling indicates the viewer's own reaction
   - [ ] Tapping 💡 again removes the chip and the count returns to 0
