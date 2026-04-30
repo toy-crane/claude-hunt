@@ -125,10 +125,13 @@ describe("ProjectCard (terminal row) — desktop branch", () => {
     );
   });
 
-  it("opens the project URL in new tabs from every link (desktop branch)", () => {
+  it("navigates every desktop link to the internal detail page", () => {
     render(
       <ProjectCard
-        project={buildProject({ project_url: "https://myapp.com" })}
+        project={buildProject({
+          id: "proj-detail",
+          project_url: "https://myapp.com",
+        })}
         rank={5}
         screenshotUrl="https://cdn.example.com/shot.png"
       />
@@ -138,9 +141,8 @@ describe("ProjectCard (terminal row) — desktop branch", () => {
     ).getAllByRole("link");
     expect(links.length).toBeGreaterThanOrEqual(2);
     for (const link of links) {
-      expect(link).toHaveAttribute("href", "https://myapp.com");
-      expect(link).toHaveAttribute("target", "_blank");
-      expect(link).toHaveAttribute("rel", "noopener noreferrer");
+      expect(link).toHaveAttribute("href", "/projects/proj-detail");
+      expect(link).not.toHaveAttribute("target", "_blank");
     }
   });
 
@@ -424,27 +426,31 @@ describe("ProjectCard — desktop hover preview popover", () => {
     ).not.toBeInTheDocument();
   });
 
-  it("keeps the trigger link href and target intact for empty-screenshot rows", () => {
+  it("keeps the trigger link pointing at the detail page for empty-screenshot rows", () => {
     render(
       <ProjectCard
         project={buildProject({
-          screenshot_path: null,
+          id: "proj-empty",
           project_url: "https://myapp.com",
+          screenshot_path: null,
         })}
         rank={1}
         screenshotUrl=""
       />
     );
     const trigger = getDesktopTrigger();
-    expect(trigger).toHaveAttribute("href", "https://myapp.com");
-    expect(trigger).toHaveAttribute("target", "_blank");
+    expect(trigger).toHaveAttribute("href", "/projects/proj-empty");
+    expect(trigger).not.toHaveAttribute("target", "_blank");
   });
 
-  it("keeps the trigger link href and target intact while the popover is open", async () => {
+  it("keeps the trigger link pointing at the detail page while the popover is open", async () => {
     const user = userEvent.setup();
     render(
       <ProjectCard
-        project={buildProject({ project_url: "https://myapp.com" })}
+        project={buildProject({
+          id: "proj-hover",
+          project_url: "https://myapp.com",
+        })}
         rank={1}
         screenshotUrl="https://cdn.example.com/shot.png"
       />
@@ -455,8 +461,8 @@ describe("ProjectCard — desktop hover preview popover", () => {
       timeout: 1000,
     });
 
-    expect(trigger).toHaveAttribute("href", "https://myapp.com");
-    expect(trigger).toHaveAttribute("target", "_blank");
+    expect(trigger).toHaveAttribute("href", "/projects/proj-hover");
+    expect(trigger).not.toHaveAttribute("target", "_blank");
   });
 
   it("keeps the popover open when the cursor moves from the trigger onto the popover content", async () => {
