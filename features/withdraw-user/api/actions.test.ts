@@ -34,7 +34,7 @@ vi.mock("@shared/api/supabase/admin", () => ({
 const { withdrawAccount } = await import("./actions");
 
 function stubProjects(
-  rows: Array<{ screenshot_path: string | null }>,
+  rows: Array<{ images: Array<{ path: string }> }>,
   error: { message: string } | null = null
 ) {
   const eq = vi.fn().mockResolvedValue({ data: rows, error });
@@ -72,8 +72,8 @@ describe("withdrawAccount server action", () => {
   it("removes screenshots, deletes the auth user, then signs out (happy path)", async () => {
     getUser.mockResolvedValue({ data: { user: { id: "u1" } }, error: null });
     stubProjects([
-      { screenshot_path: "u1/a.png" },
-      { screenshot_path: "u1/b.png" },
+      { images: [{ path: "u1/a.png" }] },
+      { images: [{ path: "u1/b.png" }] },
     ]);
 
     const result = await withdrawAccount();
@@ -99,7 +99,7 @@ describe("withdrawAccount server action", () => {
 
   it("returns an error and does not sign out when admin.deleteUser fails", async () => {
     getUser.mockResolvedValue({ data: { user: { id: "u3" } }, error: null });
-    stubProjects([{ screenshot_path: "u3/s.png" }]);
+    stubProjects([{ images: [{ path: "u3/s.png" }] }]);
     deleteUser.mockResolvedValueOnce({
       data: null,
       error: { message: "supabase down" },

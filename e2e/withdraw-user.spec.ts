@@ -55,7 +55,7 @@ async function seedPeerProject(
       title: projectTitle,
       tagline: "A peer-seeded project for the withdraw-user e2e spec.",
       project_url: "https://peer.example.com",
-      screenshot_path: `${peerId}/peer-seed.png`,
+      images: [{ path: `${peerId}/peer-seed.png` }],
     })
     .select("id")
     .single();
@@ -128,7 +128,7 @@ async function signInAndSeedWithdrawStudent(
       title: ownProjectTitle,
       tagline: "Own project that should vanish on withdraw.",
       project_url: "https://withdraw-me.example.com",
-      screenshot_path: `${userId}/withdraw-seed.png`,
+      images: [{ path: `${userId}/withdraw-seed.png` }],
     })
     .select("id")
     .single();

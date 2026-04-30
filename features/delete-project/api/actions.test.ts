@@ -32,7 +32,7 @@ beforeEach(() => {
 });
 
 function stubDelete(options: {
-  screenshotPath?: string | null;
+  imagePaths?: string[];
   deleted: Array<{ id: string }>;
   deleteError?: { message: string };
 }) {
@@ -40,9 +40,9 @@ function stubDelete(options: {
     eq: vi.fn().mockReturnValue({
       maybeSingle: vi.fn().mockResolvedValue({
         data:
-          options.screenshotPath === undefined
+          options.imagePaths === undefined
             ? null
-            : { screenshot_path: options.screenshotPath },
+            : { images: options.imagePaths.map((path) => ({ path })) },
         error: null,
       }),
     }),
@@ -76,7 +76,7 @@ describe("deleteProject server action", () => {
   it("deletes the row, removes the screenshot, and revalidates on success", async () => {
     getUser.mockResolvedValue({ data: { user: { id: "u1" } }, error: null });
     stubDelete({
-      screenshotPath: "u1/shot.png",
+      imagePaths: ["u1/shot.png"],
       deleted: [{ id: "proj-1" }],
     });
 
@@ -89,7 +89,7 @@ describe("deleteProject server action", () => {
 
   it("reports forbidden when RLS returns 0 rows", async () => {
     getUser.mockResolvedValue({ data: { user: { id: "u1" } }, error: null });
-    stubDelete({ screenshotPath: "u1/shot.png", deleted: [] });
+    stubDelete({ imagePaths: ["u1/shot.png"], deleted: [] });
 
     const result = await deleteProject({ projectId: "proj-1" });
 
@@ -97,9 +97,9 @@ describe("deleteProject server action", () => {
     expect(result.error).toMatch(FORBIDDEN_REGEX);
   });
 
-  it("succeeds even when the screenshot path is missing (no cleanup needed)", async () => {
+  it("succeeds even when the project has no images (no cleanup needed)", async () => {
     getUser.mockResolvedValue({ data: { user: { id: "u1" } }, error: null });
-    stubDelete({ screenshotPath: null, deleted: [{ id: "proj-1" }] });
+    stubDelete({ imagePaths: [], deleted: [{ id: "proj-1" }] });
 
     const result = await deleteProject({ projectId: "proj-1" });
 
@@ -110,7 +110,7 @@ describe("deleteProject server action", () => {
   it("still returns ok when storage removal fails (non-blocking cleanup)", async () => {
     getUser.mockResolvedValue({ data: { user: { id: "u1" } }, error: null });
     stubDelete({
-      screenshotPath: "u1/shot.webp",
+      imagePaths: ["u1/shot.webp"],
       deleted: [{ id: "proj-1" }],
     });
     storageRemove.mockResolvedValueOnce({
