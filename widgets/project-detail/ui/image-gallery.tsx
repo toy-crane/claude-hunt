@@ -84,7 +84,7 @@ export function ImageGallery({ imageUrls, title }: ImageGalleryProps) {
               className={cn(
                 "relative aspect-square w-16 shrink-0 overflow-hidden rounded-md border",
                 idx === activeIndex
-                  ? "border-foreground ring-1 ring-foreground"
+                  ? "border-transparent ring-2 ring-ring ring-offset-2 ring-offset-background"
                   : "border-border opacity-70 hover:opacity-100"
               )}
               data-testid="project-detail-gallery-thumb"
