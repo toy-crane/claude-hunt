@@ -6,30 +6,35 @@ const LGE_2_RE = /LG전자 2기/;
 const LGE_3_RE = /LG전자 3기/;
 const INFLEARN_RE = /인프런/;
 
-const SEEDED_COHORTS: readonly { name: string; re: RegExp }[] = [
-  { name: "LGE-1", re: LGE_1_RE },
-  { name: "LGE-2", re: LGE_2_RE },
-  { name: "Inflearn", re: INFLEARN_RE },
+// The three demo projects seeded by `supabase/seed.sql`. Asserting on the
+// titles instead of strict counts keeps the spec robust against student
+// tests submitting projects in parallel from other spec files.
+const SEEDED_COHORTS: readonly {
+  name: string;
+  re: RegExp;
+  projectTitle: string;
+}[] = [
+  { name: "LGE-1", re: LGE_1_RE, projectTitle: "Paint Studio" },
+  { name: "LGE-2", re: LGE_2_RE, projectTitle: "Note Keeper" },
+  { name: "Inflearn", re: INFLEARN_RE, projectTitle: "Focus Timer" },
 ];
 
 test.describe("seed demo data — home page renders three cards", () => {
-  test("home page shows exactly three project cards with image/png screenshots", async ({
+  test("home page renders the three seeded project cards with image/png screenshots", async ({
     page,
   }) => {
     await page.goto("/");
 
-    const cards = page.getByTestId("project-card");
-    await expect(cards).toHaveCount(3);
-
-    // Every card's screenshot resolves to a 200 + image/png from the
-    // project-screenshots bucket. Iterating via count() + nth() because
-    // Locator.all() snapshots once and can desync with retries.
-    for (let i = 0; i < 3; i++) {
-      const img = cards.nth(i).locator("img").first();
+    for (const { projectTitle } of SEEDED_COHORTS) {
+      const card = page
+        .getByTestId("project-card")
+        .filter({ hasText: projectTitle })
+        .first();
+      const img = card.locator("img").first();
       await expect(img).toBeVisible();
       const src = await img.getAttribute("src");
       if (!src) {
-        throw new Error("Project card image has no src");
+        throw new Error(`Project card '${projectTitle}' image has no src`);
       }
       const response = await page.request.fetch(src, { method: "HEAD" });
       expect(response.status()).toBe(200);
@@ -37,51 +42,75 @@ test.describe("seed demo data — home page renders three cards", () => {
     }
   });
 
-  test("the three cards reference three distinct authors", async ({ page }) => {
+  test("the three seeded cards reference three distinct authors", async ({
+    page,
+  }) => {
     await page.goto("/");
-    const cards = page.getByTestId("project-card");
-    await expect(cards).toHaveCount(3);
-
     const authors = new Set<string>();
-    for (let i = 0; i < 3; i++) {
-      const card = cards.nth(i);
-      const text = (await card.textContent()) ?? "";
-      authors.add(text);
+    for (const { projectTitle } of SEEDED_COHORTS) {
+      const card = page
+        .getByTestId("project-card")
+        .filter({ hasText: projectTitle })
+        .first();
+      authors.add((await card.textContent()) ?? "");
     }
-    // Each seeded profile has a unique display_name so per-card textContent
-    // (which includes the author name) must also be distinct across cards.
     expect(authors.size).toBe(3);
   });
 
   for (const cohort of SEEDED_COHORTS) {
-    test(`cohort filter '${cohort.name}' returns exactly one card`, async ({
+    test(`cohort filter '${cohort.name}' surfaces its seeded project`, async ({
       page,
     }) => {
       await page.goto("/");
       const chips = page.getByTestId("cohort-chips");
       await chips.getByRole("button", { name: cohort.re }).click();
 
-      const cards = page.getByTestId("project-card");
-      await expect(cards).toHaveCount(1);
+      await expect(
+        page
+          .getByTestId("project-card")
+          .filter({ hasText: cohort.projectTitle })
+          .first()
+      ).toBeVisible();
     });
   }
 
-  test("cohort filter 'LGE-3' returns zero cards", async ({ page }) => {
+  test("cohort filter 'LGE-3' surfaces no seeded cards", async ({ page }) => {
     await page.goto("/");
     const chips = page.getByTestId("cohort-chips");
     await chips.getByRole("button", { name: LGE_3_RE }).click();
 
-    await expect(page.getByTestId("project-card")).toHaveCount(0);
+    for (const { projectTitle } of SEEDED_COHORTS) {
+      await expect(
+        page
+          .getByTestId("project-card")
+          .filter({ hasText: projectTitle })
+          .first()
+      ).not.toBeVisible();
+    }
   });
 
-  test("restoring 'All cohorts' restores all three cards", async ({ page }) => {
+  test("restoring 'All cohorts' restores all three seeded cards", async ({
+    page,
+  }) => {
     await page.goto("/");
     const chips = page.getByTestId("cohort-chips");
 
     await chips.getByRole("button", { name: LGE_1_RE }).click();
-    await expect(page.getByTestId("project-card")).toHaveCount(1);
+    await expect(
+      page
+        .getByTestId("project-card")
+        .filter({ hasText: "Paint Studio" })
+        .first()
+    ).toBeVisible();
 
     await chips.getByRole("button", { name: ALL_COHORTS_RE }).click();
-    await expect(page.getByTestId("project-card")).toHaveCount(3);
+    for (const { projectTitle } of SEEDED_COHORTS) {
+      await expect(
+        page
+          .getByTestId("project-card")
+          .filter({ hasText: projectTitle })
+          .first()
+      ).toBeVisible();
+    }
   });
 });

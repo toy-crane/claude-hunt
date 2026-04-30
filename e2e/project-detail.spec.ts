@@ -144,29 +144,40 @@ test("authenticated student leaves, edits, reacts to, and deletes a comment", as
       timeout: 10_000,
     });
 
-    // Open kebab on our own comment, then click "편집".
-    await page.getByTestId("comment-kebab").first().click();
+    // Open kebab on our own comment, then click "편집". Scope to the
+    // specific comment by its text so parallel tests on the same project
+    // can't pick a stranger's comment.
+    const ownComment = page
+      .getByTestId("comment-item")
+      .filter({ hasText: "멋진 프로젝트네요!" })
+      .first();
+    await ownComment.getByTestId("comment-kebab").click();
     await page.getByRole("menuitem", { name: EDIT_MENU_RE }).click();
-    const editArea = page
-      .getByTestId("edit-comment-inline")
-      .locator("textarea");
-    await editArea.fill("훨씬 더 멋진 프로젝트네요!");
-    await page.getByRole("button", { name: SAVE_BTN_RE }).click();
-    await expect(page.getByText("훨씬 더 멋진 프로젝트네요!")).toBeVisible();
-    await expect(page.getByTestId("comment-edited-tag")).toBeVisible();
+    // Radix's DropdownMenuItem onSelect keeps the menu open via
+    // `preventDefault`; press Escape so its overlay doesn't intercept
+    // the save click.
+    await page.keyboard.press("Escape");
+    const editForm = page.getByTestId("edit-comment-inline");
+    await expect(editForm).toBeVisible();
+    await editForm.locator("textarea").fill("훨씬 더 멋진 프로젝트네요!");
+    await editForm.getByRole("button", { name: SAVE_BTN_RE }).click();
+    await expect(
+      page.getByText("훨씬 더 멋진 프로젝트네요!").first()
+    ).toBeVisible();
+    await expect(ownComment.getByTestId("comment-edited-tag")).toBeVisible();
 
-    // Add a reaction via the popover.
-    await page.getByTestId("reaction-add-trigger").first().click();
+    // Add a reaction via the popover (scoped to our own comment).
+    await ownComment.getByTestId("reaction-add-trigger").click();
     await page
       .getByTestId("reaction-popover-emoji")
       .filter({ hasText: "💡" })
       .click();
     await expect(
-      page.getByTestId("reaction-chip").filter({ hasText: "💡" })
+      ownComment.getByTestId("reaction-chip").filter({ hasText: "💡" })
     ).toBeVisible({ timeout: 10_000 });
 
     // Delete the comment.
-    await page.getByTestId("comment-kebab").first().click();
+    await ownComment.getByTestId("comment-kebab").click();
     await page.getByRole("menuitem", { name: DELETE_MENU_RE }).click();
     await page.getByRole("button", { name: CONFIRM_DELETE_BTN_RE }).click();
     await expect(page.getByText("훨씬 더 멋진 프로젝트네요!")).toHaveCount(0, {
@@ -202,15 +213,20 @@ test("project detail page exposes Open Graph metadata", async ({
   page,
   request,
 }) => {
+  // First-compile of /projects/[id]/opengraph-image under turbopack can
+  // take ~10-15 s in dev, so leave room beyond the 30 s default.
+  test.setTimeout(90_000);
   const admin = createAdminClient();
+  // Pin to a specific seed project so the test doesn't race against
+  // student-submitted projects from other parallel specs.
+  const seedId = "00000000-0000-0000-0000-0000000000a1";
   const { data: seeded } = await admin
     .from("projects")
     .select("id, title")
-    .order("created_at", { ascending: false })
-    .limit(1)
+    .eq("id", seedId)
     .single();
   if (!seeded?.id) {
-    throw new Error("no seeded project found");
+    throw new Error("seed project missing — run supabase db reset first");
   }
   const url = `/projects/${seeded.id}`;
   await page.goto(url);
@@ -225,9 +241,12 @@ test("project detail page exposes Open Graph metadata", async ({
     .getAttribute("content");
   expect(ogUrl).toContain(url);
 
-  // The opengraph-image route returns a PNG.
+  // The opengraph-image route returns a PNG. First-compile under
+  // turbopack can take several seconds in dev, so allow a generous
+  // request timeout.
   const ogImageResponse = await request.get(
-    `http://localhost:3000${url}/opengraph-image`
+    `http://localhost:3000${url}/opengraph-image`,
+    { timeout: 60_000 }
   );
   expect(ogImageResponse.status()).toBe(200);
   expect(ogImageResponse.headers()["content-type"]).toContain("image/");

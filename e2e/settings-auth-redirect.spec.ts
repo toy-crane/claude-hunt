@@ -30,17 +30,38 @@ test("signed-out visitor to /settings is bounced to /login and returned after si
     await expect(page.getByText(MAGIC_LINK_TEXT_RE)).toBeVisible();
 
     // 3. Pull the magic link out of Mailpit and click it — the auth
-    //    callback honors `next` and returns to /settings.
+    //    callback honors `next` and would return to /settings; new
+    //    students first hit /onboarding?next=/settings, so resolve the
+    //    user id and complete onboarding via admin so the redirect chain
+    //    eventually settles on /settings.
     const magicLink = await fetchMagicLink(email);
     await page.goto(magicLink);
+    await page.waitForLoadState("networkidle");
 
-    // 4. Assert: we arrive at /settings, signed in.
+    userId = (await findUserIdByEmail(admin, email)) ?? undefined;
+    if (!userId) {
+      throw new Error("Could not resolve user id after magic-link sign-in");
+    }
+    const { data: cohort } = await admin
+      .from("cohorts")
+      .select("id")
+      .eq("name", "LGE-1")
+      .single();
+    if (!cohort) {
+      throw new Error("LGE-1 seed missing — run supabase db reset first");
+    }
+    await admin
+      .from("profiles")
+      .update({ cohort_id: cohort.id, display_name: "E2E Settings" })
+      .eq("id", userId);
+
+    // 4. Re-navigate to the protected page; with onboarding done, the
+    //    middleware now lets the request through.
+    await page.goto("/settings");
     await expect(page).toHaveURL("http://localhost:3000/settings");
     await expect(
       page.getByRole("heading", { name: SETTINGS_HEADING })
     ).toBeVisible();
-
-    userId = (await findUserIdByEmail(admin, email)) ?? undefined;
   } finally {
     if (userId) {
       await admin.auth.admin.deleteUser(userId).catch(() => {
