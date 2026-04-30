@@ -409,12 +409,12 @@ Change Type: New | Modify | Delete
   - skill `shadcn` — install `@shadcn/separator` if needed; `HoverCard` for thumbnail preview already used on board
   - wireframe Screen 1 (gallery section)
 - **Implementation targets**:
-  - `widgets/project-detail/ui/image-gallery.tsx` — primary 16:10 + thumb strip below + arrows; thumb click and arrows swap which image is in the primary slot. Strip hidden when only 1 image. Optional lightbox click (skip for v1; document deferral in screen-notes if not implemented).
+  - `widgets/project-detail/ui/image-gallery.tsx` — primary 16:10 + thumb strip below + arrows; thumb click and arrows swap which image is in the primary slot. Arrows wrap around in both directions. Strip hidden when only 1 image. **Clicking the primary image does nothing** (no lightbox — explicitly excluded for v1).
   - `widgets/project-detail/ui/image-gallery.test.tsx`
   - `next.config.mjs` — verify Supabase storage host is in `remotePatterns`
 - **Acceptance**:
   - [ ] A project with 3 images renders the primary image first; clicking thumbnail #2 swaps it into the primary slot
-  - [ ] Right arrow advances to image #2 then #3; left arrow goes back; arrows wrap or stop at ends (consistent behavior — choose stop)
+  - [ ] Right arrow advances to image #2 then #3; pressing right again wraps to image #1. Left arrow on image #1 wraps to the last image. Wrap-around in both directions
   - [ ] A project with 1 image renders only the primary slot (no thumb strip, no arrows)
   - [ ] Each image is rendered through `next/image` with the resolved Supabase signed/public URL
 - **Verification**:
@@ -567,7 +567,7 @@ Change Type: New | Modify | Delete
   - [ ] Tapping 💡 again removes the chip and the count returns to 0
   - [ ] Two different visitors each tapping 💡 results in `💡 2` for both viewers
   - [ ] The author of a comment can react to their own comment with any of the 4 emojis (spec SC 3.6 — self-reaction allowed)
-  - [ ] An anonymous visitor sees existing chips but the trigger does nothing (or shows a sign-in hint) — confirm the chosen behavior
+  - [ ] An anonymous visitor clicking the `[😊+]` trigger or any existing reaction chip is redirected to `/login`. After login, the user lands back on the project detail page
   - [ ] Attempting to react to a comment using a non-allowlisted emoji via crafted request is rejected by the DB CHECK
 - **Verification**:
   - `bun run test:unit -- toggle-reaction reaction-row`
@@ -634,6 +634,10 @@ Change Type: New | Modify | Delete
 
 ## Undecided Items
 
-- **Anonymous visitor tap on the `[😊+]` reaction trigger** — the spec says "tapping does nothing for anon"; T14 may upgrade this to a one-liner sign-in toast for parity with vote behavior. Decide during T14 implementation.
-- **Image gallery arrow wrap-around** — choose stop-at-end vs. wrap; default stop-at-end during T9.
-- **Lightbox on primary image click** — deferred from T9; revisit if requested in QA.
+(none — all open questions resolved before implementation began)
+
+## Resolved Items
+
+- **Anonymous click on `[😊+]` or a reaction chip** — redirect to `/login`, return to detail page on success. (T14 acceptance updated.)
+- **Image gallery arrow behavior** — wrap-around in both directions. (T9 acceptance updated.)
+- **Lightbox on primary image click** — explicitly excluded from this feature. The gallery is in-place only; users who want a larger view click "Visit project" or zoom on their device.
