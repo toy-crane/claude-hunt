@@ -89,7 +89,7 @@ export function ReactionRow({
             className={cn(
               "inline-flex items-center gap-1 rounded-full border px-2 py-0.5 text-xs",
               summary.viewerReacted
-                ? "border-primary/40 bg-primary/10 text-foreground"
+                ? "border-accent-terracotta/40 bg-accent-terracotta/10 text-accent-terracotta"
                 : "border-border bg-muted text-foreground hover:bg-muted/80"
             )}
             data-testid="reaction-chip"
