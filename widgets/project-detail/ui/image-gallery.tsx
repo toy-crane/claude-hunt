@@ -1,6 +1,7 @@
 "use client";
 
 import { RiArrowLeftSLine, RiArrowRightSLine } from "@remixicon/react";
+import { SHIMMER_DATA_URL } from "@shared/lib/image";
 import { cn } from "@shared/lib/utils";
 import NextImage from "next/image";
 import { useCallback, useState } from "react";
@@ -46,6 +47,7 @@ export function ImageGallery({ imageUrls, title }: ImageGalleryProps) {
           className="object-contain"
           data-testid="project-detail-primary-image"
           fill
+          placeholder={SHIMMER_DATA_URL}
           priority={activeIndex === 0}
           sizes="(max-width: 768px) 100vw, 768px"
           src={currentUrl}
@@ -96,6 +98,7 @@ export function ImageGallery({ imageUrls, title }: ImageGalleryProps) {
                 alt={`${title} 썸네일 ${idx + 1}`}
                 className="object-cover"
                 fill
+                placeholder={SHIMMER_DATA_URL}
                 sizes="64px"
                 src={url}
               />
