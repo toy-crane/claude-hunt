@@ -1,3 +1,4 @@
+import { fetchCohorts } from "@features/cohort-filter/server";
 import { SettingsForm } from "@features/settings";
 import { WithdrawDialog } from "@features/withdraw-user";
 import { RiArrowLeftLine } from "@remixicon/react";
@@ -12,10 +13,13 @@ export const metadata: Metadata = {
 };
 
 export default async function SettingsPage() {
-  const viewer = await fetchViewer();
+  const [viewer, cohorts] = await Promise.all([fetchViewer(), fetchCohorts()]);
   if (!viewer) {
     redirect("/login?next=/settings");
   }
+  const cohortLabel = viewer.cohortId
+    ? (cohorts.find((cohort) => cohort.id === viewer.cohortId)?.label ?? null)
+    : null;
 
   return (
     <main className="mx-auto flex min-h-svh w-full max-w-2xl flex-col gap-8 p-6">
@@ -44,6 +48,7 @@ export default async function SettingsPage() {
         <Card>
           <CardContent>
             <SettingsForm
+              cohortLabel={cohortLabel}
               email={viewer.email}
               initialDisplayName={viewer.displayName ?? ""}
             />

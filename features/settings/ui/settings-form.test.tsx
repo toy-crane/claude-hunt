@@ -27,10 +27,15 @@ vi.mock("sonner", () => ({
 import { SettingsForm } from "./settings-form";
 
 function renderForm(
-  props?: Partial<{ email: string; initialDisplayName: string }>
+  props?: Partial<{
+    cohortLabel: string | null;
+    email: string;
+    initialDisplayName: string;
+  }>
 ) {
   return render(
     <SettingsForm
+      cohortLabel={props?.cohortLabel}
       email={props?.email ?? "alice@example.com"}
       initialDisplayName={props?.initialDisplayName ?? "Alice"}
     />
@@ -57,6 +62,20 @@ describe("<SettingsForm />", () => {
     const email = screen.getByLabelText("이메일") as HTMLInputElement;
     expect(email).toBeDisabled();
     expect(email.value).toBe("alice@example.com");
+  });
+
+  it("renders the cohort label as a disabled field when provided", () => {
+    renderForm({ cohortLabel: "2기" });
+
+    const cohort = screen.getByLabelText("클래스") as HTMLInputElement;
+    expect(cohort).toBeDisabled();
+    expect(cohort.value).toBe("2기");
+  });
+
+  it("omits the cohort field when cohortLabel is not provided", () => {
+    renderForm();
+
+    expect(screen.queryByLabelText("클래스")).not.toBeInTheDocument();
   });
 
   it("renders the Email field before the Display name field", () => {
