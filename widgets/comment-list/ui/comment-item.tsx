@@ -26,7 +26,7 @@ import {
 } from "@shared/ui/dropdown-menu";
 import { Spinner } from "@shared/ui/spinner";
 import { useRouter } from "next/navigation";
-import { useState } from "react";
+import { useState, useTransition } from "react";
 import { toast } from "sonner";
 import type { CommentRow } from "../api/queries";
 
@@ -35,6 +35,11 @@ export interface CommentItemProps {
   allowReply: boolean;
   comment: CommentRow;
   isAuthenticated: boolean;
+  /**
+   * When provided, confirm-delete pushes an optimistic remove into the
+   * parent list before the server roundtrip completes.
+   */
+  onOptimisticDelete?: (commentId: string) => void;
   /**
    * When provided, the reply form synchronously pushes an optimistic
    * reply into the parent list before the server roundtrip completes.
@@ -51,12 +56,13 @@ export function CommentItem({
   isAuthenticated,
   allowReply,
   viewerUserId,
+  onOptimisticDelete,
   onOptimisticReply,
 }: CommentItemProps) {
   const router = useRouter();
   const [replyOpen, setReplyOpen] = useState(false);
   const [editing, setEditing] = useState(false);
-  const [deleting, setDeleting] = useState(false);
+  const [deleting, startDeleteTransition] = useTransition();
   const [confirmOpen, setConfirmOpen] = useState(false);
   const author = comment.author_display_name ?? "익명";
   const initial = author.charAt(0);
@@ -67,12 +73,14 @@ export function CommentItem({
   });
   const isOwner = viewerUserId != null && viewerUserId === comment.user_id;
 
-  async function handleConfirmDelete(
-    event: React.MouseEvent<HTMLButtonElement>
-  ) {
+  function handleConfirmDelete(event: React.MouseEvent<HTMLButtonElement>) {
     event.preventDefault();
-    setDeleting(true);
-    try {
+    setConfirmOpen(false);
+    startDeleteTransition(async () => {
+      // Optimistically remove the comment from the parent list before
+      // the server roundtrip completes. useOptimistic in CommentList
+      // reverts back to props automatically if the action fails.
+      onOptimisticDelete?.(comment.id);
       const result = await deleteComment({
         commentId: comment.id,
         projectId,
@@ -82,11 +90,8 @@ export function CommentItem({
         return;
       }
       toast.success("댓글이 삭제됐어요.");
-      setConfirmOpen(false);
       router.refresh();
-    } finally {
-      setDeleting(false);
-    }
+    });
   }
 
   return (

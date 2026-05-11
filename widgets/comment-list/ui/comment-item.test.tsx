@@ -55,16 +55,16 @@ const baseComment: CommentRow = {
 };
 
 describe("<CommentItem />", () => {
-  it("shows a Spinner on the delete confirm button while pending and keeps the static label", async () => {
-    deleteComment.mockImplementation(
-      () => new Promise<{ ok: true }>(() => undefined)
-    );
+  it("closes the confirm dialog and dispatches optimistic delete immediately on confirm", async () => {
+    deleteComment.mockResolvedValue({ ok: true });
+    const onOptimisticDelete = vi.fn();
 
     render(
       <CommentItem
         allowReply
         comment={baseComment}
         isAuthenticated
+        onOptimisticDelete={onOptimisticDelete}
         projectId="p1"
         viewerUserId="u1"
       />
@@ -79,15 +79,17 @@ describe("<CommentItem />", () => {
     const dialog = await screen.findByRole("alertdialog");
     fireEvent.click(within(dialog).getByRole("button", { name: DELETE_LABEL }));
 
+    // Optimistic UI: dialog closes immediately and the parent receives
+    // the delete dispatch synchronously. CommentList absorbs the
+    // dispatch via `useOptimistic` and removes the row before the
+    // server roundtrip completes.
     await waitFor(() => {
-      const liveDialog = screen.getByRole("alertdialog");
-      const button = within(liveDialog).getByRole("button", {
-        name: DELETE_LABEL,
-      });
-      expect(button).toBeDisabled();
-      expect(button.querySelector('[role="status"]')).toBeInTheDocument();
-      expect(button.textContent).toContain("삭제");
-      expect(button.textContent).not.toContain("삭제 중");
+      expect(screen.queryByRole("alertdialog")).not.toBeInTheDocument();
+    });
+    expect(onOptimisticDelete).toHaveBeenCalledWith("c1");
+    expect(deleteComment).toHaveBeenCalledWith({
+      commentId: "c1",
+      projectId: "p1",
     });
   });
 });
