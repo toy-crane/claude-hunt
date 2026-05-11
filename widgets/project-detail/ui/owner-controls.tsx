@@ -14,6 +14,7 @@ import {
   AlertDialogTrigger,
 } from "@shared/ui/alert-dialog";
 import { Button } from "@shared/ui/button";
+import { Spinner } from "@shared/ui/spinner";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
@@ -77,7 +78,8 @@ export function OwnerControls({ projectId, projectTitle }: OwnerControlsProps) {
           <AlertDialogFooter>
             <AlertDialogCancel disabled={deleting}>취소</AlertDialogCancel>
             <AlertDialogAction disabled={deleting} onClick={handleDelete}>
-              {deleting ? "삭제 중..." : "삭제"}
+              {deleting ? <Spinner data-icon="inline-start" /> : null}
+              삭제
             </AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>
