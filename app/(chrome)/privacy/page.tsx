@@ -1,7 +1,5 @@
 import { RiArrowLeftLine } from "@remixicon/react";
 import { Separator } from "@shared/ui/separator";
-import { Footer } from "@widgets/footer";
-import { Header } from "@widgets/header";
 import type { Metadata } from "next";
 import Link from "next/link";
 
@@ -99,9 +97,7 @@ const REMEDY_CHANNELS = [
 
 export default function PrivacyPage() {
   return (
-    <>
-      <Header />
-      <main className="mx-auto flex min-h-svh w-full max-w-3xl flex-col gap-8 p-6">
+    <main className="mx-auto flex min-h-svh w-full max-w-3xl flex-col gap-8 p-6">
         <Link
           className="inline-flex w-fit items-center gap-1 text-muted-foreground text-xs hover:text-foreground"
           href="/"
@@ -351,8 +347,6 @@ export default function PrivacyPage() {
             시행일: 2026-04-16
           </span>
         </aside>
-      </main>
-      <Footer />
-    </>
+    </main>
   );
 }

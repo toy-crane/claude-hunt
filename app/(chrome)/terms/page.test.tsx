@@ -16,14 +16,6 @@ vi.mock("next/link", () => ({
   ),
 }));
 
-vi.mock("@widgets/header", () => ({
-  Header: () => <div data-testid="site-header-stub" />,
-}));
-
-vi.mock("@widgets/footer", () => ({
-  Footer: () => <div data-testid="site-footer-stub" />,
-}));
-
 async function renderPage() {
   const { default: Page } = await import("./page");
   render(<Page />);
@@ -130,10 +122,4 @@ describe("terms page (/terms)", () => {
     expect(within(clause).getByText(CLAUSE_14_SENTENCE)).toBeInTheDocument();
   });
 
-  it("reuses the site Header and Footer widgets", async () => {
-    await renderPage();
-
-    expect(screen.getByTestId("site-header-stub")).toBeInTheDocument();
-    expect(screen.getByTestId("site-footer-stub")).toBeInTheDocument();
-  });
 });

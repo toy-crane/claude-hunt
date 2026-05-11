@@ -21,12 +21,8 @@ vi.mock("@features/submit-project", () => ({
   SubmitTrigger: () => null,
 }));
 
-vi.mock("@widgets/header", () => ({
-  Header: () => null,
-}));
-
 vi.mock("../_components/project-board", () => ({
-  ProjectBoard: () => null,
+  ProjectBoard: () => <div data-testid="project-board-stub" />,
 }));
 
 const SIGNED_IN_VIEWER = {
@@ -44,28 +40,27 @@ describe("home page (/)", () => {
     fetchProjectsMock.mockReset().mockResolvedValue([]);
   });
 
-  it("renders the Footer landmark for signed-out visitors", async () => {
+  it("renders the project board for signed-out visitors", async () => {
     fetchViewerMock.mockResolvedValue(null);
 
     const { default: Page } = await import("../page");
     const jsx = await Page({ searchParams: Promise.resolve({}) });
     render(jsx);
 
-    expect(screen.getByRole("contentinfo")).toBeInTheDocument();
+    expect(screen.getByTestId("project-board-stub")).toBeInTheDocument();
   });
 
-  it("renders the Footer landmark for signed-in visitors", async () => {
+  it("renders the project board for signed-in visitors", async () => {
     fetchViewerMock.mockResolvedValue(SIGNED_IN_VIEWER);
 
     const { default: Page } = await import("../page");
     const jsx = await Page({ searchParams: Promise.resolve({}) });
     render(jsx);
 
-    expect(screen.getByRole("contentinfo")).toBeInTheDocument();
+    expect(screen.getByTestId("project-board-stub")).toBeInTheDocument();
   });
 
-  // The "프로젝트 보드" heading + subtitle now live inside ProjectBoard
-  // (the client-side board owns them so the subtitle can reflect the
-  // filtered project count). Corresponding assertions live in
-  // `app/_components/project-board.test.tsx`.
+  // Header/Footer landmarks are provided by the (chrome) route group layout;
+  // covered by `app/(chrome)/layout.test.tsx`. ProjectBoard internals are
+  // covered by `app/(chrome)/_components/project-board.test.tsx`.
 });
