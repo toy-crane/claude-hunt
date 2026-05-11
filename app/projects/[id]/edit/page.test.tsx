@@ -1,5 +1,5 @@
-import type { ProjectDetail } from "@widgets/project-detail";
 import { render, screen } from "@testing-library/react";
+import type { ProjectDetail } from "@widgets/project-detail";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
 const REDIRECT_LOGIN = /REDIRECT:\/login/;
@@ -62,9 +62,7 @@ vi.mock("@features/edit-project", () => ({
   EditForm: (props: EditFormProps) => editFormMock(props),
 }));
 
-function makeProject(
-  overrides: Partial<ProjectDetail> = {}
-): ProjectDetail {
+function makeProject(overrides: Partial<ProjectDetail> = {}): ProjectDetail {
   return {
     id: "proj-1",
     user_id: "owner-1",
