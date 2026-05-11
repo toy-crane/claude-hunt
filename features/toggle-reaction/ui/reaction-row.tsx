@@ -5,7 +5,7 @@ import { RiEmotionHappyLine } from "@remixicon/react";
 import { cn } from "@shared/lib/utils";
 import { Popover, PopoverContent, PopoverTrigger } from "@shared/ui/popover";
 import { useRouter } from "next/navigation";
-import { useState } from "react";
+import { useOptimistic, useState, useTransition } from "react";
 import { toast } from "sonner";
 import { toggleReaction } from "../api/actions";
 
@@ -20,6 +20,28 @@ export interface ReactionRowProps {
   isAuthenticated: boolean;
   projectId: string;
   reactions: ReactionSummary[];
+}
+
+function applyOptimisticToggle(
+  state: ReactionSummary[],
+  emoji: ReactionEmoji
+): ReactionSummary[] {
+  const existing = state.find((r) => r.emoji === emoji);
+  if (!existing) {
+    return [...state, { emoji, count: 1, viewerReacted: true }];
+  }
+  if (existing.viewerReacted) {
+    const nextCount = existing.count - 1;
+    if (nextCount <= 0) {
+      return state.filter((r) => r.emoji !== emoji);
+    }
+    return state.map((r) =>
+      r.emoji === emoji ? { ...r, count: nextCount, viewerReacted: false } : r
+    );
+  }
+  return state.map((r) =>
+    r.emoji === emoji ? { ...r, count: r.count + 1, viewerReacted: true } : r
+  );
 }
 
 /**
@@ -37,20 +59,25 @@ export function ReactionRow({
 }: ReactionRowProps) {
   const router = useRouter();
   const [open, setOpen] = useState(false);
-  const [pending, setPending] = useState(false);
+  const [, startTransition] = useTransition();
+  const [optimisticReactions, applyOptimistic] = useOptimistic(
+    reactions,
+    applyOptimisticToggle
+  );
 
   const byEmoji = new Map<ReactionEmoji, ReactionSummary>();
-  for (const r of reactions) {
+  for (const r of optimisticReactions) {
     byEmoji.set(r.emoji, r);
   }
 
-  async function handleSelect(emoji: ReactionEmoji) {
+  function handleSelect(emoji: ReactionEmoji) {
     if (!isAuthenticated) {
       router.push("/login");
       return;
     }
-    setPending(true);
-    try {
+    setOpen(false);
+    startTransition(async () => {
+      applyOptimistic(emoji);
       const result = await toggleReaction({
         commentId,
         projectId,
@@ -60,11 +87,8 @@ export function ReactionRow({
         toast.error(result.error ?? "반응을 저장하지 못했어요.");
         return;
       }
-      setOpen(false);
       router.refresh();
-    } finally {
-      setPending(false);
-    }
+    });
   }
 
   const visibleChips = REACTION_EMOJI.filter((e) => {
@@ -93,7 +117,6 @@ export function ReactionRow({
                 : "border-border bg-muted text-foreground hover:bg-muted/80"
             )}
             data-testid="reaction-chip"
-            disabled={pending}
             key={emoji}
             onClick={() => handleSelect(emoji)}
             type="button"
@@ -111,7 +134,6 @@ export function ReactionRow({
               "inline-flex items-center gap-1 rounded-full border border-dashed px-2 py-0.5 text-muted-foreground text-xs hover:text-foreground"
             )}
             data-testid="reaction-add-trigger"
-            disabled={pending}
             onClick={(e) => {
               if (!isAuthenticated) {
                 e.preventDefault();
@@ -131,7 +153,6 @@ export function ReactionRow({
                 aria-label={`${emoji} 반응`}
                 className="inline-flex size-7 items-center justify-center rounded-md text-base hover:bg-muted"
                 data-testid="reaction-popover-emoji"
-                disabled={pending}
                 key={emoji}
                 onClick={() => handleSelect(emoji)}
                 type="button"
