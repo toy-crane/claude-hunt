@@ -15,6 +15,13 @@ export interface CommentFormProps {
   isAuthenticated: boolean;
   /** Called when user clicks Cancel. Used by inline reply forms. */
   onCancel?: () => void;
+  /**
+   * Fires synchronously before the server action with the body the user
+   * just submitted, so the parent list can push an optimistic comment
+   * into the rendered tree. CommentList provides this; the form does
+   * not require it.
+   */
+  onOptimisticSubmit?: (body: string) => void;
   /** When set, this form posts as a reply to that comment. */
   parentCommentId?: string;
   projectId: string;

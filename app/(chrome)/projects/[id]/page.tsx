@@ -61,10 +61,17 @@ export default async function Page({ params }: PageProps) {
         viewerUserId={viewerId}
       />
       <CommentList
-        isAuthenticated={Boolean(viewer)}
         projectId={project.id}
         threads={threads}
-        viewerUserId={viewerId}
+        viewer={
+          viewer
+            ? {
+                id: viewer.id,
+                displayName: viewer.displayName,
+                avatarUrl: viewer.avatarUrl,
+              }
+            : null
+        }
       />
     </main>
   );
