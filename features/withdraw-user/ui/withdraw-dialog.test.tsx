@@ -200,4 +200,29 @@ describe("<WithdrawDialog />", () => {
     expect(screen.getByRole("dialog")).toBeInTheDocument();
     expect(mocks.routerReplace).not.toHaveBeenCalled();
   });
+
+  it("shows a Spinner on the confirm button while pending and keeps the static label", async () => {
+    mocks.withdrawAccount.mockImplementation(
+      () => new Promise<{ ok: true }>(() => undefined)
+    );
+    const user = userEvent.setup();
+    renderDialog();
+
+    await openDialog(user);
+    await user.type(
+      screen.getByLabelText(TYPE_PROMPT_REGEX),
+      "alice@example.com"
+    );
+    await user.click(
+      screen.getByRole("button", { name: DELETE_ACCOUNT_BUTTON_NAME })
+    );
+
+    await waitFor(() => {
+      const button = getConfirmButton();
+      expect(button).toBeDisabled();
+      expect(button.querySelector('[role="status"]')).toBeInTheDocument();
+      expect(button.textContent).toContain("계정 삭제");
+      expect(button.textContent).not.toContain("삭제 중");
+    });
+  });
 });

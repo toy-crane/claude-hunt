@@ -258,4 +258,23 @@ describe("OnboardingForm", () => {
       expect(replaceMock).toHaveBeenCalledWith("/login");
     });
   });
+
+  it("shows a Spinner on the submit button while pending and keeps the static label", async () => {
+    completeOnboardingMock.mockImplementation(
+      () => new Promise<{ ok: true }>(() => undefined)
+    );
+    render(<OnboardingForm cohorts={cohorts} initialNext="/" />);
+
+    typeDisplayName("Alice");
+    await pickCohort("LG전자 1기");
+    await submit();
+
+    await vi.waitFor(() => {
+      const button = screen.getByTestId("onboarding-submit");
+      expect(button).toBeDisabled();
+      expect(button.querySelector('[role="status"]')).toBeInTheDocument();
+      expect(button.textContent).toContain("계속하기");
+      expect(button.textContent).not.toContain("저장 중");
+    });
+  });
 });
