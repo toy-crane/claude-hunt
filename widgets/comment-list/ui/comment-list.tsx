@@ -1,3 +1,5 @@
+"use client";
+
 import { CommentForm } from "@features/leave-comment";
 import {
   Empty,
@@ -5,23 +7,94 @@ import {
   EmptyHeader,
   EmptyTitle,
 } from "@shared/ui/empty";
-import type { CommentThread } from "../api/queries";
+import { useOptimistic } from "react";
+import type { CommentRow, CommentThread } from "../api/queries";
 import { CommentItem } from "./comment-item";
 
-export interface CommentListProps {
-  isAuthenticated: boolean;
-  projectId: string;
-  threads: CommentThread[];
-  viewerUserId: string | null;
+export interface CommentListViewer {
+  avatarUrl: string | null;
+  displayName: string | null;
+  id: string;
 }
 
-export function CommentList({
-  threads,
-  projectId,
-  isAuthenticated,
-  viewerUserId,
-}: CommentListProps) {
-  const total = threads.reduce((sum, t) => sum + 1 + t.replies.length, 0);
+export interface CommentListProps {
+  projectId: string;
+  threads: CommentThread[];
+  /** Signed-in viewer's profile slice, or null for anonymous. */
+  viewer: CommentListViewer | null;
+}
+
+/**
+ * Optimistic actions dispatched while a server action is in flight.
+ * `useOptimistic` reconciles back to props once the transition ends, so
+ * the server's revalidated threads always win.
+ */
+type CommentAction =
+  | { type: "add"; thread: CommentThread }
+  | { type: "reply"; parentId: string; reply: CommentRow }
+  | { type: "edit"; commentId: string; body: string }
+  | { type: "delete"; commentId: string };
+
+function applyAction(
+  state: CommentThread[],
+  action: CommentAction
+): CommentThread[] {
+  switch (action.type) {
+    case "add":
+      // Newest top-level threads appear first (matches fetchCommentThreads order).
+      return [action.thread, ...state];
+    case "reply":
+      return state.map((thread) =>
+        thread.comment.id === action.parentId
+          ? { ...thread, replies: [...thread.replies, action.reply] }
+          : thread
+      );
+    case "edit": {
+      const now = new Date().toISOString();
+      return state.map((thread) => {
+        if (thread.comment.id === action.commentId) {
+          return {
+            ...thread,
+            comment: {
+              ...thread.comment,
+              body: action.body,
+              updated_at: now,
+            },
+          };
+        }
+        if (thread.replies.some((r) => r.id === action.commentId)) {
+          return {
+            ...thread,
+            replies: thread.replies.map((r) =>
+              r.id === action.commentId
+                ? { ...r, body: action.body, updated_at: now }
+                : r
+            ),
+          };
+        }
+        return thread;
+      });
+    }
+    case "delete":
+      return state
+        .filter((thread) => thread.comment.id !== action.commentId)
+        .map((thread) => ({
+          ...thread,
+          replies: thread.replies.filter((r) => r.id !== action.commentId),
+        }));
+    default:
+      return state;
+  }
+}
+
+export function CommentList({ threads, projectId, viewer }: CommentListProps) {
+  const [optimisticThreads] = useOptimistic(threads, applyAction);
+  const isAuthenticated = viewer !== null;
+  const viewerUserId = viewer?.id ?? null;
+  const total = optimisticThreads.reduce(
+    (sum, t) => sum + 1 + t.replies.length,
+    0
+  );
 
   return (
     <section className="flex flex-col gap-4" data-testid="comment-list">
@@ -33,7 +106,7 @@ export function CommentList({
 
       <CommentForm isAuthenticated={isAuthenticated} projectId={projectId} />
 
-      {threads.length === 0 ? (
+      {optimisticThreads.length === 0 ? (
         <Empty className="border" data-testid="comment-list-empty">
           <EmptyHeader>
             <EmptyTitle>아직 댓글이 없어요</EmptyTitle>
@@ -42,7 +115,7 @@ export function CommentList({
         </Empty>
       ) : (
         <ul className="flex flex-col divide-y" data-testid="comment-list-items">
-          {threads.map((thread) => (
+          {optimisticThreads.map((thread) => (
             <li
               className="flex flex-col gap-1"
               data-testid="comment-thread"
