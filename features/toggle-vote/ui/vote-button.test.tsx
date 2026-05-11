@@ -2,11 +2,15 @@ import { render, screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
-const { toggleVoteMock } = vi.hoisted(() => ({
+const { toggleVoteMock, toastErrorMock } = vi.hoisted(() => ({
   toggleVoteMock: vi.fn(),
+  toastErrorMock: vi.fn(),
 }));
 vi.mock("../api/actions", () => ({
   toggleVote: toggleVoteMock,
+}));
+vi.mock("sonner", () => ({
+  toast: { error: toastErrorMock },
 }));
 
 import { VoteButton } from "./vote-button";
@@ -34,6 +38,7 @@ function createDeferred<T>() {
 
 beforeEach(() => {
   toggleVoteMock.mockReset();
+  toastErrorMock.mockReset();
 });
 
 describe("VoteButton (signed-in non-owner)", () => {
@@ -86,8 +91,9 @@ describe("VoteButton (signed-in non-owner)", () => {
     expect(svg).not.toBeNull();
   });
 
-  it("optimistically increments the count and flips aria-pressed synchronously on click", async () => {
-    toggleVoteMock.mockResolvedValue({ ok: true, voted: true });
+  it("shows the optimistic count and pressed state while the server call is in flight", async () => {
+    const deferred = createDeferred<{ ok: true; voted: true }>();
+    toggleVoteMock.mockReturnValue(deferred.promise);
     const user = userEvent.setup();
     render(<VoteButton {...baseProps} voteCount={12} />);
 
@@ -99,46 +105,60 @@ describe("VoteButton (signed-in non-owner)", () => {
 
     expect(button.textContent).toContain("13");
     expect(button).toHaveAttribute("aria-pressed", "true");
-  });
-
-  it("disables the button while the server call is in flight", async () => {
-    const deferred = createDeferred<{ ok: true; voted: true }>();
-    toggleVoteMock.mockReturnValue(deferred.promise);
-    const user = userEvent.setup();
-    render(<VoteButton {...baseProps} voteCount={12} />);
-
-    const button = screen.getByRole("button");
-    await user.click(button);
-
     expect(button).toBeDisabled();
 
     deferred.resolve({ ok: true, voted: true });
   });
 
-  it("stays in the voted state with the optimistic count after the server confirms success", async () => {
+  it("reflects the new server state when parent re-renders with fresh props after success", async () => {
     toggleVoteMock.mockResolvedValue({ ok: true, voted: true });
     const user = userEvent.setup();
-    render(<VoteButton {...baseProps} voteCount={128} />);
+    const { rerender } = render(<VoteButton {...baseProps} voteCount={128} />);
+
+    await user.click(screen.getByRole("button"));
+
+    // Production: server resolves → revalidatePath → parent re-renders with
+    // fresh props. Without the prop update, useOptimistic reconciles back to
+    // base value, which is the expected useOptimistic contract.
+    rerender(<VoteButton {...baseProps} alreadyVoted={true} voteCount={129} />);
 
     const button = screen.getByRole("button");
-    await user.click(button);
-
     expect(button).toHaveAttribute("aria-pressed", "true");
     expect(button.textContent).toContain("129");
     expect(button).not.toBeDisabled();
   });
 
-  it("reverts to the idle state with the original count when the server rejects the vote", async () => {
-    toggleVoteMock.mockResolvedValue({ ok: false });
+  it("reverts to the idle state when the server rejects the vote and shows a toast", async () => {
+    toggleVoteMock.mockResolvedValue({ ok: false, error: "denied" });
     const user = userEvent.setup();
     render(<VoteButton {...baseProps} voteCount={128} />);
 
     const button = screen.getByRole("button");
     await user.click(button);
 
+    // Server failed → no prop update → useOptimistic auto-reverts to base.
     expect(button).toHaveAttribute("aria-pressed", "false");
     expect(button.textContent).toContain("128");
     expect(button).not.toBeDisabled();
+    expect(toastErrorMock).toHaveBeenCalledWith("denied");
+  });
+
+  it("syncs to fresh props when an external change updates voteCount/alreadyVoted", () => {
+    const { rerender } = render(
+      <VoteButton {...baseProps} alreadyVoted={false} voteCount={5} />
+    );
+    const button = screen.getByRole("button");
+    expect(button.textContent).toContain("5");
+    expect(button).toHaveAttribute("aria-pressed", "false");
+
+    // Someone else votes for this project — parent revalidates with new count.
+    rerender(<VoteButton {...baseProps} alreadyVoted={false} voteCount={6} />);
+    expect(button.textContent).toContain("6");
+
+    // The viewer's own vote is reflected in props on the next revalidation.
+    rerender(<VoteButton {...baseProps} alreadyVoted={true} voteCount={7} />);
+    expect(button.textContent).toContain("7");
+    expect(button).toHaveAttribute("aria-pressed", "true");
   });
 });
 
@@ -199,7 +219,7 @@ describe("VoteButton (variant='inline')", () => {
     expect(button).toHaveAttribute("aria-pressed", "true");
   });
 
-  it("keeps optimistic toggling + server revert behavior in inline variant", async () => {
+  it("auto-reverts to the base state in the inline variant when the server rejects", async () => {
     toggleVoteMock.mockResolvedValue({ ok: false });
     const user = userEvent.setup();
     render(<VoteButton {...baseProps} variant="inline" voteCount={12} />);
