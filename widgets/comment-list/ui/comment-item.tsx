@@ -41,6 +41,11 @@ export interface CommentItemProps {
    */
   onOptimisticDelete?: (commentId: string) => void;
   /**
+   * When provided, save in the inline editor pushes an optimistic body
+   * update into the parent list before the server roundtrip completes.
+   */
+  onOptimisticEdit?: (commentId: string, body: string) => void;
+  /**
    * When provided, the reply form synchronously pushes an optimistic
    * reply into the parent list before the server roundtrip completes.
    */
@@ -57,6 +62,7 @@ export function CommentItem({
   allowReply,
   viewerUserId,
   onOptimisticDelete,
+  onOptimisticEdit,
   onOptimisticReply,
 }: CommentItemProps) {
   const router = useRouter();
@@ -159,6 +165,11 @@ export function CommentItem({
               commentId={comment.id}
               initialBody={comment.body}
               onCancel={() => setEditing(false)}
+              onOptimisticSave={
+                onOptimisticEdit
+                  ? (body) => onOptimisticEdit(comment.id, body)
+                  : undefined
+              }
               projectId={projectId}
             />
           ) : (

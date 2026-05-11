@@ -5,7 +5,7 @@ import { Button } from "@shared/ui/button";
 import { Spinner } from "@shared/ui/spinner";
 import { Textarea } from "@shared/ui/textarea";
 import { useRouter } from "next/navigation";
-import { useState } from "react";
+import { useState, useTransition } from "react";
 import { toast } from "sonner";
 import { editComment } from "../api/actions";
 
@@ -13,6 +13,12 @@ export interface EditCommentInlineProps {
   commentId: string;
   initialBody: string;
   onCancel: () => void;
+  /**
+   * Fires synchronously before the server action with the new body so
+   * the parent list can replace the displayed body before the server
+   * roundtrip completes. CommentList provides this.
+   */
+  onOptimisticSave?: (body: string) => void;
   projectId: string;
 }
 
@@ -21,15 +27,16 @@ export function EditCommentInline({
   projectId,
   initialBody,
   onCancel,
+  onOptimisticSave,
 }: EditCommentInlineProps) {
   const router = useRouter();
   const [value, setValue] = useState(initialBody);
-  const [submitting, setSubmitting] = useState(false);
+  const [isPending, startTransition] = useTransition();
   const [error, setError] = useState<string | null>(null);
 
   const overLimit = value.length > MAX_COMMENT_BODY;
 
-  async function handleSubmit(event: React.FormEvent<HTMLFormElement>) {
+  function handleSubmit(event: React.FormEvent<HTMLFormElement>) {
     event.preventDefault();
     setError(null);
     if (!value.trim()) {
@@ -39,23 +46,25 @@ export function EditCommentInline({
       setError(`${MAX_COMMENT_BODY}자까지 작성할 수 있어요`);
       return;
     }
-    setSubmitting(true);
-    try {
+    const body = value;
+    // Close the inline editor immediately and let the optimistic body
+    // surface in the parent list. useOptimistic reverts back to props
+    // if the server fails.
+    onCancel();
+    startTransition(async () => {
+      onOptimisticSave?.(body);
       const result = await editComment({
         commentId,
         projectId,
-        body: value,
+        body,
       });
       if (!result.ok) {
-        setError(result.error ?? "수정하지 못했어요.");
+        toast.error(result.error ?? "수정하지 못했어요.");
         return;
       }
       toast.success("수정됐어요.");
-      onCancel();
       router.refresh();
-    } finally {
-      setSubmitting(false);
-    }
+    });
   }
 
   return (
@@ -67,7 +76,7 @@ export function EditCommentInline({
     >
       <Textarea
         autoFocus
-        disabled={submitting}
+        disabled={isPending}
         onChange={(e) => setValue(e.target.value)}
         rows={3}
         value={value}
@@ -84,7 +93,7 @@ export function EditCommentInline({
         </span>
         <div className="flex items-center gap-2">
           <Button
-            disabled={submitting}
+            disabled={isPending}
             onClick={onCancel}
             size="sm"
             type="button"
@@ -93,11 +102,11 @@ export function EditCommentInline({
             취소
           </Button>
           <Button
-            disabled={submitting || !value.trim() || overLimit}
+            disabled={isPending || !value.trim() || overLimit}
             size="sm"
             type="submit"
           >
-            {submitting ? <Spinner data-icon="inline-start" /> : null}
+            {isPending ? <Spinner data-icon="inline-start" /> : null}
             저장
           </Button>
         </div>
