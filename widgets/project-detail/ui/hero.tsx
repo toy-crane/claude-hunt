@@ -74,12 +74,14 @@ export function Hero({ project, isAuthenticated, viewerUserId }: HeroProps) {
         data-testid="project-detail-meta"
       >
         {project.cohort_label ? (
-          <Badge className="gap-1" variant="outline">
-            <RiGroupLine aria-hidden="true" className="size-3" />
-            {project.cohort_label}
-          </Badge>
+          <>
+            <Badge className="gap-1" variant="outline">
+              <RiGroupLine aria-hidden="true" className="size-3" />
+              {project.cohort_label}
+            </Badge>
+            <span aria-hidden="true">·</span>
+          </>
         ) : null}
-        <span aria-hidden="true">·</span>
         <span className="text-foreground">
           {project.author_display_name ?? "익명"}
         </span>
