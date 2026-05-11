@@ -42,14 +42,6 @@ export function ImageGallery({ imageUrls, title }: ImageGalleryProps) {
     <div className="flex flex-col gap-2" data-testid="project-detail-gallery">
       <div className="relative aspect-[16/10] w-full overflow-hidden rounded-md border bg-muted">
         <NextImage
-          alt=""
-          aria-hidden
-          className="scale-110 object-cover blur-2xl"
-          fill
-          sizes="64px"
-          src={currentUrl}
-        />
-        <NextImage
           alt={`${title} 스크린샷 ${activeIndex + 1}/${total}`}
           className="object-contain"
           data-testid="project-detail-primary-image"
