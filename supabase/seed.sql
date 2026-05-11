@@ -91,7 +91,7 @@ update public.profiles
 ------------------------------------------------------------------------------
 
 insert into public.projects (
-  id, user_id, cohort_id, title, tagline, project_url, images
+  id, user_id, cohort_id, title, tagline, project_url, github_url, images
 ) values
   (
     '00000000-0000-0000-0000-0000000000a1',
@@ -100,6 +100,7 @@ insert into public.projects (
     'Paint Studio',
     '웹에서 바로 쓰는 간단한 드로잉 툴',
     'https://paint-studio.example.com',
+    'https://github.com/claude-hunt/paint-studio',
     jsonb_build_array(
       jsonb_build_object('path', '00000000-0000-0000-0000-00000000000a/paint-studio.png'),
       jsonb_build_object('path', '00000000-0000-0000-0000-00000000000a/wide-canvas.png')
@@ -112,6 +113,7 @@ insert into public.projects (
     'Note Keeper',
     '마크다운으로 빠르게 메모하고 태그로 정리해요',
     'https://note-keeper.example.com',
+    null,
     jsonb_build_array(
       jsonb_build_object('path', '00000000-0000-0000-0000-00000000000b/note-keeper.png'),
       jsonb_build_object('path', '00000000-0000-0000-0000-00000000000b/mobile-portrait.png')
@@ -124,6 +126,7 @@ insert into public.projects (
     'Focus Timer',
     '뽀모도로 방식으로 집중 세션을 기록해 주는 타이머',
     'https://focus-timer.example.com',
+    null,
     jsonb_build_array(
       jsonb_build_object('path', '00000000-0000-0000-0000-00000000000c/focus-timer.png'),
       jsonb_build_object('path', '00000000-0000-0000-0000-00000000000c/square.png')
