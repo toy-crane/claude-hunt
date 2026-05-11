@@ -44,6 +44,7 @@ export async function toggleVote(projectId: string): Promise<ToggleVoteResult> {
       return { ok: false, error: deleteError.message };
     }
     revalidatePath("/");
+    revalidatePath(`/projects/${projectId}`);
     return { ok: true, voted: false };
   }
 
@@ -54,5 +55,6 @@ export async function toggleVote(projectId: string): Promise<ToggleVoteResult> {
     return { ok: false, error: insertError.message };
   }
   revalidatePath("/");
+  revalidatePath(`/projects/${projectId}`);
   return { ok: true, voted: true };
 }

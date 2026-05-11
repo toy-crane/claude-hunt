@@ -3,7 +3,8 @@
 import { RiArrowUpFill, RiArrowUpLine } from "@remixicon/react";
 import { cn } from "@shared/lib/utils";
 import Link from "next/link";
-import { useState, useTransition } from "react";
+import { useOptimistic, useTransition } from "react";
+import { toast } from "sonner";
 import { toggleVote } from "../api/actions";
 
 const ARIA_LABEL = "추천하기";
@@ -45,6 +46,11 @@ export interface VoteButtonProps {
   voteCount: number;
 }
 
+interface VoteState {
+  count: number;
+  voted: boolean;
+}
+
 export function VoteButton({
   projectId,
   voteCount,
@@ -53,8 +59,13 @@ export function VoteButton({
   isAuthenticated,
   variant = "stacked",
 }: VoteButtonProps) {
-  const [optimisticVoted, setOptimisticVoted] = useState(alreadyVoted);
-  const [optimisticCount, setOptimisticCount] = useState(voteCount);
+  const [optimistic, applyOptimistic] = useOptimistic<VoteState, void>(
+    { voted: alreadyVoted, count: voteCount },
+    (state) => ({
+      voted: !state.voted,
+      count: state.count + (state.voted ? -1 : 1),
+    })
+  );
   const [isPending, startTransition] = useTransition();
 
   const baseClass =
@@ -88,14 +99,11 @@ export function VoteButton({
   }
 
   function handleClick() {
-    const nextVoted = !optimisticVoted;
-    setOptimisticVoted(nextVoted);
-    setOptimisticCount((prev) => prev + (nextVoted ? 1 : -1));
     startTransition(async () => {
+      applyOptimistic();
       const result = await toggleVote(projectId);
       if (!result.ok) {
-        setOptimisticVoted((prev) => !prev);
-        setOptimisticCount((prev) => prev + (nextVoted ? -1 : 1));
+        toast.error(result.error ?? "투표를 저장하지 못했어요.");
       }
     });
   }
@@ -103,19 +111,19 @@ export function VoteButton({
   return (
     <button
       aria-label={ARIA_LABEL}
-      aria-pressed={optimisticVoted}
-      className={cn(baseClass, optimisticVoted ? VOTED_COLORS : IDLE_COLORS)}
-      data-testid={optimisticVoted ? "vote-button-voted" : "vote-button-idle"}
+      aria-pressed={optimistic.voted}
+      className={cn(baseClass, optimistic.voted ? VOTED_COLORS : IDLE_COLORS)}
+      data-testid={optimistic.voted ? "vote-button-voted" : "vote-button-idle"}
       disabled={isPending}
       onClick={handleClick}
       type="button"
     >
-      {optimisticVoted ? (
+      {optimistic.voted ? (
         <RiArrowUpFill aria-hidden="true" className={iconSize} />
       ) : (
         <RiArrowUpLine aria-hidden="true" className={iconSize} />
       )}
-      <span className="tabular-nums">{optimisticCount}</span>
+      <span className="tabular-nums">{optimistic.count}</span>
     </button>
   );
 }
