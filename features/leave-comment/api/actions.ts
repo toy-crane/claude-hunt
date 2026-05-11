@@ -37,6 +37,12 @@ export async function leaveComment(
   const { data: inserted, error } = await supabase
     .from("comments")
     .insert({
+      // Reusing the client-generated optimistic id keeps the React key
+      // stable across the optimistic → revalidated transition. Without
+      // this, the row's react key flips from the temp uuid to a new
+      // server-generated one and Radix's open dropdown menus inside
+      // the optimistic CommentItem get torn down mid-interaction.
+      id: input.optimisticId,
       project_id: input.projectId,
       user_id: user.id,
       parent_comment_id: input.parentCommentId ?? null,

@@ -56,14 +56,22 @@ async function loadProjectGridCore(): Promise<ProjectGridCore[]> {
 /**
  * Cached read of the landing-page grid rows. Tagged with
  * `projects-grid` so mutations (vote, submit, edit, delete) can invalidate
- * it via `revalidateTag`. The 60-second `revalidate` is a safety net — tag
+ * it via `updateTag`. The 60-second `revalidate` is a safety net — tag
  * invalidation is the primary freshness mechanism.
+ *
+ * Disabled outside production so dev + e2e see every admin-side write
+ * immediately. Tests that seed via the admin client never go through a
+ * server action, so they can't trigger `updateTag`; without this guard
+ * the cached grid would mask freshly inserted rows during the
+ * configured TTL.
  */
-const fetchProjectGridCore = unstable_cache(
-  loadProjectGridCore,
-  ["project-grid-core"],
-  { revalidate: 60, tags: [CACHE_TAGS.PROJECTS_GRID] }
-);
+const fetchProjectGridCore =
+  process.env.NODE_ENV === "production"
+    ? unstable_cache(loadProjectGridCore, ["project-grid-core"], {
+        revalidate: 60,
+        tags: [CACHE_TAGS.PROJECTS_GRID],
+      })
+    : loadProjectGridCore;
 
 /**
  * Returns the set of project ids the viewer has voted on. Caller is

@@ -87,15 +87,17 @@ function applyAction(
 }
 
 function buildOptimisticRow(
+  id: string,
   body: string,
   viewer: CommentListViewer
 ): CommentRow {
   const now = new Date().toISOString();
   return {
-    // The temp id is replaced as soon as the server revalidates and
-    // fresh threads arrive as props. Prefix makes it easy to identify
-    // in tests and devtools.
-    id: `optimistic-${crypto.randomUUID()}`,
+    // Caller (CommentForm) supplies the id. The same id is sent to the
+    // server so the row that comes back from revalidation has a
+    // matching React key — the subtree stays mounted across the
+    // optimistic → real transition.
+    id,
     user_id: viewer.id,
     body,
     created_at: now,
@@ -116,11 +118,11 @@ export function CommentList({ threads, projectId, viewer }: CommentListProps) {
   );
 
   const onTopLevelSubmit = viewer
-    ? (body: string) => {
+    ? (commentId: string, body: string) => {
         dispatch({
           type: "add",
           thread: {
-            comment: buildOptimisticRow(body, viewer),
+            comment: buildOptimisticRow(commentId, body, viewer),
             replies: [],
           },
         });
@@ -128,11 +130,11 @@ export function CommentList({ threads, projectId, viewer }: CommentListProps) {
     : undefined;
 
   const onReplySubmit = viewer
-    ? (parentId: string, body: string) => {
+    ? (parentId: string, commentId: string, body: string) => {
         dispatch({
           type: "reply",
           parentId,
-          reply: buildOptimisticRow(body, viewer),
+          reply: buildOptimisticRow(commentId, body, viewer),
         });
       }
     : undefined;
