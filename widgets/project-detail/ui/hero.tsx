@@ -97,8 +97,24 @@ export function Hero({ project, isAuthenticated, viewerUserId }: HeroProps) {
         <ImageGallery imageUrls={project.imageUrls} title={project.title} />
       ) : null}
 
-      <div className="flex flex-col gap-2" data-testid="project-detail-actions">
-        <Button asChild className="gap-2 self-end" size="lg">
+      <div
+        className="flex flex-col-reverse gap-2 sm:flex-row sm:justify-end"
+        data-testid="project-detail-actions"
+      >
+        {project.github_url ? (
+          <Button asChild className="gap-2" size="lg" variant="outline">
+            <a
+              data-testid="project-detail-github-link"
+              href={project.github_url}
+              rel="noopener noreferrer"
+              target="_blank"
+            >
+              <RiGithubLine aria-hidden="true" />
+              GitHub 보기
+            </a>
+          </Button>
+        ) : null}
+        <Button asChild className="gap-2" size="lg">
           <a
             href={project.project_url}
             rel="noopener noreferrer"
@@ -108,20 +124,6 @@ export function Hero({ project, isAuthenticated, viewerUserId }: HeroProps) {
             프로젝트 방문하기
           </a>
         </Button>
-        {project.github_url ? (
-          <a
-            className="inline-flex w-fit items-center gap-1.5 text-muted-foreground text-sm hover:text-foreground"
-            data-testid="project-detail-github-link"
-            href={project.github_url}
-            rel="noopener noreferrer"
-            target="_blank"
-          >
-            <RiGithubLine aria-hidden="true" className="size-3.5" />
-            <span className="underline underline-offset-2">
-              GitHub 저장소 보기
-            </span>
-          </a>
-        ) : null}
       </div>
     </article>
   );
