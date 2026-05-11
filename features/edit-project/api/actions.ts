@@ -2,9 +2,10 @@
 
 import type { ProjectImage } from "@entities/project";
 import { requireAuth } from "@shared/api/supabase/require-auth";
+import { CACHE_TAGS } from "@shared/config/cache-tags";
 import { SCREENSHOT_BUCKET } from "@shared/config/storage";
 import { getZodErrorMessage } from "@shared/lib/validation";
-import { revalidatePath } from "next/cache";
+import { revalidatePath, updateTag } from "next/cache";
 import { type EditProjectInput, editProjectInputSchema } from "./schema";
 
 export interface EditProjectResult {
@@ -81,7 +82,7 @@ export async function editProject(
     await supabase.storage.from(SCREENSHOT_BUCKET).remove(orphans);
   }
 
-  revalidatePath("/");
+  updateTag(CACHE_TAGS.PROJECTS_GRID);
   revalidatePath(`/projects/${input.projectId}`);
   return { ok: true };
 }

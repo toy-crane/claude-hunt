@@ -1,23 +1,42 @@
 import { vi } from "vitest";
 
-const projectsSelectMock = vi.fn();
+// `unstable_cache` is the real Data Cache wrapper in production. In tests
+// we collapse it to the identity function so each spec sees fresh mock
+// data and we can focus on data flow rather than cache behavior.
+vi.mock("next/cache", () => ({
+  unstable_cache: <T>(fn: T) => fn,
+  revalidateTag: vi.fn(),
+  revalidatePath: vi.fn(),
+}));
+
+const anonProjectsSelectMock = vi.fn();
 const votesSelectMock = vi.fn();
+const anonStorageFromMock = vi.fn(() => ({
+  getPublicUrl: (path: string) => ({
+    data: { publicUrl: `https://cdn.example.com/${path}` },
+  }),
+}));
+
+vi.mock("@shared/api/supabase/anon-server", () => ({
+  createAnonServerClient: () => ({
+    from: (table: string) => {
+      if (table === "projects_with_vote_count") {
+        return { select: anonProjectsSelectMock };
+      }
+      throw new Error(`unexpected table ${table}`);
+    },
+    storage: { from: anonStorageFromMock },
+  }),
+}));
 
 vi.mock("@shared/api/supabase/server", () => ({
   createClient: vi.fn().mockResolvedValue({
     from: vi.fn((table: string) => {
-      if (table === "projects_with_vote_count") {
-        return { select: projectsSelectMock };
+      if (table === "votes") {
+        return { select: votesSelectMock };
       }
-      return { select: votesSelectMock };
+      throw new Error(`unexpected table ${table}`);
     }),
-    storage: {
-      from: vi.fn(() => ({
-        getPublicUrl: (path: string) => ({
-          data: { publicUrl: `https://cdn.example.com/${path}` },
-        }),
-      })),
-    },
   }),
 }));
 
@@ -45,20 +64,26 @@ const ROW_B = {
   vote_count: 2,
 };
 
+function stubProjectGridQuery(rows: (typeof ROW_A)[]) {
+  anonProjectsSelectMock.mockReturnValue({
+    order: vi.fn().mockReturnValue({
+      order: vi.fn().mockResolvedValue({ data: rows, error: null }),
+    }),
+  });
+}
+
 describe("fetchProjects", () => {
   beforeEach(() => {
     vi.clearAllMocks();
+    anonStorageFromMock.mockImplementation(() => ({
+      getPublicUrl: (path: string) => ({
+        data: { publicUrl: `https://cdn.example.com/${path}` },
+      }),
+    }));
   });
 
   it("returns all rows — no cohort filter applied", async () => {
-    projectsSelectMock.mockReturnValue({
-      order: vi.fn().mockReturnValue({
-        order: vi.fn().mockResolvedValue({
-          data: [ROW_A, ROW_B],
-          error: null,
-        }),
-      }),
-    });
+    stubProjectGridQuery([ROW_A, ROW_B]);
     votesSelectMock.mockReturnValue({
       eq: vi.fn().mockResolvedValue({ data: [], error: null }),
     });
@@ -73,14 +98,7 @@ describe("fetchProjects", () => {
   });
 
   it("sets viewer_has_voted to true for projects the viewer voted on", async () => {
-    projectsSelectMock.mockReturnValue({
-      order: vi.fn().mockReturnValue({
-        order: vi.fn().mockResolvedValue({
-          data: [ROW_A, ROW_B],
-          error: null,
-        }),
-      }),
-    });
+    stubProjectGridQuery([ROW_A, ROW_B]);
     votesSelectMock.mockReturnValue({
       eq: vi.fn().mockResolvedValue({
         data: [{ project_id: "p1" }],
@@ -96,14 +114,7 @@ describe("fetchProjects", () => {
   });
 
   it("sets all viewer_has_voted to false for anonymous visitors", async () => {
-    projectsSelectMock.mockReturnValue({
-      order: vi.fn().mockReturnValue({
-        order: vi.fn().mockResolvedValue({
-          data: [ROW_A, ROW_B],
-          error: null,
-        }),
-      }),
-    });
+    stubProjectGridQuery([ROW_A, ROW_B]);
 
     const { fetchProjects } = await import("./fetch-projects");
     const rows = await fetchProjects();
@@ -113,33 +124,15 @@ describe("fetchProjects", () => {
 });
 
 // ──────────────────────────────────────────────────────────────────────────
-// fetchTopProjects: cookie-free variant used by the OG image. Uses the anon
-// server client and returns a narrow row shape — no viewer-vote merging.
+// fetchTopProjects: cookie-free variant used by the OG image. Same anon
+// client as fetchProjectGridCore, but with a row limit and no viewer-vote
+// merging.
 // ──────────────────────────────────────────────────────────────────────────
-
-const topProjectsSelectMock = vi.fn();
-const topStorageFromMock = vi.fn(() => ({
-  getPublicUrl: (path: string) => ({
-    data: { publicUrl: `https://cdn.example.com/${path}` },
-  }),
-}));
-
-vi.mock("@shared/api/supabase/anon-server", () => ({
-  createAnonServerClient: () => ({
-    from: (table: string) => {
-      if (table === "projects_with_vote_count") {
-        return { select: topProjectsSelectMock };
-      }
-      throw new Error(`unexpected table ${table}`);
-    },
-    storage: { from: topStorageFromMock },
-  }),
-}));
 
 describe("fetchTopProjects", () => {
   beforeEach(() => {
     vi.clearAllMocks();
-    topStorageFromMock.mockImplementation(() => ({
+    anonStorageFromMock.mockImplementation(() => ({
       getPublicUrl: (path: string) => ({
         data: { publicUrl: `https://cdn.example.com/${path}` },
       }),
@@ -150,7 +143,7 @@ describe("fetchTopProjects", () => {
     const limitSpy = vi.fn().mockResolvedValue({ data: [], error: null });
     const innerOrderSpy = vi.fn().mockReturnValue({ limit: limitSpy });
     const outerOrderSpy = vi.fn().mockReturnValue({ order: innerOrderSpy });
-    topProjectsSelectMock.mockReturnValue({ order: outerOrderSpy });
+    anonProjectsSelectMock.mockReturnValue({ order: outerOrderSpy });
 
     const { fetchTopProjects } = await import("./fetch-projects");
     await fetchTopProjects({ limit: 6 });
@@ -165,7 +158,7 @@ describe("fetchTopProjects", () => {
   });
 
   it("resolves each row's primary_image_path to a public URL", async () => {
-    topProjectsSelectMock.mockReturnValue({
+    anonProjectsSelectMock.mockReturnValue({
       order: vi.fn().mockReturnValue({
         order: vi.fn().mockReturnValue({
           limit: vi.fn().mockResolvedValue({
@@ -182,11 +175,11 @@ describe("fetchTopProjects", () => {
     expect(rows).toHaveLength(2);
     expect(rows[0].screenshotUrl).toBe("https://cdn.example.com/u1/p1.png");
     expect(rows[1].screenshotUrl).toBe("https://cdn.example.com/u1/p1.png");
-    expect(topStorageFromMock).toHaveBeenCalledWith("project-screenshots");
+    expect(anonStorageFromMock).toHaveBeenCalledWith("project-screenshots");
   });
 
   it("returns an empty string for rows with a null primary_image_path", async () => {
-    topProjectsSelectMock.mockReturnValue({
+    anonProjectsSelectMock.mockReturnValue({
       order: vi.fn().mockReturnValue({
         order: vi.fn().mockReturnValue({
           limit: vi.fn().mockResolvedValue({
@@ -203,7 +196,7 @@ describe("fetchTopProjects", () => {
   });
 
   it("returns an empty array when the query returns no rows (does not throw)", async () => {
-    topProjectsSelectMock.mockReturnValue({
+    anonProjectsSelectMock.mockReturnValue({
       order: vi.fn().mockReturnValue({
         order: vi.fn().mockReturnValue({
           limit: vi.fn().mockResolvedValue({ data: [], error: null }),
@@ -218,7 +211,7 @@ describe("fetchTopProjects", () => {
 
   it("defaults the limit to 6 when no argument is provided", async () => {
     const limitSpy = vi.fn().mockResolvedValue({ data: [], error: null });
-    topProjectsSelectMock.mockReturnValue({
+    anonProjectsSelectMock.mockReturnValue({
       order: vi.fn().mockReturnValue({
         order: vi.fn().mockReturnValue({ limit: limitSpy }),
       }),

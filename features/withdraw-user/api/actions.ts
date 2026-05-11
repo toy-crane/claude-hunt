@@ -3,8 +3,9 @@
 import type { ProjectImage } from "@entities/project";
 import { createAdminClient } from "@shared/api/supabase/admin";
 import { requireAuth } from "@shared/api/supabase/require-auth";
+import { CACHE_TAGS } from "@shared/config/cache-tags";
 import { SCREENSHOT_BUCKET } from "@shared/config/storage";
-import { revalidatePath } from "next/cache";
+import { revalidatePath, updateTag } from "next/cache";
 
 export type WithdrawAccountResult = { ok: true } | { error: string; ok: false };
 
@@ -52,7 +53,9 @@ export async function withdrawAccount(): Promise<WithdrawAccountResult> {
   }
 
   await supabase.auth.signOut();
-  revalidatePath("/");
+  // Cascading delete removes the user's projects and votes; the cached
+  // grid must reflect that on next visit.
+  updateTag(CACHE_TAGS.PROJECTS_GRID);
   revalidatePath("/settings");
 
   return { ok: true };

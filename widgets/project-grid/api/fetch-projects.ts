@@ -1,7 +1,9 @@
 import type { ProjectWithVoteCount } from "@entities/vote";
 import { createAnonServerClient } from "@shared/api/supabase/anon-server";
 import { createClient } from "@shared/api/supabase/server";
+import { CACHE_TAGS } from "@shared/config/cache-tags";
 import { SCREENSHOT_BUCKET } from "@shared/config/storage";
+import { unstable_cache } from "next/cache";
 
 export interface FetchProjectsOptions {
   /**
@@ -27,14 +29,10 @@ export interface FetchTopProjectsOptions {
   limit?: number;
 }
 
-/**
- * Reads every landing-page grid row from `projects_with_vote_count` and
- * resolves each screenshot path to a public URL. Identical for every
- * caller — no viewer-specific data — so this is the function that sits
- * behind a Data Cache layer in the next phase.
- */
-async function fetchProjectGridCore(): Promise<ProjectGridCore[]> {
-  const supabase = await createClient();
+async function loadProjectGridCore(): Promise<ProjectGridCore[]> {
+  // Anonymous client — the function MUST NOT depend on cookies/headers so
+  // that `unstable_cache` can safely persist the result across requests.
+  const supabase = createAnonServerClient();
   const { data, error } = await supabase
     .from("projects_with_vote_count")
     .select("*")
@@ -56,8 +54,21 @@ async function fetchProjectGridCore(): Promise<ProjectGridCore[]> {
 }
 
 /**
+ * Cached read of the landing-page grid rows. Tagged with
+ * `projects-grid` so mutations (vote, submit, edit, delete) can invalidate
+ * it via `revalidateTag`. The 60-second `revalidate` is a safety net — tag
+ * invalidation is the primary freshness mechanism.
+ */
+const fetchProjectGridCore = unstable_cache(
+  loadProjectGridCore,
+  ["project-grid-core"],
+  { revalidate: 60, tags: [CACHE_TAGS.PROJECTS_GRID] }
+);
+
+/**
  * Returns the set of project ids the viewer has voted on. Caller is
  * expected to short-circuit to an empty set when no viewer is signed in.
+ * Not cached across requests — votes change per user.
  */
 async function fetchViewerVotedIds(viewerUserId: string): Promise<Set<string>> {
   const supabase = await createClient();
@@ -79,10 +90,9 @@ async function fetchViewerVotedIds(viewerUserId: string): Promise<Set<string>> {
 }
 
 /**
- * Composes the viewer-agnostic grid core with the viewer's vote overlay.
- * Public signature is preserved for existing callers (home page,
- * project-board, e2e). The split exists so the core query can be cached
- * across requests independently of viewer state.
+ * Composes the cached, viewer-agnostic grid core with the viewer's votes
+ * overlay. Public signature is preserved for the existing callers (home
+ * page, project-board, e2e).
  */
 export async function fetchProjects(
   options: FetchProjectsOptions = {}

@@ -1,8 +1,10 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
 const revalidatePathMock = vi.fn();
+const updateTagMock = vi.fn();
 vi.mock("next/cache", () => ({
   revalidatePath: revalidatePathMock,
+  updateTag: updateTagMock,
 }));
 
 const getUser = vi.fn();
@@ -17,6 +19,7 @@ const { toggleVote } = await import("./actions");
 
 beforeEach(() => {
   revalidatePathMock.mockClear();
+  updateTagMock.mockClear();
   getUser.mockReset();
   from.mockReset();
 });
@@ -71,7 +74,7 @@ describe("toggleVote server action", () => {
       user_id: "u1",
       project_id: "p1",
     });
-    expect(revalidatePathMock).toHaveBeenCalledWith("/");
+    expect(updateTagMock).toHaveBeenCalledWith("projects-grid");
     expect(revalidatePathMock).toHaveBeenCalledWith("/projects/p1");
   });
 
@@ -92,7 +95,7 @@ describe("toggleVote server action", () => {
 
     expect(result.ok).toBe(true);
     expect(result.voted).toBe(false);
-    expect(revalidatePathMock).toHaveBeenCalledWith("/");
+    expect(updateTagMock).toHaveBeenCalledWith("projects-grid");
     expect(revalidatePathMock).toHaveBeenCalledWith("/projects/p1");
   });
 

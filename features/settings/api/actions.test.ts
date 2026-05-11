@@ -16,8 +16,10 @@ vi.mock("@shared/api/supabase/server", () => ({
 }));
 
 const revalidatePathMock = vi.fn();
+const updateTagMock = vi.fn();
 vi.mock("next/cache", () => ({
   revalidatePath: revalidatePathMock,
+  updateTag: updateTagMock,
 }));
 
 describe("updateDisplayName", () => {
@@ -41,7 +43,7 @@ describe("updateDisplayName", () => {
     expect(result).toEqual({ ok: true });
     expect(updateMock).toHaveBeenCalledWith({ display_name: "Alice K." });
     expect(eqMock).toHaveBeenCalledWith("id", "user-1");
-    expect(revalidatePathMock).toHaveBeenCalledWith("/");
+    expect(updateTagMock).toHaveBeenCalledWith("projects-grid");
     expect(revalidatePathMock).toHaveBeenCalledWith("/settings");
   });
 

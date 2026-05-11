@@ -1,16 +1,13 @@
 import type { Cohort } from "@entities/cohort";
-import { createClient } from "@shared/api/supabase/server";
-import { cache } from "react";
+import { createAnonServerClient } from "@shared/api/supabase/anon-server";
+import { CACHE_TAGS } from "@shared/config/cache-tags";
+import { unstable_cache } from "next/cache";
 
-/**
- * Loads all cohorts for the dropdown. Sorted by name so the UI is stable
- * across page loads regardless of insertion order.
- *
- * Wrapped in `cache()` so multiple call sites within the same server
- * render tree share one Supabase query (e.g. page + ProjectGridSection).
- */
-export const fetchCohorts = cache(async (): Promise<Cohort[]> => {
-  const supabase = await createClient();
+async function loadCohorts(): Promise<Cohort[]> {
+  // Anon client — cohorts are public reference data and the read MUST NOT
+  // depend on cookies so `unstable_cache` can persist the result across
+  // requests.
+  const supabase = createAnonServerClient();
   const { data, error } = await supabase
     .from("cohorts")
     .select("*")
@@ -19,4 +16,15 @@ export const fetchCohorts = cache(async (): Promise<Cohort[]> => {
     throw error;
   }
   return data ?? [];
+}
+
+/**
+ * Reads the cohort list shared by the dropdown and the chips. Cohorts
+ * change very rarely (only when an admin adds a new one), so we cache for
+ * an hour. The `cohorts` tag lets future admin tooling invalidate on
+ * demand via `revalidateTag`.
+ */
+export const fetchCohorts = unstable_cache(loadCohorts, ["cohorts"], {
+  revalidate: 3600,
+  tags: [CACHE_TAGS.COHORTS],
 });

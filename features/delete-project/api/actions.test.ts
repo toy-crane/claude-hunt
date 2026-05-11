@@ -3,8 +3,10 @@ import { beforeEach, describe, expect, it, vi } from "vitest";
 const FORBIDDEN_REGEX = /permission/;
 
 const revalidatePathMock = vi.fn();
+const updateTagMock = vi.fn();
 vi.mock("next/cache", () => ({
   revalidatePath: revalidatePathMock,
+  updateTag: updateTagMock,
 }));
 
 const getUser = vi.fn();
@@ -25,6 +27,7 @@ const { deleteProject } = await import("./actions");
 
 beforeEach(() => {
   revalidatePathMock.mockClear();
+  updateTagMock.mockClear();
   storageRemove.mockClear();
   storageFrom.mockClear();
   getUser.mockReset();
@@ -84,7 +87,7 @@ describe("deleteProject server action", () => {
 
     expect(result.ok).toBe(true);
     expect(storageRemove).toHaveBeenCalledWith(["u1/shot.png"]);
-    expect(revalidatePathMock).toHaveBeenCalledWith("/");
+    expect(updateTagMock).toHaveBeenCalledWith("projects-grid");
   });
 
   it("reports forbidden when RLS returns 0 rows", async () => {
@@ -122,6 +125,6 @@ describe("deleteProject server action", () => {
 
     expect(result.ok).toBe(true);
     expect(storageRemove).toHaveBeenCalledTimes(1);
-    expect(revalidatePathMock).toHaveBeenCalledWith("/");
+    expect(updateTagMock).toHaveBeenCalledWith("projects-grid");
   });
 });
