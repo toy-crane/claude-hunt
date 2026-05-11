@@ -36,14 +36,6 @@ vi.mock("@widgets/project-detail", () => ({
   fetchProjectDetail: fetchProjectDetailMock,
 }));
 
-vi.mock("@widgets/header", () => ({
-  Header: () => <div data-testid="header-stub" />,
-}));
-
-vi.mock("@widgets/footer", () => ({
-  Footer: () => <div data-testid="footer-stub" />,
-}));
-
 interface EditFormProps {
   initial: {
     githubUrl: string | null;

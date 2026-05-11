@@ -16,14 +16,6 @@ vi.mock("next/link", () => ({
   ),
 }));
 
-vi.mock("@widgets/header", () => ({
-  Header: () => <div data-testid="site-header-stub" />,
-}));
-
-vi.mock("@widgets/footer", () => ({
-  Footer: () => <div data-testid="site-footer-stub" />,
-}));
-
 async function renderPage() {
   const { default: Page } = await import("./page");
   render(<Page />);
@@ -114,12 +106,6 @@ describe("privacy page (/privacy)", () => {
     await renderPage();
     const back = screen.getByRole("link", { name: BACK_LINK_LABEL });
     expect(back).toHaveAttribute("href", "/");
-  });
-
-  it("reuses Header and Footer widgets", async () => {
-    await renderPage();
-    expect(screen.getByTestId("site-header-stub")).toBeInTheDocument();
-    expect(screen.getByTestId("site-footer-stub")).toBeInTheDocument();
   });
 
   it("renders the 12 KISA-standard section headings in order", async () => {

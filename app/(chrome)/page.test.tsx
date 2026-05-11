@@ -58,10 +58,6 @@ vi.mock("@features/submit-project", () => ({
   ),
 }));
 
-vi.mock("@widgets/header", () => ({
-  Header: () => <div data-testid="site-header-stub" />,
-}));
-
 const fetchProjectsMock = vi.fn<() => Promise<ProjectGridRow[]>>();
 
 vi.mock("@widgets/project-grid/server", () => ({

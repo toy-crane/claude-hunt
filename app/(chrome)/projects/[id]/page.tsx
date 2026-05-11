@@ -1,7 +1,5 @@
 import { fetchViewer } from "@shared/api/supabase/viewer";
 import { CommentList, fetchCommentThreads } from "@widgets/comment-list";
-import { Footer } from "@widgets/footer";
-import { Header } from "@widgets/header";
 import { fetchProjectDetail, Hero } from "@widgets/project-detail";
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
@@ -56,22 +54,18 @@ export default async function Page({ params }: PageProps) {
   }
 
   return (
-    <>
-      <Header />
-      <main className="mx-auto flex min-h-svh w-full max-w-3xl flex-col gap-6 bg-background p-6 pb-24 text-foreground">
-        <Hero
-          isAuthenticated={Boolean(viewer)}
-          project={project}
-          viewerUserId={viewerId}
-        />
-        <CommentList
-          isAuthenticated={Boolean(viewer)}
-          projectId={project.id}
-          threads={threads}
-          viewerUserId={viewerId}
-        />
-      </main>
-      <Footer />
-    </>
+    <main className="mx-auto flex min-h-svh w-full max-w-3xl flex-col gap-6 bg-background p-6 pb-24 text-foreground">
+      <Hero
+        isAuthenticated={Boolean(viewer)}
+        project={project}
+        viewerUserId={viewerId}
+      />
+      <CommentList
+        isAuthenticated={Boolean(viewer)}
+        projectId={project.id}
+        threads={threads}
+        viewerUserId={viewerId}
+      />
+    </main>
   );
 }
