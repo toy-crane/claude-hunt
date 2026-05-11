@@ -123,7 +123,7 @@ export function WithdrawDialog({ email }: WithdrawDialogProps) {
             variant="destructive"
           >
             {isPending ? <Spinner data-icon="inline-start" /> : null}
-            {isPending ? "삭제 중..." : "계정 삭제"}
+            계정 삭제
           </Button>
         </DialogFooter>
       </DialogContent>

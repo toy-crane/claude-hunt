@@ -261,7 +261,7 @@ export function EditForm({ initial }: EditFormProps) {
         </Button>
         <Button className="flex-1" disabled={submitting} type="submit">
           {submitting ? <Spinner data-icon="inline-start" /> : null}
-          {submitting ? "저장 중..." : "저장"}
+          저장
         </Button>
       </div>
     </form>

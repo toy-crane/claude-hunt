@@ -81,7 +81,7 @@ export function SettingsForm({ initialDisplayName, email }: SettingsFormProps) {
       <div className="flex justify-end">
         <Button disabled={isPending} type="submit">
           {isPending ? <Spinner data-icon="inline-start" /> : null}
-          {isPending ? "저장 중..." : "저장"}
+          저장
         </Button>
       </div>
     </form>

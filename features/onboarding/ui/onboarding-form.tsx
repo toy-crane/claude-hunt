@@ -194,7 +194,7 @@ export function OnboardingForm({ cohorts, initialNext }: OnboardingFormProps) {
           type="submit"
         >
           {isPending ? <Spinner data-icon="inline-start" /> : null}
-          {isPending ? "저장 중..." : "계속하기"}
+          계속하기
         </Button>
 
         <div className="grid grid-cols-[1fr_auto_1fr] items-center gap-3">

@@ -219,7 +219,7 @@ export function SubmitForm({ cohortId: _cohortId }: SubmitFormProps) {
         </Button>
         <Button disabled={submitting} size="lg" type="submit">
           {submitting ? <Spinner data-icon="inline-start" /> : null}
-          {submitting ? "제출 중..." : "프로젝트 제출"}
+          프로젝트 제출
         </Button>
       </div>
     </form>
