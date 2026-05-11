@@ -43,7 +43,7 @@ export function ImageGallery({ imageUrls, title }: ImageGalleryProps) {
       <div className="relative aspect-[16/10] w-full overflow-hidden rounded-md border bg-muted">
         <NextImage
           alt={`${title} 스크린샷 ${activeIndex + 1}/${total}`}
-          className="object-cover"
+          className="object-contain"
           data-testid="project-detail-primary-image"
           fill
           priority={activeIndex === 0}
