@@ -5,7 +5,14 @@ import { RiEmotionHappyLine } from "@remixicon/react";
 import { cn } from "@shared/lib/utils";
 import { Popover, PopoverContent, PopoverTrigger } from "@shared/ui/popover";
 import { useRouter } from "next/navigation";
-import { useOptimistic, useState, useTransition } from "react";
+import {
+  type RefObject,
+  useEffect,
+  useOptimistic,
+  useRef,
+  useState,
+  useTransition,
+} from "react";
 import { toast } from "sonner";
 import { toggleReaction } from "../api/actions";
 
@@ -64,6 +71,10 @@ export function ReactionRow({
     reactions,
     applyOptimisticToggle
   );
+  const hasMountedRef = useRef(false);
+  useEffect(() => {
+    hasMountedRef.current = true;
+  }, []);
 
   const byEmoji = new Map<ReactionEmoji, ReactionSummary>();
   for (const r of optimisticReactions) {
@@ -108,22 +119,12 @@ export function ReactionRow({
           return null;
         }
         return (
-          <button
-            aria-pressed={summary.viewerReacted}
-            className={cn(
-              "inline-flex items-center gap-1 rounded-full border px-2 py-0.5 text-xs",
-              summary.viewerReacted
-                ? "border-accent-terracotta/40 bg-accent-terracotta/10 text-accent-terracotta"
-                : "border-border bg-muted text-foreground hover:bg-muted/80"
-            )}
-            data-testid="reaction-chip"
+          <ReactionChip
+            hasMountedRef={hasMountedRef}
             key={emoji}
-            onClick={() => handleSelect(emoji)}
-            type="button"
-          >
-            <span aria-hidden="true">{emoji}</span>
-            <span>{summary.count}</span>
-          </button>
+            onSelect={handleSelect}
+            summary={summary}
+          />
         );
       })}
       <Popover onOpenChange={setOpen} open={open}>
@@ -164,5 +165,68 @@ export function ReactionRow({
         </PopoverContent>
       </Popover>
     </div>
+  );
+}
+
+interface ReactionChipProps {
+  hasMountedRef: RefObject<boolean>;
+  onSelect: (emoji: ReactionEmoji) => void;
+  summary: ReactionSummary;
+}
+
+function ReactionChip({ hasMountedRef, onSelect, summary }: ReactionChipProps) {
+  const chipRef = useRef<HTMLButtonElement>(null);
+  const countRef = useRef<HTMLSpanElement>(null);
+
+  // biome-ignore lint/correctness/useExhaustiveDependencies: hasMountedRef is a one-shot flag ref; ref mutations are not tracked by React deps.
+  useEffect(() => {
+    if (!hasMountedRef.current) {
+      return;
+    }
+    if (summary.count <= 0) {
+      return;
+    }
+    if (
+      typeof window !== "undefined" &&
+      window.matchMedia?.("(prefers-reduced-motion: reduce)").matches
+    ) {
+      return;
+    }
+    chipRef.current?.animate(
+      [
+        { transform: "scale(1)" },
+        { transform: "scale(1.18)" },
+        { transform: "scale(1)" },
+      ],
+      { duration: 240, easing: "cubic-bezier(0.34, 1.56, 0.64, 1)" }
+    );
+    countRef.current?.animate(
+      [
+        { transform: "translateY(4px)", opacity: 0 },
+        { transform: "translateY(0)", opacity: 1 },
+      ],
+      { duration: 200, easing: "ease-out" }
+    );
+  }, [summary.count]);
+
+  return (
+    <button
+      aria-pressed={summary.viewerReacted}
+      className={cn(
+        "inline-flex items-center gap-1 rounded-full border px-2 py-0.5 text-xs",
+        summary.viewerReacted
+          ? "border-accent-terracotta/40 bg-accent-terracotta/10 text-accent-terracotta"
+          : "border-border bg-muted text-foreground hover:bg-muted/80"
+      )}
+      data-testid="reaction-chip"
+      onClick={() => onSelect(summary.emoji)}
+      ref={chipRef}
+      type="button"
+    >
+      <span aria-hidden="true">{summary.emoji}</span>
+      <span className="inline-block tabular-nums" ref={countRef}>
+        {summary.count}
+      </span>
+    </button>
   );
 }
