@@ -61,7 +61,10 @@ export function CommentItem({
   });
   const isOwner = viewerUserId != null && viewerUserId === comment.user_id;
 
-  async function handleConfirmDelete() {
+  async function handleConfirmDelete(
+    event: React.MouseEvent<HTMLButtonElement>
+  ) {
+    event.preventDefault();
     setDeleting(true);
     try {
       const result = await deleteComment({

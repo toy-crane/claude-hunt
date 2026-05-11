@@ -33,9 +33,11 @@ export interface OwnerControlsProps {
  */
 export function OwnerControls({ projectId, projectTitle }: OwnerControlsProps) {
   const router = useRouter();
+  const [confirmOpen, setConfirmOpen] = useState(false);
   const [deleting, setDeleting] = useState(false);
 
-  async function handleDelete() {
+  async function handleDelete(event: React.MouseEvent<HTMLButtonElement>) {
+    event.preventDefault();
     setDeleting(true);
     try {
       const result = await deleteProject({ projectId });
@@ -44,6 +46,7 @@ export function OwnerControls({ projectId, projectTitle }: OwnerControlsProps) {
         return;
       }
       toast.success("프로젝트가 삭제됐어요.");
+      setConfirmOpen(false);
       router.push("/");
       router.refresh();
     } finally {
@@ -61,7 +64,7 @@ export function OwnerControls({ projectId, projectTitle }: OwnerControlsProps) {
           <RiPencilLine />
         </Link>
       </Button>
-      <AlertDialog>
+      <AlertDialog onOpenChange={setConfirmOpen} open={confirmOpen}>
         <AlertDialogTrigger asChild>
           <Button aria-label="삭제" size="icon" variant="outline">
             <RiDeleteBin6Line />
