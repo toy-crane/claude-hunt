@@ -11,6 +11,7 @@ import {
   DialogTitle,
   DialogTrigger,
 } from "@shared/ui/dialog";
+import { Spinner } from "@shared/ui/spinner";
 import { useState } from "react";
 import { deleteProject } from "../api/actions";
 
@@ -103,7 +104,8 @@ export function DeleteButton({
             type="button"
             variant="destructive"
           >
-            {deleting ? "삭제 중..." : "삭제"}
+            {deleting ? <Spinner data-icon="inline-start" /> : null}
+            삭제
           </Button>
         </DialogFooter>
       </DialogContent>

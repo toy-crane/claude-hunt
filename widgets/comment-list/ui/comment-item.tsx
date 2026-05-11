@@ -24,6 +24,7 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@shared/ui/dropdown-menu";
+import { Spinner } from "@shared/ui/spinner";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { toast } from "sonner";
@@ -204,7 +205,8 @@ export function CommentItem({
               disabled={deleting}
               onClick={handleConfirmDelete}
             >
-              {deleting ? "삭제 중..." : "삭제"}
+              {deleting ? <Spinner data-icon="inline-start" /> : null}
+              삭제
             </AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>
