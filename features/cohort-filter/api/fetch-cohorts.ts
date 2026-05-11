@@ -23,8 +23,14 @@ async function loadCohorts(): Promise<Cohort[]> {
  * change very rarely (only when an admin adds a new one), so we cache for
  * an hour. The `cohorts` tag lets future admin tooling invalidate on
  * demand via `revalidateTag`.
+ *
+ * Disabled outside production so dev + e2e see admin-side cohort
+ * writes immediately. See fetch-projects.ts for the rationale.
  */
-export const fetchCohorts = unstable_cache(loadCohorts, ["cohorts"], {
-  revalidate: 3600,
-  tags: [CACHE_TAGS.COHORTS],
-});
+export const fetchCohorts =
+  process.env.NODE_ENV === "production"
+    ? unstable_cache(loadCohorts, ["cohorts"], {
+        revalidate: 3600,
+        tags: [CACHE_TAGS.COHORTS],
+      })
+    : loadCohorts;

@@ -56,6 +56,9 @@ export async function withdrawAccount(): Promise<WithdrawAccountResult> {
   // Cascading delete removes the user's projects and votes; the cached
   // grid must reflect that on next visit.
   updateTag(CACHE_TAGS.PROJECTS_GRID);
+  // Bust the home + settings Router Caches so the dialog's
+  // `router.replace('/')` lands on a fresh anonymous render.
+  revalidatePath("/");
   revalidatePath("/settings");
 
   return { ok: true };

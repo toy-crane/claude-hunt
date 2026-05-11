@@ -16,12 +16,13 @@ export interface CommentFormProps {
   /** Called when user clicks Cancel. Used by inline reply forms. */
   onCancel?: () => void;
   /**
-   * Fires synchronously before the server action with the body the user
-   * just submitted, so the parent list can push an optimistic comment
-   * into the rendered tree. CommentList provides this; the form does
-   * not require it.
+   * Fires synchronously before the server action with the client-
+   * generated comment id and body, so the parent list can push an
+   * optimistic comment into the rendered tree. The same id is passed
+   * to the server so the React key stays stable across the
+   * optimistic → revalidated transition.
    */
-  onOptimisticSubmit?: (body: string) => void;
+  onOptimisticSubmit?: (commentId: string, body: string) => void;
   /** When set, this form posts as a reply to that comment. */
   parentCommentId?: string;
   projectId: string;
@@ -70,18 +71,21 @@ export function CommentForm({
       return;
     }
     const body = value;
+    const optimisticId = crypto.randomUUID();
     // Clear the textarea immediately so it doesn't block the optimistic
     // comment from appearing — the input is captured in `body`.
     setValue("");
     startTransition(async () => {
       // Synchronously push the optimistic comment into the list before
-      // we wait on the server. `useOptimistic` in the parent reconciles
-      // back to props once the transition ends.
-      onOptimisticSubmit?.(body);
+      // we wait on the server. The same id is passed to the server so
+      // when revalidation lands the row, its React key matches the
+      // optimistic one and the rendered subtree isn't torn down.
+      onOptimisticSubmit?.(optimisticId, body);
       const result = await leaveComment({
         projectId,
         parentCommentId,
         body,
+        optimisticId,
       });
       if (!result.ok) {
         setError(result.error ?? "댓글을 등록하지 못했어요.");

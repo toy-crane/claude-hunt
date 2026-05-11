@@ -49,7 +49,11 @@ export interface CommentItemProps {
    * When provided, the reply form synchronously pushes an optimistic
    * reply into the parent list before the server roundtrip completes.
    */
-  onOptimisticReply?: (parentId: string, body: string) => void;
+  onOptimisticReply?: (
+    parentId: string,
+    commentId: string,
+    body: string
+  ) => void;
   projectId: string;
   /** auth.uid() of the current viewer; controls the kebab menu. */
   viewerUserId: string | null;
@@ -208,7 +212,8 @@ export function CommentItem({
                 onCancel={() => setReplyOpen(false)}
                 onOptimisticSubmit={
                   onOptimisticReply
-                    ? (body) => onOptimisticReply(comment.id, body)
+                    ? (commentId, body) =>
+                        onOptimisticReply(comment.id, commentId, body)
                     : undefined
                 }
                 parentCommentId={comment.id}
