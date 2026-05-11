@@ -2,6 +2,7 @@
 
 import { MAX_COMMENT_BODY } from "@entities/comment";
 import { Button } from "@shared/ui/button";
+import { Spinner } from "@shared/ui/spinner";
 import { Textarea } from "@shared/ui/textarea";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
@@ -96,7 +97,8 @@ export function EditCommentInline({
             size="sm"
             type="submit"
           >
-            {submitting ? "저장 중..." : "저장"}
+            {submitting ? <Spinner data-icon="inline-start" /> : null}
+            저장
           </Button>
         </div>
       </div>

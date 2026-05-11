@@ -2,6 +2,7 @@
 
 import { MAX_COMMENT_BODY } from "@entities/comment";
 import { Button } from "@shared/ui/button";
+import { Spinner } from "@shared/ui/spinner";
 import { Textarea } from "@shared/ui/textarea";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
@@ -126,7 +127,8 @@ export function CommentForm({
             size="sm"
             type="submit"
           >
-            {submitting ? "등록 중..." : "등록"}
+            {submitting ? <Spinner data-icon="inline-start" /> : null}
+            등록
           </Button>
         </div>
       </div>
