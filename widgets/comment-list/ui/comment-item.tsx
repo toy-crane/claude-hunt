@@ -35,6 +35,11 @@ export interface CommentItemProps {
   allowReply: boolean;
   comment: CommentRow;
   isAuthenticated: boolean;
+  /**
+   * When provided, the reply form synchronously pushes an optimistic
+   * reply into the parent list before the server roundtrip completes.
+   */
+  onOptimisticReply?: (parentId: string, body: string) => void;
   projectId: string;
   /** auth.uid() of the current viewer; controls the kebab menu. */
   viewerUserId: string | null;
@@ -46,6 +51,7 @@ export function CommentItem({
   isAuthenticated,
   allowReply,
   viewerUserId,
+  onOptimisticReply,
 }: CommentItemProps) {
   const router = useRouter();
   const [replyOpen, setReplyOpen] = useState(false);
@@ -184,6 +190,11 @@ export function CommentItem({
                 autoFocus
                 isAuthenticated={isAuthenticated}
                 onCancel={() => setReplyOpen(false)}
+                onOptimisticSubmit={
+                  onOptimisticReply
+                    ? (body) => onOptimisticReply(comment.id, body)
+                    : undefined
+                }
                 parentCommentId={comment.id}
                 projectId={projectId}
                 size="compact"
