@@ -75,7 +75,7 @@ export function ImageGallery({ imageUrls, title }: ImageGalleryProps) {
       </div>
       {total > 1 ? (
         <div
-          className="flex gap-2 overflow-x-auto"
+          className="flex gap-2 overflow-x-auto p-1"
           data-testid="project-detail-gallery-strip"
         >
           {imageUrls.map((url, idx) => (
