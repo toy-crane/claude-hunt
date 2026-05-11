@@ -1,5 +1,6 @@
 import type { ProjectWithVoteCount } from "@entities/vote";
 import { formatRelativeShort } from "@shared/lib/format-relative";
+import { SHIMMER_DATA_URL } from "@shared/lib/image";
 import { cn } from "@shared/lib/utils";
 import {
   HoverCard,
@@ -109,6 +110,7 @@ export function ProjectCard({
                   className="h-10 w-16 origin-left object-cover transition-transform duration-200 ease-out group-hover/row:scale-[1.08]"
                   data-testid="project-card-thumb"
                   height={40}
+                  placeholder={SHIMMER_DATA_URL}
                   priority={priority}
                   sizes="64px"
                   src={screenshotUrl}
@@ -135,6 +137,7 @@ export function ProjectCard({
                 className="block h-[200px] w-[320px] object-cover"
                 data-testid="project-card-preview-popover"
                 height={200}
+                placeholder={SHIMMER_DATA_URL}
                 sizes="320px"
                 src={screenshotUrl}
                 width={320}
@@ -206,6 +209,7 @@ export function ProjectCard({
               className="object-cover"
               data-testid="project-card-mobile-thumb"
               fill
+              placeholder={SHIMMER_DATA_URL}
               priority={priority}
               sizes="(max-width: 720px) 100vw, 720px"
               src={screenshotUrl}
