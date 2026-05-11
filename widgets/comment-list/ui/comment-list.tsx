@@ -143,6 +143,12 @@ export function CommentList({ threads, projectId, viewer }: CommentListProps) {
       }
     : undefined;
 
+  const onEdit = viewer
+    ? (commentId: string, body: string) => {
+        dispatch({ type: "edit", commentId, body });
+      }
+    : undefined;
+
   return (
     <section className="flex flex-col gap-4" data-testid="comment-list">
       <div className="flex items-center justify-between">
@@ -177,6 +183,7 @@ export function CommentList({ threads, projectId, viewer }: CommentListProps) {
                 comment={thread.comment}
                 isAuthenticated={isAuthenticated}
                 onOptimisticDelete={onDelete}
+                onOptimisticEdit={onEdit}
                 onOptimisticReply={onReplySubmit}
                 projectId={projectId}
                 viewerUserId={viewerUserId}
@@ -193,6 +200,7 @@ export function CommentList({ threads, projectId, viewer }: CommentListProps) {
                         comment={reply}
                         isAuthenticated={isAuthenticated}
                         onOptimisticDelete={onDelete}
+                        onOptimisticEdit={onEdit}
                         projectId={projectId}
                         viewerUserId={viewerUserId}
                       />
