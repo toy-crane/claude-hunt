@@ -31,7 +31,7 @@ vi.mock("next/navigation", () => ({
 
 const GITHUB_RE = /GitHub/i;
 const GOOGLE_RE = /Google/i;
-const SENDING_RE = /보내는 중/;
+const CONTINUE_RE = /계속하기/;
 const CALLBACK_PATH_RE = /\/auth\/callback$/;
 
 function neverResolve() {
@@ -169,11 +169,11 @@ describe("login", () => {
       expect(screen.getByRole("button", { name: GITHUB_RE })).toBeDisabled();
       expect(screen.getByRole("button", { name: GOOGLE_RE })).toBeDisabled();
       expect(screen.getByLabelText("이메일")).toBeDisabled();
-      expect(screen.getByRole("button", { name: SENDING_RE })).toBeDisabled();
+      expect(screen.getByRole("button", { name: CONTINUE_RE })).toBeDisabled();
     });
   });
 
-  it("Continue button shows 'Sending...' during loading", async () => {
+  it("Continue button shows a Spinner during loading and keeps its label", async () => {
     mockClient.auth.signInWithOtp = vi.fn().mockReturnValue(neverResolve());
 
     const user = userEvent.setup();
@@ -184,9 +184,9 @@ describe("login", () => {
     await user.click(screen.getByRole("button", { name: "계속하기" }));
 
     await waitFor(() => {
-      expect(
-        screen.getByRole("button", { name: "보내는 중..." })
-      ).toBeInTheDocument();
+      const button = screen.getByRole("button", { name: CONTINUE_RE });
+      expect(button).toBeDisabled();
+      expect(button.querySelector('[role="status"]')).toBeInTheDocument();
     });
   });
 

@@ -7,6 +7,7 @@ import { GitHubIcon } from "@shared/ui/icons/github";
 import { GoogleIcon } from "@shared/ui/icons/google";
 import { Input } from "@shared/ui/input";
 import { Label } from "@shared/ui/label";
+import { Spinner } from "@shared/ui/spinner";
 import Link from "next/link";
 import { useSearchParams } from "next/navigation";
 import { useState } from "react";
@@ -69,7 +70,11 @@ export function LoginForm() {
             type="button"
             variant="outline"
           >
-            <GitHubIcon className="size-4" />
+            {loading === "github" ? (
+              <Spinner data-icon="inline-start" />
+            ) : (
+              <GitHubIcon className="size-4" />
+            )}
             <span>GitHub</span>
           </Button>
           <Button
@@ -78,7 +83,11 @@ export function LoginForm() {
             type="button"
             variant="outline"
           >
-            <GoogleIcon className="size-4" />
+            {loading === "google" ? (
+              <Spinner data-icon="inline-start" />
+            ) : (
+              <GoogleIcon className="size-4" />
+            )}
             <span>Google</span>
           </Button>
         </div>
@@ -126,7 +135,10 @@ export function LoginForm() {
               />
             </div>
             <Button className="w-full" disabled={loading !== null}>
-              {loading === "email" ? "보내는 중..." : "계속하기"}
+              {loading === "email" ? (
+                <Spinner data-icon="inline-start" />
+              ) : null}
+              계속하기
             </Button>
           </div>
         )}
