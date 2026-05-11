@@ -3,7 +3,6 @@ import userEvent from "@testing-library/user-event";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
 const SAVE_LABEL = /^저장$/;
-const SAVING_LABEL = /저장 중/;
 const REQUIRED_MESSAGE = /닉네임을 입력해 주세요/;
 const LENGTH_MESSAGE = /50자 이하/;
 
@@ -167,7 +166,7 @@ describe("<SettingsForm />", () => {
     await user.click(screen.getByRole("button", { name: SAVE_LABEL }));
 
     await waitFor(() => {
-      expect(screen.getByRole("button", { name: SAVING_LABEL })).toBeDisabled();
+      expect(screen.getByRole("button", { name: SAVE_LABEL })).toBeDisabled();
     });
 
     resolveUpdate({ ok: true });
