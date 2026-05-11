@@ -1,3 +1,5 @@
+import { readFile } from "node:fs/promises";
+import path from "node:path";
 import { fetchProjectDetail } from "@widgets/project-detail";
 import { ImageResponse } from "next/og";
 
@@ -16,9 +18,21 @@ interface PageProps {
   params: Promise<{ id: string }>;
 }
 
+async function loadFont(file: string): Promise<ArrayBuffer> {
+  const buf = await readFile(path.join(process.cwd(), "public/fonts", file));
+  return buf.buffer.slice(
+    buf.byteOffset,
+    buf.byteOffset + buf.byteLength
+  ) as ArrayBuffer;
+}
+
 export default async function Image({ params }: PageProps) {
   const { id } = await params;
-  const project = await fetchProjectDetail(id, null);
+  const [project, pretendard400, pretendard500] = await Promise.all([
+    fetchProjectDetail(id, null),
+    loadFont("Pretendard-Regular.ttf"),
+    loadFont("Pretendard-Medium.ttf"),
+  ]);
   const title = project?.title ?? "claude-hunt";
   const tagline = project?.tagline ?? "";
   const cohort = project?.cohort_label ?? "";
@@ -26,96 +40,110 @@ export default async function Image({ params }: PageProps) {
   const primary = project?.primaryImageUrl ?? "";
 
   return new ImageResponse(
-    (
+    <div
+      style={{
+        background: BG,
+        width: "100%",
+        height: "100%",
+        display: "flex",
+        color: INK,
+        fontFamily: "Pretendard, system-ui, sans-serif",
+      }}
+    >
+      {primary ? (
+        <div
+          style={{
+            width: "55%",
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "center",
+            borderRight: `1px solid ${BORDER}`,
+          }}
+        >
+          <img
+            alt=""
+            src={primary}
+            style={{ width: "100%", height: "100%", objectFit: "cover" }}
+          />
+        </div>
+      ) : null}
       <div
         style={{
-          background: BG,
-          width: "100%",
-          height: "100%",
           display: "flex",
-          color: INK,
-          fontFamily: "system-ui, sans-serif",
+          flexDirection: "column",
+          flex: 1,
+          justifyContent: "space-between",
+          padding: 56,
         }}
       >
-        {primary ? (
+        <div style={{ display: "flex", flexDirection: "column", gap: 24 }}>
+          {cohort ? (
+            <div
+              style={{
+                display: "flex",
+                alignSelf: "flex-start",
+                fontSize: 22,
+                color: ACCENT,
+                border: `1px solid ${ACCENT}`,
+                padding: "6px 14px",
+                borderRadius: 999,
+              }}
+            >
+              {cohort}
+            </div>
+          ) : null}
           <div
             style={{
-              width: "55%",
               display: "flex",
-              alignItems: "center",
-              justifyContent: "center",
-              borderRight: `1px solid ${BORDER}`,
+              fontSize: 56,
+              fontWeight: 500,
+              lineHeight: 1.1,
             }}
           >
-            <img
-              alt=""
-              src={primary}
-              style={{ width: "100%", height: "100%", objectFit: "cover" }}
-            />
+            {title}
           </div>
-        ) : null}
+          <div
+            style={{
+              display: "flex",
+              fontSize: 28,
+              lineHeight: 1.4,
+              color: MUTED,
+            }}
+          >
+            {tagline}
+          </div>
+        </div>
         <div
           style={{
             display: "flex",
-            flexDirection: "column",
-            flex: 1,
-            justifyContent: "space-between",
-            padding: 56,
+            fontSize: 22,
+            color: MUTED,
+            gap: 12,
+            alignItems: "center",
           }}
         >
-          <div style={{ display: "flex", flexDirection: "column", gap: 24 }}>
-            {cohort ? (
-              <div
-                style={{
-                  display: "flex",
-                  alignSelf: "flex-start",
-                  fontSize: 22,
-                  color: ACCENT,
-                  border: `1px solid ${ACCENT}`,
-                  padding: "6px 14px",
-                  borderRadius: 999,
-                }}
-              >
-                {cohort}
-              </div>
-            ) : null}
-            <div
-              style={{
-                display: "flex",
-                fontSize: 56,
-                fontWeight: 700,
-                lineHeight: 1.1,
-              }}
-            >
-              {title}
-            </div>
-            <div
-              style={{
-                display: "flex",
-                fontSize: 28,
-                lineHeight: 1.4,
-                color: MUTED,
-              }}
-            >
-              {tagline}
-            </div>
-          </div>
-          <div
-            style={{
-              display: "flex",
-              fontSize: 22,
-              color: MUTED,
-              gap: 12,
-              alignItems: "center",
-            }}
-          >
-            <span>by {author}</span>
-            <span>·</span>
-            <span>claude-hunt</span>
-          </div>
+          <span>by {author}</span>
+          <span>·</span>
+          <span>claude-hunt</span>
         </div>
       </div>
-    ),
-    size
+    </div>,
+    {
+      ...size,
+      fonts: [
+        {
+          name: "Pretendard",
+          data: pretendard400,
+          style: "normal",
+          weight: 400,
+        },
+        {
+          name: "Pretendard",
+          data: pretendard500,
+          style: "normal",
+          weight: 500,
+        },
+      ],
+    }
   );
 }
