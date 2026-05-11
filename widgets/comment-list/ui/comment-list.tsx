@@ -41,7 +41,6 @@ function applyAction(
 ): CommentThread[] {
   switch (action.type) {
     case "add":
-      // Newest top-level threads appear first (matches fetchCommentThreads order).
       return [action.thread, ...state];
     case "reply":
       return state.map((thread) =>
@@ -87,14 +86,56 @@ function applyAction(
   }
 }
 
+function buildOptimisticRow(
+  body: string,
+  viewer: CommentListViewer
+): CommentRow {
+  const now = new Date().toISOString();
+  return {
+    // The temp id is replaced as soon as the server revalidates and
+    // fresh threads arrive as props. Prefix makes it easy to identify
+    // in tests and devtools.
+    id: `optimistic-${crypto.randomUUID()}`,
+    user_id: viewer.id,
+    body,
+    created_at: now,
+    updated_at: now,
+    author_display_name: viewer.displayName,
+    author_avatar_url: viewer.avatarUrl,
+    reactions: [],
+  };
+}
+
 export function CommentList({ threads, projectId, viewer }: CommentListProps) {
-  const [optimisticThreads] = useOptimistic(threads, applyAction);
+  const [optimisticThreads, dispatch] = useOptimistic(threads, applyAction);
   const isAuthenticated = viewer !== null;
   const viewerUserId = viewer?.id ?? null;
   const total = optimisticThreads.reduce(
     (sum, t) => sum + 1 + t.replies.length,
     0
   );
+
+  const onTopLevelSubmit = viewer
+    ? (body: string) => {
+        dispatch({
+          type: "add",
+          thread: {
+            comment: buildOptimisticRow(body, viewer),
+            replies: [],
+          },
+        });
+      }
+    : undefined;
+
+  const onReplySubmit = viewer
+    ? (parentId: string, body: string) => {
+        dispatch({
+          type: "reply",
+          parentId,
+          reply: buildOptimisticRow(body, viewer),
+        });
+      }
+    : undefined;
 
   return (
     <section className="flex flex-col gap-4" data-testid="comment-list">
@@ -104,7 +145,11 @@ export function CommentList({ threads, projectId, viewer }: CommentListProps) {
         </h2>
       </div>
 
-      <CommentForm isAuthenticated={isAuthenticated} projectId={projectId} />
+      <CommentForm
+        isAuthenticated={isAuthenticated}
+        onOptimisticSubmit={onTopLevelSubmit}
+        projectId={projectId}
+      />
 
       {optimisticThreads.length === 0 ? (
         <Empty className="border" data-testid="comment-list-empty">
@@ -125,6 +170,7 @@ export function CommentList({ threads, projectId, viewer }: CommentListProps) {
                 allowReply
                 comment={thread.comment}
                 isAuthenticated={isAuthenticated}
+                onOptimisticReply={onReplySubmit}
                 projectId={projectId}
                 viewerUserId={viewerUserId}
               />

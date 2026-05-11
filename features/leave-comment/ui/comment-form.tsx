@@ -6,7 +6,7 @@ import { Spinner } from "@shared/ui/spinner";
 import { Textarea } from "@shared/ui/textarea";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { useId, useState } from "react";
+import { useId, useState, useTransition } from "react";
 import { toast } from "sonner";
 import { leaveComment } from "../api/actions";
 
@@ -36,11 +36,12 @@ export function CommentForm({
   size = "default",
   onCancel,
   autoFocus = false,
+  onOptimisticSubmit,
 }: CommentFormProps) {
   const textareaId = useId();
   const router = useRouter();
   const [value, setValue] = useState("");
-  const [submitting, setSubmitting] = useState(false);
+  const [isPending, startTransition] = useTransition();
   const [error, setError] = useState<string | null>(null);
 
   if (!isAuthenticated) {
@@ -58,7 +59,7 @@ export function CommentForm({
 
   const overLimit = value.length > MAX_COMMENT_BODY;
 
-  async function handleSubmit(event: React.FormEvent<HTMLFormElement>) {
+  function handleSubmit(event: React.FormEvent<HTMLFormElement>) {
     event.preventDefault();
     setError(null);
     if (!value.trim()) {
@@ -68,26 +69,31 @@ export function CommentForm({
       setError(`${MAX_COMMENT_BODY}자까지 작성할 수 있어요`);
       return;
     }
-    setSubmitting(true);
-    try {
+    const body = value;
+    // Clear the textarea immediately so it doesn't block the optimistic
+    // comment from appearing — the input is captured in `body`.
+    setValue("");
+    startTransition(async () => {
+      // Synchronously push the optimistic comment into the list before
+      // we wait on the server. `useOptimistic` in the parent reconciles
+      // back to props once the transition ends.
+      onOptimisticSubmit?.(body);
       const result = await leaveComment({
         projectId,
         parentCommentId,
-        body: value,
+        body,
       });
       if (!result.ok) {
         setError(result.error ?? "댓글을 등록하지 못했어요.");
+        setValue(body);
         return;
       }
-      setValue("");
       toast.success(
         parentCommentId ? "답글이 등록됐어요." : "댓글이 등록됐어요."
       );
       onCancel?.();
       router.refresh();
-    } finally {
-      setSubmitting(false);
-    }
+    });
   }
 
   return (
@@ -100,7 +106,7 @@ export function CommentForm({
       <Textarea
         aria-label={parentCommentId ? "답글 내용" : "댓글 내용"}
         autoFocus={autoFocus}
-        disabled={submitting}
+        disabled={isPending}
         id={textareaId}
         onChange={(e) => setValue(e.target.value)}
         placeholder="의견을 남겨주세요"
@@ -120,7 +126,7 @@ export function CommentForm({
         <div className="flex items-center gap-2">
           {onCancel ? (
             <Button
-              disabled={submitting}
+              disabled={isPending}
               onClick={onCancel}
               size="sm"
               type="button"
@@ -130,11 +136,11 @@ export function CommentForm({
             </Button>
           ) : null}
           <Button
-            disabled={submitting || !value.trim() || overLimit}
+            disabled={isPending || !value.trim() || overLimit}
             size="sm"
             type="submit"
           >
-            {submitting ? <Spinner data-icon="inline-start" /> : null}
+            {isPending ? <Spinner data-icon="inline-start" /> : null}
             등록
           </Button>
         </div>
