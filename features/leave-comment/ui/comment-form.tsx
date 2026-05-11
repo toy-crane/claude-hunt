@@ -5,7 +5,6 @@ import { Button } from "@shared/ui/button";
 import { Spinner } from "@shared/ui/spinner";
 import { Textarea } from "@shared/ui/textarea";
 import Link from "next/link";
-import { useRouter } from "next/navigation";
 import { useId, useState, useTransition } from "react";
 import { toast } from "sonner";
 import { leaveComment } from "../api/actions";
@@ -40,7 +39,6 @@ export function CommentForm({
   onOptimisticSubmit,
 }: CommentFormProps) {
   const textareaId = useId();
-  const router = useRouter();
   const [value, setValue] = useState("");
   const [isPending, startTransition] = useTransition();
   const [error, setError] = useState<string | null>(null);
@@ -96,7 +94,6 @@ export function CommentForm({
         parentCommentId ? "답글이 등록됐어요." : "댓글이 등록됐어요."
       );
       onCancel?.();
-      router.refresh();
     });
   }
 

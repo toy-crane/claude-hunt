@@ -1,6 +1,7 @@
 "use client";
 
 import { CommentForm } from "@features/leave-comment";
+import type { Viewer } from "@shared/api/supabase/viewer";
 import {
   Empty,
   EmptyDescription,
@@ -11,11 +12,15 @@ import { useOptimistic } from "react";
 import type { CommentRow, CommentThread } from "../api/queries";
 import { CommentItem } from "./comment-item";
 
-export interface CommentListViewer {
-  avatarUrl: string | null;
-  displayName: string | null;
-  id: string;
-}
+/**
+ * Narrow slice of `Viewer` the list needs to author an optimistic
+ * comment row (id for ownership checks, display name + avatar for the
+ * author cell). Defined as a `Pick` so changes to `Viewer` propagate.
+ */
+export type CommentListViewer = Pick<
+  Viewer,
+  "id" | "displayName" | "avatarUrl"
+>;
 
 export interface CommentListProps {
   projectId: string;
@@ -130,7 +135,15 @@ export function CommentList({ threads, projectId, viewer }: CommentListProps) {
     : undefined;
 
   const onReplySubmit = viewer
-    ? (parentId: string, commentId: string, body: string) => {
+    ? ({
+        parentId,
+        commentId,
+        body,
+      }: {
+        body: string;
+        commentId: string;
+        parentId: string;
+      }) => {
         dispatch({
           type: "reply",
           parentId,

@@ -60,19 +60,7 @@ export default async function Page({ params }: PageProps) {
         project={project}
         viewerUserId={viewerId}
       />
-      <CommentList
-        projectId={project.id}
-        threads={threads}
-        viewer={
-          viewer
-            ? {
-                id: viewer.id,
-                displayName: viewer.displayName,
-                avatarUrl: viewer.avatarUrl,
-              }
-            : null
-        }
-      />
+      <CommentList projectId={project.id} threads={threads} viewer={viewer} />
     </main>
   );
 }

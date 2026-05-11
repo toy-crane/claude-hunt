@@ -25,7 +25,6 @@ import {
   DropdownMenuTrigger,
 } from "@shared/ui/dropdown-menu";
 import { Spinner } from "@shared/ui/spinner";
-import { useRouter } from "next/navigation";
 import { useState, useTransition } from "react";
 import { toast } from "sonner";
 import type { CommentRow } from "../api/queries";
@@ -49,11 +48,11 @@ export interface CommentItemProps {
    * When provided, the reply form synchronously pushes an optimistic
    * reply into the parent list before the server roundtrip completes.
    */
-  onOptimisticReply?: (
-    parentId: string,
-    commentId: string,
-    body: string
-  ) => void;
+  onOptimisticReply?: (args: {
+    body: string;
+    commentId: string;
+    parentId: string;
+  }) => void;
   projectId: string;
   /** auth.uid() of the current viewer; controls the kebab menu. */
   viewerUserId: string | null;
@@ -69,7 +68,6 @@ export function CommentItem({
   onOptimisticEdit,
   onOptimisticReply,
 }: CommentItemProps) {
-  const router = useRouter();
   const [replyOpen, setReplyOpen] = useState(false);
   const [editing, setEditing] = useState(false);
   const [deleting, startDeleteTransition] = useTransition();
@@ -100,7 +98,6 @@ export function CommentItem({
         return;
       }
       toast.success("댓글이 삭제됐어요.");
-      router.refresh();
     });
   }
 
@@ -213,7 +210,11 @@ export function CommentItem({
                 onOptimisticSubmit={
                   onOptimisticReply
                     ? (commentId, body) =>
-                        onOptimisticReply(comment.id, commentId, body)
+                        onOptimisticReply({
+                          parentId: comment.id,
+                          commentId,
+                          body,
+                        })
                     : undefined
                 }
                 parentCommentId={comment.id}

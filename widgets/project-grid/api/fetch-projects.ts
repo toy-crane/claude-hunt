@@ -3,7 +3,7 @@ import { createAnonServerClient } from "@shared/api/supabase/anon-server";
 import { createClient } from "@shared/api/supabase/server";
 import { CACHE_TAGS } from "@shared/config/cache-tags";
 import { SCREENSHOT_BUCKET } from "@shared/config/storage";
-import { unstable_cache } from "next/cache";
+import { productionCache } from "@shared/lib/cache";
 
 export interface FetchProjectsOptions {
   /**
@@ -55,23 +55,14 @@ async function loadProjectGridCore(): Promise<ProjectGridCore[]> {
 
 /**
  * Cached read of the landing-page grid rows. Tagged with
- * `projects-grid` so mutations (vote, submit, edit, delete) can invalidate
- * it via `updateTag`. The 60-second `revalidate` is a safety net — tag
- * invalidation is the primary freshness mechanism.
- *
- * Disabled outside production so dev + e2e see every admin-side write
- * immediately. Tests that seed via the admin client never go through a
- * server action, so they can't trigger `updateTag`; without this guard
- * the cached grid would mask freshly inserted rows during the
- * configured TTL.
+ * `projects-grid` so mutations invalidate it via `updateTag`; the 60s
+ * `revalidate` is a safety net behind the tag.
  */
-const fetchProjectGridCore =
-  process.env.NODE_ENV === "production"
-    ? unstable_cache(loadProjectGridCore, ["project-grid-core"], {
-        revalidate: 60,
-        tags: [CACHE_TAGS.PROJECTS_GRID],
-      })
-    : loadProjectGridCore;
+const fetchProjectGridCore = productionCache(
+  loadProjectGridCore,
+  ["project-grid-core"],
+  { revalidate: 60, tags: [CACHE_TAGS.PROJECTS_GRID] }
+);
 
 /**
  * Returns the set of project ids the viewer has voted on. Caller is

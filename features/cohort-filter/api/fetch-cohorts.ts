@@ -1,7 +1,7 @@
 import type { Cohort } from "@entities/cohort";
 import { createAnonServerClient } from "@shared/api/supabase/anon-server";
 import { CACHE_TAGS } from "@shared/config/cache-tags";
-import { unstable_cache } from "next/cache";
+import { productionCache } from "@shared/lib/cache";
 
 async function loadCohorts(): Promise<Cohort[]> {
   // Anon client — cohorts are public reference data and the read MUST NOT
@@ -19,18 +19,11 @@ async function loadCohorts(): Promise<Cohort[]> {
 }
 
 /**
- * Reads the cohort list shared by the dropdown and the chips. Cohorts
- * change very rarely (only when an admin adds a new one), so we cache for
- * an hour. The `cohorts` tag lets future admin tooling invalidate on
- * demand via `revalidateTag`.
- *
- * Disabled outside production so dev + e2e see admin-side cohort
- * writes immediately. See fetch-projects.ts for the rationale.
+ * Cohort list shared by the dropdown and the chips. Tagged so admin
+ * tooling can bust on demand via `revalidateTag`. The 1-hour
+ * `revalidate` is a generous safety net — cohorts change rarely.
  */
-export const fetchCohorts =
-  process.env.NODE_ENV === "production"
-    ? unstable_cache(loadCohorts, ["cohorts"], {
-        revalidate: 3600,
-        tags: [CACHE_TAGS.COHORTS],
-      })
-    : loadCohorts;
+export const fetchCohorts = productionCache(loadCohorts, ["cohorts"], {
+  revalidate: 3600,
+  tags: [CACHE_TAGS.COHORTS],
+});

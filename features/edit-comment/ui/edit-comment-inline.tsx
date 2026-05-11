@@ -4,7 +4,6 @@ import { MAX_COMMENT_BODY } from "@entities/comment";
 import { Button } from "@shared/ui/button";
 import { Spinner } from "@shared/ui/spinner";
 import { Textarea } from "@shared/ui/textarea";
-import { useRouter } from "next/navigation";
 import { useState, useTransition } from "react";
 import { toast } from "sonner";
 import { editComment } from "../api/actions";
@@ -29,7 +28,6 @@ export function EditCommentInline({
   onCancel,
   onOptimisticSave,
 }: EditCommentInlineProps) {
-  const router = useRouter();
   const [value, setValue] = useState(initialBody);
   const [isPending, startTransition] = useTransition();
   const [error, setError] = useState<string | null>(null);
@@ -63,7 +61,6 @@ export function EditCommentInline({
         return;
       }
       toast.success("수정됐어요.");
-      router.refresh();
     });
   }
 
