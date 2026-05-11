@@ -2,7 +2,7 @@ import { render, screen, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
-const SAVE_LABEL = /^저장$/;
+const SAVE_LABEL = /저장/;
 const REQUIRED_MESSAGE = /닉네임을 입력해 주세요/;
 const LENGTH_MESSAGE = /50자 이하/;
 
@@ -152,7 +152,7 @@ describe("<SettingsForm />", () => {
     });
   });
 
-  it("disables the Save button while the action is pending", async () => {
+  it("shows a Spinner on the Save button while pending and keeps the static label", async () => {
     let resolveUpdate: (value: { ok: true }) => void = () => undefined;
     mocks.updateDisplayName.mockImplementation(
       () =>
@@ -166,7 +166,11 @@ describe("<SettingsForm />", () => {
     await user.click(screen.getByRole("button", { name: SAVE_LABEL }));
 
     await waitFor(() => {
-      expect(screen.getByRole("button", { name: SAVE_LABEL })).toBeDisabled();
+      const button = screen.getByRole("button", { name: SAVE_LABEL });
+      expect(button).toBeDisabled();
+      expect(button.querySelector('[role="status"]')).toBeInTheDocument();
+      expect(button.textContent).toContain("저장");
+      expect(button.textContent).not.toContain("저장 중");
     });
 
     resolveUpdate({ ok: true });

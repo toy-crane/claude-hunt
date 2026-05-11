@@ -67,6 +67,7 @@ const { SubmitForm } = await import("./submit-form");
 const LABEL_TITLE = /제목/;
 const LABEL_TAGLINE = /한 줄 소개/;
 const LABEL_URL = /프로젝트 URL/;
+const SUBMIT_LABEL = /프로젝트 제출/;
 
 function fillTextFields() {
   const title = screen.getByLabelText(LABEL_TITLE) as HTMLInputElement;
@@ -183,5 +184,24 @@ describe("SubmitForm", () => {
     expect(
       await screen.findByTestId("submit-form-field-error")
     ).toHaveTextContent("최대 5장까지");
+  });
+
+  it("shows a Spinner on the submit button while pending and keeps the static label", async () => {
+    uploadScreenshot.mockResolvedValue({ path: "user-1/a.webp" });
+    submitProject.mockImplementation(
+      () => new Promise<{ ok: true; projectId: string }>(() => undefined)
+    );
+
+    render(<SubmitForm cohortId="cohort-1" />);
+    addOneImage();
+    fireEvent.submit(fillTextFields());
+
+    await vi.waitFor(() => {
+      const button = screen.getByRole("button", { name: SUBMIT_LABEL });
+      expect(button).toBeDisabled();
+      expect(button.querySelector('[role="status"]')).toBeInTheDocument();
+      expect(button.textContent).toContain("프로젝트 제출");
+      expect(button.textContent).not.toContain("제출 중");
+    });
   });
 });

@@ -1,9 +1,10 @@
-import { render, screen } from "@testing-library/react";
+import { render, screen, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { describe, expect, it, vi } from "vitest";
 
+const deleteProject = vi.fn();
 vi.mock("../api/actions", () => ({
-  deleteProject: vi.fn(),
+  deleteProject,
 }));
 
 const { DeleteButton } = await import("./delete-button");
@@ -36,5 +37,28 @@ describe("DeleteButton — icon variant", () => {
     await user.click(screen.getByTestId("delete-project-trigger"));
     expect(screen.getByRole("dialog")).toBeInTheDocument();
     expect(screen.getByText("프로젝트를 삭제할까요?")).toBeInTheDocument();
+  });
+});
+
+describe("DeleteButton — confirm pending state", () => {
+  it("shows a Spinner on the confirm button while pending and keeps the static label", async () => {
+    deleteProject.mockImplementation(
+      () => new Promise<{ ok: true }>(() => undefined)
+    );
+    const user = userEvent.setup();
+    render(<DeleteButton projectId="p1" projectTitle="My App" />);
+
+    await user.click(screen.getByTestId("delete-project-trigger"));
+    await user.click(screen.getByTestId("delete-project-confirm"));
+
+    await waitFor(() => {
+      const button = screen.getByTestId(
+        "delete-project-confirm"
+      ) as HTMLButtonElement;
+      expect(button).toBeDisabled();
+      expect(button.querySelector('[role="status"]')).toBeInTheDocument();
+      expect(button.textContent).toContain("삭제");
+      expect(button.textContent).not.toContain("삭제 중");
+    });
   });
 });
