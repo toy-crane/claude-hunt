@@ -98,22 +98,9 @@ export function Hero({ project, isAuthenticated, viewerUserId }: HeroProps) {
       ) : null}
 
       <div
-        className="flex flex-col-reverse gap-2 sm:flex-row sm:justify-end"
+        className="flex flex-col gap-2 sm:flex-row sm:justify-end"
         data-testid="project-detail-actions"
       >
-        {project.github_url ? (
-          <Button asChild className="gap-2" size="lg" variant="outline">
-            <a
-              data-testid="project-detail-github-link"
-              href={project.github_url}
-              rel="noopener noreferrer"
-              target="_blank"
-            >
-              <RiGithubLine aria-hidden="true" />
-              GitHub 보기
-            </a>
-          </Button>
-        ) : null}
         <Button asChild className="gap-2" size="lg">
           <a
             href={project.project_url}
@@ -124,6 +111,19 @@ export function Hero({ project, isAuthenticated, viewerUserId }: HeroProps) {
             프로젝트 방문하기
           </a>
         </Button>
+        {project.github_url ? (
+          <Button asChild size="icon-lg" variant="outline">
+            <a
+              aria-label="GitHub 저장소"
+              data-testid="project-detail-github-link"
+              href={project.github_url}
+              rel="noopener noreferrer"
+              target="_blank"
+            >
+              <RiGithubLine aria-hidden="true" />
+            </a>
+          </Button>
+        ) : null}
       </div>
     </article>
   );
