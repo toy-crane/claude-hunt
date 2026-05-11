@@ -38,9 +38,14 @@ vi.mock("sonner", () => ({
 }));
 
 const fetchViewerMock = vi.fn();
+const fetchCohortsMock = vi.fn();
 
 vi.mock("@shared/api/supabase/viewer", () => ({
   fetchViewer: (...args: unknown[]) => fetchViewerMock(...args),
+}));
+
+vi.mock("@features/cohort-filter/server", () => ({
+  fetchCohorts: (...args: unknown[]) => fetchCohortsMock(...args),
 }));
 
 vi.mock("@features/withdraw-user", () => ({
@@ -53,9 +58,11 @@ vi.mock("@features/withdraw-user", () => ({
 
 vi.mock("@features/settings", () => ({
   SettingsForm: ({
+    cohortLabel,
     email,
     initialDisplayName,
   }: {
+    cohortLabel?: string | null;
     email: string;
     initialDisplayName: string;
   }) => (
@@ -68,6 +75,12 @@ vi.mock("@features/settings", () => ({
         Email
         <input defaultValue={email} disabled id="email" type="email" />
       </label>
+      {cohortLabel ? (
+        <label htmlFor="cohort">
+          Cohort
+          <input defaultValue={cohortLabel} disabled id="cohort" />
+        </label>
+      ) : null}
     </div>
   ),
 }));
@@ -75,6 +88,8 @@ vi.mock("@features/settings", () => ({
 describe("settings page", () => {
   beforeEach(() => {
     fetchViewerMock.mockReset();
+    fetchCohortsMock.mockReset();
+    fetchCohortsMock.mockResolvedValue([]);
     redirectMock.mockClear();
   });
 
@@ -126,6 +141,47 @@ describe("settings page", () => {
       .getAllByRole("heading", { level: 2 })
       .map((h) => h.textContent?.trim());
     expect(sectionHeadings).toEqual(["프로필 정보", "위험 영역"]);
+  });
+
+  it("passes the viewer's cohort label to the settings form", async () => {
+    fetchViewerMock.mockResolvedValue({
+      id: "user-1",
+      email: "alice@example.com",
+      displayName: "Alice",
+      avatarUrl: null,
+      cohortId: "cohort-2",
+    });
+    fetchCohortsMock.mockResolvedValue([
+      { id: "cohort-1", name: "cohort-1", label: "1기" },
+      { id: "cohort-2", name: "cohort-2", label: "2기" },
+    ]);
+
+    const Page = (await import("./page")).default;
+    const jsx = await Page();
+    render(jsx);
+
+    const cohortInput = screen.getByLabelText("Cohort") as HTMLInputElement;
+    expect(cohortInput).toBeDisabled();
+    expect(cohortInput.value).toBe("2기");
+  });
+
+  it("omits the cohort field when the viewer has no cohort", async () => {
+    fetchViewerMock.mockResolvedValue({
+      id: "user-1",
+      email: "alice@example.com",
+      displayName: "Alice",
+      avatarUrl: null,
+      cohortId: null,
+    });
+    fetchCohortsMock.mockResolvedValue([
+      { id: "cohort-1", name: "cohort-1", label: "1기" },
+    ]);
+
+    const Page = (await import("./page")).default;
+    const jsx = await Page();
+    render(jsx);
+
+    expect(screen.queryByLabelText("Cohort")).not.toBeInTheDocument();
   });
 
   it("renders the Delete account row with a Withdraw button and warning text in Danger Zone", async () => {

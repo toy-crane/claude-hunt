@@ -11,13 +11,19 @@ import { toast } from "sonner";
 import { updateDisplayName } from "../api/actions";
 
 export interface SettingsFormProps {
+  cohortLabel?: string | null;
   email: string;
   initialDisplayName: string;
 }
 
-export function SettingsForm({ initialDisplayName, email }: SettingsFormProps) {
+export function SettingsForm({
+  cohortLabel,
+  initialDisplayName,
+  email,
+}: SettingsFormProps) {
   const displayNameId = useId();
   const emailId = useId();
+  const cohortFieldId = useId();
   const [displayName, setDisplayName] = useState(initialDisplayName);
   const [error, setError] = useState<string | null>(null);
   const [isPending, startTransition] = useTransition();
@@ -55,6 +61,20 @@ export function SettingsForm({ initialDisplayName, email }: SettingsFormProps) {
             value={email}
           />
         </Field>
+
+        {cohortLabel ? (
+          <Field data-disabled="">
+            <FieldLabel htmlFor={cohortFieldId}>클래스</FieldLabel>
+            <Input
+              disabled
+              id={cohortFieldId}
+              name="cohort"
+              readOnly
+              type="text"
+              value={cohortLabel}
+            />
+          </Field>
+        ) : null}
 
         <Field data-invalid={error === null ? undefined : ""}>
           <FieldLabel htmlFor={displayNameId}>닉네임</FieldLabel>
