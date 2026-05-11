@@ -4,8 +4,10 @@ const SIGNED_IN_REGEX = /signed in/i;
 const INSTRUCTOR_REGEX = /instructor/i;
 
 const revalidatePathMock = vi.fn();
+const updateTagMock = vi.fn();
 vi.mock("next/cache", () => ({
   revalidatePath: revalidatePathMock,
+  updateTag: updateTagMock,
 }));
 
 const getUser = vi.fn();
@@ -30,6 +32,7 @@ const validInput = {
 
 beforeEach(() => {
   revalidatePathMock.mockClear();
+  updateTagMock.mockClear();
   getUser.mockReset();
   from.mockReset();
 });
@@ -127,7 +130,7 @@ describe("submitProject server action", () => {
         images: [{ path: "user-1/shot.png" }],
       })
     );
-    expect(revalidatePathMock).toHaveBeenCalledWith("/");
+    expect(updateTagMock).toHaveBeenCalledWith("projects-grid");
   });
 
   it("surfaces storage/db errors back to the caller", async () => {

@@ -1,8 +1,9 @@
 "use server";
 
 import { requireAuth } from "@shared/api/supabase/require-auth";
+import { CACHE_TAGS } from "@shared/config/cache-tags";
 import { getZodErrorMessage } from "@shared/lib/validation";
-import { revalidatePath } from "next/cache";
+import { updateTag } from "next/cache";
 import { type SubmitProjectInput, submitProjectInputSchema } from "./schema";
 
 export interface SubmitProjectResult {
@@ -66,6 +67,6 @@ export async function submitProject(
     };
   }
 
-  revalidatePath("/");
+  updateTag(CACHE_TAGS.PROJECTS_GRID);
   return { ok: true, projectId: inserted.id };
 }

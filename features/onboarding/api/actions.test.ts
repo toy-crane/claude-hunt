@@ -4,8 +4,10 @@ const SIGNED_IN_REGEX = /signed in/i;
 const COHORT_UUID = "a1b2c3d4-5678-4abc-9def-0123456789ab";
 
 const revalidatePathMock = vi.fn();
+const updateTagMock = vi.fn();
 vi.mock("next/cache", () => ({
   revalidatePath: revalidatePathMock,
+  updateTag: updateTagMock,
 }));
 
 const getUser = vi.fn();
@@ -44,6 +46,7 @@ function stubProfileUpsert(options: {
 
 beforeEach(() => {
   revalidatePathMock.mockClear();
+  updateTagMock.mockClear();
   getUser.mockReset();
   from.mockReset();
 });

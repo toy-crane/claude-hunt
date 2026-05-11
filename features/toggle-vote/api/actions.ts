@@ -1,7 +1,8 @@
 "use server";
 
 import { requireAuth } from "@shared/api/supabase/require-auth";
-import { revalidatePath } from "next/cache";
+import { CACHE_TAGS } from "@shared/config/cache-tags";
+import { revalidatePath, updateTag } from "next/cache";
 
 export interface ToggleVoteResult {
   error?: string;
@@ -43,7 +44,7 @@ export async function toggleVote(projectId: string): Promise<ToggleVoteResult> {
     if (deleteError) {
       return { ok: false, error: deleteError.message };
     }
-    revalidatePath("/");
+    updateTag(CACHE_TAGS.PROJECTS_GRID);
     revalidatePath(`/projects/${projectId}`);
     return { ok: true, voted: false };
   }
@@ -54,7 +55,7 @@ export async function toggleVote(projectId: string): Promise<ToggleVoteResult> {
   if (insertError) {
     return { ok: false, error: insertError.message };
   }
-  revalidatePath("/");
+  updateTag(CACHE_TAGS.PROJECTS_GRID);
   revalidatePath(`/projects/${projectId}`);
   return { ok: true, voted: true };
 }

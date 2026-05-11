@@ -3,8 +3,10 @@ import { beforeEach, describe, expect, it, vi } from "vitest";
 const SIGNED_IN_REGEX = /signed in/i;
 
 const revalidatePathMock = vi.fn();
+const updateTagMock = vi.fn();
 vi.mock("next/cache", () => ({
   revalidatePath: revalidatePathMock,
+  updateTag: updateTagMock,
 }));
 
 const getUser = vi.fn();
@@ -45,6 +47,7 @@ function stubProjects(
 
 beforeEach(() => {
   revalidatePathMock.mockClear();
+  updateTagMock.mockClear();
   storageRemove.mockClear();
   storageFrom.mockClear();
   signOut.mockClear();
@@ -83,7 +86,7 @@ describe("withdrawAccount server action", () => {
     expect(storageRemove).toHaveBeenCalledWith(["u1/a.png", "u1/b.png"]);
     expect(deleteUser).toHaveBeenCalledWith("u1");
     expect(signOut).toHaveBeenCalledTimes(1);
-    expect(revalidatePathMock).toHaveBeenCalledWith("/");
+    expect(updateTagMock).toHaveBeenCalledWith("projects-grid");
   });
 
   it("skips storage.remove when the user has no projects", async () => {

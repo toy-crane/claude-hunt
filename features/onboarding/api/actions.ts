@@ -1,12 +1,13 @@
 "use server";
 
 import { requireAuth } from "@shared/api/supabase/require-auth";
+import { CACHE_TAGS } from "@shared/config/cache-tags";
 import {
   DISPLAY_NAME_TAKEN_MESSAGE,
   isDisplayNameUniqueViolation,
 } from "@shared/lib/display-name-violation";
 import { getZodErrorMessage } from "@shared/lib/validation";
-import { revalidatePath } from "next/cache";
+import { updateTag } from "next/cache";
 import { type OnboardingInput, onboardingInputSchema } from "./schema";
 
 export interface CompleteOnboardingResult {
@@ -55,6 +56,8 @@ export async function completeOnboarding(
     return { ok: false, error: upsertError.message };
   }
 
-  revalidatePath("/");
+  // display_name surfaces in the projects_with_vote_count view as
+  // author_display_name, so the cached grid must be invalidated.
+  updateTag(CACHE_TAGS.PROJECTS_GRID);
   return { ok: true };
 }

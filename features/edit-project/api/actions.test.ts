@@ -3,8 +3,10 @@ import { beforeEach, describe, expect, it, vi } from "vitest";
 const PERMISSION_ERROR_REGEX = /permission/;
 
 const revalidatePathMock = vi.fn();
+const updateTagMock = vi.fn();
 vi.mock("next/cache", () => ({
   revalidatePath: revalidatePathMock,
+  updateTag: updateTagMock,
 }));
 
 const getUser = vi.fn();
@@ -33,6 +35,7 @@ const validInput = {
 
 beforeEach(() => {
   revalidatePathMock.mockClear();
+  updateTagMock.mockClear();
   storageFrom.mockClear();
   storageRemove.mockClear();
   storageRemove.mockResolvedValue({ data: [], error: null });
@@ -94,7 +97,7 @@ describe("editProject server action", () => {
       })
     );
     expect(updateEq).toHaveBeenCalledWith("id", validInput.projectId);
-    expect(revalidatePathMock).toHaveBeenCalledWith("/");
+    expect(updateTagMock).toHaveBeenCalledWith("projects-grid");
   });
 
   it("reports forbidden when RLS returns zero rows (spoofed projectId)", async () => {
@@ -191,6 +194,6 @@ describe("editProject server action", () => {
 
     expect(result.ok).toBe(true);
     expect(storageRemove).toHaveBeenCalledTimes(1);
-    expect(revalidatePathMock).toHaveBeenCalledWith("/");
+    expect(updateTagMock).toHaveBeenCalledWith("projects-grid");
   });
 });

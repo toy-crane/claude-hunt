@@ -2,8 +2,9 @@
 
 import type { ProjectImage } from "@entities/project";
 import { requireAuth } from "@shared/api/supabase/require-auth";
+import { CACHE_TAGS } from "@shared/config/cache-tags";
 import { SCREENSHOT_BUCKET } from "@shared/config/storage";
-import { revalidatePath } from "next/cache";
+import { updateTag } from "next/cache";
 
 export interface DeleteProjectInput {
   projectId: string;
@@ -68,6 +69,6 @@ export async function deleteProject(
     await supabase.storage.from(SCREENSHOT_BUCKET).remove([...orphans]);
   }
 
-  revalidatePath("/");
+  updateTag(CACHE_TAGS.PROJECTS_GRID);
   return { ok: true };
 }
