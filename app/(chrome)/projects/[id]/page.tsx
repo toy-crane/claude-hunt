@@ -1,11 +1,58 @@
 import { fetchViewer } from "@shared/api/supabase/viewer";
 import { CommentList, fetchCommentThreads } from "@widgets/comment-list";
-import { fetchProjectDetail, Hero } from "@widgets/project-detail";
+import {
+  fetchProjectDetail,
+  Hero,
+  type ProjectDetail,
+} from "@widgets/project-detail";
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 
+const SITE_URL = "https://www.claude-hunt.com";
+
 interface PageProps {
   params: Promise<{ id: string }>;
+}
+
+export function buildProjectJsonLd(project: ProjectDetail) {
+  const projectUrl = `${SITE_URL}/projects/${project.id}`;
+  return {
+    "@context": "https://schema.org",
+    "@graph": [
+      {
+        "@type": "CreativeWork",
+        name: project.title,
+        abstract: project.tagline,
+        url: projectUrl,
+        ...(project.primaryImageUrl && { image: project.primaryImageUrl }),
+        ...(project.author_display_name && {
+          author: {
+            "@type": "Person",
+            name: project.author_display_name,
+          },
+        }),
+        dateCreated: project.created_at,
+        dateModified: project.updated_at,
+        inLanguage: "ko",
+      },
+      {
+        "@type": "BreadcrumbList",
+        itemListElement: [
+          {
+            "@type": "ListItem",
+            position: 1,
+            name: "claude-hunt",
+            item: `${SITE_URL}/`,
+          },
+          {
+            "@type": "ListItem",
+            position: 2,
+            name: project.title,
+          },
+        ],
+      },
+    ],
+  };
 }
 
 export async function generateMetadata({
@@ -23,6 +70,7 @@ export async function generateMetadata({
   return {
     title: `${project.title}${cohort} — claude-hunt`,
     description,
+    alternates: { canonical: `/projects/${project.id}` },
     openGraph: {
       title: project.title,
       description,
@@ -55,6 +103,13 @@ export default async function Page({ params }: PageProps) {
 
   return (
     <main className="mx-auto flex min-h-svh w-full max-w-3xl flex-col gap-6 bg-background p-6 pb-24 text-foreground">
+      <script
+        // biome-ignore lint/security/noDangerouslySetInnerHtml: JSON.stringify of a server-controlled object built from typed project data — required for JSON-LD injection
+        dangerouslySetInnerHTML={{
+          __html: JSON.stringify(buildProjectJsonLd(project)),
+        }}
+        type="application/ld+json"
+      />
       <Hero
         isAuthenticated={Boolean(viewer)}
         project={project}
