@@ -39,7 +39,7 @@ export function SettingsForm({
       return;
     }
     startTransition(async () => {
-      const result = await updateDisplayName(displayName);
+      const result = await updateDisplayName(parsed.data);
       if (result.ok) {
         toast.success("닉네임이 변경되었어요.");
         router.refresh();

@@ -118,6 +118,21 @@ describe("<SettingsForm />", () => {
     expect((input as HTMLInputElement).value).toBe("Bob_123");
   });
 
+  it("trims surrounding whitespace before passing the value to the action", async () => {
+    mocks.updateDisplayName.mockResolvedValue({ ok: true });
+    const user = userEvent.setup();
+    renderForm();
+
+    const input = screen.getByLabelText("닉네임");
+    await user.clear(input);
+    await user.type(input, "  Alice  ");
+    await user.click(screen.getByRole("button", { name: SAVE_LABEL }));
+
+    await waitFor(() => {
+      expect(mocks.updateDisplayName).toHaveBeenCalledWith("Alice");
+    });
+  });
+
   it("blocks client-side and shows the required message for an empty value (action not called)", async () => {
     const user = userEvent.setup();
     renderForm();
