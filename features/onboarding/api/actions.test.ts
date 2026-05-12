@@ -1,3 +1,7 @@
+import {
+  DISPLAY_NAME_POLICY_MESSAGE,
+  DISPLAY_NAME_REQUIRED_MESSAGE,
+} from "@entities/profile";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
 const SIGNED_IN_REGEX = /signed in/i;
@@ -77,7 +81,7 @@ describe("completeOnboarding server action", () => {
     });
 
     expect(result.ok).toBe(false);
-    expect(result.error).toBe("닉네임을 입력해 주세요.");
+    expect(result.error).toBe(DISPLAY_NAME_REQUIRED_MESSAGE);
     expect(getUser).not.toHaveBeenCalled();
   });
 
@@ -88,7 +92,7 @@ describe("completeOnboarding server action", () => {
     });
 
     expect(result.ok).toBe(false);
-    expect(result.error).toBe("닉네임을 입력해 주세요.");
+    expect(result.error).toBe(DISPLAY_NAME_REQUIRED_MESSAGE);
   });
 
   it("rejects display name longer than 12 characters with the policy message", async () => {
@@ -98,9 +102,7 @@ describe("completeOnboarding server action", () => {
     });
 
     expect(result.ok).toBe(false);
-    expect(result.error).toBe(
-      "닉네임은 2~12자의 한글, 영문, 숫자, 밑줄(_)만 사용할 수 있어요."
-    );
+    expect(result.error).toBe(DISPLAY_NAME_POLICY_MESSAGE);
   });
 
   it("rejects display name containing a special character", async () => {
@@ -110,9 +112,7 @@ describe("completeOnboarding server action", () => {
     });
 
     expect(result.ok).toBe(false);
-    expect(result.error).toBe(
-      "닉네임은 2~12자의 한글, 영문, 숫자, 밑줄(_)만 사용할 수 있어요."
-    );
+    expect(result.error).toBe(DISPLAY_NAME_POLICY_MESSAGE);
   });
 
   it("accepts underscore in display name", async () => {

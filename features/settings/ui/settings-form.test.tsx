@@ -1,10 +1,12 @@
+import {
+  DISPLAY_NAME_POLICY_MESSAGE,
+  DISPLAY_NAME_REQUIRED_MESSAGE,
+} from "@entities/profile";
 import { render, screen, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
 const SAVE_LABEL = /저장/;
-const REQUIRED_MESSAGE = /닉네임을 입력해 주세요/;
-const POLICY_MESSAGE = /닉네임은 2~12자의 한글, 영문, 숫자, 밑줄\(_\)/;
 const DUPLICATE_MESSAGE = /이미 사용 중인 닉네임이에요/;
 
 const mocks = vi.hoisted(() => ({
@@ -141,7 +143,9 @@ describe("<SettingsForm />", () => {
     await user.click(screen.getByRole("button", { name: SAVE_LABEL }));
 
     await waitFor(() => {
-      expect(screen.getByText(REQUIRED_MESSAGE)).toBeInTheDocument();
+      expect(
+        screen.getByText(DISPLAY_NAME_REQUIRED_MESSAGE)
+      ).toBeInTheDocument();
     });
     expect(mocks.updateDisplayName).not.toHaveBeenCalled();
     expect(mocks.toastSuccess).not.toHaveBeenCalled();
@@ -157,7 +161,9 @@ describe("<SettingsForm />", () => {
     await user.click(screen.getByRole("button", { name: SAVE_LABEL }));
 
     await waitFor(() => {
-      expect(screen.getByText(REQUIRED_MESSAGE)).toBeInTheDocument();
+      expect(
+        screen.getByText(DISPLAY_NAME_REQUIRED_MESSAGE)
+      ).toBeInTheDocument();
     });
     expect(mocks.updateDisplayName).not.toHaveBeenCalled();
   });
@@ -169,7 +175,7 @@ describe("<SettingsForm />", () => {
     await user.click(screen.getByRole("button", { name: SAVE_LABEL }));
 
     await waitFor(() => {
-      expect(screen.getByText(POLICY_MESSAGE)).toBeInTheDocument();
+      expect(screen.getByText(DISPLAY_NAME_POLICY_MESSAGE)).toBeInTheDocument();
     });
     expect(mocks.updateDisplayName).not.toHaveBeenCalled();
   });
@@ -184,7 +190,7 @@ describe("<SettingsForm />", () => {
     await user.click(screen.getByRole("button", { name: SAVE_LABEL }));
 
     await waitFor(() => {
-      expect(screen.getByText(POLICY_MESSAGE)).toBeInTheDocument();
+      expect(screen.getByText(DISPLAY_NAME_POLICY_MESSAGE)).toBeInTheDocument();
     });
     expect(mocks.updateDisplayName).not.toHaveBeenCalled();
   });
@@ -199,7 +205,7 @@ describe("<SettingsForm />", () => {
     await user.click(screen.getByRole("button", { name: SAVE_LABEL }));
 
     await waitFor(() => {
-      expect(screen.getByText(POLICY_MESSAGE)).toBeInTheDocument();
+      expect(screen.getByText(DISPLAY_NAME_POLICY_MESSAGE)).toBeInTheDocument();
     });
     expect(input.value).toBe("Alice!");
   });
@@ -245,8 +251,12 @@ describe("<SettingsForm />", () => {
 
     const input = screen.getByLabelText("닉네임") as HTMLInputElement;
     expect(input.value).toBe("x");
-    expect(screen.queryByText(POLICY_MESSAGE)).not.toBeInTheDocument();
-    expect(screen.queryByText(REQUIRED_MESSAGE)).not.toBeInTheDocument();
+    expect(
+      screen.queryByText(DISPLAY_NAME_POLICY_MESSAGE)
+    ).not.toBeInTheDocument();
+    expect(
+      screen.queryByText(DISPLAY_NAME_REQUIRED_MESSAGE)
+    ).not.toBeInTheDocument();
   });
 
   it("shows a Spinner on the Save button while pending and keeps the static label", async () => {

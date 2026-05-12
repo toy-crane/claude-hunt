@@ -1,8 +1,12 @@
 "use client";
 
 import type { Cohort } from "@entities/cohort";
-import { displayNameSchema } from "@entities/profile";
+import {
+  DISPLAY_NAME_REQUIRED_MESSAGE,
+  displayNameSchema,
+} from "@entities/profile";
 import { createClient } from "@shared/api/supabase/client";
+import { getZodErrorMessage } from "@shared/lib/validation";
 import { Alert, AlertDescription, AlertTitle } from "@shared/ui/alert";
 import { AuthLayout } from "@shared/ui/auth-layout";
 import { Button } from "@shared/ui/button";
@@ -42,24 +46,21 @@ export function OnboardingForm({ cohorts, initialNext }: OnboardingFormProps) {
   const [isSigningOut, setIsSigningOut] = useState(false);
   const noCohorts = cohorts.length === 0;
 
-  function validate() {
-    let ok = true;
+  function validate(): { displayName: string; cohortId: string } | null {
     const parsed = displayNameSchema.safeParse(displayName);
-    if (parsed.success) {
-      setDisplayNameError(null);
-    } else {
-      setDisplayNameError(
-        parsed.error.issues[0]?.message ?? "닉네임을 입력해 주세요."
-      );
-      ok = false;
+    const cohortValid = selectedCohortId !== COHORT_UNSELECTED;
+
+    setDisplayNameError(
+      parsed.success
+        ? null
+        : getZodErrorMessage(parsed.error, DISPLAY_NAME_REQUIRED_MESSAGE)
+    );
+    setCohortError(cohortValid ? null : "클래스를 선택해 주세요.");
+
+    if (!(parsed.success && cohortValid)) {
+      return null;
     }
-    if (selectedCohortId === COHORT_UNSELECTED) {
-      setCohortError("클래스를 선택해 주세요.");
-      ok = false;
-    } else {
-      setCohortError(null);
-    }
-    return ok;
+    return { displayName: parsed.data, cohortId: selectedCohortId };
   }
 
   function handleSubmit(event: React.FormEvent<HTMLFormElement>) {
@@ -68,15 +69,12 @@ export function OnboardingForm({ cohorts, initialNext }: OnboardingFormProps) {
     if (noCohorts) {
       return;
     }
-    if (!validate()) {
+    const input = validate();
+    if (!input) {
       return;
     }
-    const trimmed = displayName.trim();
     startTransition(async () => {
-      const result = await completeOnboarding({
-        displayName: trimmed,
-        cohortId: selectedCohortId,
-      });
+      const result = await completeOnboarding(input);
       if (!result.ok) {
         setSubmitError(result.error ?? "온보딩을 완료할 수 없어요.");
         return;

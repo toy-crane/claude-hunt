@@ -1,3 +1,7 @@
+import {
+  DISPLAY_NAME_POLICY_MESSAGE,
+  DISPLAY_NAME_REQUIRED_MESSAGE,
+} from "@entities/profile";
 import { createMockSupabaseClient } from "@shared/lib/test-utils";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
@@ -63,7 +67,7 @@ describe("updateDisplayName", () => {
 
     expect(result).toEqual({
       ok: false,
-      error: { field: "displayName", message: "닉네임을 입력해 주세요." },
+      error: { field: "displayName", message: DISPLAY_NAME_REQUIRED_MESSAGE },
     });
     expect(updateMock).not.toHaveBeenCalled();
   });
@@ -75,7 +79,7 @@ describe("updateDisplayName", () => {
 
     expect(result).toEqual({
       ok: false,
-      error: { field: "displayName", message: "닉네임을 입력해 주세요." },
+      error: { field: "displayName", message: DISPLAY_NAME_REQUIRED_MESSAGE },
     });
     expect(updateMock).not.toHaveBeenCalled();
   });
@@ -87,11 +91,7 @@ describe("updateDisplayName", () => {
 
     expect(result).toEqual({
       ok: false,
-      error: {
-        field: "displayName",
-        message:
-          "닉네임은 2~12자의 한글, 영문, 숫자, 밑줄(_)만 사용할 수 있어요.",
-      },
+      error: { field: "displayName", message: DISPLAY_NAME_POLICY_MESSAGE },
     });
     expect(updateMock).not.toHaveBeenCalled();
   });
@@ -103,11 +103,7 @@ describe("updateDisplayName", () => {
 
     expect(result).toEqual({
       ok: false,
-      error: {
-        field: "displayName",
-        message:
-          "닉네임은 2~12자의 한글, 영문, 숫자, 밑줄(_)만 사용할 수 있어요.",
-      },
+      error: { field: "displayName", message: DISPLAY_NAME_POLICY_MESSAGE },
     });
     expect(updateMock).not.toHaveBeenCalled();
   });

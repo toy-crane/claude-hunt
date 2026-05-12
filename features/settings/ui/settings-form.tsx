@@ -1,6 +1,10 @@
 "use client";
 
-import { displayNameSchema } from "@entities/profile";
+import {
+  DISPLAY_NAME_REQUIRED_MESSAGE,
+  displayNameSchema,
+} from "@entities/profile";
+import { getZodErrorMessage } from "@shared/lib/validation";
 import { Button } from "@shared/ui/button";
 import { Field, FieldGroup, FieldLabel } from "@shared/ui/field";
 import { Input } from "@shared/ui/input";
@@ -35,7 +39,7 @@ export function SettingsForm({
     setError(null);
     const parsed = displayNameSchema.safeParse(displayName);
     if (!parsed.success) {
-      setError(parsed.error.issues[0]?.message ?? "닉네임을 입력해 주세요.");
+      setError(getZodErrorMessage(parsed.error, DISPLAY_NAME_REQUIRED_MESSAGE));
       return;
     }
     startTransition(async () => {

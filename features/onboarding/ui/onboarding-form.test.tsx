@@ -1,4 +1,8 @@
 import type { Cohort } from "@entities/cohort";
+import {
+  DISPLAY_NAME_POLICY_MESSAGE,
+  DISPLAY_NAME_REQUIRED_MESSAGE,
+} from "@entities/profile";
 import { fireEvent, render, screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { beforeEach, describe, expect, it, vi } from "vitest";
@@ -157,7 +161,7 @@ describe("OnboardingForm", () => {
 
     expect(
       await screen.findByTestId("onboarding-display-name-error")
-    ).toHaveTextContent("닉네임을 입력해 주세요.");
+    ).toHaveTextContent(DISPLAY_NAME_REQUIRED_MESSAGE);
     expect(completeOnboardingMock).not.toHaveBeenCalled();
   });
 
@@ -169,7 +173,7 @@ describe("OnboardingForm", () => {
 
     expect(
       await screen.findByTestId("onboarding-display-name-error")
-    ).toHaveTextContent("닉네임을 입력해 주세요.");
+    ).toHaveTextContent(DISPLAY_NAME_REQUIRED_MESSAGE);
     expect(completeOnboardingMock).not.toHaveBeenCalled();
   });
 
@@ -181,7 +185,7 @@ describe("OnboardingForm", () => {
 
     expect(
       await screen.findByTestId("onboarding-display-name-error")
-    ).toHaveTextContent("닉네임은 2~12자의 한글, 영문, 숫자, 밑줄(_)");
+    ).toHaveTextContent(DISPLAY_NAME_POLICY_MESSAGE);
     expect(completeOnboardingMock).not.toHaveBeenCalled();
   });
 
@@ -194,7 +198,7 @@ describe("OnboardingForm", () => {
 
     expect(
       await screen.findByTestId("onboarding-display-name-error")
-    ).toHaveTextContent("닉네임은 2~12자의 한글, 영문, 숫자, 밑줄(_)");
+    ).toHaveTextContent(DISPLAY_NAME_POLICY_MESSAGE);
     expect(completeOnboardingMock).not.toHaveBeenCalled();
   });
 
@@ -206,7 +210,7 @@ describe("OnboardingForm", () => {
 
     expect(
       await screen.findByTestId("onboarding-display-name-error")
-    ).toHaveTextContent("닉네임은 2~12자의 한글, 영문, 숫자, 밑줄(_)");
+    ).toHaveTextContent(DISPLAY_NAME_POLICY_MESSAGE);
     expect(completeOnboardingMock).not.toHaveBeenCalled();
   });
 
@@ -219,7 +223,7 @@ describe("OnboardingForm", () => {
 
     expect(
       await screen.findByTestId("onboarding-display-name-error")
-    ).toHaveTextContent("닉네임은 2~12자의 한글, 영문, 숫자, 밑줄(_)");
+    ).toHaveTextContent(DISPLAY_NAME_POLICY_MESSAGE);
     expect(completeOnboardingMock).not.toHaveBeenCalled();
   });
 
