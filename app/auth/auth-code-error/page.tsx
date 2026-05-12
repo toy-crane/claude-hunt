@@ -1,5 +1,10 @@
 import { Button } from "@shared/ui/button";
+import type { Metadata } from "next";
 import Link from "next/link";
+
+export const metadata: Metadata = {
+  robots: { index: false, follow: false },
+};
 
 export default function AuthCodeError() {
   return (

@@ -1,7 +1,12 @@
 import { fetchCohorts } from "@features/cohort-filter/server";
 import { OnboardingForm } from "@features/onboarding";
 import { createClient } from "@shared/api/supabase/server";
+import type { Metadata } from "next";
 import { redirect } from "next/navigation";
+
+export const metadata: Metadata = {
+  robots: { index: false, follow: false },
+};
 
 interface OnboardingPageProps {
   searchParams: Promise<{ next?: string }>;

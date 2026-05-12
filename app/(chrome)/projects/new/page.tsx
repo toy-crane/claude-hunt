@@ -1,7 +1,12 @@
 import { SubmitForm } from "@features/submit-project";
 import { fetchViewer } from "@shared/api/supabase/viewer";
+import type { Metadata } from "next";
 import Link from "next/link";
 import { redirect } from "next/navigation";
+
+export const metadata: Metadata = {
+  robots: { index: false, follow: false },
+};
 
 export default async function Page() {
   const viewer = await fetchViewer();
