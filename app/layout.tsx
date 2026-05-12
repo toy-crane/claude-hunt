@@ -13,11 +13,35 @@ const fontHeading = JetBrains_Mono({
   variable: "--font-heading",
 });
 
+const SITE_URL = "https://www.claude-hunt.com";
 const TAGLINE = "함께 배우는 사람들의 프로젝트";
 const SOCIAL_TITLE = `claude-hunt · ${TAGLINE}`;
 
+// schema.org @graph linking WebSite + Organization. SearchAction is
+// intentionally omitted — claude-hunt has no on-site search endpoint
+// to handle a query parameter.
+export const SITE_JSON_LD = {
+  "@context": "https://schema.org",
+  "@graph": [
+    {
+      "@type": "WebSite",
+      "@id": `${SITE_URL}/#website`,
+      name: "claude-hunt",
+      url: SITE_URL,
+      inLanguage: "ko",
+    },
+    {
+      "@type": "Organization",
+      "@id": `${SITE_URL}/#org`,
+      name: "claude-hunt",
+      url: SITE_URL,
+      logo: `${SITE_URL}/icon.png`,
+    },
+  ],
+} as const;
+
 export const metadata: Metadata = {
-  metadataBase: new URL("https://www.claude-hunt.com"),
+  metadataBase: new URL(SITE_URL),
   title: {
     default: "claude-hunt",
     template: "%s · claude-hunt",
@@ -69,6 +93,11 @@ export default function RootLayout({
       suppressHydrationWarning
     >
       <body>
+        <script
+          // biome-ignore lint/security/noDangerouslySetInnerHtml: JSON.stringify of a static, server-controlled object — required for JSON-LD injection
+          dangerouslySetInnerHTML={{ __html: JSON.stringify(SITE_JSON_LD) }}
+          type="application/ld+json"
+        />
         <ThemeProvider>
           {children}
           <Toaster />
