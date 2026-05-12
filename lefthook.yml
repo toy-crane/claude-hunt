@@ -10,5 +10,7 @@ pre-commit:
 
 pre-push:
   jobs:
+    - name: check
+      run: bun run check
     - name: test
       run: bun run test:unit
