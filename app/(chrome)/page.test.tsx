@@ -168,6 +168,14 @@ describe("home page", () => {
     ).toBeInTheDocument();
   });
 
+  it("renders the SubmitTrigger inside the page hero, not inside the board", async () => {
+    await renderPage();
+    const submit = screen.getByTestId("submit-trigger-stub");
+    const board = screen.getByTestId("project-board-stub");
+    expect(submit).toBeInTheDocument();
+    expect(board.contains(submit)).toBe(false);
+  });
+
   it("exports an absolute title so the layout template doesn't append the brand twice", async () => {
     const { metadata } = await import("./page");
     expect(metadata.title).toEqual(

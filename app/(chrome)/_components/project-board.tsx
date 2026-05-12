@@ -3,7 +3,6 @@
 import type { Cohort } from "@entities/cohort";
 import type { ProjectWithVoteCount } from "@entities/vote";
 import { CohortChips } from "@features/cohort-filter";
-import { SubmitTrigger } from "@features/submit-project";
 import { VoteButton } from "@features/toggle-vote";
 import type { ProjectGridRow } from "@widgets/project-grid";
 import { ProjectGrid, PromptLine } from "@widgets/project-grid";
@@ -106,18 +105,6 @@ export function ProjectBoard({
   return (
     <>
       <PromptLine cohortLabel={cohortLabel} />
-      <section className="flex flex-wrap items-end justify-between gap-4">
-        <p
-          className="text-muted-foreground text-sm"
-          data-testid="project-board-subtitle"
-        >
-          {filteredProjects.length}개 프로젝트 · 마음에 드는 곳에 응원을
-          보내주세요.
-        </p>
-        <div className="w-fit self-end">
-          <SubmitTrigger isAuthenticated={isAuthenticated} />
-        </div>
-      </section>
       <CohortChips
         allCount={projects.length}
         cohorts={cohorts}
