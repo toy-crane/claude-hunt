@@ -4,13 +4,7 @@ import { MAX_TAGLINE_LENGTH, MAX_TITLE_LENGTH } from "@entities/project";
 import { type ImageSlot, ImageSlots } from "@features/upload-project-images";
 import { uploadScreenshot } from "@shared/lib/screenshot-upload";
 import { Button } from "@shared/ui/button";
-import {
-  Field,
-  FieldDescription,
-  FieldError,
-  FieldGroup,
-  FieldLabel,
-} from "@shared/ui/field";
+import { Field, FieldError, FieldGroup, FieldLabel } from "@shared/ui/field";
 import { Input } from "@shared/ui/input";
 import { Spinner } from "@shared/ui/spinner";
 import { Textarea } from "@shared/ui/textarea";
@@ -133,7 +127,6 @@ export function SubmitForm({ cohortId: _cohortId }: SubmitFormProps) {
             placeholder="내 앱"
             required
           />
-          <FieldDescription>상세 페이지 헤더에 표시돼요.</FieldDescription>
         </Field>
 
         <Field>
@@ -150,7 +143,6 @@ export function SubmitForm({ cohortId: _cohortId }: SubmitFormProps) {
             required
             rows={2}
           />
-          <FieldDescription>보드 카드와 공유 카드에 사용돼요.</FieldDescription>
         </Field>
 
         <Field>
@@ -166,9 +158,6 @@ export function SubmitForm({ cohortId: _cohortId }: SubmitFormProps) {
             required
             type="url"
           />
-          <FieldDescription>
-            사용자가 직접 접속할 수 있는 주소를 적어주세요.
-          </FieldDescription>
         </Field>
 
         <Field>
@@ -180,9 +169,6 @@ export function SubmitForm({ cohortId: _cohortId }: SubmitFormProps) {
             placeholder="https://github.com/owner/repo"
             type="url"
           />
-          <FieldDescription>
-            선택 — 코드를 공개했다면 링크해 주세요.
-          </FieldDescription>
         </Field>
 
         <Field>
@@ -195,10 +181,6 @@ export function SubmitForm({ cohortId: _cohortId }: SubmitFormProps) {
             onError={setFieldError}
             value={images}
           />
-          <FieldDescription>
-            첫 번째 이미지가 대표(보드 썸네일·공유 카드)로 쓰여요. 드래그로
-            순서를 바꿀 수 있어요. JPEG · PNG · WebP, 한 장당 최대 25 MB.
-          </FieldDescription>
           {fieldError ? (
             <FieldError data-testid="submit-form-field-error">
               {fieldError}
