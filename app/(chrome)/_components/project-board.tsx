@@ -32,8 +32,8 @@ export interface ProjectBoardProps {
  * URL is kept in sync via `history.pushState` so browser back/forward can
  * restore the previously selected chip via a `popstate` listener.
  *
- * Owns the full landing layout (prompt line, H1, subtitle, submit button,
- * filter, list) so all three pieces stay synchronized with the filter state.
+ * Owns the board layout below the page hero (prompt line, subtitle,
+ * submit button, filter, list) so the count and filter stay in sync.
  */
 export function ProjectBoard({
   initialCohortId,
@@ -107,16 +107,13 @@ export function ProjectBoard({
     <>
       <PromptLine cohortLabel={cohortLabel} />
       <section className="flex flex-wrap items-end justify-between gap-4">
-        <div className="flex flex-col gap-1">
-          <h1 className="font-heading font-medium text-2xl">프로젝트 보드</h1>
-          <p
-            className="text-muted-foreground text-sm"
-            data-testid="project-board-subtitle"
-          >
-            {filteredProjects.length}개 프로젝트 · 마음에 드는 곳에 응원을
-            보내주세요.
-          </p>
-        </div>
+        <p
+          className="text-muted-foreground text-sm"
+          data-testid="project-board-subtitle"
+        >
+          {filteredProjects.length}개 프로젝트 · 마음에 드는 곳에 응원을
+          보내주세요.
+        </p>
         <div className="w-fit self-end">
           <SubmitTrigger isAuthenticated={isAuthenticated} />
         </div>

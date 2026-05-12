@@ -6,9 +6,12 @@ import { ProjectBoard } from "./_components/project-board";
 
 // Brand-first absolute title bypasses the layout template so the SERP
 // listing reads naturally and stays under 60 chars.
-const HOME_TITLE = "claude-hunt — Claude Code 코호트가 만든 프로젝트 보드";
+const HOME_TITLE = "claude-hunt — Claude Code 클래스에서 만든 프로젝트들";
 const HOME_DESCRIPTION =
-  "Claude Code 코호트 동료들이 함께 빌드한 프로젝트를 둘러보고, 마음에 드는 작품에 응원을 보내주세요.";
+  "Claude Code 클래스 수강생들이 직접 빌드한 작품을 둘러보고, 마음에 드는 프로젝트에 응원을 보내주세요.";
+const HOME_HERO_HEADING = "Claude Code 클래스에서 만든 프로젝트들";
+const HOME_HERO_LEAD =
+  "함께 배우는 수강생들이 직접 만든 작품을 둘러보고 응원해 주세요.";
 
 export const metadata: Metadata = {
   title: { absolute: HOME_TITLE },
@@ -41,6 +44,12 @@ export default async function Page({ searchParams }: PageProps) {
 
   return (
     <main className="mx-auto flex min-h-svh w-full max-w-6xl flex-col gap-6 bg-background p-6 text-foreground">
+      <header className="flex flex-col gap-2">
+        <h1 className="font-heading font-medium text-3xl">
+          {HOME_HERO_HEADING}
+        </h1>
+        <p className="text-muted-foreground">{HOME_HERO_LEAD}</p>
+      </header>
       <ProjectBoard
         cohorts={cohorts}
         initialCohortId={selectedCohortId}

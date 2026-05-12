@@ -1,6 +1,6 @@
 import type { Cohort } from "@entities/cohort";
 import { createMockSupabaseClient } from "@shared/lib/test-utils";
-import { render } from "@testing-library/react";
+import { render, screen } from "@testing-library/react";
 import type { ProjectGridRow } from "@widgets/project-grid";
 import { vi } from "vitest";
 
@@ -156,6 +156,16 @@ describe("home page", () => {
         isAuthenticated: false,
       })
     );
+  });
+
+  it("renders a page-level H1 introducing the class projects", async () => {
+    await renderPage();
+    expect(
+      screen.getByRole("heading", {
+        name: "Claude Code 클래스에서 만든 프로젝트들",
+        level: 1,
+      })
+    ).toBeInTheDocument();
   });
 
   it("exports an absolute title so the layout template doesn't append the brand twice", async () => {

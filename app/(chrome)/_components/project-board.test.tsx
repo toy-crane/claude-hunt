@@ -209,11 +209,8 @@ describe("ProjectBoard", () => {
     expect(capturedChipsProps?.value).toBeNull();
   });
 
-  it("renders the Korean H1 and the subtitle with the filtered project count", async () => {
+  it("renders the subtitle with the filtered project count", async () => {
     await renderBoard();
-    expect(
-      screen.getByRole("heading", { name: "프로젝트 보드", level: 1 })
-    ).toBeInTheDocument();
     expect(screen.getByTestId("project-board-subtitle")).toHaveTextContent(
       "3개 프로젝트 · 마음에 드는 곳에 응원을 보내주세요."
     );
