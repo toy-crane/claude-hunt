@@ -121,5 +121,4 @@ describe("terms page (/terms)", () => {
     }
     expect(within(clause).getByText(CLAUSE_14_SENTENCE)).toBeInTheDocument();
   });
-
 });

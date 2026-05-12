@@ -60,6 +60,8 @@ export default async function Image({ params }: PageProps) {
             borderRight: `1px solid ${BORDER}`,
           }}
         >
+          {/* biome-ignore lint/correctness/useImageSize: ImageResponse renders via satori, not in the DOM */}
+          {/* biome-ignore lint/performance/noImgElement: next/og ImageResponse does not support next/image */}
           <img
             alt=""
             src={primary}
