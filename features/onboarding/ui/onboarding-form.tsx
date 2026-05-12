@@ -1,6 +1,7 @@
 "use client";
 
 import type { Cohort } from "@entities/cohort";
+import { displayNameSchema } from "@entities/profile";
 import { createClient } from "@shared/api/supabase/client";
 import { Alert, AlertDescription, AlertTitle } from "@shared/ui/alert";
 import { AuthLayout } from "@shared/ui/auth-layout";
@@ -19,7 +20,6 @@ import { Spinner } from "@shared/ui/spinner";
 import { useRouter } from "next/navigation";
 import { useId, useState, useTransition } from "react";
 import { completeOnboarding } from "../api/actions";
-import { MAX_DISPLAY_NAME_LENGTH } from "../api/schema";
 
 export interface OnboardingFormProps {
   cohorts: Cohort[];
@@ -44,17 +44,14 @@ export function OnboardingForm({ cohorts, initialNext }: OnboardingFormProps) {
 
   function validate() {
     let ok = true;
-    const trimmed = displayName.trim();
-    if (trimmed.length === 0) {
-      setDisplayNameError("닉네임을 입력해 주세요.");
-      ok = false;
-    } else if (trimmed.length > MAX_DISPLAY_NAME_LENGTH) {
+    const parsed = displayNameSchema.safeParse(displayName);
+    if (parsed.success) {
+      setDisplayNameError(null);
+    } else {
       setDisplayNameError(
-        `닉네임은 ${MAX_DISPLAY_NAME_LENGTH}자 이하로 입력해 주세요.`
+        parsed.error.issues[0]?.message ?? "닉네임을 입력해 주세요."
       );
       ok = false;
-    } else {
-      setDisplayNameError(null);
     }
     if (selectedCohortId === COHORT_UNSELECTED) {
       setCohortError("클래스를 선택해 주세요.");

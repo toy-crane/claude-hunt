@@ -173,16 +173,80 @@ describe("OnboardingForm", () => {
     expect(completeOnboardingMock).not.toHaveBeenCalled();
   });
 
-  it("shows the length error when display name exceeds 50 chars", async () => {
+  it("shows the policy error when display name exceeds 12 chars", async () => {
     render(<OnboardingForm cohorts={cohorts} initialNext="/" />);
 
-    typeDisplayName("a".repeat(51));
+    typeDisplayName("a".repeat(13));
     await submit();
 
     expect(
       await screen.findByTestId("onboarding-display-name-error")
-    ).toHaveTextContent("50자 이하");
+    ).toHaveTextContent("닉네임은 2~12자의 한글, 영문, 숫자, 밑줄(_)");
     expect(completeOnboardingMock).not.toHaveBeenCalled();
+  });
+
+  it("shows the policy error when display name contains a special character", async () => {
+    render(<OnboardingForm cohorts={cohorts} initialNext="/" />);
+
+    typeDisplayName("Alice!");
+    await pickCohort("LG전자 1기");
+    await submit();
+
+    expect(
+      await screen.findByTestId("onboarding-display-name-error")
+    ).toHaveTextContent("닉네임은 2~12자의 한글, 영문, 숫자, 밑줄(_)");
+    expect(completeOnboardingMock).not.toHaveBeenCalled();
+  });
+
+  it("shows the policy error for a single-character display name", async () => {
+    render(<OnboardingForm cohorts={cohorts} initialNext="/" />);
+
+    typeDisplayName("a");
+    await submit();
+
+    expect(
+      await screen.findByTestId("onboarding-display-name-error")
+    ).toHaveTextContent("닉네임은 2~12자의 한글, 영문, 숫자, 밑줄(_)");
+    expect(completeOnboardingMock).not.toHaveBeenCalled();
+  });
+
+  it("shows the policy error for inner whitespace", async () => {
+    render(<OnboardingForm cohorts={cohorts} initialNext="/" />);
+
+    typeDisplayName("Alice K");
+    await pickCohort("LG전자 1기");
+    await submit();
+
+    expect(
+      await screen.findByTestId("onboarding-display-name-error")
+    ).toHaveTextContent("닉네임은 2~12자의 한글, 영문, 숫자, 밑줄(_)");
+    expect(completeOnboardingMock).not.toHaveBeenCalled();
+  });
+
+  it("accepts underscore and submits successfully", async () => {
+    completeOnboardingMock.mockResolvedValue({ ok: true });
+    render(<OnboardingForm cohorts={cohorts} initialNext="/" />);
+
+    typeDisplayName("Car_crash");
+    await pickCohort("LG전자 1기");
+    await submit();
+
+    await vi.waitFor(() => {
+      expect(completeOnboardingMock).toHaveBeenCalledWith({
+        displayName: "Car_crash",
+        cohortId: COHORT_A_ID,
+      });
+    });
+  });
+
+  it("preserves the entered value in the input after a validation error", async () => {
+    render(<OnboardingForm cohorts={cohorts} initialNext="/" />);
+
+    typeDisplayName("Alice!");
+    await submit();
+
+    const input = screen.getByLabelText("닉네임") as HTMLInputElement;
+    expect(input.value).toBe("Alice!");
   });
 
   it("shows 'Please select a cohort' when no cohort is picked", async () => {
