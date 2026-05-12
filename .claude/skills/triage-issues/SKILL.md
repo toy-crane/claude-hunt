@@ -58,21 +58,25 @@ Pass only `id` and `labels` — omitting all other fields leaves them untouched.
 ### 5. Post audit comment (Format A)
 Call `mcp__claude_ai_Linear__save_comment(issueId=<id>, body=<comment>)`. Comments append; previous comments are preserved.
 
-The body uses the 3-axis structure and mentions only the axes that drove the verdict.
+The body has three parts: a verdict line, axis bullets, and a fixed signature footer. The footer is required — Linear records the comment author as the OAuth user (the human), so without an explicit marker an automated triage comment looks indistinguishable from one the human typed by hand. The footer makes the auto-generated origin visible in the Activity feed.
 
 For `needs-human` or `needs-clarification` — name the failing axis or axes:
 ```
 Triage: needs-human
 - 영향 범위: DB 스키마 변경 (users 테이블 컬럼 추가)
+
+_— posted by `triage-issues` skill._
 ```
 
 For `ai-ready` — a single short affirmation of what made it pass:
 ```
 Triage: ai-ready
 - 단일 컴포넌트 변경, 기존 optimistic-update 패턴 따름
+
+_— posted by `triage-issues` skill._
 ```
 
-Keep each bullet to one line. Quote the specific signal from the issue body when it sharpens the audit (e.g. `"성능 개선" — 정량 metric 없음`).
+Keep each bullet to one line. Quote the specific signal from the issue body when it sharpens the audit (e.g. `"성능 개선" — 정량 metric 없음`). The footer line is exact text — do not vary it, translate it, or omit it.
 
 ### 6. Summarize
 Output a single block listing how many issues went into each bucket:
