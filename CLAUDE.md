@@ -75,7 +75,7 @@ Test names describe the behavior in natural language — do not use scenario IDs
 
 ### E2E preconditions
 - `supabase start` running (API on `:54321`)
-- `.env.local` contains `SUPABASE_SECRET_KEY` (copy from `supabase status`)
+- `.env.local` contains `SUPABASE_SECRET_KEY` (copy from `supabase status`) — required server env, validated at app boot
 - `bunx playwright install chromium` (once)
 
 ## Architecture — Feature-Sliced Design (FSD)
