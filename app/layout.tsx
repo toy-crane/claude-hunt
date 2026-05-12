@@ -47,7 +47,13 @@ export const metadata: Metadata = {
     template: "%s · claude-hunt",
   },
   description: TAGLINE,
-  keywords: ["Claude Code", "cohort projects", "AI coding", "showcase"],
+  keywords: [
+    "Claude Code",
+    "Claude Code 클래스",
+    "수강생 프로젝트",
+    "AI coding",
+    "showcase",
+  ],
   robots: {
     index: true,
     follow: true,

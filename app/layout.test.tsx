@@ -102,11 +102,18 @@ describe("app/layout metadata", () => {
     expect(metadata.keywords).toEqual(
       expect.arrayContaining([
         "Claude Code",
-        "cohort projects",
+        "Claude Code 클래스",
+        "수강생 프로젝트",
         "AI coding",
         "showcase",
       ])
     );
+  });
+
+  it("does not include the loanword '코호트' in user-facing keywords", () => {
+    const json = JSON.stringify(metadata.keywords ?? []);
+    expect(json).not.toContain("코호트");
+    expect(json).not.toContain("cohort");
   });
 });
 
