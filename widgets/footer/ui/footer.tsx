@@ -11,7 +11,7 @@ const COPYRIGHT_YEAR = 2026;
 
 export function Footer() {
   return (
-    <footer>
+    <footer className="mt-16">
       <Separator />
       <div className="mx-auto flex w-full max-w-6xl flex-col items-start justify-between gap-4 px-6 py-6 text-muted-foreground text-sm sm:flex-row sm:items-start">
         <div className="flex flex-col gap-2">
