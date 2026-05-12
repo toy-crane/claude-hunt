@@ -40,12 +40,11 @@ If no (input is too vague, e.g. "something is weird", "fix this") → call `AskU
 Refinement cannot recover information that capture failed to record. This is the only point where slowing capture down is acceptable.
 
 ### 4. Decide label
-Apply **at most one** label from this team-scoped set: `bug`, `feat`, `refactor`, `chore`, `docs`.
+Apply **exactly one** label from this team-scoped set: `bug`, `feat`, `refactor`, `chore`, `docs`. Every issue must carry a label. The semantics are standard conventional-commit terms — judge from the input.
 
-- Apply a label only when the user's intent clearly fits one. The semantics are standard conventional-commit terms — judge from the input.
-- When two labels plausibly fit, apply none.
-- When intent is unclear, apply none.
-- Never invent a label outside this set. Never apply more than one. Never guess.
+- Pick the best fit. When two plausibly fit, pick the closer one.
+- When nothing fits cleanly, pick the least-wrong option from the set. The refinement step will correct it later. Empty labels block downstream filtering, so a best-guess label is always better than none.
+- Never invent a label outside this set. Never apply more than one.
 
 ### 5. Build description
 Use this exact markdown — heading levels and order are part of the contract for the future `refine-issue` skill:
@@ -69,14 +68,14 @@ Call `mcp__claude_ai_Linear__save_issue` with:
 - `state: "Backlog"`
 - `title`
 - `description` (from Step 5)
-- `labels: [<label>]` if one was chosen, otherwise omit
+- `labels: [<label>]` — always exactly one
 
 ### 7. Report
 Read the `identifier` and `url` from the response (e.g. `CLA-7`).
 
 Output exactly one line:
 
-    Created <identifier> · <label or "no label"> · <url>
+    Created <identifier> · <label> · <url>
 
 Stop. Do not propose next actions. Do not echo the description.
 
@@ -90,5 +89,5 @@ Stop. Do not propose next actions. Do not echo the description.
 
 - Never call `mcp__claude_ai_Linear__save_issue` for a new issue outside this flow.
 - Never set `team` to anything other than `"claude-hunt"`.
-- Never apply a label outside `bug` / `feat` / `refactor` / `chore` / `docs`.
+- Never apply a label outside `bug` / `feat` / `refactor` / `chore` / `docs`. Never leave labels empty.
 - Never ask more than one clarifying question per capture.

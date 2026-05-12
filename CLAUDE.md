@@ -24,7 +24,7 @@ Each phase has a human review gate. Do not advance until the current phase is va
 
 - Linear is the single source of truth for every new requirement in this repo. All new bugs, features, refactors, chores, and docs work — including meta-tooling (skills, hooks, rules) — start as Linear issues in the `claude-hunt` team.
 - Use the `capture-issue` skill (triggers: `capture`, `캡쳐`, `이슈 만들어`, etc.) to create issues. Do not call `save_issue` directly for new issues — the skill enforces team and label defaults.
-- Allowed labels (team-scoped on `claude-hunt`): `bug`, `feat`, `refactor`, `chore`, `docs`. One label per issue.
+- Allowed labels (team-scoped on `claude-hunt`): `bug`, `feat`, `refactor`, `chore`, `docs`. Exactly one label per issue.
 - Team id: `400292c4-1535-4271-81df-e7b83257a207`. Issue identifiers: `CLA-N`.
 
 ## Development Workflow
