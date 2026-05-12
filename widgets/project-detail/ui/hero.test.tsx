@@ -100,7 +100,7 @@ describe("<Hero />", () => {
     const visit = screen.getByRole("link", { name: VISIT_BUTTON_NAME });
     expect(visit).toHaveAttribute("href", "https://myapp.com");
     expect(visit).toHaveAttribute("target", "_blank");
-    expect(visit).toHaveAttribute("rel", "noopener noreferrer");
+    expect(visit).toHaveAttribute("rel", "noopener noreferrer ugc");
   });
 
   it("hides the GitHub link when github_url is null", () => {
@@ -129,7 +129,7 @@ describe("<Hero />", () => {
     const link = screen.getByTestId("project-detail-github-link");
     expect(link).toHaveAttribute("href", "https://github.com/octocat/hello");
     expect(link).toHaveAttribute("target", "_blank");
-    expect(link).toHaveAttribute("rel", "noopener noreferrer");
+    expect(link).toHaveAttribute("rel", "noopener noreferrer ugc");
   });
 
   it("flags the vote button as owned when the viewer is the author (self-vote prevented)", () => {
