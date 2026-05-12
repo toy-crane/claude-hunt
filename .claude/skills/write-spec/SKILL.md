@@ -1,19 +1,29 @@
 ---
 name: write-spec
-description: Write a feature spec through conversation with the user. Simulate user flows, fill in the blanks with questions, then generate spec.md (a single WHAT-only specification covering scope, scenarios, and invariants). Trigger with "/write-spec", "write spec", "define feature", etc.
-argument-hint: "feature description"
+description: Write a feature spec through conversation with the user. Simulate user flows, fill in the blanks with questions, then generate spec.md (a single WHAT-only specification covering scope, scenarios, and invariants). Accepts a Linear issue identifier (e.g. CLA-8) as the seed. Trigger with "/write-spec", "write spec", "define feature", etc.
+argument-hint: "feature description | Linear issue id (e.g. CLA-8)"
 ---
 
 # Write Spec
 
 The output of this skill is a single document: `artifacts/<feature-name>/spec.md`. The spec describes WHAT the feature must do from an externally observable perspective. Implementation choices (FSD slice placement, file layout, table schemas, test types, libraries) belong in `plan.md`, not here.
 
-## Step 1: Ensure Worktree
+## Step 1: Resolve Input and Ensure Worktree
 
-`/write-spec` must run inside a worktree. Check the current working directory:
+`/write-spec` accepts two input modes. Detect which one applies before doing anything else.
+
+**Mode A — Linear issue.** `$ARGUMENTS` matches a Linear identifier (uppercase team key + `-` + number, e.g. `CLA-8`).
+
+1. Fetch the issue with `mcp__plugin_linear_linear__get_issue`. If the fetch fails or the issue does not exist, stop and surface the error — do not fall back to Mode B.
+2. Derive `<feature>` as `<lowercase-id>-<title-slug>`, where `<title-slug>` is up to 5 significant words from the issue title, lowercased and hyphen-separated. Drop articles and prepositions. Example: `CLA-8` "Enable SDD workflow to consume Linear issues as input" → `cla-8-enable-sdd-workflow`.
+3. The **seed description** for the rest of this skill is the issue's title and description. Keep the fetched issue body in context so later steps can read it.
+
+**Mode B — Free text.** `$ARGUMENTS` is a plain feature description. Derive `<feature>` from `$ARGUMENTS` (lowercased, hyphen-separated, max 5 words). The **seed description** is `$ARGUMENTS`.
+
+After deriving `<feature>`, ensure a worktree:
 
 - If the path contains `.claude/worktrees/`, continue to Step 2.
-- Otherwise, invoke `/create-worktree feat/<short-description>` where `<short-description>` is derived from `$ARGUMENTS` (lowercase, hyphen-separated, max 5 words). The session will switch into the new worktree, then continue to Step 2.
+- Otherwise, invoke `/create-worktree feat/<feature>`. The session will switch into the new worktree, then continue to Step 2.
 
 ## Step 2: Pre-exploration
 
@@ -35,11 +45,13 @@ ASSUMPTIONS I'M MAKING:
 → Correct me now or I'll proceed with these.
 ```
 
+In Mode A (Linear issue), seed this list from the issue's title, description, and any acceptance hints already present. Each seeded assumption must be a claim the issue commits to, not a paraphrase. List Linear-sourced assumptions first, then exploration-derived ones.
+
 Don't silently fill in ambiguous requirements. The spec's purpose is to surface misunderstandings before code gets written.
 
 ## Step 4: Reframe as Success Criteria
 
-Translate vague requirements from the user's description into concrete, testable conditions:
+Translate vague requirements from the **seed description** into concrete, testable conditions:
 
 ```
 REQUIREMENT: "Make the dashboard faster"
@@ -54,7 +66,7 @@ If the user's description is already concrete, skip this step.
 
 ## Step 5: Iterative Questioning
 
-Simulate user flows for `$ARGUMENTS` and find the blanks. At each step, check the happy path, error paths, boundary conditions, and intersections with existing features.
+Simulate user flows for the **seed description** and find the blanks. At each step, check the happy path, error paths, boundary conditions, and intersections with existing features.
 
 Keep questions about WHAT the user can observe — not about HOW it is built. Avoid questions about file paths, slice placement, table design, or test strategy.
 
