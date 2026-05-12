@@ -1,5 +1,7 @@
 # `/ship` skill replaces GitHub Actions
 
+> **Update 2026-05-12**: Reconsidered for the `dispatch-issue` flow — production workflow restored, `/ship` kept as emergency override. See [`2026-05-12-workflow-restore-for-dispatch-flow.md`](./2026-05-12-workflow-restore-for-dispatch-flow.md).
+
 ## Date
 2026-04-17
 
