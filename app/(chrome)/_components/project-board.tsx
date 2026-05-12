@@ -3,7 +3,6 @@
 import type { Cohort } from "@entities/cohort";
 import type { ProjectWithVoteCount } from "@entities/vote";
 import { CohortChips } from "@features/cohort-filter";
-import { SubmitTrigger } from "@features/submit-project";
 import { VoteButton } from "@features/toggle-vote";
 import type { ProjectGridRow } from "@widgets/project-grid";
 import { ProjectGrid, PromptLine } from "@widgets/project-grid";
@@ -26,14 +25,10 @@ export interface ProjectBoardProps {
 }
 
 /**
- * Client component that owns the cohort filter state for the landing page.
- * All projects are passed in on first render; cohort switching filters in
- * memory so there are no additional network requests after the initial load.
- * URL is kept in sync via `history.pushState` so browser back/forward can
- * restore the previously selected chip via a `popstate` listener.
- *
- * Owns the full landing layout (prompt line, H1, subtitle, submit button,
- * filter, list) so all three pieces stay synchronized with the filter state.
+ * Owns the cohort filter, prompt line, and project grid below the page
+ * hero. All projects come pre-fetched; switching cohorts filters in
+ * memory and only mirrors the selection to the URL via `history.pushState`
+ * so browser back/forward can restore it.
  */
 export function ProjectBoard({
   initialCohortId,
@@ -106,21 +101,6 @@ export function ProjectBoard({
   return (
     <>
       <PromptLine cohortLabel={cohortLabel} />
-      <section className="flex flex-wrap items-end justify-between gap-4">
-        <div className="flex flex-col gap-1">
-          <h1 className="font-heading font-medium text-2xl">프로젝트 보드</h1>
-          <p
-            className="text-muted-foreground text-sm"
-            data-testid="project-board-subtitle"
-          >
-            {filteredProjects.length}개 프로젝트 · 마음에 드는 곳에 응원을
-            보내주세요.
-          </p>
-        </div>
-        <div className="w-fit self-end">
-          <SubmitTrigger isAuthenticated={isAuthenticated} />
-        </div>
-      </section>
       <CohortChips
         allCount={projects.length}
         cohorts={cohorts}

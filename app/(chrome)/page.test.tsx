@@ -1,6 +1,6 @@
 import type { Cohort } from "@entities/cohort";
 import { createMockSupabaseClient } from "@shared/lib/test-utils";
-import { render } from "@testing-library/react";
+import { render, screen } from "@testing-library/react";
 import type { ProjectGridRow } from "@widgets/project-grid";
 import { vi } from "vitest";
 
@@ -156,6 +156,46 @@ describe("home page", () => {
         isAuthenticated: false,
       })
     );
+  });
+
+  it("renders the page-level Claude Hunt brand heading", async () => {
+    await renderPage();
+    expect(
+      screen.getByRole("heading", {
+        name: "오늘의 Claude Hunt",
+        level: 1,
+      })
+    ).toBeInTheDocument();
+  });
+
+  it("renders the SubmitTrigger inside the page hero, not inside the board", async () => {
+    await renderPage();
+    const submit = screen.getByTestId("submit-trigger-stub");
+    const board = screen.getByTestId("project-board-stub");
+    expect(submit).toBeInTheDocument();
+    expect(board.contains(submit)).toBe(false);
+  });
+
+  it("exports an absolute title so the layout template doesn't append the brand twice", async () => {
+    const { metadata } = await import("./page");
+    expect(metadata.title).toEqual(
+      expect.objectContaining({
+        absolute: expect.stringContaining("claude-hunt"),
+      })
+    );
+  });
+
+  it("declares a self-referencing canonical for the home URL", async () => {
+    const { metadata } = await import("./page");
+    expect(metadata.alternates?.canonical).toBe("/");
+  });
+
+  it("sets a unique description distinct from the layout fallback", async () => {
+    const { metadata } = await import("./page");
+    expect(metadata.description).toEqual(
+      expect.stringContaining("Claude Code")
+    );
+    expect(metadata.description).not.toBe("함께 배우는 사람들의 프로젝트");
   });
 
   it("passes isAuthenticated=true to ProjectBoard for signed-in students", async () => {

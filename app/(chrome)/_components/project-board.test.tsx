@@ -65,18 +65,6 @@ vi.mock("@features/edit-project", () => ({
 vi.mock("@features/delete-project", () => ({
   DeleteButton: () => null,
 }));
-vi.mock("@features/submit-project", () => ({
-  SubmitTrigger: ({ isAuthenticated }: { isAuthenticated: boolean }) => (
-    <button
-      data-authenticated={String(isAuthenticated)}
-      data-testid="submit-trigger-stub"
-      type="button"
-    >
-      프로젝트 제출
-    </button>
-  ),
-}));
-
 vi.mock("@shared/api/supabase/server", () => ({
   createClient: vi.fn().mockResolvedValue({
     storage: {
@@ -209,42 +197,6 @@ describe("ProjectBoard", () => {
     expect(capturedChipsProps?.value).toBeNull();
   });
 
-  it("renders the Korean H1 and the subtitle with the filtered project count", async () => {
-    await renderBoard();
-    expect(
-      screen.getByRole("heading", { name: "프로젝트 보드", level: 1 })
-    ).toBeInTheDocument();
-    expect(screen.getByTestId("project-board-subtitle")).toHaveTextContent(
-      "3개 프로젝트 · 마음에 드는 곳에 응원을 보내주세요."
-    );
-
-    act(() => capturedOnValueChange?.("cohort-a"));
-    expect(screen.getByTestId("project-board-subtitle")).toHaveTextContent(
-      "2개 프로젝트 · 마음에 드는 곳에 응원을 보내주세요."
-    );
-
-    act(() => capturedOnValueChange?.("cohort-b"));
-    expect(screen.getByTestId("project-board-subtitle")).toHaveTextContent(
-      "1개 프로젝트 · 마음에 드는 곳에 응원을 보내주세요."
-    );
-  });
-
-  it("forwards isAuthenticated to the inline SubmitTrigger", async () => {
-    capturedOnValueChange = undefined;
-    const { ProjectBoard } = await import("./project-board");
-    render(
-      <ProjectBoard
-        cohorts={cohorts}
-        initialCohortId={null}
-        isAuthenticated={true}
-        projects={allProjects}
-        viewerUserId="user-1"
-      />
-    );
-    const submit = screen.getByTestId("submit-trigger-stub");
-    expect(submit).toHaveAttribute("data-authenticated", "true");
-  });
-
   it("shows all projects when no cohort is selected", async () => {
     await renderBoard();
     // Each row renders the title in both desktop and mobile branches.
@@ -324,9 +276,6 @@ describe("ProjectBoard", () => {
     expect(capturedChipsProps?.value).toBe("cohort-a");
     expect(screen.getAllByText("Alpha One").length).toBeGreaterThanOrEqual(1);
     expect(screen.queryByText("Beta One")).not.toBeInTheDocument();
-    expect(screen.getByTestId("project-board-subtitle")).toHaveTextContent(
-      "2개 프로젝트 · 마음에 드는 곳에 응원을 보내주세요."
-    );
   });
 
   it("returns to all projects on a popstate event when the URL has no cohort param", async () => {

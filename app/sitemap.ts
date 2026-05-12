@@ -1,17 +1,20 @@
 import { createAnonServerClient } from "@shared/api/supabase/anon-server";
+import { SITE_URL } from "@shared/config/site";
 import type { MetadataRoute } from "next";
 
 export const revalidate = 3600;
 
-const SITE_URL = "https://www.claude-hunt.com";
+const STATIC_PATHS = ["/", "/privacy", "/terms"] as const;
 
-const STATIC_PATHS = ["/", "/projects", "/privacy", "/terms"] as const;
+// Fixed lastmod for static pages — using `new Date()` on every revalidation
+// signals fake freshness to crawlers. Bump manually when a static page's
+// content actually changes.
+const STATIC_LAST_MODIFIED = new Date("2026-05-12T00:00:00Z");
 
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
-  const now = new Date();
   const staticEntries: MetadataRoute.Sitemap = STATIC_PATHS.map((path) => ({
     url: `${SITE_URL}${path}`,
-    lastModified: now,
+    lastModified: STATIC_LAST_MODIFIED,
   }));
 
   const supabase = createAnonServerClient();

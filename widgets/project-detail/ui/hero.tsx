@@ -104,7 +104,7 @@ export function Hero({ project, isAuthenticated, viewerUserId }: HeroProps) {
         <Button asChild className="gap-2" size="lg">
           <a
             href={project.project_url}
-            rel="noopener noreferrer"
+            rel="noopener noreferrer ugc"
             target="_blank"
           >
             <RiExternalLinkLine aria-hidden="true" />
@@ -116,7 +116,7 @@ export function Hero({ project, isAuthenticated, viewerUserId }: HeroProps) {
             <a
               data-testid="project-detail-github-link"
               href={project.github_url}
-              rel="noopener noreferrer"
+              rel="noopener noreferrer ugc"
               target="_blank"
             >
               <RiGithubLine aria-hidden="true" />

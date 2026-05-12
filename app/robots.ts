@@ -1,6 +1,5 @@
+import { SITE_URL } from "@shared/config/site";
 import type { MetadataRoute } from "next";
-
-const SITE_URL = "https://www.claude-hunt.com";
 
 export default function robots(): MetadataRoute.Robots {
   return {

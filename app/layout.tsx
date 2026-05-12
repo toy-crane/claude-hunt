@@ -1,3 +1,4 @@
+import { SITE_URL } from "@shared/config/site";
 import type { Metadata } from "next";
 import { Geist_Mono, Inter, JetBrains_Mono } from "next/font/google";
 
@@ -16,14 +17,43 @@ const fontHeading = JetBrains_Mono({
 const TAGLINE = "함께 배우는 사람들의 프로젝트";
 const SOCIAL_TITLE = `claude-hunt · ${TAGLINE}`;
 
+// SearchAction omitted — claude-hunt has no on-site search endpoint.
+export const SITE_JSON_LD = {
+  "@context": "https://schema.org",
+  "@graph": [
+    {
+      "@type": "WebSite",
+      "@id": `${SITE_URL}/#website`,
+      name: "claude-hunt",
+      url: SITE_URL,
+      inLanguage: "ko",
+    },
+    {
+      "@type": "Organization",
+      "@id": `${SITE_URL}/#org`,
+      name: "claude-hunt",
+      url: SITE_URL,
+      logo: `${SITE_URL}/icon.png`,
+    },
+  ],
+} as const;
+
+const SITE_JSON_LD_HTML = JSON.stringify(SITE_JSON_LD);
+
 export const metadata: Metadata = {
-  metadataBase: new URL("https://www.claude-hunt.com"),
+  metadataBase: new URL(SITE_URL),
   title: {
     default: "claude-hunt",
     template: "%s · claude-hunt",
   },
   description: TAGLINE,
-  keywords: ["Claude Code", "cohort projects", "AI coding", "showcase"],
+  keywords: [
+    "Claude Code",
+    "Claude Code 클래스",
+    "수강생 프로젝트",
+    "AI coding",
+    "showcase",
+  ],
   robots: {
     index: true,
     follow: true,
@@ -69,6 +99,11 @@ export default function RootLayout({
       suppressHydrationWarning
     >
       <body>
+        <script
+          // biome-ignore lint/security/noDangerouslySetInnerHtml: JSON.stringify of a static, server-controlled object — required for JSON-LD injection
+          dangerouslySetInnerHTML={{ __html: SITE_JSON_LD_HTML }}
+          type="application/ld+json"
+        />
         <ThemeProvider>
           {children}
           <Toaster />

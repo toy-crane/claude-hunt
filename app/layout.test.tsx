@@ -16,9 +16,10 @@ vi.mock("@core/providers/theme-provider.tsx", () => ({
   ThemeProvider: ({ children }: { children: React.ReactNode }) => children,
 }));
 
-const { metadata } = await import("./layout");
+const { metadata, SITE_JSON_LD } = await import("./layout");
 
 const ENGLISH_TAGLINE = /Discover|cohort|showcase/i;
+const LOCAL_HOST = /localhost|127\.0\.0\.1/;
 
 describe("app/layout metadata", () => {
   it("sets the default title to 'claude-hunt'", () => {
@@ -101,10 +102,46 @@ describe("app/layout metadata", () => {
     expect(metadata.keywords).toEqual(
       expect.arrayContaining([
         "Claude Code",
-        "cohort projects",
+        "Claude Code 클래스",
+        "수강생 프로젝트",
         "AI coding",
         "showcase",
       ])
     );
+  });
+
+  it("does not include the loanword '코호트' in user-facing keywords", () => {
+    const json = JSON.stringify(metadata.keywords ?? []);
+    expect(json).not.toContain("코호트");
+    expect(json).not.toContain("cohort");
+  });
+});
+
+describe("app/layout JSON-LD", () => {
+  it("declares both a WebSite and an Organization node in @graph", () => {
+    const types = SITE_JSON_LD["@graph"].map((node) => node["@type"]);
+    expect(types).toEqual(expect.arrayContaining(["WebSite", "Organization"]));
+  });
+
+  it("uses the production origin for every URL field", () => {
+    const json = JSON.stringify(SITE_JSON_LD);
+    expect(json).not.toMatch(LOCAL_HOST);
+    for (const node of SITE_JSON_LD["@graph"]) {
+      expect(node.url).toBe("https://www.claude-hunt.com");
+    }
+  });
+
+  it("declares Korean as the WebSite's inLanguage", () => {
+    const website = SITE_JSON_LD["@graph"].find(
+      (node) => node["@type"] === "WebSite"
+    );
+    expect(website).toMatchObject({ inLanguage: "ko" });
+  });
+
+  it("intentionally omits SearchAction since the site has no search endpoint", () => {
+    const website = SITE_JSON_LD["@graph"].find(
+      (node) => node["@type"] === "WebSite"
+    );
+    expect(website).not.toHaveProperty("potentialAction");
   });
 });

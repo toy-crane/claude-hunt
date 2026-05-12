@@ -3,6 +3,7 @@ import { SettingsForm } from "@features/settings";
 import { WithdrawDialog } from "@features/withdraw-user";
 import { RiArrowLeftLine } from "@remixicon/react";
 import { fetchViewer } from "@shared/api/supabase/viewer";
+import { NOINDEX_METADATA } from "@shared/config/site";
 import { Card, CardContent } from "@shared/ui/card";
 import type { Metadata } from "next";
 import Link from "next/link";
@@ -10,6 +11,7 @@ import { redirect } from "next/navigation";
 
 export const metadata: Metadata = {
   title: "설정",
+  ...NOINDEX_METADATA,
 };
 
 export default async function SettingsPage() {
