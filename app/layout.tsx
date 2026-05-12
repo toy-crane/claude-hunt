@@ -14,6 +14,7 @@ const fontHeading = JetBrains_Mono({
 });
 
 const TAGLINE = "함께 배우는 사람들의 프로젝트";
+const SOCIAL_TITLE = `claude-hunt · ${TAGLINE}`;
 
 export const metadata: Metadata = {
   metadataBase: new URL("https://www.claude-hunt.com"),
@@ -31,14 +32,14 @@ export const metadata: Metadata = {
     canonical: "/",
   },
   openGraph: {
-    title: "claude-hunt",
+    title: SOCIAL_TITLE,
     description: TAGLINE,
     type: "website",
     siteName: "claude-hunt",
   },
   twitter: {
     card: "summary_large_image",
-    title: "claude-hunt",
+    title: SOCIAL_TITLE,
     description: TAGLINE,
   },
 };
