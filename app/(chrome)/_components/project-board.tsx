@@ -25,14 +25,10 @@ export interface ProjectBoardProps {
 }
 
 /**
- * Client component that owns the cohort filter state for the landing page.
- * All projects are passed in on first render; cohort switching filters in
- * memory so there are no additional network requests after the initial load.
- * URL is kept in sync via `history.pushState` so browser back/forward can
- * restore the previously selected chip via a `popstate` listener.
- *
- * Owns the board layout below the page hero (prompt line, subtitle,
- * submit button, filter, list) so the count and filter stay in sync.
+ * Owns the cohort filter, prompt line, and project grid below the page
+ * hero. All projects come pre-fetched; switching cohorts filters in
+ * memory and only mirrors the selection to the URL via `history.pushState`
+ * so browser back/forward can restore it.
  */
 export function ProjectBoard({
   initialCohortId,

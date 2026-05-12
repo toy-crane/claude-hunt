@@ -5,8 +5,7 @@ import { fetchProjects } from "@widgets/project-grid/server";
 import type { Metadata } from "next";
 import { ProjectBoard } from "./_components/project-board";
 
-// Brand-first absolute title bypasses the layout template so the SERP
-// listing reads naturally and stays under 60 chars.
+// Absolute (no template) keeps the SERP title under ~60 chars.
 const HOME_TITLE = "claude-hunt — 오늘의 Claude Hunt";
 const HOME_DESCRIPTION =
   "Claude Code 수강생들이 만든 작품을 둘러보고 응원해 주세요.";
