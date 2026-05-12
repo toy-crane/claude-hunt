@@ -1,4 +1,5 @@
 import { fetchViewer } from "@shared/api/supabase/viewer";
+import { SITE_URL } from "@shared/config/site";
 import { CommentList, fetchCommentThreads } from "@widgets/comment-list";
 import {
   fetchProjectDetail,
@@ -7,8 +8,6 @@ import {
 } from "@widgets/project-detail";
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
-
-const SITE_URL = "https://www.claude-hunt.com";
 
 interface PageProps {
   params: Promise<{ id: string }>;

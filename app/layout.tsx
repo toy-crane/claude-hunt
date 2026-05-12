@@ -1,3 +1,4 @@
+import { SITE_URL } from "@shared/config/site";
 import type { Metadata } from "next";
 import { Geist_Mono, Inter, JetBrains_Mono } from "next/font/google";
 
@@ -13,13 +14,10 @@ const fontHeading = JetBrains_Mono({
   variable: "--font-heading",
 });
 
-const SITE_URL = "https://www.claude-hunt.com";
 const TAGLINE = "함께 배우는 사람들의 프로젝트";
 const SOCIAL_TITLE = `claude-hunt · ${TAGLINE}`;
 
-// schema.org @graph linking WebSite + Organization. SearchAction is
-// intentionally omitted — claude-hunt has no on-site search endpoint
-// to handle a query parameter.
+// SearchAction omitted — claude-hunt has no on-site search endpoint.
 export const SITE_JSON_LD = {
   "@context": "https://schema.org",
   "@graph": [
@@ -39,6 +37,8 @@ export const SITE_JSON_LD = {
     },
   ],
 } as const;
+
+const SITE_JSON_LD_HTML = JSON.stringify(SITE_JSON_LD);
 
 export const metadata: Metadata = {
   metadataBase: new URL(SITE_URL),
@@ -101,7 +101,7 @@ export default function RootLayout({
       <body>
         <script
           // biome-ignore lint/security/noDangerouslySetInnerHtml: JSON.stringify of a static, server-controlled object — required for JSON-LD injection
-          dangerouslySetInnerHTML={{ __html: JSON.stringify(SITE_JSON_LD) }}
+          dangerouslySetInnerHTML={{ __html: SITE_JSON_LD_HTML }}
           type="application/ld+json"
         />
         <ThemeProvider>

@@ -1,9 +1,8 @@
 import { createAnonServerClient } from "@shared/api/supabase/anon-server";
+import { SITE_URL } from "@shared/config/site";
 import type { MetadataRoute } from "next";
 
 export const revalidate = 3600;
-
-const SITE_URL = "https://www.claude-hunt.com";
 
 const STATIC_PATHS = ["/", "/privacy", "/terms"] as const;
 

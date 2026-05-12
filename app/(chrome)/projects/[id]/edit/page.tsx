@@ -1,13 +1,12 @@
 import { EditForm } from "@features/edit-project";
 import { fetchViewer } from "@shared/api/supabase/viewer";
+import { NOINDEX_METADATA } from "@shared/config/site";
 import { fetchProjectDetail } from "@widgets/project-detail";
 import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound, redirect } from "next/navigation";
 
-export const metadata: Metadata = {
-  robots: { index: false, follow: false },
-};
+export const metadata: Metadata = NOINDEX_METADATA;
 
 interface PageProps {
   params: Promise<{ id: string }>;
