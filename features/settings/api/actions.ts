@@ -1,5 +1,6 @@
 "use server";
 
+import { displayNameSchema } from "@entities/profile";
 import { requireAuth } from "@shared/api/supabase/require-auth";
 import { CACHE_TAGS } from "@shared/config/cache-tags";
 import {
@@ -8,8 +9,6 @@ import {
 } from "@shared/lib/display-name-violation";
 import { getZodErrorMessage } from "@shared/lib/validation";
 import { revalidatePath, updateTag } from "next/cache";
-
-import { displayNameSchema } from "./schema";
 
 export type UpdateDisplayNameResult =
   | { ok: true }

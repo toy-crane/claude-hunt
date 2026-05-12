@@ -1,5 +1,10 @@
 "use client";
 
+import {
+  DISPLAY_NAME_REQUIRED_MESSAGE,
+  displayNameSchema,
+} from "@entities/profile";
+import { getZodErrorMessage } from "@shared/lib/validation";
 import { Button } from "@shared/ui/button";
 import { Field, FieldGroup, FieldLabel } from "@shared/ui/field";
 import { Input } from "@shared/ui/input";
@@ -32,8 +37,13 @@ export function SettingsForm({
   function handleSubmit(event: React.FormEvent<HTMLFormElement>) {
     event.preventDefault();
     setError(null);
+    const parsed = displayNameSchema.safeParse(displayName);
+    if (!parsed.success) {
+      setError(getZodErrorMessage(parsed.error, DISPLAY_NAME_REQUIRED_MESSAGE));
+      return;
+    }
     startTransition(async () => {
-      const result = await updateDisplayName(displayName);
+      const result = await updateDisplayName(parsed.data);
       if (result.ok) {
         toast.success("닉네임이 변경되었어요.");
         router.refresh();

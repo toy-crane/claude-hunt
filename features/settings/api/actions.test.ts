@@ -1,3 +1,7 @@
+import {
+  DISPLAY_NAME_POLICY_MESSAGE,
+  DISPLAY_NAME_REQUIRED_MESSAGE,
+} from "@entities/profile";
 import { createMockSupabaseClient } from "@shared/lib/test-utils";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
@@ -38,10 +42,10 @@ describe("updateDisplayName", () => {
   it("updates the profile row and revalidates / on a valid input", async () => {
     const { updateDisplayName } = await import("./actions");
 
-    const result = await updateDisplayName("Alice K.");
+    const result = await updateDisplayName("Alice_99");
 
     expect(result).toEqual({ ok: true });
-    expect(updateMock).toHaveBeenCalledWith({ display_name: "Alice K." });
+    expect(updateMock).toHaveBeenCalledWith({ display_name: "Alice_99" });
     expect(eqMock).toHaveBeenCalledWith("id", "user-1");
     expect(updateTagMock).toHaveBeenCalledWith("projects-grid");
     expect(revalidatePathMock).toHaveBeenCalledWith("/settings");
@@ -50,10 +54,10 @@ describe("updateDisplayName", () => {
   it("trims whitespace before persisting", async () => {
     const { updateDisplayName } = await import("./actions");
 
-    const result = await updateDisplayName("  Alice K.  ");
+    const result = await updateDisplayName("  Alice  ");
 
     expect(result).toEqual({ ok: true });
-    expect(updateMock).toHaveBeenCalledWith({ display_name: "Alice K." });
+    expect(updateMock).toHaveBeenCalledWith({ display_name: "Alice" });
   });
 
   it("rejects an empty display name without calling update", async () => {
@@ -63,7 +67,7 @@ describe("updateDisplayName", () => {
 
     expect(result).toEqual({
       ok: false,
-      error: { field: "displayName", message: "닉네임을 입력해 주세요." },
+      error: { field: "displayName", message: DISPLAY_NAME_REQUIRED_MESSAGE },
     });
     expect(updateMock).not.toHaveBeenCalled();
   });
@@ -75,24 +79,42 @@ describe("updateDisplayName", () => {
 
     expect(result).toEqual({
       ok: false,
-      error: { field: "displayName", message: "닉네임을 입력해 주세요." },
+      error: { field: "displayName", message: DISPLAY_NAME_REQUIRED_MESSAGE },
     });
     expect(updateMock).not.toHaveBeenCalled();
   });
 
-  it("rejects display names longer than 50 characters", async () => {
+  it("rejects display names longer than 12 characters with the policy message", async () => {
     const { updateDisplayName } = await import("./actions");
 
-    const result = await updateDisplayName("A".repeat(51));
+    const result = await updateDisplayName("A".repeat(13));
 
     expect(result).toEqual({
       ok: false,
-      error: {
-        field: "displayName",
-        message: "닉네임은 50자 이하로 입력해 주세요.",
-      },
+      error: { field: "displayName", message: DISPLAY_NAME_POLICY_MESSAGE },
     });
     expect(updateMock).not.toHaveBeenCalled();
+  });
+
+  it("rejects display names with a special character", async () => {
+    const { updateDisplayName } = await import("./actions");
+
+    const result = await updateDisplayName("Alice!");
+
+    expect(result).toEqual({
+      ok: false,
+      error: { field: "displayName", message: DISPLAY_NAME_POLICY_MESSAGE },
+    });
+    expect(updateMock).not.toHaveBeenCalled();
+  });
+
+  it("accepts underscore in display name", async () => {
+    const { updateDisplayName } = await import("./actions");
+
+    const result = await updateDisplayName("Car_crash");
+
+    expect(result).toEqual({ ok: true });
+    expect(updateMock).toHaveBeenCalledWith({ display_name: "Car_crash" });
   });
 
   it("returns an auth error when no session exists", async () => {

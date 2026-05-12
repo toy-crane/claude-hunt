@@ -1,3 +1,7 @@
+import {
+  DISPLAY_NAME_POLICY_MESSAGE,
+  DISPLAY_NAME_REQUIRED_MESSAGE,
+} from "@entities/profile";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
 const SIGNED_IN_REGEX = /signed in/i;
@@ -77,7 +81,7 @@ describe("completeOnboarding server action", () => {
     });
 
     expect(result.ok).toBe(false);
-    expect(result.error).toBe("닉네임을 입력해 주세요.");
+    expect(result.error).toBe(DISPLAY_NAME_REQUIRED_MESSAGE);
     expect(getUser).not.toHaveBeenCalled();
   });
 
@@ -88,17 +92,42 @@ describe("completeOnboarding server action", () => {
     });
 
     expect(result.ok).toBe(false);
-    expect(result.error).toBe("닉네임을 입력해 주세요.");
+    expect(result.error).toBe(DISPLAY_NAME_REQUIRED_MESSAGE);
   });
 
-  it("rejects display name longer than 50 characters", async () => {
+  it("rejects display name longer than 12 characters with the policy message", async () => {
     const result = await completeOnboarding({
       ...validInput,
-      displayName: "a".repeat(51),
+      displayName: "a".repeat(13),
     });
 
     expect(result.ok).toBe(false);
-    expect(result.error).toBe("닉네임은 50자 이하로 입력해 주세요.");
+    expect(result.error).toBe(DISPLAY_NAME_POLICY_MESSAGE);
+  });
+
+  it("rejects display name containing a special character", async () => {
+    const result = await completeOnboarding({
+      ...validInput,
+      displayName: "Alice!",
+    });
+
+    expect(result.ok).toBe(false);
+    expect(result.error).toBe(DISPLAY_NAME_POLICY_MESSAGE);
+  });
+
+  it("accepts underscore in display name", async () => {
+    getUser.mockResolvedValue({
+      data: { user: { id: "u1", email: "u1@example.com" } },
+      error: null,
+    });
+    stubProfileUpsert({});
+
+    const result = await completeOnboarding({
+      ...validInput,
+      displayName: "Car_crash",
+    });
+
+    expect(result.ok).toBe(true);
   });
 
   it("rejects a missing/invalid cohort id", async () => {

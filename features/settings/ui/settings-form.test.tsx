@@ -1,10 +1,13 @@
+import {
+  DISPLAY_NAME_POLICY_MESSAGE,
+  DISPLAY_NAME_REQUIRED_MESSAGE,
+} from "@entities/profile";
 import { render, screen, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
 const SAVE_LABEL = /저장/;
-const REQUIRED_MESSAGE = /닉네임을 입력해 주세요/;
-const LENGTH_MESSAGE = /50자 이하/;
+const DUPLICATE_MESSAGE = /이미 사용 중인 닉네임이에요/;
 
 const mocks = vi.hoisted(() => ({
   updateDisplayName: vi.fn(),
@@ -106,22 +109,33 @@ describe("<SettingsForm />", () => {
 
     const input = screen.getByLabelText("닉네임");
     await user.clear(input);
-    await user.type(input, "Alice K.");
+    await user.type(input, "Bob_123");
     await user.click(screen.getByRole("button", { name: SAVE_LABEL }));
 
     await waitFor(() => {
-      expect(mocks.updateDisplayName).toHaveBeenCalledWith("Alice K.");
+      expect(mocks.updateDisplayName).toHaveBeenCalledWith("Bob_123");
     });
     expect(mocks.toastSuccess).toHaveBeenCalledWith("닉네임이 변경되었어요.");
     expect(mocks.routerRefresh).toHaveBeenCalledTimes(1);
-    expect((input as HTMLInputElement).value).toBe("Alice K.");
+    expect((input as HTMLInputElement).value).toBe("Bob_123");
   });
 
-  it("shows 'Display name is required' when the action rejects an empty value", async () => {
-    mocks.updateDisplayName.mockResolvedValue({
-      ok: false,
-      error: { field: "displayName", message: "닉네임을 입력해 주세요." },
+  it("trims surrounding whitespace before passing the value to the action", async () => {
+    mocks.updateDisplayName.mockResolvedValue({ ok: true });
+    const user = userEvent.setup();
+    renderForm();
+
+    const input = screen.getByLabelText("닉네임");
+    await user.clear(input);
+    await user.type(input, "  Alice  ");
+    await user.click(screen.getByRole("button", { name: SAVE_LABEL }));
+
+    await waitFor(() => {
+      expect(mocks.updateDisplayName).toHaveBeenCalledWith("Alice");
     });
+  });
+
+  it("blocks client-side and shows the required message for an empty value (action not called)", async () => {
     const user = userEvent.setup();
     renderForm();
 
@@ -129,16 +143,15 @@ describe("<SettingsForm />", () => {
     await user.click(screen.getByRole("button", { name: SAVE_LABEL }));
 
     await waitFor(() => {
-      expect(screen.getByText(REQUIRED_MESSAGE)).toBeInTheDocument();
+      expect(
+        screen.getByText(DISPLAY_NAME_REQUIRED_MESSAGE)
+      ).toBeInTheDocument();
     });
+    expect(mocks.updateDisplayName).not.toHaveBeenCalled();
     expect(mocks.toastSuccess).not.toHaveBeenCalled();
   });
 
-  it("shows 'Display name is required' for a whitespace-only value", async () => {
-    mocks.updateDisplayName.mockResolvedValue({
-      ok: false,
-      error: { field: "displayName", message: "닉네임을 입력해 주세요." },
-    });
+  it("blocks client-side and shows the required message for whitespace-only input", async () => {
     const user = userEvent.setup();
     renderForm();
 
@@ -148,27 +161,102 @@ describe("<SettingsForm />", () => {
     await user.click(screen.getByRole("button", { name: SAVE_LABEL }));
 
     await waitFor(() => {
-      expect(screen.getByText(REQUIRED_MESSAGE)).toBeInTheDocument();
+      expect(
+        screen.getByText(DISPLAY_NAME_REQUIRED_MESSAGE)
+      ).toBeInTheDocument();
     });
-    expect(mocks.updateDisplayName).toHaveBeenCalledWith("   ");
+    expect(mocks.updateDisplayName).not.toHaveBeenCalled();
   });
 
-  it("shows the length error when the display name exceeds 50 characters", async () => {
-    mocks.updateDisplayName.mockResolvedValue({
-      ok: false,
-      error: {
-        field: "displayName",
-        message: "닉네임은 50자 이하로 입력해 주세요.",
-      },
-    });
+  it("blocks client-side and shows the policy message when the value exceeds 12 chars", async () => {
     const user = userEvent.setup();
-    renderForm({ initialDisplayName: "A".repeat(51) });
+    renderForm({ initialDisplayName: "A".repeat(13) });
 
     await user.click(screen.getByRole("button", { name: SAVE_LABEL }));
 
     await waitFor(() => {
-      expect(screen.getByText(LENGTH_MESSAGE)).toBeInTheDocument();
+      expect(screen.getByText(DISPLAY_NAME_POLICY_MESSAGE)).toBeInTheDocument();
     });
+    expect(mocks.updateDisplayName).not.toHaveBeenCalled();
+  });
+
+  it("blocks client-side and shows the policy message for special characters", async () => {
+    const user = userEvent.setup();
+    renderForm();
+
+    const input = screen.getByLabelText("닉네임");
+    await user.clear(input);
+    await user.type(input, "Alice!");
+    await user.click(screen.getByRole("button", { name: SAVE_LABEL }));
+
+    await waitFor(() => {
+      expect(screen.getByText(DISPLAY_NAME_POLICY_MESSAGE)).toBeInTheDocument();
+    });
+    expect(mocks.updateDisplayName).not.toHaveBeenCalled();
+  });
+
+  it("preserves the entered value in the input after a validation error", async () => {
+    const user = userEvent.setup();
+    renderForm();
+
+    const input = screen.getByLabelText("닉네임") as HTMLInputElement;
+    await user.clear(input);
+    await user.type(input, "Alice!");
+    await user.click(screen.getByRole("button", { name: SAVE_LABEL }));
+
+    await waitFor(() => {
+      expect(screen.getByText(DISPLAY_NAME_POLICY_MESSAGE)).toBeInTheDocument();
+    });
+    expect(input.value).toBe("Alice!");
+  });
+
+  it("surfaces the server duplicate error when the action reports unique violation", async () => {
+    mocks.updateDisplayName.mockResolvedValue({
+      ok: false,
+      error: { field: "displayName", message: "이미 사용 중인 닉네임이에요." },
+    });
+    const user = userEvent.setup();
+    renderForm();
+
+    const input = screen.getByLabelText("닉네임");
+    await user.clear(input);
+    await user.type(input, "alice");
+    await user.click(screen.getByRole("button", { name: SAVE_LABEL }));
+
+    await waitFor(() => {
+      expect(screen.getByText(DUPLICATE_MESSAGE)).toBeInTheDocument();
+    });
+    expect(mocks.toastSuccess).not.toHaveBeenCalled();
+  });
+
+  it("self-save: succeeds when the server accepts the user's own current nickname (any case)", async () => {
+    mocks.updateDisplayName.mockResolvedValue({ ok: true });
+    const user = userEvent.setup();
+    renderForm({ initialDisplayName: "Alice" });
+
+    const input = screen.getByLabelText("닉네임");
+    await user.clear(input);
+    await user.type(input, "alice");
+    await user.click(screen.getByRole("button", { name: SAVE_LABEL }));
+
+    await waitFor(() => {
+      expect(mocks.updateDisplayName).toHaveBeenCalledWith("alice");
+    });
+    expect(mocks.toastSuccess).toHaveBeenCalledWith("닉네임이 변경되었어요.");
+    expect(screen.queryByText(DUPLICATE_MESSAGE)).not.toBeInTheDocument();
+  });
+
+  it("displays a legacy non-compliant stored nickname without auto-erroring on mount", () => {
+    renderForm({ initialDisplayName: "x" });
+
+    const input = screen.getByLabelText("닉네임") as HTMLInputElement;
+    expect(input.value).toBe("x");
+    expect(
+      screen.queryByText(DISPLAY_NAME_POLICY_MESSAGE)
+    ).not.toBeInTheDocument();
+    expect(
+      screen.queryByText(DISPLAY_NAME_REQUIRED_MESSAGE)
+    ).not.toBeInTheDocument();
   });
 
   it("shows a Spinner on the Save button while pending and keeps the static label", async () => {
