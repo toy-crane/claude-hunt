@@ -158,6 +158,28 @@ describe("home page", () => {
     );
   });
 
+  it("exports an absolute title so the layout template doesn't append the brand twice", async () => {
+    const { metadata } = await import("./page");
+    expect(metadata.title).toEqual(
+      expect.objectContaining({
+        absolute: expect.stringContaining("claude-hunt"),
+      })
+    );
+  });
+
+  it("declares a self-referencing canonical for the home URL", async () => {
+    const { metadata } = await import("./page");
+    expect(metadata.alternates?.canonical).toBe("/");
+  });
+
+  it("sets a unique description distinct from the layout fallback", async () => {
+    const { metadata } = await import("./page");
+    expect(metadata.description).toEqual(
+      expect.stringContaining("Claude Code")
+    );
+    expect(metadata.description).not.toBe("함께 배우는 사람들의 프로젝트");
+  });
+
   it("passes isAuthenticated=true to ProjectBoard for signed-in students", async () => {
     vi.mocked(mockClient.auth.getUser).mockResolvedValueOnce({
       data: { user: { id: "user-1" } },
