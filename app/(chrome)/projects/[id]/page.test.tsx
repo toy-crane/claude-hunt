@@ -56,8 +56,9 @@ describe("buildProjectJsonLd", () => {
   it("includes author when display name is present", async () => {
     const { buildProjectJsonLd } = await import("./page");
     const data = buildProjectJsonLd(sampleProject);
-    const work = data["@graph"][0] as { author?: { name: string } };
-    expect(work.author).toEqual({ "@type": "Person", name: "토이크레인" });
+    expect(data["@graph"][0]).toMatchObject({
+      author: { "@type": "Person", name: "토이크레인" },
+    });
   });
 
   it("omits author when display name is null", async () => {
@@ -66,33 +67,32 @@ describe("buildProjectJsonLd", () => {
       ...sampleProject,
       author_display_name: null,
     });
-    const work = data["@graph"][0] as { author?: unknown };
-    expect(work.author).toBeUndefined();
+    expect(data["@graph"][0]).not.toHaveProperty("author");
   });
 
   it("omits image when primaryImageUrl is empty", async () => {
     const { buildProjectJsonLd } = await import("./page");
     const data = buildProjectJsonLd({ ...sampleProject, primaryImageUrl: "" });
-    const work = data["@graph"][0] as { image?: unknown };
-    expect(work.image).toBeUndefined();
+    expect(data["@graph"][0]).not.toHaveProperty("image");
   });
 
   it("places site root as the first breadcrumb item", async () => {
     const { buildProjectJsonLd } = await import("./page");
     const data = buildProjectJsonLd(sampleProject);
-    const breadcrumbs = data["@graph"][1] as {
-      itemListElement: { position: number; name: string; item?: string }[];
-    };
-    expect(breadcrumbs.itemListElement[0]).toEqual({
-      "@type": "ListItem",
-      position: 1,
-      name: "claude-hunt",
-      item: "https://www.claude-hunt.com/",
-    });
-    expect(breadcrumbs.itemListElement[1]).toEqual({
-      "@type": "ListItem",
-      position: 2,
-      name: sampleProject.title,
+    expect(data["@graph"][1]).toMatchObject({
+      itemListElement: [
+        {
+          "@type": "ListItem",
+          position: 1,
+          name: "claude-hunt",
+          item: "https://www.claude-hunt.com/",
+        },
+        {
+          "@type": "ListItem",
+          position: 2,
+          name: sampleProject.title,
+        },
+      ],
     });
   });
 });
