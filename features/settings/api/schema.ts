@@ -1,11 +1,8 @@
-// Import directly from the schema module rather than the feature
-// barrel so reusing the rules doesn't drag in the client-side
-// `OnboardingForm` (which touches env validation at import time and
-// breaks node-side tests).
-import { onboardingInputSchema } from "@features/onboarding/api/schema";
-
-/**
- * Reuse onboarding's display-name rules so the two forms stay in
- * lockstep (trimmed, min 1 char, max 50). Messages are owned there.
- */
-export const displayNameSchema = onboardingInputSchema.shape.displayName;
+// Re-export the shared nickname schema from the profile entity.
+// Settings does not own the rule — `entities/profile` is the single
+// source of truth for the policy, shared with onboarding.
+export {
+  DISPLAY_NAME_POLICY_MESSAGE,
+  DISPLAY_NAME_REQUIRED_MESSAGE,
+  displayNameSchema,
+} from "@entities/profile";

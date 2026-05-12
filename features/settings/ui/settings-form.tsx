@@ -1,5 +1,6 @@
 "use client";
 
+import { displayNameSchema } from "@entities/profile";
 import { Button } from "@shared/ui/button";
 import { Field, FieldGroup, FieldLabel } from "@shared/ui/field";
 import { Input } from "@shared/ui/input";
@@ -32,6 +33,11 @@ export function SettingsForm({
   function handleSubmit(event: React.FormEvent<HTMLFormElement>) {
     event.preventDefault();
     setError(null);
+    const parsed = displayNameSchema.safeParse(displayName);
+    if (!parsed.success) {
+      setError(parsed.error.issues[0]?.message ?? "닉네임을 입력해 주세요.");
+      return;
+    }
     startTransition(async () => {
       const result = await updateDisplayName(displayName);
       if (result.ok) {
