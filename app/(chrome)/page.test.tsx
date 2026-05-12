@@ -158,11 +158,11 @@ describe("home page", () => {
     );
   });
 
-  it("renders a page-level H1 introducing the class projects", async () => {
+  it("renders the page-level Claude Hunt brand heading", async () => {
     await renderPage();
     expect(
       screen.getByRole("heading", {
-        name: "Claude Code 클래스에서 만든 프로젝트들",
+        name: "오늘의 Claude Hunt",
         level: 1,
       })
     ).toBeInTheDocument();
