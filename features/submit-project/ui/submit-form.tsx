@@ -196,7 +196,7 @@ export function SubmitForm({ cohortId: _cohortId }: SubmitFormProps) {
       ) : null}
 
       <div className="flex justify-end gap-2">
-        <Button asChild variant="outline">
+        <Button asChild size="lg" variant="outline">
           <Link href="/">취소</Link>
         </Button>
         <Button disabled={submitting} size="lg" type="submit">
