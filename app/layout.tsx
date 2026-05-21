@@ -3,6 +3,7 @@ import type { Metadata } from "next";
 import { Geist_Mono, Inter, JetBrains_Mono } from "next/font/google";
 
 import "./globals.css";
+import { NuqsProvider } from "@core/providers/nuqs-provider";
 import { ThemeProvider } from "@core/providers/theme-provider";
 import { cn } from "@shared/lib/utils";
 import { Toaster } from "@shared/ui/sonner";
@@ -105,8 +106,10 @@ export default function RootLayout({
           type="application/ld+json"
         />
         <ThemeProvider>
-          {children}
-          <Toaster />
+          <NuqsProvider>
+            {children}
+            <Toaster />
+          </NuqsProvider>
         </ThemeProvider>
         <Analytics />
         <SpeedInsights />

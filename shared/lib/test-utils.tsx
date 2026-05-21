@@ -1,4 +1,6 @@
 import { render } from "@testing-library/react";
+import { NuqsTestingAdapter } from "nuqs/adapters/testing";
+import type { ReactElement, ReactNode } from "react";
 import { vi } from "vitest";
 
 export function createMockSupabaseClient(overrides?: {
@@ -31,4 +33,17 @@ export async function renderServerComponent(
 ) {
   const jsx = await asyncComponent;
   return render(jsx);
+}
+
+/**
+ * Renders a client component under `NuqsTestingAdapter` so any `useQueryState`
+ * / `useQueryStates` hooks resolve against the supplied URL search string.
+ * Pass `"?cohort=cohort-a"` style strings (leading `?` optional).
+ */
+export function renderWithSearchParams(ui: ReactElement, search = "") {
+  return render(ui, {
+    wrapper: ({ children }: { children: ReactNode }) => (
+      <NuqsTestingAdapter searchParams={search}>{children}</NuqsTestingAdapter>
+    ),
+  });
 }
