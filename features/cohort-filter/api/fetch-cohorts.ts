@@ -20,10 +20,11 @@ async function loadCohorts(): Promise<Cohort[]> {
 
 /**
  * Cohort list shared by the dropdown and the chips. Tagged so admin
- * tooling can bust on demand via `revalidateTag`. The 1-hour
- * `revalidate` is a generous safety net — cohorts change rarely.
+ * tooling can bust on demand via `revalidateTag`. The 60-second
+ * `revalidate` keeps the hot-path cheap while letting newly inserted
+ * cohorts surface on the onboarding screen within ~1 minute.
  */
 export const fetchCohorts = productionCache(loadCohorts, ["cohorts"], {
-  revalidate: 3600,
+  revalidate: 60,
   tags: [CACHE_TAGS.COHORTS],
 });
