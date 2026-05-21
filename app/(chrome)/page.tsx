@@ -3,7 +3,9 @@ import { SubmitTrigger } from "@features/submit-project";
 import { fetchViewer } from "@shared/api/supabase/viewer";
 import { fetchProjects } from "@widgets/project-grid/server";
 import type { Metadata } from "next";
+import type { SearchParams } from "nuqs/server";
 import { ProjectBoard } from "./_components/project-board";
+import { homeSearchParamsCache } from "./_search-params";
 
 // Absolute (no template) keeps the SERP title under ~60 chars.
 const HOME_TITLE = "claude-hunt — 오늘의 Claude Hunt";
@@ -29,12 +31,15 @@ export const metadata: Metadata = {
 };
 
 interface PageProps {
-  searchParams: Promise<{ cohort?: string }>;
+  searchParams: Promise<SearchParams>;
 }
 
 export default async function Page({ searchParams }: PageProps) {
-  const { cohort: cohortParam } = await searchParams;
-  const selectedCohortId = cohortParam ?? null;
+  // Parse the URL through the shared cache so the parser contract stays in
+  // sync with the client-side useCohortQuery hook. The value is currently
+  // unused server-side (filtering happens in memory), but parsing here keeps
+  // the contract honest and ready for future server-driven filters.
+  await homeSearchParamsCache.parse(searchParams);
 
   const [viewer, cohorts] = await Promise.all([fetchViewer(), fetchCohorts()]);
   const projects = await fetchProjects({
@@ -54,7 +59,6 @@ export default async function Page({ searchParams }: PageProps) {
       </header>
       <ProjectBoard
         cohorts={cohorts}
-        initialCohortId={selectedCohortId}
         isAuthenticated={Boolean(viewer)}
         projects={projects}
         viewerUserId={viewer?.id ?? null}

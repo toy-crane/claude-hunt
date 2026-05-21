@@ -9,9 +9,15 @@ vi.mock("@shared/api/supabase/viewer", () => ({
   fetchViewer: (...args: unknown[]) => fetchViewerMock(...args),
 }));
 
-vi.mock("@features/cohort-filter/server", () => ({
-  fetchCohorts: (...args: unknown[]) => fetchCohortsMock(...args),
-}));
+vi.mock("@features/cohort-filter/server", async () => {
+  const { parseAsString } = await import("nuqs/server");
+  const cohortParser = parseAsString;
+  return {
+    fetchCohorts: (...args: unknown[]) => fetchCohortsMock(...args),
+    cohortParser,
+    cohortSearchParams: { cohort: cohortParser },
+  };
+});
 
 vi.mock("@widgets/project-grid/server", () => ({
   fetchProjects: (...args: unknown[]) => fetchProjectsMock(...args),

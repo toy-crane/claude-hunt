@@ -29,7 +29,6 @@ vi.mock("next/navigation", () => ({
 // passed from the server page without rendering the grid tree.
 interface BoardProps {
   cohorts: Cohort[];
-  initialCohortId: string | null;
   isAuthenticated: boolean;
   projects: unknown[];
   viewerUserId: string | null;
@@ -43,9 +42,15 @@ vi.mock("./_components/project-board", () => ({
 
 const fetchCohortsMock = vi.fn<() => Promise<Cohort[]>>();
 
-vi.mock("@features/cohort-filter/server", () => ({
-  fetchCohorts: fetchCohortsMock,
-}));
+vi.mock("@features/cohort-filter/server", async () => {
+  const { parseAsString } = await import("nuqs/server");
+  const cohortParser = parseAsString;
+  return {
+    fetchCohorts: fetchCohortsMock,
+    cohortParser,
+    cohortSearchParams: { cohort: cohortParser },
+  };
+});
 
 vi.mock("@features/submit-project", () => ({
   SubmitTrigger: ({ isAuthenticated }: { isAuthenticated: boolean }) => (
@@ -118,20 +123,6 @@ async function renderPage(search: Record<string, string> = {}) {
 describe("home page", () => {
   beforeEach(() => {
     vi.clearAllMocks();
-  });
-
-  it("passes the cohort searchParam to ProjectBoard as initialCohortId", async () => {
-    await renderPage({ cohort: "a1" });
-    expect(boardMock).toHaveBeenCalledWith(
-      expect.objectContaining({ initialCohortId: "a1" })
-    );
-  });
-
-  it("passes null initialCohortId to ProjectBoard when no cohort param is set", async () => {
-    await renderPage();
-    expect(boardMock).toHaveBeenCalledWith(
-      expect.objectContaining({ initialCohortId: null })
-    );
   });
 
   it("fetches projects once without a cohort filter on the server", async () => {
