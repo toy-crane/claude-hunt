@@ -16,6 +16,14 @@ import { submitProject } from "../api/actions";
 
 export interface SubmitFormProps {
   /**
+   * Destination for the cancel link and the post-submit redirect.
+   * Defaults to `/` for cancel and `/projects/${newId}` for success
+   * when not provided. The settings → new flow passes `/settings` so
+   * the user lands back where they started and sees the freshly added
+   * row in 내 프로젝트.
+   */
+  backHref?: string;
+  /**
    * `cohort_id` of the signed-in student's profile. At runtime the
    * onboarding gate (`proxy.ts` + `/onboarding` route) guarantees this
    * is non-null for any user who reaches the form. Kept nullable here
@@ -33,7 +41,7 @@ function RequiredMark() {
   );
 }
 
-export function SubmitForm({ cohortId: _cohortId }: SubmitFormProps) {
+export function SubmitForm({ backHref, cohortId: _cohortId }: SubmitFormProps) {
   const router = useRouter();
   const titleId = useId();
   const taglineId = useId();
@@ -97,11 +105,13 @@ export function SubmitForm({ cohortId: _cohortId }: SubmitFormProps) {
       form.reset();
       setImages([]);
       toast.success("프로젝트가 제출되었어요.");
-      if (result.projectId) {
-        router.push(`/projects/${result.projectId}`);
-      } else {
-        router.push("/");
-      }
+      // When the user came from a specific entry point (e.g. /settings),
+      // honor it for both success and fallback paths. Otherwise default
+      // to the new project's detail page (which doesn't exist until the
+      // server action returned the id, so it cannot live in backHref).
+      const successHref = backHref ?? `/projects/${result.projectId}`;
+      const fallbackHref = backHref ?? "/";
+      router.push(result.projectId ? successHref : fallbackHref);
     } finally {
       setSubmitting(false);
     }
@@ -197,7 +207,7 @@ export function SubmitForm({ cohortId: _cohortId }: SubmitFormProps) {
 
       <div className="flex justify-end gap-2">
         <Button asChild size="lg" variant="outline">
-          <Link href="/">취소</Link>
+          <Link href={backHref ?? "/"}>취소</Link>
         </Button>
         <Button disabled={submitting} size="lg" type="submit">
           {submitting ? <Spinner data-icon="inline-start" /> : null}

@@ -7,6 +7,7 @@ const DELETE_ACCOUNT_HEADING = /^계정 삭제$/;
 const DANGER_WARNING =
   /프로필, 프로젝트, 추천 기록을 영구 삭제합니다\. 되돌릴 수\s+없습니다\./;
 const DANGER_ZONE_REGION = /^위험 영역$/;
+const NEW_PROJECT_CTA = /새 프로젝트/;
 
 vi.mock("next/link", () => ({
   default: ({
@@ -150,6 +151,23 @@ describe("settings page", () => {
       "내 프로젝트 · 0",
       "위험 영역",
     ]);
+  });
+
+  it("renders the 새 프로젝트 CTA with ?from=settings so the submit flow returns here on save/cancel", async () => {
+    fetchViewerMock.mockResolvedValue({
+      id: "user-1",
+      email: "alice@example.com",
+      displayName: "Alice",
+      avatarUrl: null,
+      cohortId: null,
+    });
+
+    const Page = (await import("./page")).default;
+    const jsx = await Page();
+    render(jsx);
+
+    const cta = screen.getByRole("link", { name: NEW_PROJECT_CTA });
+    expect(cta).toHaveAttribute("href", "/projects/new?from=settings");
   });
 
   it("passes the viewer's cohort label to the settings form", async () => {

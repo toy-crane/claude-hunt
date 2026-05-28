@@ -4,7 +4,7 @@ import type { ProjectImage } from "@entities/project";
 import { requireAuth } from "@shared/api/supabase/require-auth";
 import { CACHE_TAGS } from "@shared/config/cache-tags";
 import { SCREENSHOT_BUCKET } from "@shared/config/storage";
-import { updateTag } from "next/cache";
+import { revalidatePath, updateTag } from "next/cache";
 
 export interface DeleteProjectInput {
   projectId: string;
@@ -70,5 +70,10 @@ export async function deleteProject(
   }
 
   updateTag(CACHE_TAGS.PROJECTS_GRID);
+  // Invalidate the Next router cache for routes that fetch the user's
+  // own project list outside the PROJECTS_GRID tag (e.g. /settings'
+  // 내 프로젝트 section reads via fetchMyProjects, which is uncached
+  // and untagged).
+  revalidatePath("/settings");
   return { ok: true };
 }

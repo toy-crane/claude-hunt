@@ -7,6 +7,11 @@ vi.mock("../api/actions", () => ({
   deleteProject,
 }));
 
+const routerRefresh = vi.fn();
+vi.mock("next/navigation", () => ({
+  useRouter: () => ({ refresh: routerRefresh }),
+}));
+
 const { DeleteButton } = await import("./delete-button");
 
 describe("DeleteButton — default variant", () => {
@@ -60,5 +65,36 @@ describe("DeleteButton — confirm pending state", () => {
       expect(button.textContent).toContain("삭제");
       expect(button.textContent).not.toContain("삭제 중");
     });
+  });
+});
+
+describe("DeleteButton — post-delete refresh", () => {
+  it("calls router.refresh() after a successful delete so server-rendered lists drop the row", async () => {
+    deleteProject.mockResolvedValue({ ok: true });
+    routerRefresh.mockClear();
+    const user = userEvent.setup();
+    render(<DeleteButton projectId="p1" projectTitle="My App" />);
+
+    await user.click(screen.getByTestId("delete-project-trigger"));
+    await user.click(screen.getByTestId("delete-project-confirm"));
+
+    await waitFor(() => {
+      expect(routerRefresh).toHaveBeenCalledTimes(1);
+    });
+  });
+
+  it("does NOT call router.refresh() when the server action returns ok:false", async () => {
+    deleteProject.mockResolvedValue({ ok: false, error: "forbidden" });
+    routerRefresh.mockClear();
+    const user = userEvent.setup();
+    render(<DeleteButton projectId="p1" projectTitle="My App" />);
+
+    await user.click(screen.getByTestId("delete-project-trigger"));
+    await user.click(screen.getByTestId("delete-project-confirm"));
+
+    await waitFor(() => {
+      expect(screen.getByTestId("delete-project-error")).toBeInTheDocument();
+    });
+    expect(routerRefresh).not.toHaveBeenCalled();
   });
 });

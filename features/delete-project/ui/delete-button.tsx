@@ -12,6 +12,7 @@ import {
   DialogTrigger,
 } from "@shared/ui/dialog";
 import { Spinner } from "@shared/ui/spinner";
+import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { deleteProject } from "../api/actions";
 
@@ -33,6 +34,7 @@ export function DeleteButton({
   projectTitle,
   variant = "default",
 }: DeleteButtonProps) {
+  const router = useRouter();
   const [open, setOpen] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [deleting, setDeleting] = useState(false);
@@ -47,6 +49,10 @@ export function DeleteButton({
       return;
     }
     setOpen(false);
+    // Re-render the route's server components so the deleted row
+    // disappears from any list (e.g. settings 내 프로젝트) without a
+    // manual reload.
+    router.refresh();
   }
 
   return (
