@@ -21,9 +21,18 @@ vi.mock("next/link", () => ({
 }));
 
 const fetchViewerMock = vi.fn();
+const fetchProjectCountMock = vi.fn();
 
 vi.mock("@shared/api/supabase/viewer", () => ({
   fetchViewer: (...args: unknown[]) => fetchViewerMock(...args),
+}));
+
+vi.mock("../api/fetch-project-count", () => ({
+  fetchProjectCount: (...args: unknown[]) => fetchProjectCountMock(...args),
+}));
+
+vi.mock("next/navigation", () => ({
+  usePathname: () => "/",
 }));
 
 vi.mock("@features/auth-login", () => ({
@@ -37,6 +46,8 @@ vi.mock("next-themes", () => ({
 describe("<Header />", () => {
   beforeEach(() => {
     fetchViewerMock.mockReset();
+    fetchProjectCountMock.mockReset();
+    fetchProjectCountMock.mockResolvedValue(45);
   });
 
   it("renders the claude-hunt logo linking to /", async () => {
