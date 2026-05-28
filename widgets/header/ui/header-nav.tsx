@@ -1,6 +1,5 @@
 "use client";
 
-import { RiExternalLinkLine } from "@remixicon/react";
 import { cn } from "@shared/lib/utils";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
@@ -33,10 +32,6 @@ export function HeaderNav({ projectCount, className }: HeaderNavProps) {
       </NavLink>
       <NavLink active={false} external href={DOCS_URL}>
         강의자료
-        <RiExternalLinkLine
-          aria-hidden="true"
-          className="ml-1 size-3 text-muted-foreground"
-        />
       </NavLink>
     </nav>
   );
