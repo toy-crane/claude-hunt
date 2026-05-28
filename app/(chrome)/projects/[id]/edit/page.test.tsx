@@ -4,6 +4,7 @@ import { beforeEach, describe, expect, it, vi } from "vitest";
 
 const REDIRECT_LOGIN = /REDIRECT:\/login/;
 const NOT_FOUND_THROW = /NOT_FOUND/;
+const BACK_TO_SETTINGS_LABEL = /설정으로 돌아가기/;
 
 const redirectMock = vi.fn((to: string) => {
   throw new Error(`REDIRECT:${to}`);
@@ -37,6 +38,7 @@ vi.mock("@widgets/project-detail", () => ({
 }));
 
 interface EditFormProps {
+  backHref?: string;
   initial: {
     githubUrl: string | null;
     imagePaths: string[];
@@ -78,9 +80,12 @@ function makeProject(overrides: Partial<ProjectDetail> = {}): ProjectDetail {
   };
 }
 
-async function renderPage(id: string) {
+async function renderPage(id: string, searchParams: { from?: string } = {}) {
   const Page = (await import("./page")).default;
-  const jsx = await Page({ params: Promise.resolve({ id }) });
+  const jsx = await Page({
+    params: Promise.resolve({ id }),
+    searchParams: Promise.resolve(searchParams),
+  });
   render(jsx);
 }
 
@@ -143,6 +148,7 @@ describe("/projects/[id]/edit page", () => {
     expect(redirectMock).not.toHaveBeenCalled();
     expect(notFoundMock).not.toHaveBeenCalled();
     expect(editFormMock).toHaveBeenCalledWith({
+      backHref: "/projects/proj-1",
       initial: {
         projectId: "proj-1",
         title: "Renamed",
@@ -153,6 +159,22 @@ describe("/projects/[id]/edit page", () => {
         imagePaths: ["owner-1/a.png", "owner-1/b.png"],
       },
     });
+  });
+
+  it("uses /settings as the back href and 설정 link label when from=settings", async () => {
+    fetchViewerMock.mockResolvedValue({ id: "owner-1" });
+    fetchProjectDetailMock.mockResolvedValue(
+      makeProject({ id: "proj-1", user_id: "owner-1" })
+    );
+
+    await renderPage("proj-1", { from: "settings" });
+
+    expect(
+      screen.getByRole("link", { name: BACK_TO_SETTINGS_LABEL })
+    ).toHaveAttribute("href", "/settings");
+    expect(editFormMock).toHaveBeenCalledWith(
+      expect.objectContaining({ backHref: "/settings" })
+    );
   });
 
   it("passes the awaited route param id through to fetchProjectDetail with the viewer id", async () => {
