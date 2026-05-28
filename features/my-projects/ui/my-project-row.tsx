@@ -1,22 +1,25 @@
-import { DeleteButton } from "@features/delete-project";
-import { RiArrowUpLine, RiPencilLine } from "@remixicon/react";
+import { RiArrowUpLine } from "@remixicon/react";
 import { formatDateYmd } from "@shared/lib/format-date";
 import { SHIMMER_DATA_URL } from "@shared/lib/image";
-import { Button } from "@shared/ui/button";
 import Image from "next/image";
-import Link from "next/link";
+import type { ReactNode } from "react";
 import type { MyProjectRow as MyProjectRowData } from "../api/fetch-my-projects";
 
 export interface MyProjectRowProps {
+  /**
+   * Slot rendered in the trailing action cell. The list owner composes
+   * edit/delete controls here so this feature slice never has to know
+   * about peer slices (e.g. @features/delete-project), respecting the
+   * FSD "no cross-slice imports on the same layer" rule.
+   */
+  actions?: ReactNode;
   project: MyProjectRowData;
 }
 
-export function MyProjectRow({ project }: MyProjectRowProps) {
-  const projectId = project.id ?? "";
+export function MyProjectRow({ project, actions }: MyProjectRowProps) {
   const title = project.title ?? "";
   const submittedAt = formatDateYmd(project.created_at);
   const voteCount = project.vote_count ?? 0;
-  const editHref = `/projects/${projectId}/edit?from=settings`;
 
   return (
     <div
@@ -68,24 +71,8 @@ export function MyProjectRow({ project }: MyProjectRowProps) {
         {submittedAt}
       </span>
 
-      {/* Actions */}
-      <div className="flex shrink-0 justify-end gap-1">
-        <Button
-          aria-label="프로젝트 수정"
-          asChild
-          size="icon-sm"
-          variant="outline"
-        >
-          <Link href={editHref}>
-            <RiPencilLine className="size-3.5" />
-          </Link>
-        </Button>
-        <DeleteButton
-          projectId={projectId}
-          projectTitle={title}
-          variant="icon"
-        />
-      </div>
+      {/* Actions slot — owner-provided */}
+      <div className="flex shrink-0 justify-end gap-1">{actions}</div>
     </div>
   );
 }

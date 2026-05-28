@@ -16,22 +16,6 @@ vi.mock("next/image", () => ({
   ),
 }));
 
-// DeleteButton is a complex client component with dialog state — replace
-// with a simple stub so the row test stays focused on layout/links.
-vi.mock("@features/delete-project", () => ({
-  DeleteButton: ({
-    projectId,
-    projectTitle,
-  }: {
-    projectId: string;
-    projectTitle: string;
-  }) => (
-    <button data-project-id={projectId} type="button">
-      삭제 ({projectTitle})
-    </button>
-  ),
-}));
-
 const { MyProjectsList } = await import("./my-projects-list");
 
 const TOTAL_COUNT_RE = /총 2개의 프로젝트/;
@@ -81,14 +65,32 @@ describe("<MyProjectsList />", () => {
     expect(within(rows[1]).getAllByText("42").length).toBeGreaterThan(0);
   });
 
-  it("links each edit action to /projects/{id}/edit?from=settings", () => {
+  it("renders no action controls when renderActions is not provided", () => {
     render(<MyProjectsList projects={[buildProject({ id: "abc-123" })]} />);
 
-    const editLink = screen.getByRole("link", { name: "프로젝트 수정" });
-    expect(editLink).toHaveAttribute(
-      "href",
-      "/projects/abc-123/edit?from=settings"
+    expect(
+      screen.queryByRole("link", { name: "프로젝트 수정" })
+    ).not.toBeInTheDocument();
+  });
+
+  it("renders the owner-supplied renderActions slot for each row", () => {
+    render(
+      <MyProjectsList
+        projects={[buildProject({ id: "p1" }), buildProject({ id: "p2" })]}
+        renderActions={(project) => (
+          <button data-project-id={project.id} type="button">
+            do-something
+          </button>
+        )}
+      />
     );
+
+    const actionButtons = screen.getAllByRole("button", {
+      name: "do-something",
+    });
+    expect(actionButtons).toHaveLength(2);
+    expect(actionButtons[0]).toHaveAttribute("data-project-id", "p1");
+    expect(actionButtons[1]).toHaveAttribute("data-project-id", "p2");
   });
 
   it("shows the terminal-style total count footer", () => {

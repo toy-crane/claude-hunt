@@ -56,6 +56,20 @@ vi.mock("@features/my-projects", () => ({
   ),
 }));
 
+vi.mock("@features/delete-project", () => ({
+  DeleteButton: ({
+    projectId,
+    projectTitle,
+  }: {
+    projectId: string;
+    projectTitle: string;
+  }) => (
+    <button data-project-id={projectId} type="button">
+      삭제 ({projectTitle})
+    </button>
+  ),
+}));
+
 vi.mock("@features/withdraw-user", () => ({
   WithdrawDialog: ({ email }: { email: string }) => (
     <div data-email={email} data-testid="withdraw-dialog-stub">
