@@ -38,6 +38,7 @@ vi.mock("sonner", () => ({
 
 const fetchViewerMock = vi.fn();
 const fetchCohortsMock = vi.fn();
+const fetchMyProjectsMock = vi.fn();
 
 vi.mock("@shared/api/supabase/viewer", () => ({
   fetchViewer: (...args: unknown[]) => fetchViewerMock(...args),
@@ -45,6 +46,13 @@ vi.mock("@shared/api/supabase/viewer", () => ({
 
 vi.mock("@features/cohort-filter/server", () => ({
   fetchCohorts: (...args: unknown[]) => fetchCohortsMock(...args),
+}));
+
+vi.mock("@features/my-projects", () => ({
+  fetchMyProjects: (...args: unknown[]) => fetchMyProjectsMock(...args),
+  MyProjectsList: ({ projects }: { projects: { id: string }[] }) => (
+    <div data-count={projects.length} data-testid="my-projects-list-stub" />
+  ),
 }));
 
 vi.mock("@features/withdraw-user", () => ({
@@ -89,6 +97,8 @@ describe("settings page", () => {
     fetchViewerMock.mockReset();
     fetchCohortsMock.mockReset();
     fetchCohortsMock.mockResolvedValue([]);
+    fetchMyProjectsMock.mockReset();
+    fetchMyProjectsMock.mockResolvedValue([]);
     redirectMock.mockClear();
   });
 
@@ -134,8 +144,12 @@ describe("settings page", () => {
 
     const sectionHeadings = screen
       .getAllByRole("heading", { level: 2 })
-      .map((h) => h.textContent?.trim());
-    expect(sectionHeadings).toEqual(["프로필 정보", "위험 영역"]);
+      .map((h) => h.textContent?.replace(/\s+/g, " ").trim());
+    expect(sectionHeadings).toEqual([
+      "프로필 정보",
+      "내 프로젝트 · 0",
+      "위험 영역",
+    ]);
   });
 
   it("passes the viewer's cohort label to the settings form", async () => {
