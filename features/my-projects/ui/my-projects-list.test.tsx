@@ -40,21 +40,11 @@ const NEW_PROJECT_CTA_RE = /새 프로젝트 등록하기/;
 function buildProject(overrides: Partial<MyProjectRow> = {}): MyProjectRow {
   return {
     id: "proj-1",
-    user_id: "user-1",
-    cohort_id: "cohort-1",
-    cohort_label: "LG전자 1기",
-    cohort_name: "LGE-1",
     title: "PR 리뷰 메이트",
     tagline: "Claude에게 PR을 먼저 읽혀서 팀 리뷰 시간을 줄여주는 CLI.",
-    project_url: "https://pr-mate.dev",
-    images: [{ path: "user-1/shot.png" }],
     primary_image_path: "user-1/shot.png",
-    github_url: null,
     created_at: "2026-03-28T10:20:00Z",
-    updated_at: "2026-03-28T10:20:00Z",
     vote_count: 36,
-    author_display_name: "toycrane",
-    author_avatar_url: null,
     screenshotUrl: "https://example.com/shot.png",
     ...overrides,
   };
