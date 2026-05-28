@@ -48,7 +48,7 @@ export default async function Page() {
   if (!winner) {
     return (
       <main className="mx-auto flex min-h-svh w-full max-w-6xl flex-col gap-8 bg-background px-6 py-10 text-foreground">
-        <Eyebrow monthSlug={monthSlug} monthLabel={monthLabel} />
+        <Eyebrow monthLabel={monthLabel} monthSlug={monthSlug} />
         <ProjectsCtaCard projectCount={projectCount} />
       </main>
     );
@@ -56,7 +56,7 @@ export default async function Page() {
 
   return (
     <main className="mx-auto flex min-h-svh w-full max-w-6xl flex-col gap-8 bg-background px-6 py-10 text-foreground">
-      <Eyebrow monthSlug={monthSlug} monthLabel={monthLabel} />
+      <Eyebrow monthLabel={monthLabel} monthSlug={monthSlug} />
       <WinnerSpotlight winner={winner} />
       <RunnerUpsSection runnerUps={runnerUps} />
       <ProjectsCtaCard projectCount={projectCount} />
