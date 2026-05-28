@@ -97,6 +97,17 @@ describe("privacy page (/privacy)", () => {
     );
   });
 
+  it("declares a self-referencing /privacy canonical", async () => {
+    const { metadata } = await import("./page");
+    expect(metadata.alternates?.canonical).toBe("/privacy");
+  });
+
+  it("sets a page-specific description distinct from the layout fallback", async () => {
+    const { metadata } = await import("./page");
+    expect(typeof metadata.description).toBe("string");
+    expect(metadata.description).toMatch(/개인정보/);
+  });
+
   it("shows the effective date 2026년 4월 16일", async () => {
     await renderPage();
     expect(screen.getByText(EFFECTIVE_DATE_TEXT)).toBeInTheDocument();

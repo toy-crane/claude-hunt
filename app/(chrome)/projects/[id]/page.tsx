@@ -61,17 +61,17 @@ export async function generateMetadata({
   const project = await fetchProjectDetail(id, null);
   if (!project) {
     return {
-      title: "프로젝트를 찾을 수 없어요 — 클로드 헌트 (claude-hunt)",
+      title: { absolute: "프로젝트를 찾을 수 없어요 — 클로드 헌트" },
     };
   }
   const description = project.tagline;
-  const cohort = project.cohort_label ? ` · ${project.cohort_label}` : "";
+  const title = `${project.title} — 클로드 헌트`;
   return {
-    title: `${project.title}${cohort} — 클로드 헌트 (claude-hunt)`,
+    title: { absolute: title },
     description,
     alternates: { canonical: `/projects/${project.id}` },
     openGraph: {
-      title: project.title,
+      title,
       description,
       url: `/projects/${project.id}`,
       images: project.primaryImageUrl
@@ -81,7 +81,7 @@ export async function generateMetadata({
     },
     twitter: {
       card: "summary_large_image",
-      title: project.title,
+      title,
       description,
       images: project.primaryImageUrl ? [project.primaryImageUrl] : undefined,
     },

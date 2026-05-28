@@ -5,6 +5,9 @@ import Link from "next/link";
 
 export const metadata: Metadata = {
   title: "서비스 이용약관",
+  description:
+    "클로드 헌트 서비스 이용 시 적용되는 약관과 회원의 권리·의무를 안내합니다.",
+  alternates: { canonical: "/terms" },
 };
 
 const CLAUSES = [

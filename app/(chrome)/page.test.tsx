@@ -173,10 +173,10 @@ describe("home page (/)", () => {
     expect(screen.getByText("2026년 4월의 1위 프로젝트")).toBeInTheDocument();
   });
 
-  it("uses an absolute title matching the hero heading", async () => {
+  it("uses an absolute title with the brand suffix matching the projects-page convention", async () => {
     const { metadata } = await import("./page");
     expect(metadata.title).toEqual(
-      expect.objectContaining({ absolute: "이달의 클로드 헌트" })
+      expect.objectContaining({ absolute: "이달의 프로젝트 — 클로드 헌트" })
     );
   });
 

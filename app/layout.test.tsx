@@ -24,18 +24,18 @@ const META_DESCRIPTION =
   "Claude Code 수강생들이 만든 프로젝트를 둘러보고 응원해 보세요.";
 
 describe("app/layout metadata", () => {
-  it("sets the default title to the bilingual brand", () => {
+  it("sets the default title to the Korean brand", () => {
     expect(metadata.title).toEqual(
       expect.objectContaining({
-        default: "클로드 헌트 (claude-hunt)",
+        default: "클로드 헌트",
       })
     );
   });
 
-  it("uses a title template ending in the bilingual brand", () => {
+  it("uses a title template ending in the Korean brand with an em-dash separator", () => {
     expect(metadata.title).toEqual(
       expect.objectContaining({
-        template: "%s · 클로드 헌트 (claude-hunt)",
+        template: "%s — 클로드 헌트",
       })
     );
   });
@@ -44,20 +44,20 @@ describe("app/layout metadata", () => {
     expect(metadata.description).toBe(META_DESCRIPTION);
   });
 
-  it("sets an openGraph title containing 'claude-hunt'", () => {
+  it("sets an openGraph title containing the Korean brand", () => {
     const og = metadata.openGraph;
     expect(og).toBeDefined();
-    expect(String(og?.title)).toContain("claude-hunt");
+    expect(String(og?.title)).toContain("클로드 헌트");
   });
 
   it("sets the openGraph description to the keyword-rich Korean copy", () => {
     expect(metadata.openGraph?.description).toBe(META_DESCRIPTION);
   });
 
-  it("sets a twitter title containing 'claude-hunt'", () => {
+  it("sets a twitter title containing the Korean brand", () => {
     const tw = metadata.twitter;
     expect(tw).toBeDefined();
-    expect(String(tw?.title)).toContain("claude-hunt");
+    expect(String(tw?.title)).toContain("클로드 헌트");
   });
 
   it("sets the twitter description to the keyword-rich Korean copy", () => {

@@ -18,7 +18,7 @@ const fontHeading = JetBrains_Mono({
 const TAGLINE = "Claude Code 수강생들의 프로젝트";
 const META_DESCRIPTION =
   "Claude Code 수강생들이 만든 프로젝트를 둘러보고 응원해 보세요.";
-const SOCIAL_TITLE = `클로드 헌트 (claude-hunt) · ${TAGLINE}`;
+const SOCIAL_TITLE = `클로드 헌트 — ${TAGLINE}`;
 
 // SearchAction omitted — claude-hunt has no on-site search endpoint.
 export const SITE_JSON_LD = {
@@ -48,8 +48,8 @@ const SITE_JSON_LD_HTML = JSON.stringify(SITE_JSON_LD);
 export const metadata: Metadata = {
   metadataBase: new URL(SITE_URL),
   title: {
-    default: "클로드 헌트 (claude-hunt)",
-    template: "%s · 클로드 헌트 (claude-hunt)",
+    default: "클로드 헌트",
+    template: "%s — 클로드 헌트",
   },
   description: META_DESCRIPTION,
   keywords: [
@@ -75,7 +75,7 @@ export const metadata: Metadata = {
     title: SOCIAL_TITLE,
     description: META_DESCRIPTION,
     type: "website",
-    siteName: "클로드 헌트 (claude-hunt)",
+    siteName: "클로드 헌트",
   },
   twitter: {
     card: "summary_large_image",
