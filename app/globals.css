@@ -150,6 +150,16 @@
   }
 }
 
+.site-header {
+  transition:
+    backdrop-filter 180ms ease,
+    background 180ms ease;
+}
+html.is-scrolled .site-header {
+  background: color-mix(in oklch, var(--background) 80%, transparent);
+  backdrop-filter: saturate(140%) blur(8px);
+}
+
 @media (prefers-reduced-motion: reduce) {
   ::view-transition-old(*),
   ::view-transition-new(*),
@@ -157,5 +167,8 @@
   ::view-transition-image-pair(*) {
     animation-duration: 0s !important;
     animation-delay: 0s !important;
+  }
+  .site-header {
+    transition: none;
   }
 }
