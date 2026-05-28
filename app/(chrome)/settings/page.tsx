@@ -70,7 +70,7 @@ export default async function SettingsPage() {
             <span className="font-mono font-normal">· {myProjects.length}</span>
           </h2>
           <Button asChild size="sm">
-            <Link href="/projects/new?from=settings">
+            <Link href="/projects/new?next=/settings">
               <RiAddLine />새 프로젝트
             </Link>
           </Button>

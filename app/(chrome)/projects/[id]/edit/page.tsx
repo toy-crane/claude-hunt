@@ -1,6 +1,7 @@
 import { EditForm } from "@features/edit-project";
 import { fetchViewer } from "@shared/api/supabase/viewer";
 import { NOINDEX_METADATA } from "@shared/config/site";
+import { sanitizeNextPath } from "@shared/lib/safe-next-path";
 import { fetchProjectDetail } from "@widgets/project-detail";
 import type { Metadata } from "next";
 import Link from "next/link";
@@ -10,11 +11,23 @@ export const metadata: Metadata = NOINDEX_METADATA;
 
 interface PageProps {
   params: Promise<{ id: string }>;
-  searchParams: Promise<{ from?: string }>;
+  searchParams: Promise<{ next?: string | string[] }>;
+}
+
+/**
+ * Pick a human label for the back link based on the resolved `next`
+ * path. Keeps the page agnostic to the set of entry-point names —
+ * adding a new caller only needs a route + a label entry here.
+ */
+function backLabelFor(href: string): string {
+  if (href === "/settings") {
+    return "← 설정으로 돌아가기";
+  }
+  return "← 상세 페이지로 돌아가기";
 }
 
 export default async function Page({ params, searchParams }: PageProps) {
-  const [{ id }, { from }] = await Promise.all([params, searchParams]);
+  const [{ id }, { next }] = await Promise.all([params, searchParams]);
   const viewer = await fetchViewer();
   if (!viewer) {
     redirect("/login");
@@ -29,11 +42,8 @@ export default async function Page({ params, searchParams }: PageProps) {
     notFound();
   }
 
-  const fromSettings = from === "settings";
-  const backHref = fromSettings ? "/settings" : `/projects/${project.id}`;
-  const backLabel = fromSettings
-    ? "← 설정으로 돌아가기"
-    : "← 상세 페이지로 돌아가기";
+  const backHref = sanitizeNextPath(next, `/projects/${project.id}`);
+  const backLabel = backLabelFor(backHref);
 
   return (
     <main className="mx-auto flex min-h-svh w-full max-w-2xl flex-col gap-6 bg-background p-6 text-foreground">

@@ -22,7 +22,7 @@ export function MyProjectRow({ project }: MyProjectRowProps) {
   const title = project.title ?? "";
   const submittedAt = formatSubmittedDate(project.created_at);
   const voteCount = project.vote_count ?? 0;
-  const editHref = `/projects/${projectId}/edit?from=settings`;
+  const editHref = `/projects/${projectId}/edit?next=/settings`;
 
   return (
     <div
