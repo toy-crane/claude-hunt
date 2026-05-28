@@ -40,7 +40,7 @@ export function buildProjectJsonLd(project: ProjectDetail) {
           {
             "@type": "ListItem",
             position: 1,
-            name: "claude-hunt",
+            name: "클로드 헌트",
             item: `${SITE_URL}/`,
           },
           {
@@ -61,13 +61,13 @@ export async function generateMetadata({
   const project = await fetchProjectDetail(id, null);
   if (!project) {
     return {
-      title: "프로젝트를 찾을 수 없어요 — claude-hunt",
+      title: "프로젝트를 찾을 수 없어요 — 클로드 헌트 (claude-hunt)",
     };
   }
   const description = project.tagline;
   const cohort = project.cohort_label ? ` · ${project.cohort_label}` : "";
   return {
-    title: `${project.title}${cohort} — claude-hunt`,
+    title: `${project.title}${cohort} — 클로드 헌트 (claude-hunt)`,
     description,
     alternates: { canonical: `/projects/${project.id}` },
     openGraph: {

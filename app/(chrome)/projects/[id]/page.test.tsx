@@ -84,7 +84,7 @@ describe("buildProjectJsonLd", () => {
         {
           "@type": "ListItem",
           position: 1,
-          name: "claude-hunt",
+          name: "클로드 헌트",
           item: "https://www.claude-hunt.com/",
         },
         {

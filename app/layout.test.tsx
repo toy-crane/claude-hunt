@@ -20,26 +20,28 @@ const { metadata, SITE_JSON_LD } = await import("./layout");
 
 const ENGLISH_TAGLINE = /Discover|cohort|showcase/i;
 const LOCAL_HOST = /localhost|127\.0\.0\.1/;
+const META_DESCRIPTION =
+  "Claude Code 수강생들이 만든 프로젝트를 둘러보고 응원해 보세요.";
 
 describe("app/layout metadata", () => {
-  it("sets the default title to 'claude-hunt'", () => {
+  it("sets the default title to the bilingual brand", () => {
     expect(metadata.title).toEqual(
       expect.objectContaining({
-        default: "claude-hunt",
+        default: "클로드 헌트 (claude-hunt)",
       })
     );
   });
 
-  it("uses a title template ending in '· claude-hunt'", () => {
+  it("uses a title template ending in the bilingual brand", () => {
     expect(metadata.title).toEqual(
       expect.objectContaining({
-        template: "%s · claude-hunt",
+        template: "%s · 클로드 헌트 (claude-hunt)",
       })
     );
   });
 
-  it("uses the Korean tagline as the description", () => {
-    expect(metadata.description).toBe("함께 배우는 사람들의 프로젝트");
+  it("uses the keyword-rich Korean description", () => {
+    expect(metadata.description).toBe(META_DESCRIPTION);
   });
 
   it("sets an openGraph title containing 'claude-hunt'", () => {
@@ -48,10 +50,8 @@ describe("app/layout metadata", () => {
     expect(String(og?.title)).toContain("claude-hunt");
   });
 
-  it("sets the openGraph description to the Korean tagline", () => {
-    expect(metadata.openGraph?.description).toBe(
-      "함께 배우는 사람들의 프로젝트"
-    );
+  it("sets the openGraph description to the keyword-rich Korean copy", () => {
+    expect(metadata.openGraph?.description).toBe(META_DESCRIPTION);
   });
 
   it("sets a twitter title containing 'claude-hunt'", () => {
@@ -60,9 +60,9 @@ describe("app/layout metadata", () => {
     expect(String(tw?.title)).toContain("claude-hunt");
   });
 
-  it("sets the twitter description to the Korean tagline", () => {
+  it("sets the twitter description to the keyword-rich Korean copy", () => {
     const twitter = metadata.twitter as { description?: string };
-    expect(twitter.description).toBe("함께 배우는 사람들의 프로젝트");
+    expect(twitter.description).toBe(META_DESCRIPTION);
   });
 
   it("does not leak English copy in description fields", () => {
@@ -110,6 +110,12 @@ describe("app/layout metadata", () => {
     );
   });
 
+  it("also includes Korean keyword variants for native search matching", () => {
+    expect(metadata.keywords).toEqual(
+      expect.arrayContaining(["클로드 코드", "AI 코딩", "바이브 코딩"])
+    );
+  });
+
   it("does not include the loanword '코호트' in user-facing keywords", () => {
     const json = JSON.stringify(metadata.keywords ?? []);
     expect(json).not.toContain("코호트");
@@ -143,5 +149,11 @@ describe("app/layout JSON-LD", () => {
       (node) => node["@type"] === "WebSite"
     );
     expect(website).not.toHaveProperty("potentialAction");
+  });
+
+  it("declares the Korean brand as alternateName on both WebSite and Organization", () => {
+    for (const node of SITE_JSON_LD["@graph"]) {
+      expect(node).toMatchObject({ alternateName: "클로드 헌트" });
+    }
   });
 });

@@ -8,11 +8,11 @@ import { ProjectBoard } from "./_components/project-board";
 import { homeSearchParamsCache } from "./_search-params";
 
 // Absolute (no template) keeps the SERP title under ~60 chars.
-const HOME_TITLE = "claude-hunt — 오늘의 Claude Hunt";
+const HOME_TITLE = "오늘의 클로드 헌트 — Claude Code 수강생 프로젝트";
 const HOME_DESCRIPTION =
-  "Claude Code 수강생들이 만든 작품을 둘러보고 응원해 주세요.";
-const HOME_HERO_HEADING = "오늘의 Claude Hunt";
-const HOME_HERO_LEAD = "수강생들이 만든 작품을 둘러보고 응원해 주세요.";
+  "Claude Code 수강생들이 만든 프로젝트를 둘러보고 응원해 주세요.";
+const HOME_HERO_HEADING = "오늘의 클로드 헌트";
+const HOME_HERO_LEAD = "수강생들이 만든 프로젝트를 둘러보고 응원해 주세요.";
 
 export const metadata: Metadata = {
   title: { absolute: HOME_TITLE },
