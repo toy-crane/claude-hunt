@@ -1,3 +1,4 @@
+export type { EyebrowProps } from "./ui/eyebrow";
 export { Eyebrow } from "./ui/eyebrow";
 export type { ProjectsCtaCardProps } from "./ui/projects-cta-card";
 export { ProjectsCtaCard } from "./ui/projects-cta-card";

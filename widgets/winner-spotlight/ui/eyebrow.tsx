@@ -1,9 +1,11 @@
-import { currentMonthLabel, currentMonthSlug } from "../lib/format";
+export interface EyebrowProps {
+  /** "2026년 5월" rendered in the subtitle. */
+  monthLabel: string;
+  /** "YYYY-MM" rendered inside the terminal-style prompt. */
+  monthSlug: string;
+}
 
-export function Eyebrow() {
-  const monthSlug = currentMonthSlug();
-  const monthLabel = currentMonthLabel();
-
+export function Eyebrow({ monthSlug, monthLabel }: EyebrowProps) {
   return (
     <div className="flex flex-col items-start gap-2">
       <div className="inline-flex items-center gap-2 font-mono text-[11px] text-muted-foreground">

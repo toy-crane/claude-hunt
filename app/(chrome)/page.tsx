@@ -33,7 +33,7 @@ export const metadata: Metadata = {
 
 export default async function Page() {
   const viewer = await fetchViewer();
-  const [topProjects, projectCount] = await Promise.all([
+  const [monthly, projectCount] = await Promise.all([
     fetchMonthlyTopProjects({
       limit: 4,
       viewerUserId: viewer?.id ?? null,
@@ -41,13 +41,14 @@ export default async function Page() {
     fetchProjectCount(),
   ]);
 
-  const winner = topProjects[0];
-  const runnerUps = topProjects.slice(1, 4);
+  const { projects, monthSlug, monthLabel } = monthly;
+  const winner = projects[0];
+  const runnerUps = projects.slice(1, 4);
 
   if (!winner) {
     return (
       <main className="mx-auto flex min-h-svh w-full max-w-6xl flex-col gap-8 bg-background px-6 py-10 text-foreground">
-        <Eyebrow />
+        <Eyebrow monthLabel={monthLabel} monthSlug={monthSlug} />
         <ProjectsCtaCard projectCount={projectCount} />
       </main>
     );
@@ -55,7 +56,7 @@ export default async function Page() {
 
   return (
     <main className="mx-auto flex min-h-svh w-full max-w-6xl flex-col gap-8 bg-background px-6 py-10 text-foreground">
-      <Eyebrow />
+      <Eyebrow monthLabel={monthLabel} monthSlug={monthSlug} />
       <WinnerSpotlight winner={winner} />
       <RunnerUpsSection runnerUps={runnerUps} />
       <ProjectsCtaCard projectCount={projectCount} />
