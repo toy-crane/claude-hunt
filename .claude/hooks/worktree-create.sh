@@ -45,5 +45,15 @@ done
 echo "Running bun install..." >&2
 (cd "$WORKTREE_PATH" && bun install) >&2
 
+# Start dev server in background (portless gives it <branch>.claude-hunt.localhost)
+# PID file lives in /tmp so worktree-remove.sh can find it after the worktree dir is gone
+SAFE_NAME="${NAME//\//-}"
+LOG_FILE="/tmp/claude-hunt-dev-${SAFE_NAME}.log"
+PID_FILE="/tmp/claude-hunt-dev-${SAFE_NAME}.pid"
+echo "Starting dev server in background (log: $LOG_FILE)..." >&2
+nohup bash -c "cd '$WORKTREE_PATH' && exec bun run dev" >"$LOG_FILE" 2>&1 </dev/null &
+echo $! >"$PID_FILE"
+echo "Dev URL: https://${SAFE_NAME}.claude-hunt.localhost (PID $(cat "$PID_FILE"))" >&2
+
 # Print the absolute path to stdout (required by Claude Code)
 echo "$WORKTREE_PATH"

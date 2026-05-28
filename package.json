@@ -3,8 +3,9 @@
   "version": "0.0.1",
   "type": "module",
   "private": true,
+  "portless": "claude-hunt",
   "scripts": {
-    "dev": "next dev --turbopack",
+    "dev": "portless run next dev --turbopack",
     "build": "next build",
     "start": "next start",
     "typecheck": "tsc --noEmit",
