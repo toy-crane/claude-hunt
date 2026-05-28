@@ -4,12 +4,12 @@ import type { MetadataRoute } from "next";
 
 export const revalidate = 3600;
 
-const STATIC_PATHS = ["/", "/privacy", "/terms"] as const;
+const STATIC_PATHS = ["/", "/projects", "/privacy", "/terms"] as const;
 
 // Fixed lastmod for static pages — using `new Date()` on every revalidation
 // signals fake freshness to crawlers. Bump manually when a static page's
 // content actually changes.
-const STATIC_LAST_MODIFIED = new Date("2026-05-12T00:00:00Z");
+const STATIC_LAST_MODIFIED = new Date("2026-05-28T00:00:00Z");
 
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   const staticEntries: MetadataRoute.Sitemap = STATIC_PATHS.map((path) => ({

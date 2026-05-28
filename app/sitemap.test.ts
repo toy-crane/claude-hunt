@@ -25,19 +25,11 @@ describe("sitemap", () => {
     expect(urls).toEqual(
       expect.arrayContaining([
         "https://www.claude-hunt.com/",
+        "https://www.claude-hunt.com/projects",
         "https://www.claude-hunt.com/privacy",
         "https://www.claude-hunt.com/terms",
       ])
     );
-  });
-
-  it("does not list /projects (it 301-redirects to /)", async () => {
-    selectMock.mockResolvedValue({ data: [], error: null });
-    const sitemap = (await import("./sitemap")).default;
-
-    const urls = (await sitemap()).map((entry) => entry.url);
-
-    expect(urls).not.toContain("https://www.claude-hunt.com/projects");
   });
 
   it("adds one entry per project with its updated_at as lastModified", async () => {
@@ -71,7 +63,7 @@ describe("sitemap", () => {
 
     const entries = await sitemap();
 
-    expect(entries).toHaveLength(3);
+    expect(entries).toHaveLength(4);
     expect(entries.every((entry) => !entry.url.includes("/projects/"))).toBe(
       true
     );
