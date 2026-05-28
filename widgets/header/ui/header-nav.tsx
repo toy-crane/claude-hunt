@@ -1,8 +1,11 @@
 "use client";
 
+import { RiExternalLinkLine } from "@remixicon/react";
 import { cn } from "@shared/lib/utils";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
+
+const DOCS_URL = "https://docs.claude-hunt.com/";
 
 export interface HeaderNavProps {
   className?: string;
@@ -28,6 +31,13 @@ export function HeaderNav({ projectCount, className }: HeaderNavProps) {
           {projectCount}
         </span>
       </NavLink>
+      <NavLink active={false} external href={DOCS_URL}>
+        강의자료
+        <RiExternalLinkLine
+          aria-hidden="true"
+          className="ml-1 size-3 text-muted-foreground"
+        />
+      </NavLink>
     </nav>
   );
 }
@@ -35,20 +45,32 @@ export function HeaderNav({ projectCount, className }: HeaderNavProps) {
 interface NavLinkProps {
   active: boolean;
   children: React.ReactNode;
+  external?: boolean;
   href: string;
 }
 
-function NavLink({ active, children, href }: NavLinkProps) {
+function NavLink({ active, children, external, href }: NavLinkProps) {
+  const className = cn(
+    "-mb-px inline-flex items-center border-b px-2.5 py-1.5 text-xs",
+    active
+      ? "border-foreground font-medium text-foreground"
+      : "border-transparent text-muted-foreground"
+  );
+
+  if (external) {
+    return (
+      <a
+        className={className}
+        href={href}
+        rel="noopener noreferrer"
+        target="_blank"
+      >
+        {children}
+      </a>
+    );
+  }
   return (
-    <Link
-      className={cn(
-        "-mb-px border-b px-2.5 py-1.5 text-xs",
-        active
-          ? "border-foreground font-medium text-foreground"
-          : "border-transparent text-muted-foreground"
-      )}
-      href={href}
-    >
+    <Link className={className} href={href}>
       {children}
     </Link>
   );
