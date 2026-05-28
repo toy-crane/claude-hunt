@@ -7,7 +7,6 @@ import {
 import { formatRelativeKo } from "@shared/lib/format-relative";
 import { Badge } from "@shared/ui/badge";
 import { Button } from "@shared/ui/button";
-import Link from "next/link";
 import type { ProjectDetail } from "../api/queries";
 import { ImageGallery } from "./image-gallery";
 import { OwnerControls } from "./owner-controls";
@@ -32,15 +31,6 @@ export function Hero({ project, isAuthenticated, viewerUserId }: HeroProps) {
 
   return (
     <article className="flex flex-col gap-4">
-      <div>
-        <Link
-          className="inline-flex items-center gap-1 text-muted-foreground text-sm hover:text-foreground"
-          href="/"
-        >
-          ← 보드로 돌아가기
-        </Link>
-      </div>
-
       <header className="flex items-start justify-between gap-3">
         <div className="flex min-w-0 flex-col gap-2">
           <h1 className="font-heading font-medium text-2xl">{project.title}</h1>

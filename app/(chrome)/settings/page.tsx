@@ -1,12 +1,10 @@
 import { fetchCohorts } from "@features/cohort-filter/server";
 import { SettingsForm } from "@features/settings";
 import { WithdrawDialog } from "@features/withdraw-user";
-import { RiArrowLeftLine } from "@remixicon/react";
 import { fetchViewer } from "@shared/api/supabase/viewer";
 import { NOINDEX_METADATA } from "@shared/config/site";
 import { Card, CardContent } from "@shared/ui/card";
 import type { Metadata } from "next";
-import Link from "next/link";
 import { redirect } from "next/navigation";
 
 export const metadata: Metadata = {
@@ -25,17 +23,7 @@ export default async function SettingsPage() {
 
   return (
     <main className="mx-auto flex min-h-svh w-full max-w-2xl flex-col gap-8 p-6">
-      <div className="flex flex-col gap-6">
-        <Link
-          className="inline-flex w-fit items-center gap-1 text-muted-foreground text-xs hover:text-foreground"
-          href="/"
-        >
-          <RiArrowLeftLine />
-          <span>홈으로 돌아가기</span>
-        </Link>
-
-        <h1 className="font-heading font-medium text-2xl">설정</h1>
-      </div>
+      <h1 className="font-heading font-medium text-2xl">설정</h1>
 
       <section
         aria-labelledby="settings-profile-heading"
