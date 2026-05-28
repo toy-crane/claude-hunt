@@ -153,7 +153,7 @@ describe("settings page", () => {
     ]);
   });
 
-  it("renders the 새 프로젝트 CTA with ?from=settings so the submit flow returns here on save/cancel", async () => {
+  it("renders the 새 프로젝트 CTA with ?next=/settings so the submit flow returns here on save/cancel", async () => {
     fetchViewerMock.mockResolvedValue({
       id: "user-1",
       email: "alice@example.com",
@@ -167,7 +167,7 @@ describe("settings page", () => {
     render(jsx);
 
     const cta = screen.getByRole("link", { name: NEW_PROJECT_CTA });
-    expect(cta).toHaveAttribute("href", "/projects/new?from=settings");
+    expect(cta).toHaveAttribute("href", "/projects/new?next=/settings");
   });
 
   it("passes the viewer's cohort label to the settings form", async () => {

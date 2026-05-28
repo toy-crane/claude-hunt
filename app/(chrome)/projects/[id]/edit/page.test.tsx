@@ -80,7 +80,10 @@ function makeProject(overrides: Partial<ProjectDetail> = {}): ProjectDetail {
   };
 }
 
-async function renderPage(id: string, searchParams: { from?: string } = {}) {
+async function renderPage(
+  id: string,
+  searchParams: { next?: string | string[] } = {}
+) {
   const Page = (await import("./page")).default;
   const jsx = await Page({
     params: Promise.resolve({ id }),
@@ -161,19 +164,45 @@ describe("/projects/[id]/edit page", () => {
     });
   });
 
-  it("uses /settings as the back href and 설정 link label when from=settings", async () => {
+  it("uses /settings as the back href and 설정 link label when next=/settings", async () => {
     fetchViewerMock.mockResolvedValue({ id: "owner-1" });
     fetchProjectDetailMock.mockResolvedValue(
       makeProject({ id: "proj-1", user_id: "owner-1" })
     );
 
-    await renderPage("proj-1", { from: "settings" });
+    await renderPage("proj-1", { next: "/settings" });
 
     expect(
       screen.getByRole("link", { name: BACK_TO_SETTINGS_LABEL })
     ).toHaveAttribute("href", "/settings");
     expect(editFormMock).toHaveBeenCalledWith(
       expect.objectContaining({ backHref: "/settings" })
+    );
+  });
+
+  it("falls back to the project detail page when next is cross-origin (//evil.com)", async () => {
+    fetchViewerMock.mockResolvedValue({ id: "owner-1" });
+    fetchProjectDetailMock.mockResolvedValue(
+      makeProject({ id: "proj-1", user_id: "owner-1" })
+    );
+
+    await renderPage("proj-1", { next: "//evil.com/path" });
+
+    expect(editFormMock).toHaveBeenCalledWith(
+      expect.objectContaining({ backHref: "/projects/proj-1" })
+    );
+  });
+
+  it("falls back to the project detail page when next is an array (duplicated query)", async () => {
+    fetchViewerMock.mockResolvedValue({ id: "owner-1" });
+    fetchProjectDetailMock.mockResolvedValue(
+      makeProject({ id: "proj-1", user_id: "owner-1" })
+    );
+
+    await renderPage("proj-1", { next: ["/settings", "/anywhere"] });
+
+    expect(editFormMock).toHaveBeenCalledWith(
+      expect.objectContaining({ backHref: "/projects/proj-1" })
     );
   });
 

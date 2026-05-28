@@ -91,13 +91,13 @@ describe("<MyProjectsList />", () => {
     expect(within(rows[1]).getAllByText("42").length).toBeGreaterThan(0);
   });
 
-  it("links each edit action to /projects/{id}/edit?from=settings", () => {
+  it("links each edit action to /projects/{id}/edit?next=/settings", () => {
     render(<MyProjectsList projects={[buildProject({ id: "abc-123" })]} />);
 
     const editLink = screen.getByRole("link", { name: "프로젝트 수정" });
     expect(editLink).toHaveAttribute(
       "href",
-      "/projects/abc-123/edit?from=settings"
+      "/projects/abc-123/edit?next=/settings"
     );
   });
 
@@ -119,7 +119,7 @@ describe("<MyProjectsList />", () => {
     ).toBeInTheDocument();
 
     const cta = screen.getByRole("link", { name: NEW_PROJECT_CTA_RE });
-    expect(cta).toHaveAttribute("href", "/projects/new?from=settings");
+    expect(cta).toHaveAttribute("href", "/projects/new?next=/settings");
 
     // No table rows when empty.
     expect(screen.queryAllByTestId("my-project-row")).toHaveLength(0);
