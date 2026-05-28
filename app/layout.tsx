@@ -16,7 +16,9 @@ const fontHeading = JetBrains_Mono({
 });
 
 const TAGLINE = "함께 배우는 사람들의 프로젝트";
-const SOCIAL_TITLE = `claude-hunt · ${TAGLINE}`;
+const META_DESCRIPTION =
+  "Claude Code 수강생들이 만든 프로젝트를 둘러보고 응원해 보세요.";
+const SOCIAL_TITLE = `클로드 헌트 (claude-hunt) · ${TAGLINE}`;
 
 // SearchAction omitted — claude-hunt has no on-site search endpoint.
 export const SITE_JSON_LD = {
@@ -26,6 +28,7 @@ export const SITE_JSON_LD = {
       "@type": "WebSite",
       "@id": `${SITE_URL}/#website`,
       name: "claude-hunt",
+      alternateName: "클로드 헌트",
       url: SITE_URL,
       inLanguage: "ko",
     },
@@ -33,6 +36,7 @@ export const SITE_JSON_LD = {
       "@type": "Organization",
       "@id": `${SITE_URL}/#org`,
       name: "claude-hunt",
+      alternateName: "클로드 헌트",
       url: SITE_URL,
       logo: `${SITE_URL}/icon.png`,
     },
@@ -44,15 +48,20 @@ const SITE_JSON_LD_HTML = JSON.stringify(SITE_JSON_LD);
 export const metadata: Metadata = {
   metadataBase: new URL(SITE_URL),
   title: {
-    default: "claude-hunt",
-    template: "%s · claude-hunt",
+    default: "클로드 헌트 (claude-hunt)",
+    template: "%s · 클로드 헌트 (claude-hunt)",
   },
-  description: TAGLINE,
+  description: META_DESCRIPTION,
   keywords: [
     "Claude Code",
+    "클로드 코드",
     "Claude Code 클래스",
-    "수강생 프로젝트",
+    "클래스 수강생 프로젝트",
     "AI coding",
+    "AI 코딩",
+    "바이브 코딩",
+    "수강생 프로젝트",
+    "학습자 프로젝트",
     "showcase",
   ],
   robots: {
@@ -64,14 +73,14 @@ export const metadata: Metadata = {
   },
   openGraph: {
     title: SOCIAL_TITLE,
-    description: TAGLINE,
+    description: META_DESCRIPTION,
     type: "website",
-    siteName: "claude-hunt",
+    siteName: "클로드 헌트 (claude-hunt)",
   },
   twitter: {
     card: "summary_large_image",
     title: SOCIAL_TITLE,
-    description: TAGLINE,
+    description: META_DESCRIPTION,
   },
 };
 

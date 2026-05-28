@@ -153,7 +153,7 @@ describe("home page", () => {
     await renderPage();
     expect(
       screen.getByRole("heading", {
-        name: "오늘의 Claude Hunt",
+        name: "오늘의 클로드 헌트",
         level: 1,
       })
     ).toBeInTheDocument();
@@ -171,7 +171,7 @@ describe("home page", () => {
     const { metadata } = await import("./page");
     expect(metadata.title).toEqual(
       expect.objectContaining({
-        absolute: expect.stringContaining("claude-hunt"),
+        absolute: expect.stringContaining("클로드 헌트"),
       })
     );
   });
