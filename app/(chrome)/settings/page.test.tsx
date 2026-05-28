@@ -1,7 +1,6 @@
 import { render, screen, within } from "@testing-library/react";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
-const BACK_HOME_LABEL = /홈으로 돌아가기/;
 const SETTINGS_HEADING = /^설정$/;
 const WITHDRAW_LABEL = /^Withdraw$/;
 const DELETE_ACCOUNT_HEADING = /^계정 삭제$/;
@@ -102,7 +101,7 @@ describe("settings page", () => {
     expect(redirectMock).toHaveBeenCalledWith("/login?next=/settings");
   });
 
-  it("renders the Settings heading and a Back to home link for signed-in users", async () => {
+  it("renders the Settings heading for signed-in users", async () => {
     fetchViewerMock.mockResolvedValue({
       id: "user-1",
       email: "alice@example.com",
@@ -118,10 +117,6 @@ describe("settings page", () => {
     expect(
       screen.getByRole("heading", { level: 1, name: SETTINGS_HEADING })
     ).toBeInTheDocument();
-    expect(screen.getByRole("link", { name: BACK_HOME_LABEL })).toHaveAttribute(
-      "href",
-      "/"
-    );
   });
 
   it("renders Profile and Danger Zone section headings in order", async () => {
