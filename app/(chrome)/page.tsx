@@ -10,6 +10,8 @@ import { fetchMonthlyTopProjects } from "@widgets/winner-spotlight/server";
 import type { Metadata } from "next";
 
 const HOME_TITLE = "이달의 클로드 헌트";
+const HOME_SOCIAL_TITLE =
+  "클로드 헌트 · Claude Code 수강생들의 이달의 베스트 프로젝트";
 const HOME_DESCRIPTION =
   "이번 달 1위 프로젝트와 함께 사랑받은 인기 프로젝트들을 만나보세요.";
 
@@ -18,13 +20,13 @@ export const metadata: Metadata = {
   description: HOME_DESCRIPTION,
   alternates: { canonical: "/" },
   openGraph: {
-    title: HOME_TITLE,
+    title: HOME_SOCIAL_TITLE,
     description: HOME_DESCRIPTION,
     url: "/",
     type: "website",
   },
   twitter: {
-    title: HOME_TITLE,
+    title: HOME_SOCIAL_TITLE,
     description: HOME_DESCRIPTION,
   },
 };
