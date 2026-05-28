@@ -29,6 +29,7 @@ const CLAUSE_14_TITLE = /제14조/;
 const KR_LAW_TEXT = /대한민국/;
 const SEOUL_COURT_TEXT = /서울중앙지방법원/;
 const CLAUSE_14_SENTENCE = /본 약관은 2026년 4월 16일부터 시행됩니다\./;
+const META_DESCRIPTION_KEYWORD = /약관/;
 
 const EXPECTED_SECTION_HEADINGS = [
   /^제1조 \(목적\)$/,
@@ -71,7 +72,7 @@ describe("terms page (/terms)", () => {
   it("sets a page-specific description distinct from the layout fallback", async () => {
     const { metadata } = await import("./page");
     expect(typeof metadata.description).toBe("string");
-    expect(metadata.description).toMatch(/약관/);
+    expect(metadata.description).toMatch(META_DESCRIPTION_KEYWORD);
   });
 
   it("shows the effective date 2026년 4월 16일", async () => {

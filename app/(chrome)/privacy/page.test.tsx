@@ -24,6 +24,7 @@ async function renderPage() {
 const EFFECTIVE_DATE_TEXT = /시행일:\s*2026년\s*4월\s*16일/;
 const BACK_LINK_LABEL = /홈으로/;
 const DPO_EMAIL_TEXT = /alwaysfun2183@gmail\.com/;
+const META_DESCRIPTION_KEYWORD = /개인정보/;
 
 const EXPECTED_SECTION_HEADINGS = [
   /^1\.\s*개인정보의 처리 목적$/,
@@ -105,7 +106,7 @@ describe("privacy page (/privacy)", () => {
   it("sets a page-specific description distinct from the layout fallback", async () => {
     const { metadata } = await import("./page");
     expect(typeof metadata.description).toBe("string");
-    expect(metadata.description).toMatch(/개인정보/);
+    expect(metadata.description).toMatch(META_DESCRIPTION_KEYWORD);
   });
 
   it("shows the effective date 2026년 4월 16일", async () => {
