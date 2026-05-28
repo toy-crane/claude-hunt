@@ -119,7 +119,7 @@ describe("<MyProjectsList />", () => {
     ).toBeInTheDocument();
 
     const cta = screen.getByRole("link", { name: NEW_PROJECT_CTA_RE });
-    expect(cta).toHaveAttribute("href", "/projects/new");
+    expect(cta).toHaveAttribute("href", "/projects/new?from=settings");
 
     // No table rows when empty.
     expect(screen.queryAllByTestId("my-project-row")).toHaveLength(0);

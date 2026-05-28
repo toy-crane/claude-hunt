@@ -84,5 +84,10 @@ export async function editProject(
 
   updateTag(CACHE_TAGS.PROJECTS_GRID);
   revalidatePath(`/projects/${input.projectId}`);
+  // Same rationale as deleteProject — /settings reads via
+  // fetchMyProjects which sits outside the PROJECTS_GRID tag, so an
+  // explicit path revalidation is required for the user's own list
+  // to reflect title/tagline/screenshot changes on next visit.
+  revalidatePath("/settings");
   return { ok: true };
 }

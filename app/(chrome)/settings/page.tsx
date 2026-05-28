@@ -17,14 +17,20 @@ export const metadata: Metadata = {
 };
 
 export default async function SettingsPage() {
-  const [viewer, cohorts] = await Promise.all([fetchViewer(), fetchCohorts()]);
+  const viewer = await fetchViewer();
   if (!viewer) {
     redirect("/login?next=/settings");
   }
+  // fetchCohorts is viewer-agnostic and fetchMyProjects only needs
+  // viewer.id, so they run in parallel — same waterfall reduction
+  // pattern as the previous fetchViewer/fetchCohorts pairing.
+  const [cohorts, myProjects] = await Promise.all([
+    fetchCohorts(),
+    fetchMyProjects(viewer.id),
+  ]);
   const cohortLabel = viewer.cohortId
     ? (cohorts.find((cohort) => cohort.id === viewer.cohortId)?.label ?? null)
     : null;
-  const myProjects = await fetchMyProjects(viewer.id);
 
   return (
     <main className="mx-auto flex min-h-svh w-full max-w-2xl flex-col gap-8 p-6">
@@ -64,7 +70,7 @@ export default async function SettingsPage() {
             <span className="font-mono font-normal">· {myProjects.length}</span>
           </h2>
           <Button asChild size="sm">
-            <Link href="/projects/new">
+            <Link href="/projects/new?from=settings">
               <RiAddLine />새 프로젝트
             </Link>
           </Button>

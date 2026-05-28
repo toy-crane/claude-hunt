@@ -88,6 +88,9 @@ describe("deleteProject server action", () => {
     expect(result.ok).toBe(true);
     expect(storageRemove).toHaveBeenCalledWith(["u1/shot.png"]);
     expect(updateTagMock).toHaveBeenCalledWith("projects-grid");
+    // /settings reads its own list via fetchMyProjects which is not
+    // tagged, so we explicitly revalidate the path.
+    expect(revalidatePathMock).toHaveBeenCalledWith("/settings");
   });
 
   it("reports forbidden when RLS returns 0 rows", async () => {
