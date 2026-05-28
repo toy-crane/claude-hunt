@@ -1,5 +1,6 @@
 import { render, screen } from "@testing-library/react";
 import type { ProjectGridRow } from "@widgets/project-grid";
+import type { FetchMonthlyTopProjectsResult } from "@widgets/winner-spotlight/server";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
 vi.mock("next/link", () => ({
@@ -24,7 +25,19 @@ vi.mock("next/image", () => ({
 const fetchViewerMock = vi.fn();
 const fetchProjectCountMock = vi.fn();
 const fetchMonthlyTopProjectsMock =
-  vi.fn<(...args: unknown[]) => Promise<ProjectGridRow[]>>();
+  vi.fn<(...args: unknown[]) => Promise<FetchMonthlyTopProjectsResult>>();
+
+function monthlyResult(
+  projects: ProjectGridRow[],
+  overrides?: Partial<FetchMonthlyTopProjectsResult>
+): FetchMonthlyTopProjectsResult {
+  return {
+    monthSlug: "2026-05",
+    monthLabel: "2026년 5월",
+    projects,
+    ...overrides,
+  };
+}
 
 vi.mock("@shared/api/supabase/viewer", () => ({
   fetchViewer: (...args: unknown[]) => fetchViewerMock(...args),
@@ -78,7 +91,9 @@ describe("home page (/)", () => {
   });
 
   it("renders the 이달의 클로드 헌트 hero heading", async () => {
-    fetchMonthlyTopProjectsMock.mockResolvedValue([MOCK_ROW, RUNNER_UP_A]);
+    fetchMonthlyTopProjectsMock.mockResolvedValue(
+      monthlyResult([MOCK_ROW, RUNNER_UP_A])
+    );
 
     const { default: Page } = await import("./page");
     const jsx = await Page();
@@ -90,7 +105,7 @@ describe("home page (/)", () => {
   });
 
   it("renders the winner spotlight with the top project's title", async () => {
-    fetchMonthlyTopProjectsMock.mockResolvedValue([MOCK_ROW]);
+    fetchMonthlyTopProjectsMock.mockResolvedValue(monthlyResult([MOCK_ROW]));
 
     const { default: Page } = await import("./page");
     const jsx = await Page();
@@ -103,7 +118,9 @@ describe("home page (/)", () => {
   });
 
   it("renders runner-up cards for rows 2..4", async () => {
-    fetchMonthlyTopProjectsMock.mockResolvedValue([MOCK_ROW, RUNNER_UP_A]);
+    fetchMonthlyTopProjectsMock.mockResolvedValue(
+      monthlyResult([MOCK_ROW, RUNNER_UP_A])
+    );
 
     const { default: Page } = await import("./page");
     const jsx = await Page();
@@ -116,7 +133,7 @@ describe("home page (/)", () => {
   });
 
   it("renders the projects CTA with the total project count", async () => {
-    fetchMonthlyTopProjectsMock.mockResolvedValue([MOCK_ROW]);
+    fetchMonthlyTopProjectsMock.mockResolvedValue(monthlyResult([MOCK_ROW]));
 
     const { default: Page } = await import("./page");
     const jsx = await Page();
@@ -126,7 +143,7 @@ describe("home page (/)", () => {
   });
 
   it("falls back gracefully when no monthly projects are returned", async () => {
-    fetchMonthlyTopProjectsMock.mockResolvedValue([]);
+    fetchMonthlyTopProjectsMock.mockResolvedValue(monthlyResult([]));
 
     const { default: Page } = await import("./page");
     const jsx = await Page();
@@ -136,6 +153,24 @@ describe("home page (/)", () => {
       screen.getByRole("heading", { name: "이달의 클로드 헌트", level: 1 })
     ).toBeInTheDocument();
     expect(screen.getByText("전체 45개 프로젝트 둘러보기")).toBeInTheDocument();
+  });
+
+  it("passes the fallback month slug/label down to the Eyebrow", async () => {
+    fetchMonthlyTopProjectsMock.mockResolvedValue(
+      monthlyResult([MOCK_ROW], {
+        monthSlug: "2026-04",
+        monthLabel: "2026년 4월",
+      })
+    );
+
+    const { default: Page } = await import("./page");
+    const jsx = await Page();
+    render(jsx);
+
+    expect(
+      screen.getByText("claude-hunt show --top --month=2026-04")
+    ).toBeInTheDocument();
+    expect(screen.getByText("2026년 4월의 1위 프로젝트")).toBeInTheDocument();
   });
 
   it("uses an absolute title matching the hero heading", async () => {
