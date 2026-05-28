@@ -1,5 +1,4 @@
 import { fetchCohorts } from "@features/cohort-filter/server";
-import { SubmitTrigger } from "@features/submit-project";
 import { fetchViewer } from "@shared/api/supabase/viewer";
 import { fetchProjects } from "@widgets/project-grid/server";
 import type { Metadata } from "next";
@@ -41,10 +40,7 @@ export default async function Page({ searchParams }: PageProps) {
 
   return (
     <main className="mx-auto flex min-h-svh w-full max-w-6xl flex-col gap-6 bg-background p-6 text-foreground">
-      <header className="flex flex-wrap items-end justify-between gap-4">
-        <h1 className="font-heading font-medium text-3xl">프로젝트 보드</h1>
-        <SubmitTrigger isAuthenticated={Boolean(viewer)} />
-      </header>
+      <h1 className="font-heading font-medium text-3xl">프로젝트 보드</h1>
       <ProjectBoard
         cohorts={cohorts}
         isAuthenticated={Boolean(viewer)}

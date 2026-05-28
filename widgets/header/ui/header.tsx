@@ -1,3 +1,4 @@
+import { SubmitTrigger } from "@features/submit-project";
 import { fetchViewer } from "@shared/api/supabase/viewer";
 import { Button } from "@shared/ui/button";
 import { Logo } from "@shared/ui/logo";
@@ -22,16 +23,19 @@ export async function Header() {
           <Logo />
           <HeaderNav className="hidden md:flex" projectCount={projectCount} />
         </div>
-        {viewer ? (
-          <HeaderMenu
-            avatarUrl={viewer.avatarUrl}
-            displayName={viewer.displayName}
-          />
-        ) : (
-          <Button asChild size="sm" variant="outline">
-            <Link href="/login">로그인</Link>
-          </Button>
-        )}
+        <div className="flex items-center gap-2">
+          <SubmitTrigger isAuthenticated={Boolean(viewer)} />
+          {viewer ? (
+            <HeaderMenu
+              avatarUrl={viewer.avatarUrl}
+              displayName={viewer.displayName}
+            />
+          ) : (
+            <Button asChild size="sm" variant="outline">
+              <Link href="/login">로그인</Link>
+            </Button>
+          )}
+        </div>
       </div>
       <div className="mx-auto w-full max-w-6xl border-t px-6 md:hidden">
         <HeaderNav projectCount={projectCount} />

@@ -39,6 +39,17 @@ vi.mock("@features/auth-login", () => ({
   signOut: vi.fn(),
 }));
 
+vi.mock("@features/submit-project", () => ({
+  SubmitTrigger: ({ isAuthenticated }: { isAuthenticated: boolean }) => (
+    <div
+      data-authenticated={isAuthenticated ? "yes" : "no"}
+      data-testid="submit-trigger-stub"
+    >
+      Submit a project
+    </div>
+  ),
+}));
+
 vi.mock("next-themes", () => ({
   useTheme: () => ({ theme: "system", setTheme: vi.fn() }),
 }));
