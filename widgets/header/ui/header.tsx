@@ -4,12 +4,14 @@ import { Logo } from "@shared/ui/logo";
 import Link from "next/link";
 
 import { HeaderMenu } from "./header-menu";
+import { HeaderScrollEffect } from "./header-scroll-effect";
 
 export async function Header() {
   const viewer = await fetchViewer();
 
   return (
-    <header className="border-b bg-background">
+    <header className="site-header sticky top-0 z-50 border-b bg-background">
+      <HeaderScrollEffect />
       <div className="mx-auto flex w-full max-w-6xl items-center justify-between px-6 py-3">
         <Logo />
         {viewer ? (
