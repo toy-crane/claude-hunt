@@ -18,11 +18,7 @@ vi.mock("next/link", () => ({
 }));
 
 vi.mock("next/image", () => ({
-  default: ({ alt, src }: { alt: string; src: string }) => (
-    // biome-ignore lint/performance/noImgElement: test stub
-    // biome-ignore lint/nursery/useImageSize: test stub
-    <img alt={alt} src={src} />
-  ),
+  default: ({ alt }: { alt: string }) => <span aria-label={alt} role="img" />,
 }));
 
 const fetchViewerMock = vi.fn();
@@ -103,7 +99,7 @@ describe("home page (/)", () => {
     expect(
       screen.getByRole("heading", { name: "비행기 게임", level: 2 })
     ).toBeInTheDocument();
-    expect(screen.getByText(/RANK 01 · 이달의 프로젝트/)).toBeInTheDocument();
+    expect(screen.getByText("RANK 01 · 이달의 프로젝트")).toBeInTheDocument();
   });
 
   it("renders runner-up cards for rows 2..4", async () => {
@@ -126,7 +122,7 @@ describe("home page (/)", () => {
     const jsx = await Page();
     render(jsx);
 
-    expect(screen.getByText(/전체 45개 프로젝트 둘러보기/)).toBeInTheDocument();
+    expect(screen.getByText("전체 45개 프로젝트 둘러보기")).toBeInTheDocument();
   });
 
   it("falls back gracefully when no monthly projects are returned", async () => {
@@ -139,7 +135,7 @@ describe("home page (/)", () => {
     expect(
       screen.getByRole("heading", { name: "이달의 클로드 헌트", level: 1 })
     ).toBeInTheDocument();
-    expect(screen.getByText(/전체 45개 프로젝트 둘러보기/)).toBeInTheDocument();
+    expect(screen.getByText("전체 45개 프로젝트 둘러보기")).toBeInTheDocument();
   });
 
   it("uses an absolute title matching the hero heading", async () => {
