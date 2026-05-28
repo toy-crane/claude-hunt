@@ -1,5 +1,6 @@
 import { DeleteButton } from "@features/delete-project";
 import { RiArrowUpLine, RiPencilLine } from "@remixicon/react";
+import { formatDateYmd } from "@shared/lib/format-date";
 import { SHIMMER_DATA_URL } from "@shared/lib/image";
 import { Button } from "@shared/ui/button";
 import Image from "next/image";
@@ -10,17 +11,10 @@ export interface MyProjectRowProps {
   project: MyProjectRowData;
 }
 
-function formatSubmittedDate(iso: string | null): string {
-  if (!iso) {
-    return "";
-  }
-  return iso.slice(0, 10);
-}
-
 export function MyProjectRow({ project }: MyProjectRowProps) {
   const projectId = project.id ?? "";
   const title = project.title ?? "";
-  const submittedAt = formatSubmittedDate(project.created_at);
+  const submittedAt = formatDateYmd(project.created_at);
   const voteCount = project.vote_count ?? 0;
   const editHref = `/projects/${projectId}/edit?from=settings`;
 
