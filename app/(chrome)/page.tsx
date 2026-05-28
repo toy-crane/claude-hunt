@@ -29,6 +29,7 @@ export const metadata: Metadata = {
         url: "/opengraph-image",
         width: 1200,
         height: 630,
+        type: "image/png",
         alt: "claude-hunt — Claude Code 수강생들의 프로젝트",
       },
     ],
