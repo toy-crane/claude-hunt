@@ -5,6 +5,9 @@ import Link from "next/link";
 
 export const metadata: Metadata = {
   title: "개인정보 처리방침",
+  description:
+    "클로드 헌트가 수집·이용하는 개인정보 항목과 처리 목적, 보유 기간, 정보주체의 권리 행사 방법을 안내합니다.",
+  alternates: { canonical: "/privacy" },
 };
 
 const SECTIONS = [

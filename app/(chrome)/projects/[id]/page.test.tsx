@@ -97,7 +97,7 @@ describe("buildProjectJsonLd", () => {
   });
 });
 
-describe("generateMetadata canonical", () => {
+describe("generateMetadata", () => {
   beforeEach(() => {
     vi.clearAllMocks();
   });
@@ -109,5 +109,30 @@ describe("generateMetadata canonical", () => {
       params: Promise.resolve({ id: "abc-123" }),
     });
     expect(metadata.alternates?.canonical).toBe("/projects/abc-123");
+  });
+
+  it("uses an absolute title with the brand suffix and no cohort", async () => {
+    fetchProjectDetailMock.mockResolvedValue({
+      ...sampleProject,
+      cohort_label: "LG전자 4기",
+    });
+    const { generateMetadata } = await import("./page");
+    const metadata = await generateMetadata({
+      params: Promise.resolve({ id: "abc-123" }),
+    });
+    expect(metadata.title).toEqual({
+      absolute: "샘플 프로젝트 — 클로드 헌트",
+    });
+  });
+
+  it("mirrors the document title in openGraph.title and twitter.title", async () => {
+    fetchProjectDetailMock.mockResolvedValue(sampleProject);
+    const { generateMetadata } = await import("./page");
+    const metadata = await generateMetadata({
+      params: Promise.resolve({ id: "abc-123" }),
+    });
+    expect(metadata.openGraph?.title).toBe("샘플 프로젝트 — 클로드 헌트");
+    const twitter = metadata.twitter as { title?: string };
+    expect(twitter.title).toBe("샘플 프로젝트 — 클로드 헌트");
   });
 });
