@@ -15,7 +15,7 @@ const fontHeading = JetBrains_Mono({
   variable: "--font-heading",
 });
 
-const TAGLINE = "함께 배우는 사람들의 프로젝트";
+const TAGLINE = "Claude Code 수강생들의 프로젝트";
 const META_DESCRIPTION =
   "Claude Code 수강생들이 만든 프로젝트를 둘러보고 응원해 보세요.";
 const SOCIAL_TITLE = `클로드 헌트 (claude-hunt) · ${TAGLINE}`;
