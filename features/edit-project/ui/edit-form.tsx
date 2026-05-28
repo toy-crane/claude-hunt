@@ -27,6 +27,12 @@ export interface EditFormInitial {
 }
 
 export interface EditFormProps {
+  /**
+   * Destination for the cancel link and the post-save redirect. Defaults
+   * to the project's detail page when not provided. Settings → edit flow
+   * passes `/settings` so the user lands back where they started.
+   */
+  backHref?: string;
   initial: EditFormInitial;
 }
 
@@ -50,7 +56,8 @@ type Slot = (ExistingSlot & { kind: "existing" }) | NewSlot;
  * shape (slot.file present) and uploaded on save; existing slots
  * pass their stored path through unchanged.
  */
-export function EditForm({ initial }: EditFormProps) {
+export function EditForm({ backHref, initial }: EditFormProps) {
+  const resolvedBackHref = backHref ?? `/projects/${initial.projectId}`;
   const router = useRouter();
   const titleId = useId();
   const taglineId = useId();
@@ -159,7 +166,7 @@ export function EditForm({ initial }: EditFormProps) {
         return;
       }
       toast.success("저장됐어요.");
-      router.push(`/projects/${initial.projectId}`);
+      router.push(resolvedBackHref);
       router.refresh();
     } finally {
       setSubmitting(false);
@@ -257,7 +264,7 @@ export function EditForm({ initial }: EditFormProps) {
 
       <div className="flex items-stretch gap-2">
         <Button asChild variant="outline">
-          <Link href={`/projects/${initial.projectId}`}>취소</Link>
+          <Link href={resolvedBackHref}>취소</Link>
         </Button>
         <Button className="flex-1" disabled={submitting} type="submit">
           {submitting ? <Spinner data-icon="inline-start" /> : null}
