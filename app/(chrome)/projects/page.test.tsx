@@ -23,10 +23,6 @@ vi.mock("@widgets/project-grid/server", () => ({
   fetchProjects: (...args: unknown[]) => fetchProjectsMock(...args),
 }));
 
-vi.mock("@features/submit-project", () => ({
-  SubmitTrigger: () => null,
-}));
-
 vi.mock("../_components/project-board", () => ({
   ProjectBoard: () => <div data-testid="project-board-stub" />,
 }));
@@ -39,7 +35,7 @@ const SIGNED_IN_VIEWER = {
   cohortId: null,
 };
 
-describe("home page (/)", () => {
+describe("/projects page", () => {
   beforeEach(() => {
     fetchViewerMock.mockReset();
     fetchCohortsMock.mockReset().mockResolvedValue([]);
@@ -49,7 +45,7 @@ describe("home page (/)", () => {
   it("renders the project board for signed-out visitors", async () => {
     fetchViewerMock.mockResolvedValue(null);
 
-    const { default: Page } = await import("../page");
+    const { default: Page } = await import("./page");
     const jsx = await Page({ searchParams: Promise.resolve({}) });
     render(jsx);
 
@@ -59,14 +55,36 @@ describe("home page (/)", () => {
   it("renders the project board for signed-in visitors", async () => {
     fetchViewerMock.mockResolvedValue(SIGNED_IN_VIEWER);
 
-    const { default: Page } = await import("../page");
+    const { default: Page } = await import("./page");
     const jsx = await Page({ searchParams: Promise.resolve({}) });
     render(jsx);
 
     expect(screen.getByTestId("project-board-stub")).toBeInTheDocument();
   });
 
-  // Header/Footer landmarks are provided by the (chrome) route group layout;
-  // covered by `app/(chrome)/layout.test.tsx`. ProjectBoard internals are
-  // covered by `app/(chrome)/_components/project-board.test.tsx`.
+  it("uses 프로젝트 보드 as the page heading", async () => {
+    fetchViewerMock.mockResolvedValue(null);
+
+    const { default: Page } = await import("./page");
+    const jsx = await Page({ searchParams: Promise.resolve({}) });
+    render(jsx);
+
+    expect(
+      screen.getByRole("heading", { name: "프로젝트 보드", level: 1 })
+    ).toBeInTheDocument();
+  });
+
+  it("declares a self-referencing /projects canonical", async () => {
+    const { metadata } = await import("./page");
+    expect(metadata.alternates?.canonical).toBe("/projects");
+  });
+
+  it("exports an absolute title carrying the 클로드 헌트 brand", async () => {
+    const { metadata } = await import("./page");
+    expect(metadata.title).toEqual(
+      expect.objectContaining({
+        absolute: expect.stringContaining("클로드 헌트"),
+      })
+    );
+  });
 });

@@ -1,8 +1,6 @@
-import type { Cohort } from "@entities/cohort";
-import { createMockSupabaseClient } from "@shared/lib/test-utils";
 import { render, screen } from "@testing-library/react";
 import type { ProjectGridRow } from "@widgets/project-grid";
-import { vi } from "vitest";
+import { beforeEach, describe, expect, it, vi } from "vitest";
 
 vi.mock("next/link", () => ({
   default: ({
@@ -19,192 +17,143 @@ vi.mock("next/link", () => ({
   ),
 }));
 
-vi.mock("next/navigation", () => ({
-  useRouter: () => ({ replace: vi.fn() }),
-  usePathname: () => "/",
-  useSearchParams: () => new URLSearchParams(),
+vi.mock("next/image", () => ({
+  default: ({ alt }: { alt: string }) => <span aria-label={alt} role="img" />,
 }));
 
-// ProjectBoard is a client component; stub it so we can assert the props
-// passed from the server page without rendering the grid tree.
-interface BoardProps {
-  cohorts: Cohort[];
-  isAuthenticated: boolean;
-  projects: unknown[];
-  viewerUserId: string | null;
-}
-const boardMock = vi.fn((_props: BoardProps) => (
-  <div data-testid="project-board-stub" />
-));
-vi.mock("./_components/project-board", () => ({
-  ProjectBoard: (props: BoardProps) => boardMock(props),
+const fetchViewerMock = vi.fn();
+const fetchProjectCountMock = vi.fn();
+const fetchMonthlyTopProjectsMock =
+  vi.fn<(...args: unknown[]) => Promise<ProjectGridRow[]>>();
+
+vi.mock("@shared/api/supabase/viewer", () => ({
+  fetchViewer: (...args: unknown[]) => fetchViewerMock(...args),
 }));
 
-const fetchCohortsMock = vi.fn<() => Promise<Cohort[]>>();
-
-vi.mock("@features/cohort-filter/server", async () => {
-  const { parseAsString } = await import("nuqs/server");
-  const cohortParser = parseAsString;
-  return {
-    fetchCohorts: fetchCohortsMock,
-    cohortParser,
-    cohortSearchParams: { cohort: cohortParser },
-  };
-});
-
-vi.mock("@features/submit-project", () => ({
-  SubmitTrigger: ({ isAuthenticated }: { isAuthenticated: boolean }) => (
-    <div
-      data-authenticated={isAuthenticated ? "yes" : "no"}
-      data-testid="submit-trigger-stub"
-    >
-      Submit a project
-    </div>
-  ),
+vi.mock("@widgets/header/server", () => ({
+  fetchProjectCount: (...args: unknown[]) => fetchProjectCountMock(...args),
 }));
 
-const fetchProjectsMock = vi.fn<() => Promise<ProjectGridRow[]>>();
-
-vi.mock("@widgets/project-grid/server", () => ({
-  fetchProjects: fetchProjectsMock,
+vi.mock("@widgets/winner-spotlight/server", () => ({
+  fetchMonthlyTopProjects: (...args: unknown[]) =>
+    fetchMonthlyTopProjectsMock(...args),
 }));
 
-const profileSingle = vi
-  .fn()
-  .mockResolvedValue({ data: { cohort_id: null }, error: null });
-
-const mockClient = {
-  ...createMockSupabaseClient(),
-  from: vi.fn().mockReturnValue({
-    select: vi.fn().mockReturnValue({
-      eq: vi.fn().mockReturnValue({
-        single: profileSingle,
-      }),
-    }),
-  }),
-  storage: {
-    from: vi.fn().mockReturnValue({
-      getPublicUrl: (path: string) => ({
-        data: { publicUrl: `https://cdn.example.com/${path}` },
-      }),
-    }),
-  },
+const MOCK_ROW: ProjectGridRow = {
+  id: "p1",
+  user_id: "u1",
+  cohort_id: "c1",
+  cohort_name: "LGE-4",
+  cohort_label: "LG전자 4기",
+  title: "비행기 게임",
+  tagline: "AI의 역습을 막아주세요",
+  project_url: "https://example.com/p1",
+  github_url: null,
+  images: [{ path: "p1.webp" }],
+  primary_image_path: "p1.webp",
+  created_at: "2026-05-22T00:00:00Z",
+  updated_at: "2026-05-22T00:00:00Z",
+  vote_count: 11,
+  author_display_name: "Daniel",
+  author_avatar_url: null,
+  screenshotUrl: "https://cdn.example.com/p1.webp",
+  viewer_has_voted: false,
 };
 
-vi.mock("@shared/api/supabase/server", () => ({
-  createClient: vi.fn().mockResolvedValue(mockClient),
-}));
+const RUNNER_UP_A: ProjectGridRow = {
+  ...MOCK_ROW,
+  id: "p2",
+  title: "대박",
+  tagline: "오늘 운 좋게 대박날 일을 알려드립니다.",
+  vote_count: 8,
+  author_display_name: "Hwee",
+  screenshotUrl: "https://cdn.example.com/p2.webp",
+};
 
-const cohorts: Cohort[] = [
-  {
-    id: "a1",
-    name: "LGE-1",
-    label: "LG전자 1기",
-    created_at: "2026-04-14T00:00:00Z",
-    updated_at: "2026-04-14T00:00:00Z",
-  },
-  {
-    id: "b2",
-    name: "LGE-2",
-    label: "LG전자 2기",
-    created_at: "2026-04-14T00:00:00Z",
-    updated_at: "2026-04-14T00:00:00Z",
-  },
-];
-
-async function renderPage(search: Record<string, string> = {}) {
-  fetchCohortsMock.mockResolvedValue(cohorts);
-  fetchProjectsMock.mockResolvedValue([]);
-  const Page = (await import("./page")).default;
-  const jsx = await Page({ searchParams: Promise.resolve(search) });
-  render(jsx);
-}
-
-describe("home page", () => {
+describe("home page (/)", () => {
   beforeEach(() => {
-    vi.clearAllMocks();
+    fetchViewerMock.mockReset().mockResolvedValue(null);
+    fetchProjectCountMock.mockReset().mockResolvedValue(45);
+    fetchMonthlyTopProjectsMock.mockReset();
   });
 
-  it("fetches projects once without a cohort filter on the server", async () => {
-    await renderPage({ cohort: "a1" });
-    expect(fetchProjectsMock).toHaveBeenCalledTimes(1);
-    expect(fetchProjectsMock).toHaveBeenCalledWith(
-      expect.objectContaining({ viewerUserId: null })
-    );
-    // Server must NOT narrow the query by cohort — the client filters.
-    expect(fetchProjectsMock).not.toHaveBeenCalledWith(
-      expect.objectContaining({ cohortId: expect.anything() })
-    );
-  });
+  it("renders the 이달의 클로드 헌트 hero heading", async () => {
+    fetchMonthlyTopProjectsMock.mockResolvedValue([MOCK_ROW, RUNNER_UP_A]);
 
-  it("passes isAuthenticated=false to ProjectBoard for signed-out visitors", async () => {
-    profileSingle.mockResolvedValue({ data: null, error: null });
+    const { default: Page } = await import("./page");
+    const jsx = await Page();
+    render(jsx);
 
-    await renderPage();
-
-    expect(boardMock).toHaveBeenCalledWith(
-      expect.objectContaining({
-        isAuthenticated: false,
-      })
-    );
-  });
-
-  it("renders the page-level Claude Hunt brand heading", async () => {
-    await renderPage();
     expect(
-      screen.getByRole("heading", {
-        name: "오늘의 클로드 헌트",
-        level: 1,
-      })
+      screen.getByRole("heading", { name: "이달의 클로드 헌트", level: 1 })
     ).toBeInTheDocument();
   });
 
-  it("renders the SubmitTrigger inside the page hero, not inside the board", async () => {
-    await renderPage();
-    const submit = screen.getByTestId("submit-trigger-stub");
-    const board = screen.getByTestId("project-board-stub");
-    expect(submit).toBeInTheDocument();
-    expect(board.contains(submit)).toBe(false);
+  it("renders the winner spotlight with the top project's title", async () => {
+    fetchMonthlyTopProjectsMock.mockResolvedValue([MOCK_ROW]);
+
+    const { default: Page } = await import("./page");
+    const jsx = await Page();
+    render(jsx);
+
+    expect(
+      screen.getByRole("heading", { name: "비행기 게임", level: 2 })
+    ).toBeInTheDocument();
+    expect(screen.getByText("RANK 01 · 이달의 프로젝트")).toBeInTheDocument();
   });
 
-  it("exports an absolute title so the layout template doesn't append the brand twice", async () => {
+  it("renders runner-up cards for rows 2..4", async () => {
+    fetchMonthlyTopProjectsMock.mockResolvedValue([MOCK_ROW, RUNNER_UP_A]);
+
+    const { default: Page } = await import("./page");
+    const jsx = await Page();
+    render(jsx);
+
+    // RunnerUpsSection renders both desktop and mobile variants.
+    expect(
+      screen.getAllByRole("heading", { name: "대박", level: 4 }).length
+    ).toBeGreaterThan(0);
+  });
+
+  it("renders the projects CTA with the total project count", async () => {
+    fetchMonthlyTopProjectsMock.mockResolvedValue([MOCK_ROW]);
+
+    const { default: Page } = await import("./page");
+    const jsx = await Page();
+    render(jsx);
+
+    expect(screen.getByText("전체 45개 프로젝트 둘러보기")).toBeInTheDocument();
+  });
+
+  it("falls back gracefully when no monthly projects are returned", async () => {
+    fetchMonthlyTopProjectsMock.mockResolvedValue([]);
+
+    const { default: Page } = await import("./page");
+    const jsx = await Page();
+    render(jsx);
+
+    expect(
+      screen.getByRole("heading", { name: "이달의 클로드 헌트", level: 1 })
+    ).toBeInTheDocument();
+    expect(screen.getByText("전체 45개 프로젝트 둘러보기")).toBeInTheDocument();
+  });
+
+  it("uses an absolute title matching the hero heading", async () => {
     const { metadata } = await import("./page");
     expect(metadata.title).toEqual(
-      expect.objectContaining({
-        absolute: expect.stringContaining("클로드 헌트"),
-      })
+      expect.objectContaining({ absolute: "이달의 클로드 헌트" })
     );
   });
 
-  it("declares a self-referencing canonical for the home URL", async () => {
+  it("declares a self-referencing root canonical", async () => {
     const { metadata } = await import("./page");
     expect(metadata.alternates?.canonical).toBe("/");
   });
 
   it("sets a unique description distinct from the layout fallback", async () => {
     const { metadata } = await import("./page");
-    expect(metadata.description).toEqual(
-      expect.stringContaining("Claude Code")
-    );
-    expect(metadata.description).not.toBe("함께 배우는 사람들의 프로젝트");
-  });
-
-  it("passes isAuthenticated=true to ProjectBoard for signed-in students", async () => {
-    vi.mocked(mockClient.auth.getUser).mockResolvedValueOnce({
-      data: { user: { id: "user-1" } },
-      error: null,
-    });
-    profileSingle.mockResolvedValue({
-      data: { cohort_id: "cohort-1" },
-      error: null,
-    });
-
-    await renderPage();
-
-    expect(boardMock).toHaveBeenCalledWith(
-      expect.objectContaining({
-        isAuthenticated: true,
-      })
+    expect(metadata.description).toBe(
+      "이번 달 1위 프로젝트와 함께 사랑받은 인기 프로젝트들을 만나보세요."
     );
   });
 });
