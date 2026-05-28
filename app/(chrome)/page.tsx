@@ -24,10 +24,20 @@ export const metadata: Metadata = {
     description: HOME_DESCRIPTION,
     url: "/",
     type: "website",
+    images: [
+      {
+        url: "/opengraph-image",
+        width: 1200,
+        height: 630,
+        alt: "claude-hunt — Claude Code 수강생들의 프로젝트",
+      },
+    ],
   },
   twitter: {
+    card: "summary_large_image",
     title: HOME_SOCIAL_TITLE,
     description: HOME_DESCRIPTION,
+    images: ["/opengraph-image"],
   },
 };
 

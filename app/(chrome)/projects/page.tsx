@@ -19,10 +19,20 @@ export const metadata: Metadata = {
     description: PROJECTS_DESCRIPTION,
     url: "/projects",
     type: "website",
+    images: [
+      {
+        url: "/opengraph-image",
+        width: 1200,
+        height: 630,
+        alt: "claude-hunt — Claude Code 수강생들의 프로젝트",
+      },
+    ],
   },
   twitter: {
+    card: "summary_large_image",
     title: PROJECTS_TITLE,
     description: PROJECTS_DESCRIPTION,
+    images: ["/opengraph-image"],
   },
 };
 
