@@ -1,10 +1,14 @@
 import { fetchCohorts } from "@features/cohort-filter/server";
+import { fetchMyProjects, MyProjectsList } from "@features/my-projects";
 import { SettingsForm } from "@features/settings";
 import { WithdrawDialog } from "@features/withdraw-user";
+import { RiAddLine } from "@remixicon/react";
 import { fetchViewer } from "@shared/api/supabase/viewer";
 import { NOINDEX_METADATA } from "@shared/config/site";
+import { Button } from "@shared/ui/button";
 import { Card, CardContent } from "@shared/ui/card";
 import type { Metadata } from "next";
+import Link from "next/link";
 import { redirect } from "next/navigation";
 
 export const metadata: Metadata = {
@@ -20,6 +24,7 @@ export default async function SettingsPage() {
   const cohortLabel = viewer.cohortId
     ? (cohorts.find((cohort) => cohort.id === viewer.cohortId)?.label ?? null)
     : null;
+  const myProjects = await fetchMyProjects(viewer.id);
 
   return (
     <main className="mx-auto flex min-h-svh w-full max-w-2xl flex-col gap-8 p-6">
@@ -44,6 +49,27 @@ export default async function SettingsPage() {
             />
           </CardContent>
         </Card>
+      </section>
+
+      <section
+        aria-labelledby="settings-projects-heading"
+        className="flex flex-col gap-3"
+      >
+        <div className="flex items-center justify-between gap-2 px-1">
+          <h2
+            className="font-medium text-muted-foreground text-xs"
+            id="settings-projects-heading"
+          >
+            내 프로젝트{" "}
+            <span className="font-mono font-normal">· {myProjects.length}</span>
+          </h2>
+          <Button asChild size="sm">
+            <Link href="/projects/new">
+              <RiAddLine />새 프로젝트
+            </Link>
+          </Button>
+        </div>
+        <MyProjectsList projects={myProjects} />
       </section>
 
       <section
