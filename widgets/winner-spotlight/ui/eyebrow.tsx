@@ -14,7 +14,7 @@ export function Eyebrow() {
         이달의 클로드 헌트
       </h1>
       <p className="m-0 text-muted-foreground text-sm">
-        {monthLabel}, 가장 많은 응원을 받은 한 프로젝트
+        {monthLabel}의 1위 프로젝트
       </p>
     </div>
   );

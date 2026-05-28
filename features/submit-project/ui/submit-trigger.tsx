@@ -19,7 +19,7 @@ export interface SubmitTriggerProps {
  */
 export function SubmitTrigger({ isAuthenticated }: SubmitTriggerProps) {
   return (
-    <Button asChild data-testid="submit-project-trigger">
+    <Button asChild data-testid="submit-project-trigger" size="sm">
       <Link href={isAuthenticated ? "/projects/new" : "/login"}>
         <RiAddLine data-icon="inline-start" />
         <span>프로젝트 제출</span>
