@@ -1,14 +1,25 @@
 import { RiAddLine } from "@remixicon/react";
 import { Button } from "@shared/ui/button";
 import Link from "next/link";
+import type { ReactNode } from "react";
 import type { MyProjectRow as MyProjectRowData } from "../api/fetch-my-projects";
 import { MyProjectRow } from "./my-project-row";
 
 export interface MyProjectsListProps {
   projects: MyProjectRowData[];
+  /**
+   * Slot for the per-row action cell (edit, delete, etc.). The list
+   * owner — typically a page in `app/` — composes peer features here
+   * so this slice can stay agnostic of which actions are wired in. If
+   * not provided the action cell renders empty.
+   */
+  renderActions?: (project: MyProjectRowData) => ReactNode;
 }
 
-export function MyProjectsList({ projects }: MyProjectsListProps) {
+export function MyProjectsList({
+  projects,
+  renderActions,
+}: MyProjectsListProps) {
   if (projects.length === 0) {
     return (
       <div
@@ -41,7 +52,11 @@ export function MyProjectsList({ projects }: MyProjectsListProps) {
         </div>
 
         {projects.map((project) => (
-          <MyProjectRow key={project.id} project={project} />
+          <MyProjectRow
+            actions={renderActions?.(project)}
+            key={project.id}
+            project={project}
+          />
         ))}
       </div>
 

@@ -1,8 +1,13 @@
 import { fetchCohorts } from "@features/cohort-filter/server";
-import { fetchMyProjects, MyProjectsList } from "@features/my-projects";
+import { DeleteButton } from "@features/delete-project";
+import {
+  fetchMyProjects,
+  type MyProjectRow,
+  MyProjectsList,
+} from "@features/my-projects";
 import { SettingsForm } from "@features/settings";
 import { WithdrawDialog } from "@features/withdraw-user";
-import { RiAddLine } from "@remixicon/react";
+import { RiAddLine, RiPencilLine } from "@remixicon/react";
 import { fetchViewer } from "@shared/api/supabase/viewer";
 import { NOINDEX_METADATA } from "@shared/config/site";
 import { Button } from "@shared/ui/button";
@@ -15,6 +20,26 @@ export const metadata: Metadata = {
   title: "설정",
   ...NOINDEX_METADATA,
 };
+
+function renderProjectRowActions(project: MyProjectRow) {
+  const projectId = project.id ?? "";
+  const title = project.title ?? "";
+  return (
+    <>
+      <Button
+        aria-label="프로젝트 수정"
+        asChild
+        size="icon-sm"
+        variant="outline"
+      >
+        <Link href={`/projects/${projectId}/edit?from=settings`}>
+          <RiPencilLine className="size-3.5" />
+        </Link>
+      </Button>
+      <DeleteButton projectId={projectId} projectTitle={title} variant="icon" />
+    </>
+  );
+}
 
 export default async function SettingsPage() {
   const viewer = await fetchViewer();
@@ -75,7 +100,10 @@ export default async function SettingsPage() {
             </Link>
           </Button>
         </div>
-        <MyProjectsList projects={myProjects} />
+        <MyProjectsList
+          projects={myProjects}
+          renderActions={renderProjectRowActions}
+        />
       </section>
 
       <section
