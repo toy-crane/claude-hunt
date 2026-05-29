@@ -19,7 +19,7 @@ export function HeaderNav({ projectCount, className }: HeaderNavProps) {
   return (
     <nav
       aria-label="주요 내비게이션"
-      className={cn("flex items-center gap-1", className)}
+      className={cn("flex w-full items-center md:w-auto md:gap-1", className)}
     >
       <NavLink active={isHome} href="/">
         홈
@@ -46,7 +46,7 @@ interface NavLinkProps {
 
 function NavLink({ active, children, external, href }: NavLinkProps) {
   const className = cn(
-    "-mb-px inline-flex items-center border-b px-2.5 py-1.5 text-xs",
+    "-mb-px inline-flex flex-1 items-center justify-center border-b px-3 py-3 text-sm md:flex-none md:justify-start md:px-2.5 md:py-1.5 md:text-xs",
     active
       ? "border-foreground font-medium text-foreground"
       : "border-transparent text-muted-foreground"
