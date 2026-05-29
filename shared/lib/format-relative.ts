@@ -1,6 +1,4 @@
-const MINUTE_MS = 60_000;
-const HOUR_MS = 60 * MINUTE_MS;
-const DAY_MS = 24 * HOUR_MS;
+import { DateTime } from "luxon";
 
 interface FormatStrings {
   day: (n: number) => string;
@@ -23,26 +21,44 @@ const SHORT: FormatStrings = {
   now: "방금",
 };
 
-function format(iso: string | null, strings: FormatStrings): string {
+/**
+ * Elapsed time since `iso` as `{ days, hours, minutes }`, each floored and
+ * clamped at zero so a future timestamp reads as "now" rather than going
+ * negative. Returns null for null/unparseable input.
+ */
+function elapsedSince(
+  iso: string | null,
+  now: Date | undefined
+): { days: number; hours: number; minutes: number } | null {
   if (!iso) {
+    return null;
+  }
+  const then = DateTime.fromISO(iso);
+  if (!then.isValid) {
+    return null;
+  }
+  const reference = now ? DateTime.fromJSDate(now) : DateTime.now();
+  const diff = reference.diff(then, ["days", "hours", "minutes"]).toObject();
+  return {
+    days: Math.max(0, Math.floor(diff.days ?? 0)),
+    hours: Math.max(0, Math.floor(diff.hours ?? 0)),
+    minutes: Math.max(0, Math.floor(diff.minutes ?? 0)),
+  };
+}
+
+function format(iso: string | null, strings: FormatStrings): string {
+  const elapsed = elapsedSince(iso, undefined);
+  if (!elapsed) {
     return "";
   }
-  const then = new Date(iso).getTime();
-  if (Number.isNaN(then)) {
-    return "";
+  if (elapsed.days > 0) {
+    return strings.day(elapsed.days);
   }
-  const diff = Math.max(0, Date.now() - then);
-  const days = Math.floor(diff / DAY_MS);
-  if (days > 0) {
-    return strings.day(days);
+  if (elapsed.hours > 0) {
+    return strings.hour(elapsed.hours);
   }
-  const hours = Math.floor(diff / HOUR_MS);
-  if (hours > 0) {
-    return strings.hour(hours);
-  }
-  const mins = Math.floor(diff / MINUTE_MS);
-  if (mins > 0) {
-    return strings.minute(mins);
+  if (elapsed.minutes > 0) {
+    return strings.minute(elapsed.minutes);
   }
   return strings.now;
 }
@@ -55,4 +71,13 @@ export function formatRelativeKo(iso: string | null): string {
 /** "1d", "2h", "3m", "방금". Compact terminal-style for the board. */
 export function formatRelativeShort(iso: string | null): string {
   return format(iso, SHORT);
+}
+
+/**
+ * Whole days between `iso` and `now` (default: current time), floored and
+ * never negative. Shared day-count primitive — used by the winner
+ * spotlight's "Nd ago" line.
+ */
+export function daysSince(iso: string, now = new Date()): number {
+  return elapsedSince(iso, now)?.days ?? 0;
 }
