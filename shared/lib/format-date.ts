@@ -1,8 +1,10 @@
+import { DateTime } from "luxon";
+
 /**
  * Format a timestamptz ISO string to `YYYY-MM-DD` in the supplied
  * timezone, defaulting to Asia/Seoul. Returns an empty string when the
- * input is null/empty so callers can short-circuit rendering without
- * an extra guard.
+ * input is null/empty/unparseable so callers can short-circuit rendering
+ * without an extra guard.
  *
  * Why an explicit timezone: Postgres stores `timestamptz` in UTC and
  * the JS engine running this code may be UTC (Vercel functions) while
@@ -19,16 +21,9 @@ export function formatDateYmd(
   if (!iso) {
     return "";
   }
-  const date = new Date(iso);
-  if (Number.isNaN(date.getTime())) {
+  const dt = DateTime.fromISO(iso, { zone: "utc" });
+  if (!dt.isValid) {
     return "";
   }
-  // `en-CA` happens to emit `YYYY-MM-DD` natively — cheaper than a
-  // formatToParts pass and stable across Node + browsers.
-  return new Intl.DateTimeFormat("en-CA", {
-    timeZone: options.timeZone ?? "Asia/Seoul",
-    year: "numeric",
-    month: "2-digit",
-    day: "2-digit",
-  }).format(date);
+  return dt.setZone(options.timeZone ?? "Asia/Seoul").toFormat("yyyy-MM-dd");
 }
