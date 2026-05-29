@@ -1,18 +1,17 @@
 import { RiArrowRightLine, RiArrowUpFill } from "@remixicon/react";
+import { daysSince } from "@shared/lib/format-relative";
 import { SHIMMER_DATA_URL } from "@shared/lib/image/placeholder";
-import type { ProjectGridRow } from "@widgets/project-grid/server";
 import Image from "next/image";
 import Link from "next/link";
-
-import { daysAgo } from "../lib/format";
+import type { MonthlyTopProject } from "../api/fetch-monthly-top-projects";
 
 export interface WinnerSpotlightProps {
-  winner: ProjectGridRow;
+  winner: MonthlyTopProject;
 }
 
 export function WinnerSpotlight({ winner }: WinnerSpotlightProps) {
   const cohort = winner.cohort_label ?? "";
-  const days = winner.created_at ? daysAgo(winner.created_at) : 0;
+  const days = winner.created_at ? daysSince(winner.created_at) : 0;
   const author = winner.author_display_name ?? "익명";
   const authorInitial = author.charAt(0).toUpperCase();
   const href = `/projects/${winner.id}`;
