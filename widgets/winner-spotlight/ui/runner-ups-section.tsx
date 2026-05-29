@@ -1,10 +1,9 @@
-import type { ProjectGridRow } from "@widgets/project-grid/server";
-
+import type { MonthlyTopProject } from "../api/fetch-monthly-top-projects";
 import { RunnerUpCard } from "./runner-up-card";
 
 export interface RunnerUpsSectionProps {
   /** Rows 2..4 (already sliced by caller). */
-  runnerUps: ProjectGridRow[];
+  runnerUps: MonthlyTopProject[];
 }
 
 export function RunnerUpsSection({ runnerUps }: RunnerUpsSectionProps) {
@@ -25,19 +24,20 @@ export function RunnerUpsSection({ runnerUps }: RunnerUpsSectionProps) {
         </span>
       </div>
 
-      {/* Desktop: 3-col grid. Mobile: horizontal snap scroll. */}
-      <div className="hidden grid-cols-3 gap-4 md:grid">
+      {/*
+        One render of each card. Mobile: horizontal snap scroll
+        (`w-60` items). Desktop (md+): the same flex container becomes a
+        3-col grid so the cards stretch full width without scrolling.
+      */}
+      <div className="-mx-4 flex snap-x snap-mandatory gap-3 overflow-x-auto px-4 pb-1 md:mx-0 md:grid md:grid-cols-3 md:gap-4 md:overflow-x-visible md:px-0 md:pb-0">
         {runnerUps.map((project, i) => (
-          <RunnerUpCard key={project.id} project={project} rank={i + 2} />
-        ))}
-      </div>
-      <div className="-mx-4 flex snap-x snap-mandatory gap-3 overflow-x-auto px-4 pb-1 md:hidden">
-        {runnerUps.map((project, i) => (
-          <div className="w-60 flex-shrink-0 snap-start" key={project.id}>
+          <div
+            className="w-60 flex-shrink-0 snap-start md:w-auto"
+            key={project.id}
+          >
             <RunnerUpCard project={project} rank={i + 2} />
           </div>
         ))}
-        <div className="w-1 flex-shrink-0" />
       </div>
     </section>
   );
