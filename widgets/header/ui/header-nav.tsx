@@ -46,7 +46,7 @@ interface NavLinkProps {
 
 function NavLink({ active, children, external, href }: NavLinkProps) {
   const className = cn(
-    "-mb-px inline-flex flex-1 items-center justify-center border-b px-3 py-3 text-sm md:flex-none md:justify-start md:px-2.5 md:py-1.5 md:text-xs",
+    "-mb-px inline-flex flex-1 items-center justify-center border-b px-3 py-2 text-sm md:flex-none md:justify-start md:px-2.5 md:py-1.5 md:text-xs",
     active
       ? "border-foreground font-medium text-foreground"
       : "border-transparent text-muted-foreground"
