@@ -1,6 +1,6 @@
 import type { ProjectWithVoteCount } from "@entities/vote";
 import { createClient } from "@shared/api/supabase/server";
-import { SCREENSHOT_BUCKET } from "@shared/config/storage";
+import { withScreenshotUrls } from "@shared/lib/screenshot-url";
 
 /**
  * Columns the settings 내 프로젝트 row actually reads. Selecting only
@@ -46,12 +46,5 @@ export async function fetchMyProjects(
     throw error;
   }
 
-  const rows = data ?? [];
-  const screenshots = supabase.storage.from(SCREENSHOT_BUCKET);
-  return rows.map((row) => ({
-    ...row,
-    screenshotUrl: row.primary_image_path
-      ? screenshots.getPublicUrl(row.primary_image_path).data.publicUrl
-      : "",
-  }));
+  return withScreenshotUrls(supabase, data ?? []);
 }
