@@ -11,7 +11,6 @@ vi.mock("next/cache", () => ({
 // "latest created_at" probe (uses `.order/.limit/.maybeSingle`).
 const monthlyQueryMock = vi.fn();
 const latestCreatedAtMock = vi.fn();
-const votesSelectMock = vi.fn();
 
 function projectsViewBuilder() {
   return {
@@ -54,31 +53,15 @@ vi.mock("@shared/api/supabase/anon-server", () => ({
   }),
 }));
 
-vi.mock("@shared/api/supabase/server", () => ({
-  createClient: vi.fn().mockResolvedValue({
-    from: (table: string) => {
-      if (table === "votes") {
-        return { select: votesSelectMock };
-      }
-      throw new Error(`unexpected table ${table}`);
-    },
-  }),
-}));
-
 const MAY_ROW = {
   id: "p-may",
-  user_id: "u1",
-  cohort_id: "cohort-a",
-  cohort_name: "A",
+  cohort_label: "A",
   title: "May winner",
   tagline: "May tag",
-  project_url: "https://may.example.com",
   primary_image_path: "u1/p-may.png",
   vote_count: 12,
   author_display_name: "Alice",
-  author_avatar_url: null,
   created_at: "2026-05-20T03:00:00Z",
-  updated_at: "2026-05-20T03:00:00Z",
 };
 
 const JUNE_ROW = {
@@ -87,14 +70,10 @@ const JUNE_ROW = {
   title: "June winner",
   primary_image_path: "u1/p-june.png",
   created_at: "2026-06-05T03:00:00Z",
-  updated_at: "2026-06-05T03:00:00Z",
 };
 
 beforeEach(() => {
   vi.clearAllMocks();
-  votesSelectMock.mockReturnValue({
-    eq: vi.fn().mockResolvedValue({ data: [], error: null }),
-  });
 });
 
 afterEach(() => {
@@ -174,32 +153,20 @@ describe("fetchMonthlyTopProjects — table has no projects at all", () => {
   });
 });
 
-describe("fetchMonthlyTopProjects — viewer votes", () => {
-  it("flags rows the viewer has voted on, in either current or fallback month", async () => {
+describe("fetchMonthlyTopProjects — KST month boundary", () => {
+  it("labels the month in KST, not UTC, near the boundary", async () => {
     vi.useFakeTimers();
-    vi.setSystemTime(new Date("2026-06-10T00:00:00Z"));
+    // 2026-05-31T16:00:00Z is 2026-06-01 01:00 KST → the page is in June.
+    vi.setSystemTime(new Date("2026-05-31T16:00:00Z"));
 
-    monthlyQueryMock
-      .mockResolvedValueOnce({ data: [], error: null })
-      .mockResolvedValueOnce({ data: [MAY_ROW], error: null });
-    latestCreatedAtMock.mockResolvedValue({
-      data: { created_at: "2026-05-20T03:00:00Z" },
-      error: null,
-    });
-    votesSelectMock.mockReturnValue({
-      eq: vi
-        .fn()
-        .mockResolvedValue({ data: [{ project_id: "p-may" }], error: null }),
-    });
+    monthlyQueryMock.mockResolvedValue({ data: [JUNE_ROW], error: null });
 
     const { fetchMonthlyTopProjects } = await import(
       "./fetch-monthly-top-projects"
     );
-    const result = await fetchMonthlyTopProjects({
-      limit: 4,
-      viewerUserId: "u1",
-    });
+    const result = await fetchMonthlyTopProjects({ limit: 4 });
 
-    expect(result.projects[0].viewer_has_voted).toBe(true);
+    expect(result.monthSlug).toBe("2026-06");
+    expect(result.monthLabel).toBe("2026년 6월");
   });
 });

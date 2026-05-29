@@ -1,4 +1,3 @@
-import { fetchViewer } from "@shared/api/supabase/viewer";
 import { fetchProjectCount } from "@widgets/header/server";
 import {
   Eyebrow,
@@ -41,12 +40,11 @@ export const metadata: Metadata = {
 };
 
 export default async function Page() {
-  const viewer = await fetchViewer();
+  // The spotlight has no vote control, so nothing here depends on the
+  // viewer — load the (cached) monthly projects and the count in parallel
+  // without gating them behind a fetchViewer round-trip.
   const [monthly, projectCount] = await Promise.all([
-    fetchMonthlyTopProjects({
-      limit: 4,
-      viewerUserId: viewer?.id ?? null,
-    }),
+    fetchMonthlyTopProjects({ limit: 4 }),
     fetchProjectCount(),
   ]);
 

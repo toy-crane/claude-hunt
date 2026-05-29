@@ -1,12 +1,12 @@
 import { RiArrowRightLine, RiArrowUpFill } from "@remixicon/react";
 import { formatRelativeKo } from "@shared/lib/format-relative";
 import { SHIMMER_DATA_URL } from "@shared/lib/image/placeholder";
-import type { ProjectGridRow } from "@widgets/project-grid/server";
 import Image from "next/image";
 import Link from "next/link";
+import type { MonthlyTopProject } from "../api/fetch-monthly-top-projects";
 
 export interface WinnerSpotlightProps {
-  winner: ProjectGridRow;
+  winner: MonthlyTopProject;
 }
 
 export function WinnerSpotlight({ winner }: WinnerSpotlightProps) {
