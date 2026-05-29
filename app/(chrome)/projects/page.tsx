@@ -4,7 +4,7 @@ import { fetchProjects } from "@widgets/project-grid/server";
 import type { Metadata } from "next";
 import type { SearchParams } from "nuqs/server";
 import { ProjectBoard } from "../_components/project-board";
-import { homeSearchParamsCache } from "../_search-params";
+import { projectsSearchParamsCache } from "../_search-params";
 
 const PROJECTS_TITLE = "프로젝트 보드 — 클로드 헌트";
 const PROJECTS_DESCRIPTION =
@@ -42,7 +42,11 @@ interface PageProps {
 }
 
 export default async function Page({ searchParams }: PageProps) {
-  await homeSearchParamsCache.parse(searchParams);
+  // Parse `?cohort` server-side and seed the board so a deep-linked
+  // /projects?cohort=X renders the filtered grid in the SSR HTML (and the
+  // first client paint) instead of flashing the full list until nuqs
+  // reads the URL after hydration.
+  const { cohort } = await projectsSearchParamsCache.parse(searchParams);
 
   const [viewer, cohorts] = await Promise.all([fetchViewer(), fetchCohorts()]);
   const projects = await fetchProjects({
@@ -54,6 +58,7 @@ export default async function Page({ searchParams }: PageProps) {
       <h1 className="font-heading font-medium text-3xl">프로젝트 보드</h1>
       <ProjectBoard
         cohorts={cohorts}
+        initialCohortId={cohort}
         isAuthenticated={Boolean(viewer)}
         projects={projects}
         viewerUserId={viewer?.id ?? null}
