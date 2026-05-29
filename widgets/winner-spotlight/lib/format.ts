@@ -1,10 +1,3 @@
-/** Days between `createdAt` and `now`, floored. */
-export function daysAgo(createdAt: string, now = new Date()): number {
-  const created = new Date(createdAt).getTime();
-  const diffMs = now.getTime() - created;
-  return Math.max(0, Math.floor(diffMs / (1000 * 60 * 60 * 24)));
-}
-
 /** "YYYY-MM" derived from a Date's UTC year/month. */
 export function monthSlugFromDate(date: Date): string {
   const y = date.getUTCFullYear();

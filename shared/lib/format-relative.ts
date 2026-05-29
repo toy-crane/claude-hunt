@@ -1,25 +1,20 @@
 import { DateTime } from "luxon";
 
-interface FormatStrings {
-  day: (n: number) => string;
-  hour: (n: number) => string;
-  minute: (n: number) => string;
-  now: string;
-}
+/**
+ * Display timezone for the absolute-date fallback. Postgres stores
+ * `timestamptz` in UTC and the JS engine may be UTC (Vercel functions)
+ * while users live in KST, so the calendar date is pinned to Asia/Seoul —
+ * both for KST correctness and so server/client renders agree (no
+ * hydration mismatch). Mirrors `shared/lib/format-date.ts`.
+ */
+const DISPLAY_ZONE = "Asia/Seoul";
 
-const KO_LONG: FormatStrings = {
-  day: (n) => `${n}일 전`,
-  hour: (n) => `${n}시간 전`,
-  minute: (n) => `${n}분 전`,
-  now: "방금",
-};
-
-const SHORT: FormatStrings = {
-  day: (n) => `${n}d`,
-  hour: (n) => `${n}h`,
-  minute: (n) => `${n}m`,
-  now: "방금",
-};
+/**
+ * Days (floored) past which a timestamp is shown as an absolute date
+ * rather than "N일 전". Beyond ~a month the relative form carries no
+ * useful information (nobody back-computes "45일 전" into a date).
+ */
+const ABSOLUTE_AFTER_DAYS = 30;
 
 /**
  * Elapsed time since `iso` as `{ days, hours, minutes }`, each floored and
@@ -46,38 +41,50 @@ function elapsedSince(
   };
 }
 
-function format(iso: string | null, strings: FormatStrings): string {
-  const elapsed = elapsedSince(iso, undefined);
-  if (!elapsed) {
-    return "";
-  }
-  if (elapsed.days > 0) {
-    return strings.day(elapsed.days);
-  }
-  if (elapsed.hours > 0) {
-    return strings.hour(elapsed.hours);
-  }
-  if (elapsed.minutes > 0) {
-    return strings.minute(elapsed.minutes);
-  }
-  return strings.now;
-}
-
-/** "1일 전", "2시간 전", "3분 전", "방금". */
-export function formatRelativeKo(iso: string | null): string {
-  return format(iso, KO_LONG);
-}
-
-/** "1d", "2h", "3m", "방금". Compact terminal-style for the board. */
-export function formatRelativeShort(iso: string | null): string {
-  return format(iso, SHORT);
+/**
+ * Absolute calendar date in Asia/Seoul: "5월 12일" within the current
+ * year, "2025년 5월 12일" for a prior year. No zero-padding, matching the
+ * Korean month style in `shared/lib/month.ts`.
+ */
+function formatAbsoluteKo(iso: string, now: Date | undefined): string {
+  const then = DateTime.fromISO(iso, { zone: "utc" }).setZone(DISPLAY_ZONE);
+  const reference = (now ? DateTime.fromJSDate(now) : DateTime.now()).setZone(
+    DISPLAY_ZONE
+  );
+  return then.year === reference.year
+    ? then.toFormat("M월 d일")
+    : then.toFormat("yyyy년 M월 d일");
 }
 
 /**
- * Whole days between `iso` and `now` (default: current time), floored and
- * never negative. Shared day-count primitive — used by the winner
- * spotlight's "Nd ago" line.
+ * Relative time in Korean: "방금 전", "3분 전", "5시간 전", "12일 전".
+ * Past `ABSOLUTE_AFTER_DAYS` it switches to an absolute KST date
+ * ("5월 12일" / "2025년 5월 12일"). Returns "" for null/unparseable input
+ * so callers can short-circuit rendering.
+ *
+ * The single source of truth for elapsed-time display across the board,
+ * detail hero, winner spotlight, and comments.
+ *
+ * @param now Reference time — test-only injection. Components must omit it
+ *   so the value defaults to the real current time.
  */
-export function daysSince(iso: string, now = new Date()): number {
-  return elapsedSince(iso, now)?.days ?? 0;
+export function formatRelativeKo(iso: string | null, now?: Date): string {
+  const elapsed = elapsedSince(iso, now);
+  if (!elapsed) {
+    return "";
+  }
+  if (elapsed.days > ABSOLUTE_AFTER_DAYS) {
+    // `iso` is non-null here — elapsedSince returned a value.
+    return formatAbsoluteKo(iso as string, now);
+  }
+  if (elapsed.days > 0) {
+    return `${elapsed.days}일 전`;
+  }
+  if (elapsed.hours > 0) {
+    return `${elapsed.hours}시간 전`;
+  }
+  if (elapsed.minutes > 0) {
+    return `${elapsed.minutes}분 전`;
+  }
+  return "방금 전";
 }

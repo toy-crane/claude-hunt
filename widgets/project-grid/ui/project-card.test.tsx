@@ -635,7 +635,7 @@ describe("ProjectCard — mobile stacked card (< 720 px)", () => {
     );
     const footer = screen.getByTestId("project-card-mobile-footer");
     expect(within(footer).getByText("Nari")).toBeInTheDocument();
-    expect(within(footer).getByText("3h")).toBeInTheDocument();
+    expect(within(footer).getByText("3시간 전")).toBeInTheDocument();
     expect(within(footer).getByTestId("mobile-vote-slot")).toBeInTheDocument();
   });
 

@@ -1,5 +1,5 @@
 import type { ProjectWithVoteCount } from "@entities/vote";
-import { formatRelativeShort } from "@shared/lib/format-relative";
+import { formatRelativeKo } from "@shared/lib/format-relative";
 import { SHIMMER_DATA_URL } from "@shared/lib/image";
 import { cn } from "@shared/lib/utils";
 import {
@@ -61,7 +61,7 @@ export function ProjectCard({
   // Card click navigates to the internal detail page. The external
   // project URL is exposed there via the "Visit project" CTA.
   const detailHref = project.id ? `/projects/${project.id}` : "/";
-  const submittedAt = formatRelativeShort(project.created_at);
+  const submittedAt = formatRelativeKo(project.created_at);
   const hasRankDot = rank >= 1 && rank <= 3;
 
   const voteSlot = renderVoteButton ? renderVoteButton(project) : null;

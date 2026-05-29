@@ -2,7 +2,6 @@ import { describe, expect, it } from "vitest";
 import {
   currentMonthLabel,
   currentMonthSlug,
-  daysAgo,
   monthLabelFromDate,
   monthSlugFromDate,
 } from "./format";
@@ -35,13 +34,5 @@ describe("currentMonthSlug / currentMonthLabel", () => {
     const now = new Date("2026-05-15T10:00:00Z");
     expect(currentMonthSlug(now)).toBe(monthSlugFromDate(now));
     expect(currentMonthLabel(now)).toBe(monthLabelFromDate(now));
-  });
-});
-
-describe("daysAgo", () => {
-  it("returns the floored day difference, never negative", () => {
-    const now = new Date("2026-05-10T00:00:00Z");
-    expect(daysAgo("2026-05-08T00:00:00Z", now)).toBe(2);
-    expect(daysAgo("2026-05-10T23:00:00Z", now)).toBe(0);
   });
 });
