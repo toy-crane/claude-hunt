@@ -131,6 +131,9 @@ describe("submitProject server action", () => {
       })
     );
     expect(updateTagMock).toHaveBeenCalledWith("projects-grid");
+    // The settings 내 프로젝트 list reads via the uncached fetchMyProjects,
+    // so submit must revalidate /settings like delete/edit do.
+    expect(revalidatePathMock).toHaveBeenCalledWith("/settings");
   });
 
   it("surfaces storage/db errors back to the caller", async () => {
