@@ -255,7 +255,7 @@ test("student submits, edits, and deletes their own project end-to-end", async (
       page.getByText(PROJECT_SUBMITTED_TOAST_RE).first()
     ).toBeVisible({ timeout: 10_000 });
 
-    await page.goto("/");
+    await page.goto("/projects");
     await expect(page.getByText("E2E Test App").first()).toBeVisible({
       timeout: 10_000,
     });
@@ -289,7 +289,7 @@ test("student submits, edits, and deletes their own project end-to-end", async (
       .setInputFiles(SCREENSHOT_FIXTURE);
     await saveEditPage(page);
 
-    await page.goto("/");
+    await page.goto("/projects");
     await expect(
       page
         .getByTestId("project-card")
@@ -340,7 +340,7 @@ test("student submits, edits, and deletes their own project end-to-end", async (
     await page.getByLabel("제목").fill("E2E Test App (renamed)");
     await saveEditPage(page);
 
-    await page.goto("/");
+    await page.goto("/projects");
     await expect(
       page
         .getByTestId("project-card")
@@ -369,6 +369,9 @@ test("student submits, edits, and deletes their own project end-to-end", async (
       .click();
     await page.waitForURL(PROJECT_DETAIL_URL_RE);
     await deleteProjectFromDetail(page);
+    // The board lives at /projects now; the home spotlight never lists the
+    // full grid, so assert the deleted project is gone from the board.
+    await page.goto("/projects");
     await expect(page.getByText("E2E Test App (renamed)")).not.toBeVisible({
       timeout: 10_000,
     });
@@ -402,7 +405,7 @@ test("small sources are still served as WebP", async ({ page }) => {
       screenshotFixture: SMALL_SCREENSHOT_FIXTURE,
     });
 
-    await page.goto("/");
+    await page.goto("/projects");
     await expect(page.getByText("Small Image Test").first()).toBeVisible({
       timeout: 10_000,
     });
@@ -436,7 +439,7 @@ test("edit upload failure keeps the original screenshot on the card", async ({
       screenshotFixture: SMALL_SCREENSHOT_FIXTURE,
     });
 
-    await page.goto("/");
+    await page.goto("/projects");
     await expect(page.getByText("Edit Failure Test").first()).toBeVisible({
       timeout: 10_000,
     });
@@ -479,7 +482,7 @@ test("edit upload failure keeps the original screenshot on the card", async ({
 
     // The edit page should stay (upload failure surfaces a field error)
     // and the original card screenshot URL must not change.
-    await page.goto("/");
+    await page.goto("/projects");
     await expect(async () => {
       const current = await img.getAttribute("src");
       expect(current).toBe(originalSrc);
@@ -500,7 +503,7 @@ test("switching cohorts fires no project-list network requests after initial loa
     }
   });
 
-  await page.goto("/");
+  await page.goto("/projects");
   const chips = page.getByTestId("cohort-chips");
   await expect(chips).toBeVisible();
   ready = true;
@@ -525,7 +528,7 @@ test("deep-linked cohort URL renders the filtered grid on first paint", async ({
     throw new Error("LGE-1 seed missing — run supabase db reset first");
   }
 
-  await page.goto(`/?cohort=${cohort.id}`);
+  await page.goto(`/projects?cohort=${cohort.id}`);
   const chips = page.getByTestId("cohort-chips");
   await expect(
     chips.getByRole("button", { name: new RegExp(cohort.label), pressed: true })
@@ -545,7 +548,7 @@ test("voted project keeps its count and indicator across cohort filter toggles",
     // someone else's project to make the vote button available.
     student = await signInStudentWithCohort(page, admin);
 
-    await page.goto("/");
+    await page.goto("/projects");
     const card = page
       .getByTestId("project-card")
       .filter({ hasText: "Paint Studio" })
