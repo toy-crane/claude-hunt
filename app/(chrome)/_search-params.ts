@@ -1,8 +1,9 @@
 import { cohortSearchParams } from "@features/cohort-filter/server";
 import { createSearchParamsCache } from "nuqs/server";
 
-export const homeSearchParams = {
+export const projectsSearchParams = {
   ...cohortSearchParams,
 };
 
-export const homeSearchParamsCache = createSearchParamsCache(homeSearchParams);
+export const projectsSearchParamsCache =
+  createSearchParamsCache(projectsSearchParams);

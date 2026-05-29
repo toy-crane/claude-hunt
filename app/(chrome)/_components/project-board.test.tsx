@@ -176,6 +176,7 @@ async function renderBoard(
   renderWithSearchParams(
     <ProjectBoard
       cohorts={cohorts}
+      initialCohortId={opts.initialCohortId ?? null}
       isAuthenticated={false}
       projects={opts.projects ?? allProjects}
       viewerUserId={opts.viewerUserId ?? null}
@@ -221,6 +222,27 @@ describe("ProjectBoard", () => {
     expect(capturedChipsProps?.value).toBe("cohort-a");
     expect(screen.getAllByText("Alpha One").length).toBeGreaterThanOrEqual(1);
     expect(screen.getAllByText("Alpha Two").length).toBeGreaterThanOrEqual(1);
+    expect(screen.queryByText("Beta One")).not.toBeInTheDocument();
+  });
+
+  it("renders the server-seeded cohort on first paint without a URL param", async () => {
+    // Simulate SSR / pre-hydration: the prop carries the parsed cohort but
+    // the client URL adapter has no `?cohort` yet. The grid must already be
+    // filtered (no flash of the full list).
+    capturedOnValueChange = undefined;
+    const { ProjectBoard } = await import("./project-board");
+    renderWithSearchParams(
+      <ProjectBoard
+        cohorts={cohorts}
+        initialCohortId="cohort-a"
+        isAuthenticated={false}
+        projects={allProjects}
+        viewerUserId={null}
+      />,
+      ""
+    );
+    expect(capturedChipsProps?.value).toBe("cohort-a");
+    expect(screen.getAllByText("Alpha One").length).toBeGreaterThanOrEqual(1);
     expect(screen.queryByText("Beta One")).not.toBeInTheDocument();
   });
 
