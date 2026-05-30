@@ -130,6 +130,19 @@ describe("SubmitForm", () => {
     expect(submitProject).not.toHaveBeenCalled();
   });
 
+  it("clears a field error once the user edits the field", async () => {
+    render(<SubmitForm cohortId="cohort-1" />);
+    fireEvent.submit(screen.getByRole("form", { name: "프로젝트 제출" }));
+
+    const titleError = await screen.findByTestId("submit-form-error-title");
+    expect(titleError).toBeInTheDocument();
+
+    fireEvent.change(screen.getByLabelText(LABEL_TITLE), {
+      target: { value: "My App" },
+    });
+    expect(screen.queryByTestId("submit-form-error-title")).toBeNull();
+  });
+
   it("shows the projectUrl error inline when the URL is malformed", async () => {
     render(<SubmitForm cohortId="cohort-1" />);
     addOneImage();

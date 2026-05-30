@@ -10,4 +10,13 @@ export type {
   ProjectInsert,
   ProjectUpdate,
 } from "./model/schema";
-export { projectFieldsSchema } from "./model/validation";
+export type {
+  ProjectFieldErrors,
+  ProjectFieldName,
+  ProjectFieldValues,
+} from "./model/validation";
+export {
+  projectFieldsSchema,
+  readProjectFieldValues,
+  validateProjectFields,
+} from "./model/validation";

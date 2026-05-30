@@ -1,3 +1,4 @@
+import { getZodFieldErrors } from "@shared/lib/validation";
 import { z } from "zod";
 import {
   GITHUB_URL_PATTERN,
@@ -52,3 +53,62 @@ export const projectFieldsSchema = z.object({
       `최대 ${MAX_PROJECT_IMAGES}장까지 업로드할 수 있어요.`
     ),
 });
+
+/** The text/url fields shared by the submit and edit project forms. */
+export type ProjectFieldName =
+  | "title"
+  | "tagline"
+  | "projectUrl"
+  | "githubUrl"
+  | "imagePaths";
+
+export type ProjectFieldErrors = Partial<Record<ProjectFieldName, string>>;
+
+export interface ProjectFieldValues {
+  githubUrl: string;
+  projectUrl: string;
+  tagline: string;
+  title: string;
+}
+
+/** Read the four text/url fields off a project form by input `name`. */
+export function readProjectFieldValues(
+  form: HTMLFormElement
+): ProjectFieldValues {
+  const get = (name: string) =>
+    (
+      form.elements.namedItem(name) as
+        | HTMLInputElement
+        | HTMLTextAreaElement
+        | null
+    )?.value ?? "";
+  return {
+    title: get("title"),
+    tagline: get("tagline"),
+    projectUrl: get("projectUrl"),
+    githubUrl: get("githubUrl"),
+  };
+}
+
+/**
+ * Validate the project fields against {@link projectFieldsSchema} so each
+ * message can land next to its own field. Uploads happen after this gate,
+ * so `imageCount` is checked against the array min/max via a placeholder
+ * of matching length. Returns `null` when everything is valid.
+ */
+export function validateProjectFields(
+  values: ProjectFieldValues,
+  imageCount: number
+): ProjectFieldErrors | null {
+  const parsed = projectFieldsSchema.safeParse({
+    title: values.title,
+    tagline: values.tagline,
+    projectUrl: values.projectUrl,
+    githubUrl: values.githubUrl.trim() === "" ? undefined : values.githubUrl,
+    imagePaths: Array.from({ length: imageCount }, () => "x"),
+  });
+  if (parsed.success) {
+    return null;
+  }
+  return getZodFieldErrors(parsed.error) as ProjectFieldErrors;
+}

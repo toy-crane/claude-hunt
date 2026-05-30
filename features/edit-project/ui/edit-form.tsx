@@ -1,10 +1,17 @@
 "use client";
 
-import { MAX_TAGLINE_LENGTH, MAX_TITLE_LENGTH } from "@entities/project";
+import {
+  MAX_TAGLINE_LENGTH,
+  MAX_TITLE_LENGTH,
+  type ProjectFieldErrors,
+  type ProjectFieldName,
+  readProjectFieldValues,
+  validateProjectFields,
+} from "@entities/project";
 import { type ImageSlot, ImageSlots } from "@features/upload-project-images";
 import { uploadScreenshot } from "@shared/lib/screenshot-upload";
 import { Button } from "@shared/ui/button";
-import { Field, FieldGroup, FieldLabel } from "@shared/ui/field";
+import { Field, FieldError, FieldGroup, FieldLabel } from "@shared/ui/field";
 import { Input } from "@shared/ui/input";
 import { Spinner } from "@shared/ui/spinner";
 import { Textarea } from "@shared/ui/textarea";
@@ -71,9 +78,15 @@ export function EditForm({ backHref, initial }: EditFormProps) {
       url,
     }))
   );
-  const [fieldError, setFieldError] = useState<string | null>(null);
+  const [errors, setErrors] = useState<ProjectFieldErrors>({});
   const [submitError, setSubmitError] = useState<string | null>(null);
   const [submitting, setSubmitting] = useState(false);
+
+  // Clear a field's error as soon as the user edits it, so a corrected
+  // field stops showing a stale message before the next submit.
+  function clearError(field: ProjectFieldName) {
+    setErrors((prev) => (prev[field] ? { ...prev, [field]: undefined } : prev));
+  }
 
   // The ImageSlots component expects ImageSlot[] (with file/preview);
   // adapt our hybrid Slot[] for it.
@@ -108,26 +121,20 @@ export function EditForm({ backHref, initial }: EditFormProps) {
       return { kind: "new", ...entry };
     });
     setSlots(reconciled);
+    clearError("imagePaths");
   }
 
   async function handleSubmit(event: React.FormEvent<HTMLFormElement>) {
     event.preventDefault();
-    setFieldError(null);
+    setErrors({});
     setSubmitError(null);
 
     const form = event.currentTarget;
-    const elements = form.elements;
-    const titleEl = elements.namedItem("title") as HTMLInputElement | null;
-    const taglineEl = elements.namedItem(
-      "tagline"
-    ) as HTMLTextAreaElement | null;
-    const urlEl = elements.namedItem("projectUrl") as HTMLInputElement | null;
-    const githubUrlEl = elements.namedItem(
-      "githubUrl"
-    ) as HTMLInputElement | null;
+    const values = readProjectFieldValues(form);
 
-    if (slots.length === 0) {
-      setFieldError("스크린샷을 1장 이상 첨부해 주세요.");
+    const validationErrors = validateProjectFields(values, slots.length);
+    if (validationErrors) {
+      setErrors(validationErrors);
       return;
     }
 
@@ -147,18 +154,18 @@ export function EditForm({ backHref, initial }: EditFormProps) {
         );
       const failed = uploadResults.find((r) => r.error || !r.path);
       if (failed) {
-        setFieldError(failed.error ?? "업로드에 실패했어요.");
+        setErrors({ imagePaths: failed.error ?? "업로드에 실패했어요." });
         return;
       }
       const imagePaths = uploadResults.map((r) => r.path as string);
 
-      const githubUrlValue = (githubUrlEl?.value ?? "").trim();
       const result = await editProject({
         projectId: initial.projectId,
-        title: titleEl?.value ?? "",
-        tagline: taglineEl?.value ?? "",
-        projectUrl: urlEl?.value ?? "",
-        githubUrl: githubUrlValue === "" ? undefined : githubUrlValue,
+        title: values.title,
+        tagline: values.tagline,
+        projectUrl: values.projectUrl,
+        githubUrl:
+          values.githubUrl.trim() === "" ? undefined : values.githubUrl,
         imagePaths,
       });
       if (!result.ok) {
@@ -177,89 +184,112 @@ export function EditForm({ backHref, initial }: EditFormProps) {
     <form
       aria-label="프로젝트 편집"
       className="flex flex-col gap-4"
+      noValidate
       onSubmit={handleSubmit}
     >
       <FieldGroup>
-        <Field>
+        <Field data-invalid={errors.title ? true : undefined}>
           <FieldLabel htmlFor={titleId}>제목</FieldLabel>
           <Input
+            aria-invalid={errors.title ? true : undefined}
             defaultValue={initial.title}
             disabled={submitting}
             id={titleId}
             maxLength={MAX_TITLE_LENGTH}
             name="title"
+            onChange={() => clearError("title")}
             required
           />
+          {errors.title ? (
+            <FieldError data-testid="edit-form-error-title">
+              {errors.title}
+            </FieldError>
+          ) : null}
         </Field>
 
-        <Field>
+        <Field data-invalid={errors.tagline ? true : undefined}>
           <FieldLabel htmlFor={taglineId}>한 줄 소개</FieldLabel>
           <Textarea
+            aria-invalid={errors.tagline ? true : undefined}
             defaultValue={initial.tagline}
             disabled={submitting}
             id={taglineId}
             maxLength={MAX_TAGLINE_LENGTH}
             name="tagline"
+            onChange={() => clearError("tagline")}
             required
             rows={2}
           />
+          {errors.tagline ? (
+            <FieldError data-testid="edit-form-error-tagline">
+              {errors.tagline}
+            </FieldError>
+          ) : null}
         </Field>
 
-        <Field>
+        <Field data-invalid={errors.projectUrl ? true : undefined}>
           <FieldLabel htmlFor={urlId}>프로젝트 URL</FieldLabel>
           <Input
+            aria-invalid={errors.projectUrl ? true : undefined}
             defaultValue={initial.projectUrl}
             disabled={submitting}
             id={urlId}
             name="projectUrl"
+            onChange={() => clearError("projectUrl")}
             required
             type="url"
           />
+          {errors.projectUrl ? (
+            <FieldError data-testid="edit-form-error-projectUrl">
+              {errors.projectUrl}
+            </FieldError>
+          ) : null}
         </Field>
 
-        <Field>
+        <Field data-invalid={errors.githubUrl ? true : undefined}>
           <FieldLabel htmlFor={githubUrlId}>
             GitHub 저장소{" "}
             <span className="font-normal text-muted-foreground">(선택)</span>
           </FieldLabel>
           <Input
+            aria-invalid={errors.githubUrl ? true : undefined}
             defaultValue={initial.githubUrl ?? ""}
             disabled={submitting}
             id={githubUrlId}
             name="githubUrl"
+            onChange={() => clearError("githubUrl")}
             placeholder="https://github.com/owner/repo"
             type="url"
           />
+          {errors.githubUrl ? (
+            <FieldError data-testid="edit-form-error-githubUrl">
+              {errors.githubUrl}
+            </FieldError>
+          ) : null}
         </Field>
 
-        <Field>
+        <Field data-invalid={errors.imagePaths ? true : undefined}>
           <FieldLabel>스크린샷</FieldLabel>
           <ImageSlots
             disabled={submitting}
             onChange={handleImagesChange}
-            onError={setFieldError}
+            onError={(message) =>
+              setErrors((prev) => ({ ...prev, imagePaths: message }))
+            }
             value={imageSlotsValue}
           />
+          {errors.imagePaths ? (
+            <FieldError data-testid="edit-form-error-imagePaths">
+              {errors.imagePaths}
+            </FieldError>
+          ) : null}
         </Field>
       </FieldGroup>
 
-      {fieldError ? (
-        <p
-          className="text-destructive text-xs"
-          data-testid="edit-form-field-error"
-          role="alert"
-        >
-          {fieldError}
-        </p>
-      ) : null}
       {submitError ? (
-        <p
-          className="text-destructive text-xs"
-          data-testid="edit-form-submit-error"
-          role="alert"
-        >
+        <FieldError data-testid="edit-form-submit-error">
           {submitError}
-        </p>
+        </FieldError>
       ) : null}
 
       <div className="flex items-stretch gap-2">

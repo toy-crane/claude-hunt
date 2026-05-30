@@ -3,7 +3,10 @@
 import {
   MAX_TAGLINE_LENGTH,
   MAX_TITLE_LENGTH,
-  projectFieldsSchema,
+  type ProjectFieldErrors,
+  type ProjectFieldName,
+  readProjectFieldValues,
+  validateProjectFields,
 } from "@entities/project";
 import { type ImageSlot, ImageSlots } from "@features/upload-project-images";
 import { uploadScreenshot } from "@shared/lib/screenshot-upload";
@@ -17,69 +20,6 @@ import { useRouter } from "next/navigation";
 import { useId, useState } from "react";
 import { toast } from "sonner";
 import { submitProject } from "../api/actions";
-
-type FieldName =
-  | "title"
-  | "tagline"
-  | "projectUrl"
-  | "githubUrl"
-  | "imagePaths";
-
-type FieldErrors = Partial<Record<FieldName, string>>;
-
-interface FieldValues {
-  githubUrl: string;
-  projectUrl: string;
-  tagline: string;
-  title: string;
-}
-
-function readFieldValues(form: HTMLFormElement): FieldValues {
-  const get = (name: string) =>
-    (
-      form.elements.namedItem(name) as
-        | HTMLInputElement
-        | HTMLTextAreaElement
-        | null
-    )?.value ?? "";
-  return {
-    title: get("title"),
-    tagline: get("tagline"),
-    projectUrl: get("projectUrl"),
-    githubUrl: get("githubUrl"),
-  };
-}
-
-/**
- * Validate every field up front against the shared schema so each
- * message lands next to its own field. imagePaths only needs its length
- * checked at this stage (uploads happen after), so feed a placeholder of
- * matching length and reuse the schema's canonical min/max messages.
- * Returns `null` when everything is valid.
- */
-function validateFields(
-  values: FieldValues,
-  imageCount: number
-): FieldErrors | null {
-  const parsed = projectFieldsSchema.safeParse({
-    title: values.title,
-    tagline: values.tagline,
-    projectUrl: values.projectUrl,
-    githubUrl: values.githubUrl.trim() === "" ? undefined : values.githubUrl,
-    imagePaths: Array.from({ length: imageCount }, () => "x"),
-  });
-  if (parsed.success) {
-    return null;
-  }
-  const errors: FieldErrors = {};
-  for (const issue of parsed.error.issues) {
-    const field = issue.path[0] as FieldName | undefined;
-    if (field && !errors[field]) {
-      errors[field] = issue.message;
-    }
-  }
-  return errors;
-}
 
 export interface SubmitFormProps {
   /**
@@ -115,9 +55,15 @@ export function SubmitForm({ backHref, cohortId: _cohortId }: SubmitFormProps) {
   const urlId = useId();
   const githubUrlId = useId();
   const [images, setImages] = useState<ImageSlot[]>([]);
-  const [errors, setErrors] = useState<FieldErrors>({});
+  const [errors, setErrors] = useState<ProjectFieldErrors>({});
   const [submitError, setSubmitError] = useState<string | null>(null);
   const [submitting, setSubmitting] = useState(false);
+
+  // Clear a field's error as soon as the user edits it, so a corrected
+  // field stops showing a stale message before the next submit.
+  function clearError(field: ProjectFieldName) {
+    setErrors((prev) => (prev[field] ? { ...prev, [field]: undefined } : prev));
+  }
 
   async function handleSubmit(event: React.FormEvent<HTMLFormElement>) {
     event.preventDefault();
@@ -125,9 +71,9 @@ export function SubmitForm({ backHref, cohortId: _cohortId }: SubmitFormProps) {
     setSubmitError(null);
 
     const form = event.currentTarget;
-    const values = readFieldValues(form);
+    const values = readProjectFieldValues(form);
 
-    const validationErrors = validateFields(values, images.length);
+    const validationErrors = validateProjectFields(values, images.length);
     if (validationErrors) {
       setErrors(validationErrors);
       return;
@@ -193,6 +139,7 @@ export function SubmitForm({ backHref, cohortId: _cohortId }: SubmitFormProps) {
             id={titleId}
             maxLength={MAX_TITLE_LENGTH}
             name="title"
+            onChange={() => clearError("title")}
             placeholder="내 앱"
             required
           />
@@ -214,6 +161,7 @@ export function SubmitForm({ backHref, cohortId: _cohortId }: SubmitFormProps) {
             id={taglineId}
             maxLength={MAX_TAGLINE_LENGTH}
             name="tagline"
+            onChange={() => clearError("tagline")}
             placeholder="멋진 도구 한 줄 소개"
             required
             rows={2}
@@ -235,6 +183,7 @@ export function SubmitForm({ backHref, cohortId: _cohortId }: SubmitFormProps) {
             disabled={submitting}
             id={urlId}
             name="projectUrl"
+            onChange={() => clearError("projectUrl")}
             placeholder="https://myapp.com"
             required
             type="url"
@@ -253,6 +202,7 @@ export function SubmitForm({ backHref, cohortId: _cohortId }: SubmitFormProps) {
             disabled={submitting}
             id={githubUrlId}
             name="githubUrl"
+            onChange={() => clearError("githubUrl")}
             placeholder="https://github.com/owner/repo"
             type="url"
           />
@@ -269,7 +219,10 @@ export function SubmitForm({ backHref, cohortId: _cohortId }: SubmitFormProps) {
           </FieldLabel>
           <ImageSlots
             disabled={submitting}
-            onChange={setImages}
+            onChange={(next) => {
+              setImages(next);
+              clearError("imagePaths");
+            }}
             onError={(message) =>
               setErrors((prev) => ({ ...prev, imagePaths: message }))
             }
