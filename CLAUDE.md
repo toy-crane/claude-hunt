@@ -113,5 +113,4 @@ The raw `Database` type lives at `shared/api/supabase/types.ts`. Domain code mus
 
 ## Boundary
 
-### Ask-first
-- Adding new external dependencies
+_No ask-first boundaries currently defined._
