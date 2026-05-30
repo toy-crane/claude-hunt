@@ -10,7 +10,7 @@ import { getZodErrorMessage } from "@shared/lib/validation";
 import { Alert, AlertDescription, AlertTitle } from "@shared/ui/alert";
 import { AuthLayout } from "@shared/ui/auth-layout";
 import { Button } from "@shared/ui/button";
-import { Field, FieldGroup, FieldLabel } from "@shared/ui/field";
+import { Field, FieldError, FieldGroup, FieldLabel } from "@shared/ui/field";
 import { Input } from "@shared/ui/input";
 import {
   Select,
@@ -104,28 +104,30 @@ export function OnboardingForm({ cohorts, initialNext }: OnboardingFormProps) {
       <form
         aria-label="온보딩 완료"
         className="flex flex-col gap-6"
+        noValidate
         onSubmit={handleSubmit}
       >
         <FieldGroup>
-          <Field>
+          <Field data-invalid={displayNameError ? true : undefined}>
             <FieldLabel htmlFor={displayNameId}>닉네임</FieldLabel>
             <Input
-              aria-invalid={displayNameError !== null}
+              aria-invalid={displayNameError ? true : undefined}
               disabled={isPending || isSigningOut}
               id={displayNameId}
               name="displayName"
-              onChange={(event) => setDisplayName(event.target.value)}
+              onChange={(event) => {
+                setDisplayName(event.target.value);
+                if (displayNameError) {
+                  setDisplayNameError(null);
+                }
+              }}
               placeholder="닉네임을 입력하세요"
               value={displayName}
             />
             {displayNameError ? (
-              <p
-                className="text-destructive text-xs"
-                data-testid="onboarding-display-name-error"
-                role="alert"
-              >
+              <FieldError data-testid="onboarding-display-name-error">
                 {displayNameError}
-              </p>
+              </FieldError>
             ) : null}
           </Field>
 
@@ -137,15 +139,20 @@ export function OnboardingForm({ cohorts, initialNext }: OnboardingFormProps) {
               </AlertDescription>
             </Alert>
           ) : (
-            <Field>
+            <Field data-invalid={cohortError ? true : undefined}>
               <FieldLabel htmlFor={cohortId}>클래스</FieldLabel>
               <Select
                 disabled={isPending || isSigningOut}
-                onValueChange={setSelectedCohortId}
+                onValueChange={(value) => {
+                  setSelectedCohortId(value);
+                  if (cohortError) {
+                    setCohortError(null);
+                  }
+                }}
                 value={selectedCohortId}
               >
                 <SelectTrigger
-                  aria-invalid={cohortError !== null}
+                  aria-invalid={cohortError ? true : undefined}
                   className="w-full"
                   data-testid="onboarding-cohort-trigger"
                   id={cohortId}
@@ -161,26 +168,18 @@ export function OnboardingForm({ cohorts, initialNext }: OnboardingFormProps) {
                 </SelectContent>
               </Select>
               {cohortError ? (
-                <p
-                  className="text-destructive text-xs"
-                  data-testid="onboarding-cohort-error"
-                  role="alert"
-                >
+                <FieldError data-testid="onboarding-cohort-error">
                   {cohortError}
-                </p>
+                </FieldError>
               ) : null}
             </Field>
           )}
         </FieldGroup>
 
         {submitError ? (
-          <p
-            className="text-destructive text-xs"
-            data-testid="onboarding-submit-error"
-            role="alert"
-          >
+          <FieldError data-testid="onboarding-submit-error">
             {submitError}
-          </p>
+          </FieldError>
         ) : null}
 
         <Button
