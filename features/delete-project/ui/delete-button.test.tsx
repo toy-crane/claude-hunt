@@ -30,7 +30,7 @@ describe("DeleteButton — icon variant", () => {
     const trigger = screen.getByTestId("delete-project-trigger");
     expect(trigger).toHaveAttribute("aria-label", "프로젝트 삭제");
     expect(trigger).toHaveTextContent("");
-    expect(trigger.className).toContain("rounded-none");
+    expect(trigger.className).toContain("rounded-lg");
     expect(trigger.className).toContain("size-7");
   });
 
