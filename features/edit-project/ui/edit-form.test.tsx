@@ -62,6 +62,12 @@ const initial = {
 };
 
 describe("<EditForm />", () => {
+  beforeEach(() => {
+    editProject.mockReset();
+    routerPush.mockReset();
+    routerRefresh.mockReset();
+  });
+
   it("shows a Spinner on the Save button while pending and keeps the static label", async () => {
     editProject.mockImplementation(
       () => new Promise<{ ok: true; projectId: string }>(() => undefined)
@@ -80,5 +86,31 @@ describe("<EditForm />", () => {
       expect(button.textContent).toContain("저장");
       expect(button.textContent).not.toContain("저장 중");
     });
+  });
+
+  it("shows an inline error under the title field when it is cleared", async () => {
+    render(<EditForm initial={initial} />);
+    const title = screen.getByLabelText("제목") as HTMLInputElement;
+    fireEvent.change(title, { target: { value: "" } });
+    fireEvent.submit(title.form as HTMLFormElement);
+
+    expect(
+      await screen.findByTestId("edit-form-error-title")
+    ).toHaveTextContent("제목을 입력해 주세요.");
+    expect(editProject).not.toHaveBeenCalled();
+  });
+
+  it("clears a field error once the user edits the field", async () => {
+    render(<EditForm initial={initial} />);
+    const title = screen.getByLabelText("제목") as HTMLInputElement;
+    fireEvent.change(title, { target: { value: "" } });
+    fireEvent.submit(title.form as HTMLFormElement);
+
+    expect(
+      await screen.findByTestId("edit-form-error-title")
+    ).toHaveTextContent("제목을 입력해 주세요.");
+
+    fireEvent.change(title, { target: { value: "New title" } });
+    expect(screen.queryByTestId("edit-form-error-title")).toBeNull();
   });
 });

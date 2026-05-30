@@ -265,6 +265,35 @@ describe("OnboardingForm", () => {
     expect(completeOnboardingMock).not.toHaveBeenCalled();
   });
 
+  it("clears the display name error once the user edits the field", async () => {
+    render(<OnboardingForm cohorts={cohorts} initialNext="/" />);
+
+    await submit();
+    expect(
+      await screen.findByTestId("onboarding-display-name-error")
+    ).toBeInTheDocument();
+
+    typeDisplayName("Alice");
+    expect(
+      screen.queryByTestId("onboarding-display-name-error")
+    ).not.toBeInTheDocument();
+  });
+
+  it("clears the cohort error once a cohort is selected", async () => {
+    render(<OnboardingForm cohorts={cohorts} initialNext="/" />);
+
+    typeDisplayName("Alice");
+    await submit();
+    expect(
+      await screen.findByTestId("onboarding-cohort-error")
+    ).toBeInTheDocument();
+
+    await pickCohort("LG전자 1기");
+    expect(
+      screen.queryByTestId("onboarding-cohort-error")
+    ).not.toBeInTheDocument();
+  });
+
   it("calls completeOnboarding with trimmed inputs and redirects on success", async () => {
     completeOnboardingMock.mockResolvedValue({ ok: true });
     render(<OnboardingForm cohorts={cohorts} initialNext="/dashboard" />);
