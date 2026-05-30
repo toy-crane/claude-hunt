@@ -1,6 +1,10 @@
 "use client";
 
-import { MAX_TAGLINE_LENGTH, MAX_TITLE_LENGTH } from "@entities/project";
+import {
+  MAX_TAGLINE_LENGTH,
+  MAX_TITLE_LENGTH,
+  projectFieldsSchema,
+} from "@entities/project";
 import { type ImageSlot, ImageSlots } from "@features/upload-project-images";
 import { uploadScreenshot } from "@shared/lib/screenshot-upload";
 import { Button } from "@shared/ui/button";
@@ -13,6 +17,69 @@ import { useRouter } from "next/navigation";
 import { useId, useState } from "react";
 import { toast } from "sonner";
 import { submitProject } from "../api/actions";
+
+type FieldName =
+  | "title"
+  | "tagline"
+  | "projectUrl"
+  | "githubUrl"
+  | "imagePaths";
+
+type FieldErrors = Partial<Record<FieldName, string>>;
+
+interface FieldValues {
+  githubUrl: string;
+  projectUrl: string;
+  tagline: string;
+  title: string;
+}
+
+function readFieldValues(form: HTMLFormElement): FieldValues {
+  const get = (name: string) =>
+    (
+      form.elements.namedItem(name) as
+        | HTMLInputElement
+        | HTMLTextAreaElement
+        | null
+    )?.value ?? "";
+  return {
+    title: get("title"),
+    tagline: get("tagline"),
+    projectUrl: get("projectUrl"),
+    githubUrl: get("githubUrl"),
+  };
+}
+
+/**
+ * Validate every field up front against the shared schema so each
+ * message lands next to its own field. imagePaths only needs its length
+ * checked at this stage (uploads happen after), so feed a placeholder of
+ * matching length and reuse the schema's canonical min/max messages.
+ * Returns `null` when everything is valid.
+ */
+function validateFields(
+  values: FieldValues,
+  imageCount: number
+): FieldErrors | null {
+  const parsed = projectFieldsSchema.safeParse({
+    title: values.title,
+    tagline: values.tagline,
+    projectUrl: values.projectUrl,
+    githubUrl: values.githubUrl.trim() === "" ? undefined : values.githubUrl,
+    imagePaths: Array.from({ length: imageCount }, () => "x"),
+  });
+  if (parsed.success) {
+    return null;
+  }
+  const errors: FieldErrors = {};
+  for (const issue of parsed.error.issues) {
+    const field = issue.path[0] as FieldName | undefined;
+    if (field && !errors[field]) {
+      errors[field] = issue.message;
+    }
+  }
+  return errors;
+}
 
 export interface SubmitFormProps {
   /**
@@ -48,32 +115,21 @@ export function SubmitForm({ backHref, cohortId: _cohortId }: SubmitFormProps) {
   const urlId = useId();
   const githubUrlId = useId();
   const [images, setImages] = useState<ImageSlot[]>([]);
-  const [fieldError, setFieldError] = useState<string | null>(null);
+  const [errors, setErrors] = useState<FieldErrors>({});
   const [submitError, setSubmitError] = useState<string | null>(null);
   const [submitting, setSubmitting] = useState(false);
 
   async function handleSubmit(event: React.FormEvent<HTMLFormElement>) {
     event.preventDefault();
-    setFieldError(null);
+    setErrors({});
     setSubmitError(null);
 
     const form = event.currentTarget;
-    const elements = form.elements;
-    const titleEl = elements.namedItem("title") as HTMLInputElement | null;
-    const taglineEl = elements.namedItem(
-      "tagline"
-    ) as HTMLTextAreaElement | null;
-    const urlEl = elements.namedItem("projectUrl") as HTMLInputElement | null;
-    const githubUrlEl = elements.namedItem(
-      "githubUrl"
-    ) as HTMLInputElement | null;
-    const title = titleEl?.value ?? "";
-    const tagline = taglineEl?.value ?? "";
-    const projectUrl = urlEl?.value ?? "";
-    const githubUrl = githubUrlEl?.value ?? "";
+    const values = readFieldValues(form);
 
-    if (images.length === 0) {
-      setFieldError("스크린샷을 1장 이상 첨부해 주세요.");
+    const validationErrors = validateFields(values, images.length);
+    if (validationErrors) {
+      setErrors(validationErrors);
       return;
     }
 
@@ -86,16 +142,17 @@ export function SubmitForm({ backHref, cohortId: _cohortId }: SubmitFormProps) {
       );
       const failed = uploads.find((u) => u.error || !u.path);
       if (failed) {
-        setFieldError(failed.error ?? "업로드에 실패했어요.");
+        setErrors({ imagePaths: failed.error ?? "업로드에 실패했어요." });
         return;
       }
       const imagePaths = uploads.map((u) => u.path as string);
 
       const result = await submitProject({
-        title,
-        tagline,
-        projectUrl,
-        githubUrl: githubUrl.trim() === "" ? undefined : githubUrl,
+        title: values.title,
+        tagline: values.tagline,
+        projectUrl: values.projectUrl,
+        githubUrl:
+          values.githubUrl.trim() === "" ? undefined : values.githubUrl,
         imagePaths,
       });
       if (!result.ok) {
@@ -121,14 +178,16 @@ export function SubmitForm({ backHref, cohortId: _cohortId }: SubmitFormProps) {
     <form
       aria-label="프로젝트 제출"
       className="flex flex-col gap-6"
+      noValidate
       onSubmit={handleSubmit}
     >
       <FieldGroup>
-        <Field>
+        <Field data-invalid={errors.title ? true : undefined}>
           <FieldLabel htmlFor={titleId}>
             제목 <RequiredMark />
           </FieldLabel>
           <Input
+            aria-invalid={errors.title ? true : undefined}
             aria-required="true"
             disabled={submitting}
             id={titleId}
@@ -137,13 +196,19 @@ export function SubmitForm({ backHref, cohortId: _cohortId }: SubmitFormProps) {
             placeholder="내 앱"
             required
           />
+          {errors.title ? (
+            <FieldError data-testid="submit-form-error-title">
+              {errors.title}
+            </FieldError>
+          ) : null}
         </Field>
 
-        <Field>
+        <Field data-invalid={errors.tagline ? true : undefined}>
           <FieldLabel htmlFor={taglineId}>
             한 줄 소개 <RequiredMark />
           </FieldLabel>
           <Textarea
+            aria-invalid={errors.tagline ? true : undefined}
             aria-required="true"
             disabled={submitting}
             id={taglineId}
@@ -153,13 +218,19 @@ export function SubmitForm({ backHref, cohortId: _cohortId }: SubmitFormProps) {
             required
             rows={2}
           />
+          {errors.tagline ? (
+            <FieldError data-testid="submit-form-error-tagline">
+              {errors.tagline}
+            </FieldError>
+          ) : null}
         </Field>
 
-        <Field>
+        <Field data-invalid={errors.projectUrl ? true : undefined}>
           <FieldLabel htmlFor={urlId}>
             프로젝트 URL <RequiredMark />
           </FieldLabel>
           <Input
+            aria-invalid={errors.projectUrl ? true : undefined}
             aria-required="true"
             disabled={submitting}
             id={urlId}
@@ -168,32 +239,45 @@ export function SubmitForm({ backHref, cohortId: _cohortId }: SubmitFormProps) {
             required
             type="url"
           />
+          {errors.projectUrl ? (
+            <FieldError data-testid="submit-form-error-projectUrl">
+              {errors.projectUrl}
+            </FieldError>
+          ) : null}
         </Field>
 
-        <Field>
+        <Field data-invalid={errors.githubUrl ? true : undefined}>
           <FieldLabel htmlFor={githubUrlId}>GitHub 저장소</FieldLabel>
           <Input
+            aria-invalid={errors.githubUrl ? true : undefined}
             disabled={submitting}
             id={githubUrlId}
             name="githubUrl"
             placeholder="https://github.com/owner/repo"
             type="url"
           />
+          {errors.githubUrl ? (
+            <FieldError data-testid="submit-form-error-githubUrl">
+              {errors.githubUrl}
+            </FieldError>
+          ) : null}
         </Field>
 
-        <Field>
+        <Field data-invalid={errors.imagePaths ? true : undefined}>
           <FieldLabel>
             스크린샷 <RequiredMark />
           </FieldLabel>
           <ImageSlots
             disabled={submitting}
             onChange={setImages}
-            onError={setFieldError}
+            onError={(message) =>
+              setErrors((prev) => ({ ...prev, imagePaths: message }))
+            }
             value={images}
           />
-          {fieldError ? (
-            <FieldError data-testid="submit-form-field-error">
-              {fieldError}
+          {errors.imagePaths ? (
+            <FieldError data-testid="submit-form-error-imagePaths">
+              {errors.imagePaths}
             </FieldError>
           ) : null}
         </Field>

@@ -67,6 +67,7 @@ const { SubmitForm } = await import("./submit-form");
 const LABEL_TITLE = /제목/;
 const LABEL_TAGLINE = /한 줄 소개/;
 const LABEL_URL = /프로젝트 URL/;
+const LABEL_GITHUB = /GitHub/;
 const SUBMIT_LABEL = /프로젝트 제출/;
 
 function fillTextFields() {
@@ -102,9 +103,61 @@ describe("SubmitForm", () => {
     fireEvent.submit(form);
 
     expect(
-      await screen.findByTestId("submit-form-field-error")
+      await screen.findByTestId("submit-form-error-imagePaths")
     ).toHaveTextContent("스크린샷을 1장 이상");
     expect(uploadScreenshot).not.toHaveBeenCalled();
+    expect(submitProject).not.toHaveBeenCalled();
+  });
+
+  it("shows an inline error under every invalid field when the form is empty", async () => {
+    render(<SubmitForm cohortId="cohort-1" />);
+    const form = screen.getByRole("form", { name: "프로젝트 제출" });
+    fireEvent.submit(form);
+
+    expect(
+      await screen.findByTestId("submit-form-error-title")
+    ).toHaveTextContent("제목을 입력해 주세요.");
+    expect(screen.getByTestId("submit-form-error-tagline")).toHaveTextContent(
+      "한 줄 소개"
+    );
+    expect(
+      screen.getByTestId("submit-form-error-projectUrl")
+    ).toHaveTextContent("URL");
+    expect(
+      screen.getByTestId("submit-form-error-imagePaths")
+    ).toHaveTextContent("스크린샷을 1장 이상");
+    expect(uploadScreenshot).not.toHaveBeenCalled();
+    expect(submitProject).not.toHaveBeenCalled();
+  });
+
+  it("shows the projectUrl error inline when the URL is malformed", async () => {
+    render(<SubmitForm cohortId="cohort-1" />);
+    addOneImage();
+    const title = screen.getByLabelText(LABEL_TITLE) as HTMLInputElement;
+    const tagline = screen.getByLabelText(LABEL_TAGLINE) as HTMLTextAreaElement;
+    const url = screen.getByLabelText(LABEL_URL) as HTMLInputElement;
+    fireEvent.change(title, { target: { value: "My App" } });
+    fireEvent.change(tagline, { target: { value: "A cool tool" } });
+    fireEvent.change(url, { target: { value: "not-a-url" } });
+    fireEvent.submit(title.form as HTMLFormElement);
+
+    expect(
+      await screen.findByTestId("submit-form-error-projectUrl")
+    ).toHaveTextContent("URL");
+    expect(submitProject).not.toHaveBeenCalled();
+  });
+
+  it("shows the githubUrl error inline when a non-GitHub URL is entered", async () => {
+    render(<SubmitForm cohortId="cohort-1" />);
+    addOneImage();
+    const form = fillTextFields();
+    const github = screen.getByLabelText(LABEL_GITHUB) as HTMLInputElement;
+    fireEvent.change(github, { target: { value: "https://gitlab.com/a/b" } });
+    fireEvent.submit(form);
+
+    expect(
+      await screen.findByTestId("submit-form-error-githubUrl")
+    ).toHaveTextContent("GitHub 저장소 주소를 입력해주세요");
     expect(submitProject).not.toHaveBeenCalled();
   });
 
@@ -171,7 +224,7 @@ describe("SubmitForm", () => {
     fireEvent.submit(fillTextFields());
 
     expect(
-      await screen.findByTestId("submit-form-field-error")
+      await screen.findByTestId("submit-form-error-imagePaths")
     ).toHaveTextContent("25 MB");
     expect(submitProject).not.toHaveBeenCalled();
     expect(routerPush).not.toHaveBeenCalled();
@@ -182,7 +235,7 @@ describe("SubmitForm", () => {
     fireEvent.click(screen.getByTestId("image-slots-stub-error"));
 
     expect(
-      await screen.findByTestId("submit-form-field-error")
+      await screen.findByTestId("submit-form-error-imagePaths")
     ).toHaveTextContent("최대 5장까지");
   });
 
