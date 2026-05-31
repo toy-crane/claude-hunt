@@ -1,7 +1,7 @@
 "use server";
 
 import { requireAuth } from "@shared/api/supabase/require-auth";
-import { CACHE_TAGS } from "@shared/config/cache-tags";
+import { cacheTags } from "@shared/config/cache-tags";
 import {
   DISPLAY_NAME_TAKEN_MESSAGE,
   isDisplayNameUniqueViolation,
@@ -58,6 +58,6 @@ export async function completeOnboarding(
 
   // display_name surfaces in the projects_with_vote_count view as
   // author_display_name, so the cached grid must be invalidated.
-  updateTag(CACHE_TAGS.PROJECTS_GRID);
+  updateTag(cacheTags.projects());
   return { ok: true };
 }

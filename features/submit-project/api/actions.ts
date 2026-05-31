@@ -1,7 +1,7 @@
 "use server";
 
 import { requireAuth } from "@shared/api/supabase/require-auth";
-import { CACHE_TAGS } from "@shared/config/cache-tags";
+import { cacheTags } from "@shared/config/cache-tags";
 import { getZodErrorMessage } from "@shared/lib/validation";
 import { revalidatePath, updateTag } from "next/cache";
 import { type SubmitProjectInput, submitProjectInputSchema } from "./schema";
@@ -67,7 +67,7 @@ export async function submitProject(
     };
   }
 
-  updateTag(CACHE_TAGS.PROJECTS_GRID);
+  updateTag(cacheTags.projects());
   // Mirror delete/edit: the /settings 내 프로젝트 list reads via
   // fetchMyProjects, which is uncached and untagged, so the PROJECTS_GRID
   // tag does not reach it. Revalidate the path so a project submitted from

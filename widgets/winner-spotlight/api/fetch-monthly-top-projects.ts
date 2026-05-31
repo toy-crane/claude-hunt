@@ -1,6 +1,6 @@
 import type { ProjectWithVoteCount } from "@entities/vote";
 import { createAnonServerClient } from "@shared/api/supabase/anon-server";
-import { CACHE_TAGS } from "@shared/config/cache-tags";
+import { cacheTags } from "@shared/config/cache-tags";
 import { productionCache } from "@shared/lib/cache";
 import { monthBoundsUtc, monthLabel, monthSlug } from "@shared/lib/month";
 import { withScreenshotUrls } from "@shared/lib/screenshot-url";
@@ -65,7 +65,7 @@ function cachedLoad(startUtc: string, endUtc: string, limit: number) {
   return productionCache(
     () => loadMonthlyCore(startUtc, endUtc, limit),
     ["winner-spotlight-monthly", startUtc, String(limit)],
-    { revalidate: 60, tags: [CACHE_TAGS.PROJECTS_GRID] }
+    { revalidate: 60, tags: [cacheTags.projects()] }
   )();
 }
 

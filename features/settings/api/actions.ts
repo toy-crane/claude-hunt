@@ -2,7 +2,7 @@
 
 import { displayNameSchema } from "@entities/profile";
 import { requireAuth } from "@shared/api/supabase/require-auth";
-import { CACHE_TAGS } from "@shared/config/cache-tags";
+import { cacheTags } from "@shared/config/cache-tags";
 import {
   DISPLAY_NAME_TAKEN_MESSAGE,
   isDisplayNameUniqueViolation,
@@ -55,7 +55,7 @@ export async function updateDisplayName(
   }
 
   // display_name surfaces in the cached projects grid as author_display_name.
-  updateTag(CACHE_TAGS.PROJECTS_GRID);
+  updateTag(cacheTags.projects());
   revalidatePath("/settings");
   return { ok: true };
 }

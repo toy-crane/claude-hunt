@@ -100,7 +100,7 @@ describe("editProject server action", () => {
       })
     );
     expect(updateEq).toHaveBeenCalledWith("id", validInput.projectId);
-    expect(updateTagMock).toHaveBeenCalledWith("projects-grid");
+    expect(updateTagMock).toHaveBeenCalledWith("projects");
     expect(revalidatePathMock).toHaveBeenCalledWith(
       `/projects/${validInput.projectId}`
     );
@@ -221,6 +221,6 @@ describe("editProject server action", () => {
 
     expect(result.ok).toBe(true);
     expect(storageRemove).toHaveBeenCalledTimes(1);
-    expect(updateTagMock).toHaveBeenCalledWith("projects-grid");
+    expect(updateTagMock).toHaveBeenCalledWith("projects");
   });
 });

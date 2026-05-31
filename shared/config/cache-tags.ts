@@ -1,22 +1,21 @@
 /**
- * Tags used by `unstable_cache` Data Cache entries and `revalidateTag`
- * mutation invalidations. Adding a tag here is a contract between the
- * function that emits the cache entry and every action that should bust
- * it.
+ * Cache tag factory for `'use cache'` entries (`cacheTag`) and mutation
+ * invalidations (`updateTag` / `revalidateTag`). Each function returns the
+ * tag string that forms the contract between the cached read that emits it
+ * and every action that should bust it.
+ *
+ * Naming follows the `entity` / `entity:id` convention so a coarse tag busts
+ * a whole collection while a fine tag busts a single entity:
+ *   - `projects()`    → the landing grid, project count, and monthly
+ *                       spotlight collection. Bust on any project
+ *                       insert/delete, any vote, or an author-profile change
+ *                       that the grid joins through.
+ *   - `project(id)`   → one project's detail + comments + reactions. Bust on
+ *                       that project's vote/comment/reaction/edit.
+ *   - `cohorts()`     → the cohort reference list.
  */
-export const CACHE_TAGS = {
-  /**
-   * Landing-page grid rows (`projects_with_vote_count` plus screenshot
-   * URLs). Bust on any project insert/update/delete, any vote toggle,
-   * and any profile update that changes display name or avatar (the
-   * view joins through the author profile).
-   */
-  PROJECTS_GRID: "projects-grid",
-  /**
-   * Cohort list shared by the dropdown and chips. Bust when an admin
-   * adds, renames, or removes a cohort.
-   */
-  COHORTS: "cohorts",
+export const cacheTags = {
+  projects: () => "projects",
+  project: (id: string) => `project:id:${id}`,
+  cohorts: () => "cohorts",
 } as const;
-
-export type CacheTag = (typeof CACHE_TAGS)[keyof typeof CACHE_TAGS];

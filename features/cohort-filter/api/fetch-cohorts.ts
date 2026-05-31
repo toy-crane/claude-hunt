@@ -1,6 +1,6 @@
 import type { Cohort } from "@entities/cohort";
 import { createAnonServerClient } from "@shared/api/supabase/anon-server";
-import { CACHE_TAGS } from "@shared/config/cache-tags";
+import { cacheTags } from "@shared/config/cache-tags";
 import { productionCache } from "@shared/lib/cache";
 
 async function loadCohorts(): Promise<Cohort[]> {
@@ -26,5 +26,5 @@ async function loadCohorts(): Promise<Cohort[]> {
  */
 export const fetchCohorts = productionCache(loadCohorts, ["cohorts"], {
   revalidate: 60,
-  tags: [CACHE_TAGS.COHORTS],
+  tags: [cacheTags.cohorts()],
 });

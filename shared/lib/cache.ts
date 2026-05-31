@@ -1,9 +1,8 @@
-import type { CacheTag } from "@shared/config/cache-tags";
 import { unstable_cache } from "next/cache";
 
 interface ProductionCacheOptions {
   revalidate: number;
-  tags: CacheTag[];
+  tags: string[];
 }
 
 /**

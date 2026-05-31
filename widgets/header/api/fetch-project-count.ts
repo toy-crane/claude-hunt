@@ -1,5 +1,5 @@
 import { createAnonServerClient } from "@shared/api/supabase/anon-server";
-import { CACHE_TAGS } from "@shared/config/cache-tags";
+import { cacheTags } from "@shared/config/cache-tags";
 import { productionCache } from "@shared/lib/cache";
 
 async function loadProjectCount(): Promise<number> {
@@ -22,5 +22,5 @@ async function loadProjectCount(): Promise<number> {
 export const fetchProjectCount = productionCache(
   loadProjectCount,
   ["header-project-count"],
-  { revalidate: 60, tags: [CACHE_TAGS.PROJECTS_GRID] }
+  { revalidate: 60, tags: [cacheTags.projects()] }
 );

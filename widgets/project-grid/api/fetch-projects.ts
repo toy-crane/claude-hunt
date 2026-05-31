@@ -1,7 +1,7 @@
 import type { ProjectWithVoteCount } from "@entities/vote";
 import { createAnonServerClient } from "@shared/api/supabase/anon-server";
 import { createClient } from "@shared/api/supabase/server";
-import { CACHE_TAGS } from "@shared/config/cache-tags";
+import { cacheTags } from "@shared/config/cache-tags";
 import { productionCache } from "@shared/lib/cache";
 import { withScreenshotUrls } from "@shared/lib/screenshot-url";
 
@@ -54,7 +54,7 @@ async function loadProjectGridCore(): Promise<ProjectGridCore[]> {
 const fetchProjectGridCore = productionCache(
   loadProjectGridCore,
   ["project-grid-core"],
-  { revalidate: 60, tags: [CACHE_TAGS.PROJECTS_GRID] }
+  { revalidate: 60, tags: [cacheTags.projects()] }
 );
 
 /**

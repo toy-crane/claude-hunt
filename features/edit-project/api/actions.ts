@@ -2,7 +2,7 @@
 
 import type { ProjectImage } from "@entities/project";
 import { requireAuth } from "@shared/api/supabase/require-auth";
-import { CACHE_TAGS } from "@shared/config/cache-tags";
+import { cacheTags } from "@shared/config/cache-tags";
 import { SCREENSHOT_BUCKET } from "@shared/config/storage";
 import { getZodErrorMessage } from "@shared/lib/validation";
 import { revalidatePath, updateTag } from "next/cache";
@@ -82,7 +82,7 @@ export async function editProject(
     await supabase.storage.from(SCREENSHOT_BUCKET).remove(orphans);
   }
 
-  updateTag(CACHE_TAGS.PROJECTS_GRID);
+  updateTag(cacheTags.projects());
   revalidatePath(`/projects/${input.projectId}`);
   // Same rationale as deleteProject — /settings reads via
   // fetchMyProjects which sits outside the PROJECTS_GRID tag, so an
