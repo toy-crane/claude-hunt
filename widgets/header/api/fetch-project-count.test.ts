@@ -1,10 +1,10 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
-// In test env `productionCache` collapses to the bare loader (it only wraps
-// `unstable_cache` in production), so we exercise the real query path. Mock
-// next/cache anyway so the module import never reaches the real Data Cache.
+// The loader uses `'use cache'`, which is inert under Vitest. Mock next/cache
+// so cacheLife/cacheTag are no-ops and we exercise the real query path.
 vi.mock("next/cache", () => ({
-  unstable_cache: <T>(fn: T) => fn,
+  cacheLife: vi.fn(),
+  cacheTag: vi.fn(),
   revalidateTag: vi.fn(),
   revalidatePath: vi.fn(),
 }));

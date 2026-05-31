@@ -1,9 +1,10 @@
 import type { ProjectWithVoteCount } from "@entities/vote";
 import { createAnonServerClient } from "@shared/api/supabase/anon-server";
+import { CACHE_PROFILE } from "@shared/config/cache-profile";
 import { cacheTags } from "@shared/config/cache-tags";
-import { productionCache } from "@shared/lib/cache";
 import { monthBoundsUtc, monthLabel, monthSlug } from "@shared/lib/month";
 import { withScreenshotUrls } from "@shared/lib/screenshot-url";
+import { cacheLife, cacheTag } from "next/cache";
 
 export interface FetchMonthlyTopProjectsOptions {
   limit?: number;
@@ -39,11 +40,21 @@ export interface FetchMonthlyTopProjectsResult {
   projects: MonthlyTopProject[];
 }
 
+/**
+ * Cached month-window read. Keyed automatically on its serializable
+ * arguments (start/end instants + limit), so each month + limit pair gets
+ * its own `'use cache'` entry. Tagged with `projects` so any mutation busts
+ * it via `updateTag`.
+ */
 async function loadMonthlyCore(
   startUtc: string,
   endUtc: string,
   limit: number
 ): Promise<MonthlyTopProject[]> {
+  "use cache";
+  cacheLife(CACHE_PROFILE);
+  cacheTag(cacheTags.projects());
+
   const supabase = createAnonServerClient();
   const { data, error } = await supabase
     .from("projects_with_vote_count")
@@ -61,20 +72,17 @@ async function loadMonthlyCore(
   return withScreenshotUrls(supabase, data ?? []);
 }
 
-function cachedLoad(startUtc: string, endUtc: string, limit: number) {
-  return productionCache(
-    () => loadMonthlyCore(startUtc, endUtc, limit),
-    ["winner-spotlight-monthly", startUtc, String(limit)],
-    { revalidate: 60, tags: [cacheTags.projects()] }
-  )();
-}
-
 /**
  * `created_at` of the single most recent project. Used to pick the
  * fallback month when the current month is empty. Returns `null` only
- * when the table has no projects at all.
+ * when the table has no projects at all. Cached (anon, cookie-free) so the
+ * home spotlight can prerender even when it falls back.
  */
 async function fetchLatestProjectCreatedAt(): Promise<string | null> {
+  "use cache";
+  cacheLife(CACHE_PROFILE);
+  cacheTag(cacheTags.projects());
+
   const supabase = createAnonServerClient();
   const { data, error } = await supabase
     .from("projects_with_vote_count")
@@ -110,7 +118,11 @@ export async function fetchMonthlyTopProjects(
   const now = new Date();
   const current = monthBoundsUtc(now);
 
-  const currentRows = await cachedLoad(current.startUtc, current.endUtc, limit);
+  const currentRows = await loadMonthlyCore(
+    current.startUtc,
+    current.endUtc,
+    limit
+  );
   if (currentRows.length > 0) {
     return {
       monthSlug: monthSlug(now),
@@ -130,7 +142,7 @@ export async function fetchMonthlyTopProjects(
 
   const fallbackDate = new Date(latestCreatedAt);
   const fallback = monthBoundsUtc(fallbackDate);
-  const fallbackRows = await cachedLoad(
+  const fallbackRows = await loadMonthlyCore(
     fallback.startUtc,
     fallback.endUtc,
     limit
