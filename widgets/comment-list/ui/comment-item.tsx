@@ -1,9 +1,9 @@
 "use client";
 
 import { isCommentEdited } from "@entities/comment";
+import { CommentForm } from "@features/create-comment";
 import { deleteComment } from "@features/delete-comment";
 import { EditCommentInline } from "@features/edit-comment";
-import { CommentForm } from "@features/leave-comment";
 import { ReactionRow } from "@features/toggle-reaction";
 import { RiMoreLine } from "@remixicon/react";
 import { formatRelativeKo } from "@shared/lib/format-relative";

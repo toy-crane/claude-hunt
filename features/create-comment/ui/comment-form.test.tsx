@@ -2,9 +2,9 @@ import { render, screen, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { describe, expect, it, vi } from "vitest";
 
-const leaveComment = vi.fn();
+const createComment = vi.fn();
 vi.mock("../api/actions", () => ({
-  leaveComment,
+  createComment,
 }));
 
 vi.mock("next/link", () => ({
@@ -37,7 +37,7 @@ const SUBMIT_LABEL = /등록/;
 
 describe("<CommentForm />", () => {
   it("shows a Spinner on the submit button while pending and keeps the static label", async () => {
-    leaveComment.mockImplementation(
+    createComment.mockImplementation(
       () => new Promise<{ ok: true }>(() => undefined)
     );
     const user = userEvent.setup();

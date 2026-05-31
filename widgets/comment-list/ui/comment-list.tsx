@@ -1,6 +1,6 @@
 "use client";
 
-import { CommentForm } from "@features/leave-comment";
+import { CommentForm } from "@features/create-comment";
 import type { Viewer } from "@shared/api/supabase/viewer";
 import {
   Empty,
