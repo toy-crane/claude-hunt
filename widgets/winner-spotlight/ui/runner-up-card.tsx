@@ -19,15 +19,20 @@ export function RunnerUpCard({ project, rank }: RunnerUpCardProps) {
   const author = project.author_display_name ?? "익명";
   const cohort = project.cohort_label ?? "";
   const href = `/projects/${project.id}`;
+  // Deep-links the projects board to this project's cohort filter. Only
+  // offered when the row carries a cohort assignment.
+  const cohortHref = project.cohort_id
+    ? `/projects?cohort=${project.cohort_id}`
+    : null;
   const screenshot = project.screenshotUrl || SHIMMER_DATA_URL;
   const dotClass = RANK_DOT[rank] ?? "bg-muted-foreground";
 
+  // The card uses the "stretched link" pattern: the title link's `::after`
+  // covers the whole card so any click navigates to the detail page, while
+  // the cohort link (raised with `relative z-[1]`) stays separately
+  // clickable without nesting one anchor inside another.
   return (
-    <Link
-      aria-label={`${project.title} 프로젝트 보기`}
-      className="flex h-full flex-col overflow-hidden rounded-md bg-card text-inherit no-underline shadow-[inset_0_0_0_1px_rgb(0_0_0/0.1)]"
-      href={href}
-    >
+    <article className="relative flex h-full flex-col overflow-hidden rounded-md bg-card text-inherit shadow-[inset_0_0_0_1px_rgb(0_0_0/0.1)]">
       <div className="relative aspect-[16/9] overflow-hidden bg-muted">
         <Image
           alt={`${project.title} 스크린샷`}
@@ -44,7 +49,12 @@ export function RunnerUpCard({ project, rank }: RunnerUpCardProps) {
       </div>
       <div className="flex flex-1 flex-col gap-2 p-4">
         <h4 className="m-0 font-heading font-medium text-sm leading-snug">
-          {project.title}
+          <Link
+            className="text-inherit no-underline after:absolute after:inset-0 hover:underline"
+            href={href}
+          >
+            {project.title}
+          </Link>
         </h4>
         <p className="m-0 line-clamp-2 text-muted-foreground text-xs leading-relaxed">
           {project.tagline}
@@ -52,7 +62,21 @@ export function RunnerUpCard({ project, rank }: RunnerUpCardProps) {
         <div className="mt-auto flex items-center justify-between pt-1 text-[11px] text-muted-foreground">
           <span>
             <span className="font-medium text-foreground">{author}</span>
-            {cohort ? ` · ${cohort}` : null}
+            {cohort ? (
+              <>
+                {" · "}
+                {cohortHref ? (
+                  <Link
+                    className="relative z-[1] text-inherit no-underline hover:text-foreground hover:underline"
+                    href={cohortHref}
+                  >
+                    {cohort}
+                  </Link>
+                ) : (
+                  cohort
+                )}
+              </>
+            ) : null}
           </span>
           <span className="inline-flex items-center gap-1 font-mono font-semibold text-foreground">
             <RiArrowUpLine aria-hidden="true" size={12} />
@@ -60,6 +84,6 @@ export function RunnerUpCard({ project, rank }: RunnerUpCardProps) {
           </span>
         </div>
       </div>
-    </Link>
+    </article>
   );
 }
