@@ -28,12 +28,12 @@ export async function submitProject(
   if (!auth.ok) {
     return auth;
   }
-  const { supabase, user } = auth;
+  const { supabase, userId } = auth;
 
   const { data: profile, error: profileError } = await supabase
     .from("profiles")
     .select("cohort_id")
-    .eq("id", user.id)
+    .eq("id", userId)
     .single();
   if (profileError || !profile) {
     return { ok: false, error: "Could not load your profile" };
@@ -49,7 +49,7 @@ export async function submitProject(
   const { data: inserted, error: insertError } = await supabase
     .from("projects")
     .insert({
-      user_id: user.id,
+      user_id: userId,
       cohort_id: profile.cohort_id,
       title: input.title,
       tagline: input.tagline,

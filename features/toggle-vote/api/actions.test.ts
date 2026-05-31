@@ -7,9 +7,9 @@ vi.mock("next/cache", () => ({
   updateTag: updateTagMock,
 }));
 
-const getUser = vi.fn();
+const getClaims = vi.fn();
 const from = vi.fn();
-const mockClient = { auth: { getUser }, from };
+const mockClient = { auth: { getClaims }, from };
 
 vi.mock("@shared/api/supabase/server", () => ({
   createClient: vi.fn().mockResolvedValue(mockClient),
@@ -20,7 +20,7 @@ const { toggleVote } = await import("./actions");
 beforeEach(() => {
   revalidatePathMock.mockClear();
   updateTagMock.mockClear();
-  getUser.mockReset();
+  getClaims.mockReset();
   from.mockReset();
 });
 
@@ -46,7 +46,7 @@ function stubDeleteSuccess() {
 
 describe("toggleVote server action", () => {
   it("rejects signed-out callers", async () => {
-    getUser.mockResolvedValue({ data: { user: null }, error: null });
+    getClaims.mockResolvedValue({ data: null, error: null });
 
     const result = await toggleVote("p1");
 
@@ -54,7 +54,10 @@ describe("toggleVote server action", () => {
   });
 
   it("inserts a new vote when the viewer hasn't voted yet", async () => {
-    getUser.mockResolvedValue({ data: { user: { id: "u1" } }, error: null });
+    getClaims.mockResolvedValue({
+      data: { claims: { sub: "u1" } },
+      error: null,
+    });
     const selectQ = stubSelect(null);
     const insertQ = stubInsertSuccess();
     let call = 0;
@@ -79,7 +82,10 @@ describe("toggleVote server action", () => {
   });
 
   it("deletes the existing vote on second call (toggle off)", async () => {
-    getUser.mockResolvedValue({ data: { user: { id: "u1" } }, error: null });
+    getClaims.mockResolvedValue({
+      data: { claims: { sub: "u1" } },
+      error: null,
+    });
     const selectQ = stubSelect({ id: "v1" });
     const deleteQ = stubDeleteSuccess();
     let call = 0;
@@ -100,7 +106,10 @@ describe("toggleVote server action", () => {
   });
 
   it("surfaces a DB error (e.g. self-vote trigger) on insert", async () => {
-    getUser.mockResolvedValue({ data: { user: { id: "u1" } }, error: null });
+    getClaims.mockResolvedValue({
+      data: { claims: { sub: "u1" } },
+      error: null,
+    });
     const selectQ = stubSelect(null);
     const insert = vi.fn().mockResolvedValue({
       data: null,

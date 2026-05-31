@@ -23,12 +23,12 @@ export async function toggleVote(projectId: string): Promise<ToggleVoteResult> {
   if (!auth.ok) {
     return auth;
   }
-  const { supabase, user } = auth;
+  const { supabase, userId } = auth;
 
   const { data: existing, error: selectError } = await supabase
     .from("votes")
     .select("id")
-    .eq("user_id", user.id)
+    .eq("user_id", userId)
     .eq("project_id", projectId)
     .maybeSingle();
 
@@ -51,7 +51,7 @@ export async function toggleVote(projectId: string): Promise<ToggleVoteResult> {
 
   const { error: insertError } = await supabase
     .from("votes")
-    .insert({ user_id: user.id, project_id: projectId });
+    .insert({ user_id: userId, project_id: projectId });
   if (insertError) {
     return { ok: false, error: insertError.message };
   }

@@ -34,13 +34,13 @@ export async function toggleReaction(
   if (!auth.ok) {
     return auth;
   }
-  const { supabase, user } = auth;
+  const { supabase, userId } = auth;
 
   const { data: existing } = await supabase
     .from("comment_reactions")
     .select("id")
     .eq("comment_id", input.commentId)
-    .eq("user_id", user.id)
+    .eq("user_id", userId)
     .eq("emoji", input.emoji)
     .maybeSingle();
 
@@ -58,7 +58,7 @@ export async function toggleReaction(
 
   const { error } = await supabase.from("comment_reactions").insert({
     comment_id: input.commentId,
-    user_id: user.id,
+    user_id: userId,
     emoji: input.emoji,
   });
   if (error) {

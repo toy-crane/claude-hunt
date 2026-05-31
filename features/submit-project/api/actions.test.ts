@@ -10,10 +10,10 @@ vi.mock("next/cache", () => ({
   updateTag: updateTagMock,
 }));
 
-const getUser = vi.fn();
+const getClaims = vi.fn();
 const from = vi.fn();
 const mockClient = {
-  auth: { getUser },
+  auth: { getClaims },
   from,
 };
 
@@ -33,7 +33,7 @@ const validInput = {
 beforeEach(() => {
   revalidatePathMock.mockClear();
   updateTagMock.mockClear();
-  getUser.mockReset();
+  getClaims.mockReset();
   from.mockReset();
 });
 
@@ -78,7 +78,7 @@ function stubProfileThenInsert(options: {
 
 describe("submitProject server action", () => {
   it("rejects when the user is not signed in", async () => {
-    getUser.mockResolvedValue({ data: { user: null }, error: null });
+    getClaims.mockResolvedValue({ data: null, error: null });
 
     const result = await submitProject(validInput);
 
@@ -87,8 +87,8 @@ describe("submitProject server action", () => {
   });
 
   it("rejects when the user has no cohort assigned", async () => {
-    getUser.mockResolvedValue({
-      data: { user: { id: "u1" } },
+    getClaims.mockResolvedValue({
+      data: { claims: { sub: "u1" } },
       error: null,
     });
     stubProfileThenInsert({ cohortId: null });
@@ -103,12 +103,12 @@ describe("submitProject server action", () => {
     const result = await submitProject({ ...validInput, title: "" });
 
     expect(result.ok).toBe(false);
-    expect(getUser).not.toHaveBeenCalled();
+    expect(getClaims).not.toHaveBeenCalled();
   });
 
   it("inserts a project and revalidates the home page on success", async () => {
-    getUser.mockResolvedValue({
-      data: { user: { id: "u1" } },
+    getClaims.mockResolvedValue({
+      data: { claims: { sub: "u1" } },
       error: null,
     });
     const { insertQuery } = stubProfileThenInsert({
@@ -137,8 +137,8 @@ describe("submitProject server action", () => {
   });
 
   it("surfaces storage/db errors back to the caller", async () => {
-    getUser.mockResolvedValue({
-      data: { user: { id: "u1" } },
+    getClaims.mockResolvedValue({
+      data: { claims: { sub: "u1" } },
       error: null,
     });
     stubProfileThenInsert({

@@ -1,7 +1,7 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
 const uploadMock = vi.fn();
-const getUserMock = vi.fn();
+const getClaimsMock = vi.fn();
 const createClient = vi.fn();
 
 const downscaleImage = vi.fn();
@@ -27,16 +27,16 @@ function makeFile(name = "shot.jpg", type = "image/jpeg", bytes = 1024): File {
 
 function installSupabase(options?: { uploadError?: { message: string } }) {
   uploadMock.mockReset();
-  getUserMock.mockReset();
-  getUserMock.mockResolvedValue({
-    data: { user: { id: "user-1" } },
+  getClaimsMock.mockReset();
+  getClaimsMock.mockResolvedValue({
+    data: { claims: { sub: "user-1" } },
     error: null,
   });
   uploadMock.mockResolvedValue({ error: options?.uploadError ?? null });
 
   createClient.mockReset();
   createClient.mockReturnValue({
-    auth: { getUser: getUserMock },
+    auth: { getClaims: getClaimsMock },
     storage: {
       from: vi.fn(() => ({ upload: uploadMock })),
     },

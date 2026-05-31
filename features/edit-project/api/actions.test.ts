@@ -9,12 +9,12 @@ vi.mock("next/cache", () => ({
   updateTag: updateTagMock,
 }));
 
-const getUser = vi.fn();
+const getClaims = vi.fn();
 const from = vi.fn();
 const storageRemove = vi.fn().mockResolvedValue({ data: [], error: null });
 const storageFrom = vi.fn().mockReturnValue({ remove: storageRemove });
 const mockClient = {
-  auth: { getUser },
+  auth: { getClaims },
   from,
   storage: { from: storageFrom },
 };
@@ -39,7 +39,7 @@ beforeEach(() => {
   storageFrom.mockClear();
   storageRemove.mockClear();
   storageRemove.mockResolvedValue({ data: [], error: null });
-  getUser.mockReset();
+  getClaims.mockReset();
   from.mockReset();
 });
 
@@ -73,7 +73,7 @@ function stubFrom(options: {
 
 describe("editProject server action", () => {
   it("rejects when the user is not signed in", async () => {
-    getUser.mockResolvedValue({ data: { user: null }, error: null });
+    getClaims.mockResolvedValue({ data: null, error: null });
 
     const result = await editProject(validInput);
 
@@ -81,7 +81,10 @@ describe("editProject server action", () => {
   });
 
   it("updates the project and revalidates the home page on success", async () => {
-    getUser.mockResolvedValue({ data: { user: { id: "u1" } }, error: null });
+    getClaims.mockResolvedValue({
+      data: { claims: { sub: "u1" } },
+      error: null,
+    });
     const { update, updateEq } = stubFrom({
       updateRows: [{ id: validInput.projectId }],
     });
@@ -107,7 +110,10 @@ describe("editProject server action", () => {
   });
 
   it("reports forbidden when RLS returns zero rows (spoofed projectId)", async () => {
-    getUser.mockResolvedValue({ data: { user: { id: "u1" } }, error: null });
+    getClaims.mockResolvedValue({
+      data: { claims: { sub: "u1" } },
+      error: null,
+    });
     stubFrom({ updateRows: [] });
 
     const result = await editProject(validInput);
@@ -117,7 +123,10 @@ describe("editProject server action", () => {
   });
 
   it("includes the new image array in the update payload", async () => {
-    getUser.mockResolvedValue({ data: { user: { id: "u1" } }, error: null });
+    getClaims.mockResolvedValue({
+      data: { claims: { sub: "u1" } },
+      error: null,
+    });
     const { update } = stubFrom({
       currentImagePaths: ["u1/old-shot.webp"],
       updateRows: [{ id: validInput.projectId }],
@@ -136,7 +145,10 @@ describe("editProject server action", () => {
   });
 
   it("removes the previous screenshot from storage after a successful replace", async () => {
-    getUser.mockResolvedValue({ data: { user: { id: "u1" } }, error: null });
+    getClaims.mockResolvedValue({
+      data: { claims: { sub: "u1" } },
+      error: null,
+    });
     stubFrom({
       currentImagePaths: ["u1/old-shot.webp"],
       updateRows: [{ id: validInput.projectId }],
@@ -154,7 +166,10 @@ describe("editProject server action", () => {
   });
 
   it("does not touch storage when the screenshot is not replaced", async () => {
-    getUser.mockResolvedValue({ data: { user: { id: "u1" } }, error: null });
+    getClaims.mockResolvedValue({
+      data: { claims: { sub: "u1" } },
+      error: null,
+    });
     stubFrom({
       updateRows: [{ id: validInput.projectId }],
     });
@@ -166,7 +181,10 @@ describe("editProject server action", () => {
   });
 
   it("does not remove storage when RLS rejects the update (owner-gated)", async () => {
-    getUser.mockResolvedValue({ data: { user: { id: "u1" } }, error: null });
+    getClaims.mockResolvedValue({
+      data: { claims: { sub: "u1" } },
+      error: null,
+    });
     stubFrom({
       currentImagePaths: ["u1/old-shot.webp"],
       updateRows: [],
@@ -183,7 +201,10 @@ describe("editProject server action", () => {
   });
 
   it("still returns ok when storage removal fails (non-blocking cleanup)", async () => {
-    getUser.mockResolvedValue({ data: { user: { id: "u1" } }, error: null });
+    getClaims.mockResolvedValue({
+      data: { claims: { sub: "u1" } },
+      error: null,
+    });
     stubFrom({
       currentImagePaths: ["u1/old-shot.webp"],
       updateRows: [{ id: validInput.projectId }],

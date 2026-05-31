@@ -34,11 +34,11 @@ vi.mock("@features/onboarding", () => ({
   ),
 }));
 
-const getUser = vi.fn();
+const getClaims = vi.fn();
 const profileSingle = vi.fn();
 
 const mockClient = {
-  auth: { getUser },
+  auth: { getClaims },
   from: vi.fn().mockReturnValue({
     select: vi.fn().mockReturnValue({
       eq: vi.fn().mockReturnValue({
@@ -71,20 +71,23 @@ async function renderPage(search: Record<string, string> = {}) {
 describe("/onboarding page", () => {
   beforeEach(() => {
     redirectMock.mockClear();
-    getUser.mockReset();
+    getClaims.mockReset();
     profileSingle.mockReset();
     fetchCohortsMock.mockReset();
   });
 
   it("redirects signed-out users to /login", async () => {
-    getUser.mockResolvedValue({ data: { user: null }, error: null });
+    getClaims.mockResolvedValue({ data: null, error: null });
 
     await expect(renderPage()).rejects.toThrow(REDIRECT_LOGIN);
     expect(redirectMock).toHaveBeenCalledWith("/login");
   });
 
   it("redirects onboarded users (cohort_id set) to '/' when no next param", async () => {
-    getUser.mockResolvedValue({ data: { user: { id: "u1" } }, error: null });
+    getClaims.mockResolvedValue({
+      data: { claims: { sub: "u1" } },
+      error: null,
+    });
     profileSingle.mockResolvedValue({
       data: { cohort_id: "a1" },
       error: null,
@@ -95,7 +98,10 @@ describe("/onboarding page", () => {
   });
 
   it("redirects onboarded users to `next` when it's a local path", async () => {
-    getUser.mockResolvedValue({ data: { user: { id: "u1" } }, error: null });
+    getClaims.mockResolvedValue({
+      data: { claims: { sub: "u1" } },
+      error: null,
+    });
     profileSingle.mockResolvedValue({
       data: { cohort_id: "a1" },
       error: null,
@@ -107,7 +113,10 @@ describe("/onboarding page", () => {
   });
 
   it("sanitizes non-local `next` params to '/' for onboarded users", async () => {
-    getUser.mockResolvedValue({ data: { user: { id: "u1" } }, error: null });
+    getClaims.mockResolvedValue({
+      data: { claims: { sub: "u1" } },
+      error: null,
+    });
     profileSingle.mockResolvedValue({
       data: { cohort_id: "a1" },
       error: null,
@@ -120,7 +129,10 @@ describe("/onboarding page", () => {
   });
 
   it("renders the OnboardingForm for un-onboarded users", async () => {
-    getUser.mockResolvedValue({ data: { user: { id: "u1" } }, error: null });
+    getClaims.mockResolvedValue({
+      data: { claims: { sub: "u1" } },
+      error: null,
+    });
     profileSingle.mockResolvedValue({
       data: { cohort_id: null },
       error: null,
@@ -137,7 +149,10 @@ describe("/onboarding page", () => {
   });
 
   it("passes the sanitized `next` through to the form", async () => {
-    getUser.mockResolvedValue({ data: { user: { id: "u1" } }, error: null });
+    getClaims.mockResolvedValue({
+      data: { claims: { sub: "u1" } },
+      error: null,
+    });
     profileSingle.mockResolvedValue({
       data: { cohort_id: null },
       error: null,
@@ -153,7 +168,10 @@ describe("/onboarding page", () => {
   });
 
   it("passes cohorts=[] when the cohort catalog is empty", async () => {
-    getUser.mockResolvedValue({ data: { user: { id: "u1" } }, error: null });
+    getClaims.mockResolvedValue({
+      data: { claims: { sub: "u1" } },
+      error: null,
+    });
     profileSingle.mockResolvedValue({
       data: { cohort_id: null },
       error: null,

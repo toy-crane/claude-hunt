@@ -12,20 +12,20 @@ export type WithdrawAccountResult = { ok: true } | { error: string; ok: false };
 /**
  * Ordering: screenshots first, then `auth.admin.deleteUser` (blocked
  * while the user still owns storage objects), then signOut. The auth
- * delete cascades through `profiles → projects → votes` FKs. `user.id`
- * is always read from the server session — never from arguments.
+ * delete cascades through `profiles → projects → votes` FKs. The user id
+ * is always read from the verified session claims — never from arguments.
  */
 export async function withdrawAccount(): Promise<WithdrawAccountResult> {
   const auth = await requireAuth("You must be signed in to withdraw");
   if (!auth.ok) {
     return auth;
   }
-  const { supabase, user } = auth;
+  const { supabase, userId } = auth;
 
   const { data: projects, error: listError } = await supabase
     .from("projects")
     .select("images")
-    .eq("user_id", user.id);
+    .eq("user_id", userId);
 
   if (listError) {
     return { ok: false, error: listError.message };
@@ -47,7 +47,7 @@ export async function withdrawAccount(): Promise<WithdrawAccountResult> {
   }
 
   const admin = createAdminClient();
-  const { error: deleteError } = await admin.auth.admin.deleteUser(user.id);
+  const { error: deleteError } = await admin.auth.admin.deleteUser(userId);
   if (deleteError) {
     return { ok: false, error: deleteError.message };
   }
