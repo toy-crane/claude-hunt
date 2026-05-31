@@ -1,5 +1,5 @@
 import type { ProjectWithVoteCount } from "@entities/vote";
-import { createClient } from "@shared/api/supabase/server";
+import { createServerClient } from "@shared/api/supabase/server";
 import { withScreenshotUrls } from "@shared/lib/screenshot-url";
 
 /**
@@ -35,7 +35,7 @@ export type MyProjectRow = Pick<
 export async function fetchMyProjects(
   viewerId: string
 ): Promise<MyProjectRow[]> {
-  const supabase = await createClient();
+  const supabase = await createServerClient();
   const { data, error } = await supabase
     .from("projects_with_vote_count")
     .select(SELECT_COLUMNS)

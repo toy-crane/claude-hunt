@@ -68,7 +68,7 @@ const supabase = {
 };
 
 vi.mock("@shared/api/supabase/server", () => ({
-  createClient: vi.fn().mockResolvedValue(supabase),
+  createServerClient: vi.fn().mockResolvedValue(supabase),
 }));
 
 const { fetchProjectCore, fetchViewerVote, fetchProjectDetail } = await import(

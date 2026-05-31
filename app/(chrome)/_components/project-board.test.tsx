@@ -73,7 +73,7 @@ vi.mock("@features/delete-project", () => ({
   DeleteButton: () => null,
 }));
 vi.mock("@shared/api/supabase/server", () => ({
-  createClient: vi.fn().mockResolvedValue({
+  createServerClient: vi.fn().mockResolvedValue({
     storage: {
       from: vi.fn().mockReturnValue({
         getPublicUrl: (path: string) => ({

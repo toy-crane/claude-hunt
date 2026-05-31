@@ -1,6 +1,6 @@
 import { cache } from "react";
 
-import { createClient } from "./server";
+import { createServerClient } from "./server";
 import { getSessionClaims } from "./session";
 
 export interface Viewer {
@@ -24,7 +24,7 @@ export const fetchViewer = cache(async (): Promise<Viewer | null> => {
   if (!claims) {
     return null;
   }
-  const supabase = await createClient();
+  const supabase = await createServerClient();
   const { data } = await supabase
     .from("profiles")
     .select("display_name, avatar_url, cohort_id, email")

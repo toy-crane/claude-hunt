@@ -34,7 +34,7 @@ vi.mock("../api/actions.ts", () => ({
 
 const signOutMock = vi.fn().mockResolvedValue({ error: null });
 vi.mock("@shared/api/supabase/client.ts", () => ({
-  createClient: () => ({ auth: { signOut: signOutMock } }),
+  createBrowserClient: () => ({ auth: { signOut: signOutMock } }),
 }));
 
 const { OnboardingForm } = await import("./onboarding-form");

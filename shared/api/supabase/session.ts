@@ -2,7 +2,7 @@ import "server-only";
 
 import { cache } from "react";
 
-import { createClient } from "./server";
+import { createServerClient } from "./server";
 
 /**
  * Request-deduplicated viewer session claims.
@@ -21,7 +21,7 @@ import { createClient } from "./server";
  * are NOT in the JWT — read those from `profiles` where needed.
  */
 export const getSessionClaims = cache(async () => {
-  const supabase = await createClient();
+  const supabase = await createServerClient();
   const { data, error } = await supabase.auth.getClaims();
   if (error || !data) {
     return null;

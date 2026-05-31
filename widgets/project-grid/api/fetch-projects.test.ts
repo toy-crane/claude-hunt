@@ -30,7 +30,7 @@ vi.mock("@shared/api/supabase/anon-server", () => ({
 }));
 
 vi.mock("@shared/api/supabase/server", () => ({
-  createClient: vi.fn().mockResolvedValue({
+  createServerClient: vi.fn().mockResolvedValue({
     from: vi.fn((table: string) => {
       if (table === "votes") {
         return { select: votesSelectMock };

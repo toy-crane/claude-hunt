@@ -1,7 +1,7 @@
-import { createClient } from "./server";
+import { createServerClient } from "./server";
 import { getSessionClaims } from "./session";
 
-type SupabaseServerClient = Awaited<ReturnType<typeof createClient>>;
+type SupabaseServerClient = Awaited<ReturnType<typeof createServerClient>>;
 
 export type RequireAuthResult =
   | { ok: true; supabase: SupabaseServerClient; userId: string; email: string }
@@ -20,7 +20,7 @@ export async function requireAuth(
   if (!claims) {
     return { ok: false, error: signedOutMessage };
   }
-  const supabase = await createClient();
+  const supabase = await createServerClient();
   return {
     ok: true,
     supabase,

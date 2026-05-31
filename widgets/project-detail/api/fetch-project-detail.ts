@@ -1,5 +1,5 @@
 import type { ProjectScreenshot } from "@entities/project";
-import { createClient } from "@shared/api/supabase/server";
+import { createServerClient } from "@shared/api/supabase/server";
 import { SCREENSHOT_BUCKET } from "@shared/config/storage";
 import { cache } from "react";
 
@@ -47,7 +47,7 @@ export interface ProjectDetail extends ProjectCore {
  */
 export const fetchProjectCore = cache(
   async (id: string): Promise<ProjectCore | null> => {
-    const supabase = await createClient();
+    const supabase = await createServerClient();
     const { data: row, error } = await supabase
       .from("projects_with_vote_count")
       .select("*")
@@ -95,7 +95,7 @@ export const fetchProjectCore = cache(
  */
 export const fetchViewerVote = cache(
   async (projectId: string, viewerUserId: string): Promise<boolean> => {
-    const supabase = await createClient();
+    const supabase = await createServerClient();
     const { data } = await supabase
       .from("votes")
       .select("project_id")

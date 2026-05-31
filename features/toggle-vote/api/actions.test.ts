@@ -12,7 +12,7 @@ const from = vi.fn();
 const mockClient = { auth: { getClaims }, from };
 
 vi.mock("@shared/api/supabase/server", () => ({
-  createClient: vi.fn().mockResolvedValue(mockClient),
+  createServerClient: vi.fn().mockResolvedValue(mockClient),
 }));
 
 const { toggleVote } = await import("./actions");

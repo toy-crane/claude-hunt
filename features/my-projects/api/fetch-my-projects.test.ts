@@ -9,7 +9,7 @@ const storageFrom = vi.fn(() => ({
 const mockClient = { from, storage: { from: storageFrom } };
 
 vi.mock("@shared/api/supabase/server", () => ({
-  createClient: vi.fn().mockResolvedValue(mockClient),
+  createServerClient: vi.fn().mockResolvedValue(mockClient),
 }));
 
 const { fetchMyProjects } = await import("./fetch-my-projects");

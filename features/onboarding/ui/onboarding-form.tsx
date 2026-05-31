@@ -5,7 +5,7 @@ import {
   DISPLAY_NAME_REQUIRED_MESSAGE,
   displayNameSchema,
 } from "@entities/profile";
-import { createClient } from "@shared/api/supabase/client";
+import { createBrowserClient } from "@shared/api/supabase/client";
 import { getZodErrorMessage } from "@shared/lib/validation";
 import { Alert, AlertDescription, AlertTitle } from "@shared/ui/alert";
 import { AuthLayout } from "@shared/ui/auth-layout";
@@ -86,7 +86,7 @@ export function OnboardingForm({ cohorts, initialNext }: OnboardingFormProps) {
   async function handleSignOut() {
     setIsSigningOut(true);
     try {
-      const supabase = createClient();
+      const supabase = createBrowserClient();
       await supabase.auth.signOut();
       router.replace("/login");
     } finally {

@@ -1,6 +1,6 @@
 import type { ProjectWithVoteCount } from "@entities/vote";
 import { createAnonServerClient } from "@shared/api/supabase/anon-server";
-import { createClient } from "@shared/api/supabase/server";
+import { createServerClient } from "@shared/api/supabase/server";
 import { CACHE_TAGS } from "@shared/config/cache-tags";
 import { productionCache } from "@shared/lib/cache";
 import { withScreenshotUrls } from "@shared/lib/screenshot-url";
@@ -63,7 +63,7 @@ const fetchProjectGridCore = productionCache(
  * Not cached across requests — votes change per user.
  */
 async function fetchViewerVotedIds(viewerUserId: string): Promise<Set<string>> {
-  const supabase = await createClient();
+  const supabase = await createServerClient();
   const { data, error } = await supabase
     .from("votes")
     .select("project_id")
