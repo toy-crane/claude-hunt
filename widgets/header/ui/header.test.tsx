@@ -2,8 +2,6 @@ import { render, screen } from "@testing-library/react";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
 const LOGO_LABEL = /claude-hunt 홈/;
-const LOGIN_LABEL = /로그인/;
-const ACCOUNT_MENU_LABEL = /계정 메뉴 열기/;
 
 vi.mock("next/link", () => ({
   default: ({
@@ -20,12 +18,7 @@ vi.mock("next/link", () => ({
   ),
 }));
 
-const fetchViewerMock = vi.fn();
 const fetchProjectCountMock = vi.fn();
-
-vi.mock("@shared/api/supabase/viewer", () => ({
-  fetchViewer: (...args: unknown[]) => fetchViewerMock(...args),
-}));
 
 vi.mock("../api/fetch-project-count", () => ({
   fetchProjectCount: (...args: unknown[]) => fetchProjectCountMock(...args),
@@ -35,34 +28,22 @@ vi.mock("next/navigation", () => ({
   usePathname: () => "/",
 }));
 
-vi.mock("@features/auth-login", () => ({
-  signOut: vi.fn(),
-}));
-
-vi.mock("@features/submit-project", () => ({
-  SubmitTrigger: ({ isAuthenticated }: { isAuthenticated: boolean }) => (
-    <div
-      data-authenticated={isAuthenticated ? "yes" : "no"}
-      data-testid="submit-trigger-stub"
-    >
-      Submit a project
-    </div>
+// The viewer-dependent cluster reads cookies and is covered by
+// header-viewer-slice.test.tsx. Stub it here so the static shell renders
+// synchronously without hitting the auth session.
+vi.mock("./header-viewer-slice", () => ({
+  HeaderViewerSlice: () => (
+    <div data-testid="header-viewer-slice-stub">viewer slice</div>
   ),
-}));
-
-vi.mock("next-themes", () => ({
-  useTheme: () => ({ theme: "system", setTheme: vi.fn() }),
 }));
 
 describe("<Header />", () => {
   beforeEach(() => {
-    fetchViewerMock.mockReset();
     fetchProjectCountMock.mockReset();
     fetchProjectCountMock.mockResolvedValue(45);
   });
 
   it("renders the claude-hunt logo linking to /", async () => {
-    fetchViewerMock.mockResolvedValue(null);
     const { Header } = await import("./header");
     const jsx = await Header();
     render(jsx);
@@ -71,64 +52,23 @@ describe("<Header />", () => {
     expect(logo).toHaveAttribute("href", "/");
   });
 
-  it("renders a Log in button navigating to /login when signed out", async () => {
-    fetchViewerMock.mockResolvedValue(null);
-
+  it("renders the project count badge from the cached count", async () => {
     const { Header } = await import("./header");
     const jsx = await Header();
     render(jsx);
 
-    const login = screen.getByRole("link", { name: LOGIN_LABEL });
-    expect(login).toHaveAttribute("href", "/login");
+    expect(screen.getAllByText("45").length).toBeGreaterThan(0);
   });
 
-  it("does not render an avatar for signed-out visitors", async () => {
-    fetchViewerMock.mockResolvedValue(null);
-
+  it("renders the viewer slice (not viewer data) so the shell stays static", async () => {
     const { Header } = await import("./header");
     const jsx = await Header();
     render(jsx);
 
     expect(
-      screen.queryByRole("button", { name: ACCOUNT_MENU_LABEL })
-    ).not.toBeInTheDocument();
-  });
-
-  it("renders the avatar menu and omits the Log in button when signed in", async () => {
-    fetchViewerMock.mockResolvedValue({
-      id: "user-1",
-      email: "alice@example.com",
-      displayName: "Alice",
-      avatarUrl: null,
-      cohortId: null,
-    });
-
-    const { Header } = await import("./header");
-    const jsx = await Header();
-    render(jsx);
-
-    expect(
-      screen.getByRole("button", { name: ACCOUNT_MENU_LABEL })
-    ).toBeInTheDocument();
-    expect(
-      screen.queryByRole("link", { name: LOGIN_LABEL })
-    ).not.toBeInTheDocument();
-  });
-
-  it("shows the first character of the display name inside the avatar fallback", async () => {
-    fetchViewerMock.mockResolvedValue({
-      id: "user-1",
-      email: "alice@example.com",
-      displayName: "Alice",
-      avatarUrl: null,
-      cohortId: null,
-    });
-
-    const { Header } = await import("./header");
-    const jsx = await Header();
-    render(jsx);
-
-    const fallback = screen.getByTestId("header-avatar-fallback");
-    expect(fallback).toHaveTextContent("A");
+      screen.getAllByTestId("header-viewer-slice-stub").length
+    ).toBeGreaterThan(0);
+    // The shell itself must not read the auth session.
+    expect(fetchProjectCountMock).toHaveBeenCalled();
   });
 });

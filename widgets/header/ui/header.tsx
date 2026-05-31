@@ -1,19 +1,17 @@
-import { SubmitTrigger } from "@features/submit-project";
-import { fetchViewer } from "@shared/api/supabase/viewer";
-import { Button } from "@shared/ui/button";
 import { Logo } from "@shared/ui/logo";
-import Link from "next/link";
+import { Suspense } from "react";
 
 import { fetchProjectCount } from "../api/fetch-project-count";
-import { HeaderMenu } from "./header-menu";
 import { HeaderNav } from "./header-nav";
 import { HeaderScrollEffect } from "./header-scroll-effect";
+import { HeaderViewerFallback } from "./header-viewer-fallback";
+import { HeaderViewerSlice } from "./header-viewer-slice";
 
 export async function Header() {
-  const [viewer, projectCount] = await Promise.all([
-    fetchViewer(),
-    fetchProjectCount(),
-  ]);
+  // Only the (cached, viewer-agnostic) project count is read here so the
+  // header renders as a static shell. The viewer-dependent cluster reads
+  // cookies inside HeaderViewerSlice, isolated behind <Suspense>.
+  const projectCount = await fetchProjectCount();
 
   return (
     <header className="site-header sticky top-0 z-50 border-b bg-background">
@@ -24,17 +22,9 @@ export async function Header() {
           <HeaderNav className="hidden md:flex" projectCount={projectCount} />
         </div>
         <div className="flex items-center gap-2">
-          <SubmitTrigger isAuthenticated={Boolean(viewer)} />
-          {viewer ? (
-            <HeaderMenu
-              avatarUrl={viewer.avatarUrl}
-              displayName={viewer.displayName}
-            />
-          ) : (
-            <Button asChild size="sm" variant="outline">
-              <Link href="/login">로그인</Link>
-            </Button>
-          )}
+          <Suspense fallback={<HeaderViewerFallback />}>
+            <HeaderViewerSlice />
+          </Suspense>
         </div>
       </div>
       <div className="mx-auto w-full max-w-6xl border-t px-6 md:hidden">
