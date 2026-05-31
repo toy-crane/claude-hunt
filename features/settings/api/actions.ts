@@ -1,12 +1,12 @@
 "use server";
 
-import { displayNameSchema } from "@entities/profile";
-import { requireAuth } from "@shared/api/supabase/require-auth";
-import { CACHE_TAGS } from "@shared/config/cache-tags";
 import {
   DISPLAY_NAME_TAKEN_MESSAGE,
+  displayNameSchema,
   isDisplayNameUniqueViolation,
-} from "@shared/lib/display-name-violation";
+} from "@entities/profile";
+import { requireAuth } from "@shared/api/supabase/require-auth";
+import { CACHE_TAGS } from "@shared/config/cache-tags";
 import { getZodErrorMessage } from "@shared/lib/validation";
 import { revalidatePath, updateTag } from "next/cache";
 

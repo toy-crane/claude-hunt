@@ -1,11 +1,11 @@
 "use server";
 
-import { requireAuth } from "@shared/api/supabase/require-auth";
-import { CACHE_TAGS } from "@shared/config/cache-tags";
 import {
   DISPLAY_NAME_TAKEN_MESSAGE,
   isDisplayNameUniqueViolation,
-} from "@shared/lib/display-name-violation";
+} from "@entities/profile";
+import { requireAuth } from "@shared/api/supabase/require-auth";
+import { CACHE_TAGS } from "@shared/config/cache-tags";
 import { getZodErrorMessage } from "@shared/lib/validation";
 import { updateTag } from "next/cache";
 import { type OnboardingInput, onboardingInputSchema } from "./schema";
