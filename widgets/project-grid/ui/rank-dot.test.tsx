@@ -1,6 +1,6 @@
 import { render, screen } from "@testing-library/react";
 import { describe, expect, it } from "vitest";
-import { RankDot, RankSlot } from "./rank-badge";
+import { RankDot, RankSlot } from "./rank-dot";
 
 describe("RankSlot", () => {
   it("renders the colored RankDot for ranks 1–3", () => {

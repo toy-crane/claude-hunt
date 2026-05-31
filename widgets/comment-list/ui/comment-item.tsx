@@ -27,7 +27,7 @@ import {
 import { Spinner } from "@shared/ui/spinner";
 import { useState, useTransition } from "react";
 import { toast } from "sonner";
-import type { CommentRow } from "../api/queries";
+import type { CommentRow } from "../api/fetch-comment-threads";
 
 export interface CommentItemProps {
   /** Hides the "답글하기" button. Replies use this to enforce depth-1. */

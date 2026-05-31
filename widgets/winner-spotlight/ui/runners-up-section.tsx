@@ -1,17 +1,17 @@
 import type { MonthlyTopProject } from "../api/fetch-monthly-top-projects";
 import { RunnerUpCard } from "./runner-up-card";
 
-export interface RunnerUpsSectionProps {
+export interface RunnersUpSectionProps {
   /** Rows 2..4 (already sliced by caller). */
-  runnerUps: MonthlyTopProject[];
+  runnersUp: MonthlyTopProject[];
 }
 
-export function RunnerUpsSection({ runnerUps }: RunnerUpsSectionProps) {
-  if (runnerUps.length === 0) {
+export function RunnersUpSection({ runnersUp }: RunnersUpSectionProps) {
+  if (runnersUp.length === 0) {
     return null;
   }
 
-  const lastRank = 1 + runnerUps.length;
+  const lastRank = 1 + runnersUp.length;
 
   return (
     <section className="flex flex-col gap-4">
@@ -30,7 +30,7 @@ export function RunnerUpsSection({ runnerUps }: RunnerUpsSectionProps) {
         3-col grid so the cards stretch full width without scrolling.
       */}
       <div className="-mx-4 flex snap-x snap-mandatory gap-3 overflow-x-auto px-4 pb-1 md:mx-0 md:grid md:grid-cols-3 md:gap-4 md:overflow-x-visible md:px-0 md:pb-0">
-        {runnerUps.map((project, i) => (
+        {runnersUp.map((project, i) => (
           <div
             className="w-60 flex-shrink-0 snap-start md:w-auto"
             key={project.id}

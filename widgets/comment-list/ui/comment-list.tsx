@@ -9,7 +9,7 @@ import {
   EmptyTitle,
 } from "@shared/ui/empty";
 import { useOptimistic } from "react";
-import type { CommentRow, CommentThread } from "../api/queries";
+import type { CommentRow, CommentThread } from "../api/fetch-comment-threads";
 import { CommentItem } from "./comment-item";
 
 /**

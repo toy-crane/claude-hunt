@@ -7,7 +7,7 @@ import {
 } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { describe, expect, it, vi } from "vitest";
-import type { CommentRow } from "../api/queries";
+import type { CommentRow } from "../api/fetch-comment-threads";
 
 const deleteComment = vi.fn();
 vi.mock("@features/delete-comment", () => ({

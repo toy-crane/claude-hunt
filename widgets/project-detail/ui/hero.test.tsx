@@ -1,6 +1,6 @@
 import { render, screen } from "@testing-library/react";
 import { describe, expect, it, vi } from "vitest";
-import type { ProjectDetail } from "../api/queries";
+import type { ProjectDetail } from "../api/fetch-project-detail";
 import { Hero } from "./hero";
 
 const VISIT_BUTTON_NAME = /프로젝트 방문하기/;
