@@ -8,10 +8,7 @@ import {
   readProjectFieldValues,
   validateProjectFields,
 } from "@entities/project";
-import {
-  type ScreenshotSlot,
-  ScreenshotSlots,
-} from "@features/upload-project-screenshots";
+import { type ImageSlot, ImageSlots } from "@features/upload-project-images";
 import { uploadScreenshot } from "@shared/lib/screenshot-upload";
 import { Button } from "@shared/ui/button";
 import { Field, FieldError, FieldGroup, FieldLabel } from "@shared/ui/field";
@@ -26,12 +23,12 @@ import { editProject } from "../api/actions";
 
 export interface EditFormInitial {
   githubUrl: string | null;
+  /** Storage paths of existing images, in display order. */
+  imagePaths: string[];
+  /** Public URLs of existing images, in display order. */
+  imageUrls: string[];
   projectId: string;
   projectUrl: string;
-  /** Storage paths of existing images, in display order. */
-  screenshotPaths: string[];
-  /** Public URLs of existing images, in display order. */
-  screenshotUrls: string[];
   tagline: string;
   title: string;
 }
@@ -52,7 +49,7 @@ interface ExistingSlot {
   url: string;
 }
 
-interface NewSlot extends ScreenshotSlot {
+interface NewSlot extends ImageSlot {
   // Distinguishes freshly-uploaded files from existing ones.
   kind: "new";
 }
@@ -61,7 +58,7 @@ type Slot = (ExistingSlot & { kind: "existing" }) | NewSlot;
 
 /**
  * Owner-only edit form for /projects/[id]/edit. Mirrors the submit
- * form layout including ScreenshotSlots — but the slot list is seeded
+ * form layout including ImageSlots — but the slot list is seeded
  * with the project's existing images. New uploads are detected by
  * shape (slot.file present) and uploaded on save; existing slots
  * pass their stored path through unchanged.
@@ -74,10 +71,10 @@ export function EditForm({ backHref, initial }: EditFormProps) {
   const urlId = useId();
   const githubUrlId = useId();
   const [slots, setSlots] = useState<Slot[]>(() =>
-    initial.screenshotUrls.map<Slot>((url, idx) => ({
+    initial.imageUrls.map<Slot>((url, idx) => ({
       kind: "existing",
       id: `existing-${idx}`,
-      path: initial.screenshotPaths[idx] ?? "",
+      path: initial.imagePaths[idx] ?? "",
       url,
     }))
   );
@@ -91,9 +88,9 @@ export function EditForm({ backHref, initial }: EditFormProps) {
     setErrors((prev) => (prev[field] ? { ...prev, [field]: undefined } : prev));
   }
 
-  // The ScreenshotSlots component expects ScreenshotSlot[] (with file/preview);
+  // The ImageSlots component expects ImageSlot[] (with file/preview);
   // adapt our hybrid Slot[] for it.
-  const screenshotSlotsValue: ScreenshotSlot[] = slots.map((slot) => {
+  const imageSlotsValue: ImageSlot[] = slots.map((slot) => {
     if (slot.kind === "existing") {
       return {
         id: slot.id,
@@ -107,9 +104,9 @@ export function EditForm({ backHref, initial }: EditFormProps) {
     return slot;
   });
 
-  // Re-derive Slot[] from the value ScreenshotSlots gives back. Existing
+  // Re-derive Slot[] from the value ImageSlots gives back. Existing
   // slot IDs map back to ExistingSlot; everything else is a NewSlot.
-  function handleScreenshotsChange(next: ScreenshotSlot[]) {
+  function handleImagesChange(next: ImageSlot[]) {
     const existingById = new Map<string, ExistingSlot & { kind: "existing" }>();
     for (const s of slots) {
       if (s.kind === "existing") {
@@ -124,7 +121,7 @@ export function EditForm({ backHref, initial }: EditFormProps) {
       return { kind: "new", ...entry };
     });
     setSlots(reconciled);
-    clearError("screenshotPaths");
+    clearError("imagePaths");
   }
 
   async function handleSubmit(event: React.FormEvent<HTMLFormElement>) {
@@ -157,10 +154,10 @@ export function EditForm({ backHref, initial }: EditFormProps) {
         );
       const failed = uploadResults.find((r) => r.error || !r.path);
       if (failed) {
-        setErrors({ screenshotPaths: failed.error ?? "업로드에 실패했어요." });
+        setErrors({ imagePaths: failed.error ?? "업로드에 실패했어요." });
         return;
       }
-      const screenshotPaths = uploadResults.map((r) => r.path as string);
+      const imagePaths = uploadResults.map((r) => r.path as string);
 
       const result = await editProject({
         projectId: initial.projectId,
@@ -169,7 +166,7 @@ export function EditForm({ backHref, initial }: EditFormProps) {
         projectUrl: values.projectUrl,
         githubUrl:
           values.githubUrl.trim() === "" ? undefined : values.githubUrl,
-        screenshotPaths,
+        imagePaths,
       });
       if (!result.ok) {
         setSubmitError(result.error ?? "저장하지 못했어요.");
@@ -271,19 +268,19 @@ export function EditForm({ backHref, initial }: EditFormProps) {
           ) : null}
         </Field>
 
-        <Field data-invalid={errors.screenshotPaths ? true : undefined}>
+        <Field data-invalid={errors.imagePaths ? true : undefined}>
           <FieldLabel>스크린샷</FieldLabel>
-          <ScreenshotSlots
+          <ImageSlots
             disabled={submitting}
-            onChange={handleScreenshotsChange}
+            onChange={handleImagesChange}
             onError={(message) =>
-              setErrors((prev) => ({ ...prev, screenshotPaths: message }))
+              setErrors((prev) => ({ ...prev, imagePaths: message }))
             }
-            value={screenshotSlotsValue}
+            value={imageSlotsValue}
           />
-          {errors.screenshotPaths ? (
-            <FieldError data-testid="edit-form-error-screenshotPaths">
-              {errors.screenshotPaths}
+          {errors.imagePaths ? (
+            <FieldError data-testid="edit-form-error-imagePaths">
+              {errors.imagePaths}
             </FieldError>
           ) : null}
         </Field>

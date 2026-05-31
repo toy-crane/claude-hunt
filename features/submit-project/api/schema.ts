@@ -3,7 +3,7 @@ import type { z } from "zod";
 
 /**
  * Submit reuses the shared project field shape (title, tagline,
- * projectUrl, githubUrl, screenshotPaths). The form passes upload paths
+ * projectUrl, githubUrl, imagePaths). The form passes upload paths
  * after the client uploads each image.
  */
 export const submitProjectInputSchema = projectFieldsSchema;

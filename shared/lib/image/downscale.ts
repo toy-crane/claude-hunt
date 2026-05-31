@@ -3,7 +3,7 @@ const WEBP_QUALITY = 0.85;
 const DECODE_ERROR_MESSAGE =
   "Could not process this image. Try a different file.";
 
-export type DownscaleScreenshotResult =
+export type DownscaleResult =
   | { ok: true; file: File }
   | { ok: false; error: string };
 
@@ -17,9 +17,7 @@ export type DownscaleScreenshotResult =
  * browser cannot decode the file or the encoder fails — the caller
  * should surface the error and skip the upload.
  */
-export async function downscaleScreenshot(
-  file: File
-): Promise<DownscaleScreenshotResult> {
+export async function downscaleImage(file: File): Promise<DownscaleResult> {
   let bitmap: ImageBitmap | undefined;
   try {
     bitmap = await createImageBitmap(file, { imageOrientation: "from-image" });

@@ -30,7 +30,7 @@ const validInput = {
   title: "Edited Title",
   tagline: "Edited tagline",
   projectUrl: "https://edited.example.com",
-  screenshotPaths: ["u1/old-shot.webp"],
+  imagePaths: ["u1/old-shot.webp"],
 };
 
 beforeEach(() => {
@@ -134,7 +134,7 @@ describe("editProject server action", () => {
 
     await editProject({
       ...validInput,
-      screenshotPaths: ["u1/new-shot.webp"],
+      imagePaths: ["u1/new-shot.webp"],
     });
 
     expect(update).toHaveBeenCalledWith(
@@ -156,7 +156,7 @@ describe("editProject server action", () => {
 
     const result = await editProject({
       ...validInput,
-      screenshotPaths: ["u1/new-shot.webp"],
+      imagePaths: ["u1/new-shot.webp"],
     });
 
     expect(result.ok).toBe(true);
@@ -192,7 +192,7 @@ describe("editProject server action", () => {
 
     const result = await editProject({
       ...validInput,
-      screenshotPaths: ["u1/new-shot.webp"],
+      imagePaths: ["u1/new-shot.webp"],
     });
 
     expect(result.ok).toBe(false);
@@ -216,7 +216,7 @@ describe("editProject server action", () => {
 
     const result = await editProject({
       ...validInput,
-      screenshotPaths: ["u1/new-shot.webp"],
+      imagePaths: ["u1/new-shot.webp"],
     });
 
     expect(result.ok).toBe(true);

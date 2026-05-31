@@ -8,10 +8,7 @@ import {
   readProjectFieldValues,
   validateProjectFields,
 } from "@entities/project";
-import {
-  type ScreenshotSlot,
-  ScreenshotSlots,
-} from "@features/upload-project-screenshots";
+import { type ImageSlot, ImageSlots } from "@features/upload-project-images";
 import { uploadScreenshot } from "@shared/lib/screenshot-upload";
 import { Button } from "@shared/ui/button";
 import { Field, FieldError, FieldGroup, FieldLabel } from "@shared/ui/field";
@@ -57,7 +54,7 @@ export function SubmitForm({ backHref, cohortId: _cohortId }: SubmitFormProps) {
   const taglineId = useId();
   const urlId = useId();
   const githubUrlId = useId();
-  const [screenshots, setScreenshots] = useState<ScreenshotSlot[]>([]);
+  const [images, setImages] = useState<ImageSlot[]>([]);
   const [errors, setErrors] = useState<ProjectFieldErrors>({});
   const [submitError, setSubmitError] = useState<string | null>(null);
   const [submitting, setSubmitting] = useState(false);
@@ -76,7 +73,7 @@ export function SubmitForm({ backHref, cohortId: _cohortId }: SubmitFormProps) {
     const form = event.currentTarget;
     const values = readProjectFieldValues(form);
 
-    const validationErrors = validateProjectFields(values, screenshots.length);
+    const validationErrors = validateProjectFields(values, images.length);
     if (validationErrors) {
       setErrors(validationErrors);
       return;
@@ -87,14 +84,14 @@ export function SubmitForm({ backHref, cohortId: _cohortId }: SubmitFormProps) {
       // Upload every image in parallel; abort the whole submit on
       // the first failure so the user can fix and retry.
       const uploads = await Promise.all(
-        screenshots.map((slot) => uploadScreenshot(slot.file))
+        images.map((slot) => uploadScreenshot(slot.file))
       );
       const failed = uploads.find((u) => u.error || !u.path);
       if (failed) {
-        setErrors({ screenshotPaths: failed.error ?? "업로드에 실패했어요." });
+        setErrors({ imagePaths: failed.error ?? "업로드에 실패했어요." });
         return;
       }
-      const screenshotPaths = uploads.map((u) => u.path as string);
+      const imagePaths = uploads.map((u) => u.path as string);
 
       const result = await submitProject({
         title: values.title,
@@ -102,14 +99,14 @@ export function SubmitForm({ backHref, cohortId: _cohortId }: SubmitFormProps) {
         projectUrl: values.projectUrl,
         githubUrl:
           values.githubUrl.trim() === "" ? undefined : values.githubUrl,
-        screenshotPaths,
+        imagePaths,
       });
       if (!result.ok) {
         setSubmitError(result.error ?? "프로젝트를 제출할 수 없어요.");
         return;
       }
       form.reset();
-      setScreenshots([]);
+      setImages([]);
       toast.success("프로젝트가 제출되었어요.");
       // When the user came from a specific entry point (e.g. /settings),
       // honor it for both success and fallback paths. Otherwise default
@@ -216,24 +213,24 @@ export function SubmitForm({ backHref, cohortId: _cohortId }: SubmitFormProps) {
           ) : null}
         </Field>
 
-        <Field data-invalid={errors.screenshotPaths ? true : undefined}>
+        <Field data-invalid={errors.imagePaths ? true : undefined}>
           <FieldLabel>
             스크린샷 <RequiredMark />
           </FieldLabel>
-          <ScreenshotSlots
+          <ImageSlots
             disabled={submitting}
             onChange={(next) => {
-              setScreenshots(next);
-              clearError("screenshotPaths");
+              setImages(next);
+              clearError("imagePaths");
             }}
             onError={(message) =>
-              setErrors((prev) => ({ ...prev, screenshotPaths: message }))
+              setErrors((prev) => ({ ...prev, imagePaths: message }))
             }
-            value={screenshots}
+            value={images}
           />
-          {errors.screenshotPaths ? (
-            <FieldError data-testid="submit-form-error-screenshotPaths">
-              {errors.screenshotPaths}
+          {errors.imagePaths ? (
+            <FieldError data-testid="submit-form-error-imagePaths">
+              {errors.imagePaths}
             </FieldError>
           ) : null}
         </Field>

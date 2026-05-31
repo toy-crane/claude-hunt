@@ -1,6 +1,6 @@
 import type { ProjectWithVoteCount } from "@entities/vote";
 import { formatRelativeKo } from "@shared/lib/format-relative";
-import { SHIMMER_DATA_URL } from "@shared/lib/screenshot";
+import { SHIMMER_DATA_URL } from "@shared/lib/image";
 import { cn } from "@shared/lib/utils";
 import {
   HoverCard,

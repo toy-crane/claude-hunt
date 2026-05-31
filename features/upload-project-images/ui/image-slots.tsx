@@ -1,6 +1,6 @@
 "use client";
 
-import { MAX_PROJECT_SCREENSHOTS } from "@entities/project";
+import { MAX_PROJECT_IMAGES } from "@entities/project";
 import {
   RiAddLine,
   RiCloseLine,
@@ -20,17 +20,17 @@ import {
 import NextImage from "next/image";
 import { useCallback, useEffect, useId, useRef, useState } from "react";
 
-export interface ScreenshotSlot {
+export interface ImageSlot {
   file: File;
   id: string;
   preview: string;
 }
 
-export interface ScreenshotSlotsProps {
+export interface ImageSlotsProps {
   disabled?: boolean;
-  onChange: (slots: ScreenshotSlot[]) => void;
+  onChange: (slots: ImageSlot[]) => void;
   onError?: (message: string) => void;
-  value: ScreenshotSlot[];
+  value: ImageSlot[];
 }
 
 const ACCEPT = ALLOWED_SCREENSHOT_MIME_TYPES.join(",");
@@ -55,12 +55,12 @@ function makeSlotId(): string {
  * validateScreenshotFile so the rules stay in lock-step with single-
  * file uploads, and @reui/sortable still handles all reorder UX.
  */
-export function ScreenshotSlots({
+export function ImageSlots({
   value,
   onChange,
   onError,
   disabled = false,
-}: ScreenshotSlotsProps) {
+}: ImageSlotsProps) {
   const inputId = useId();
   const inputRef = useRef<HTMLInputElement | null>(null);
   const [dragging, setDragging] = useState(false);
@@ -95,12 +95,12 @@ export function ScreenshotSlots({
       if (files.length === 0) {
         return;
       }
-      const remaining = MAX_PROJECT_SCREENSHOTS - value.length;
+      const remaining = MAX_PROJECT_IMAGES - value.length;
       if (files.length > remaining) {
         onError?.("최대 5장까지 업로드할 수 있어요");
         return;
       }
-      const next: ScreenshotSlot[] = [];
+      const next: ImageSlot[] = [];
       for (const file of files) {
         const v = validateScreenshotFile(file);
         if (!v.ok) {
@@ -125,7 +125,7 @@ export function ScreenshotSlots({
     [value, onChange]
   );
 
-  const canAddMore = value.length < MAX_PROJECT_SCREENSHOTS;
+  const canAddMore = value.length < MAX_PROJECT_IMAGES;
 
   const handleDragOver = useCallback(
     (e: React.DragEvent) => {
@@ -186,7 +186,7 @@ export function ScreenshotSlots({
 
       <Sortable
         className="flex flex-col gap-3"
-        getItemValue={(slot: ScreenshotSlot) => slot.id}
+        getItemValue={(slot: ImageSlot) => slot.id}
         onValueChange={onChange}
         strategy="grid"
         value={value}
@@ -238,7 +238,7 @@ export function ScreenshotSlots({
             <span className="font-medium text-sm">
               이미지를 끌어다 놓거나 클릭해서 추가
             </span>
-            <span className="text-xs">최대 {MAX_PROJECT_SCREENSHOTS}장</span>
+            <span className="text-xs">최대 {MAX_PROJECT_IMAGES}장</span>
           </button>
         )}
 
@@ -296,7 +296,7 @@ export function ScreenshotSlots({
 
       {primary ? (
         <p className="text-right text-muted-foreground text-xs tabular-nums">
-          {value.length} / {MAX_PROJECT_SCREENSHOTS}
+          {value.length} / {MAX_PROJECT_IMAGES}
         </p>
       ) : null}
     </div>

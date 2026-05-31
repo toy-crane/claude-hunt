@@ -1,6 +1,6 @@
 "use server";
 
-import type { ProjectScreenshot } from "@entities/project";
+import type { ProjectImage } from "@entities/project";
 import { requireAuth } from "@shared/api/supabase/require-auth";
 import { CACHE_TAGS } from "@shared/config/cache-tags";
 import { SCREENSHOT_BUCKET } from "@shared/config/storage";
@@ -59,7 +59,7 @@ export async function deleteProject(
 
   const orphans = new Set<string>();
   if (Array.isArray(project?.images)) {
-    for (const img of project.images as unknown as ProjectScreenshot[]) {
+    for (const img of project.images as unknown as ProjectImage[]) {
       if (img && typeof img.path === "string") {
         orphans.add(img.path);
       }
