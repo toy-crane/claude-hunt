@@ -23,7 +23,9 @@ export function buildProjectJsonLd(project: ProjectDetail) {
         name: project.title,
         abstract: project.tagline,
         url: projectUrl,
-        ...(project.primaryScreenshotUrl && { image: project.primaryScreenshotUrl }),
+        ...(project.primaryScreenshotUrl && {
+          image: project.primaryScreenshotUrl,
+        }),
         ...(project.author_display_name && {
           author: {
             "@type": "Person",
@@ -83,7 +85,9 @@ export async function generateMetadata({
       card: "summary_large_image",
       title,
       description,
-      images: project.primaryScreenshotUrl ? [project.primaryScreenshotUrl] : undefined,
+      images: project.primaryScreenshotUrl
+        ? [project.primaryScreenshotUrl]
+        : undefined,
     },
   };
 }

@@ -72,7 +72,10 @@ describe("buildProjectJsonLd", () => {
 
   it("omits image when primaryScreenshotUrl is empty", async () => {
     const { buildProjectJsonLd } = await import("./page");
-    const data = buildProjectJsonLd({ ...sampleProject, primaryScreenshotUrl: "" });
+    const data = buildProjectJsonLd({
+      ...sampleProject,
+      primaryScreenshotUrl: "",
+    });
     expect(data["@graph"][0]).not.toHaveProperty("image");
   });
 
