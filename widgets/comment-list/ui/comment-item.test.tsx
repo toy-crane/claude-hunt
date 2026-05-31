@@ -18,7 +18,7 @@ vi.mock("@features/edit-comment", () => ({
   EditCommentInline: () => <div data-testid="edit-comment-inline-stub" />,
 }));
 
-vi.mock("@features/leave-comment", () => ({
+vi.mock("@features/create-comment", () => ({
   CommentForm: () => <div data-testid="comment-form-stub" />,
 }));
 

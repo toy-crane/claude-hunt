@@ -7,7 +7,7 @@ import { Textarea } from "@shared/ui/textarea";
 import Link from "next/link";
 import { useId, useState, useTransition } from "react";
 import { toast } from "sonner";
-import { leaveComment } from "../api/actions";
+import { createComment } from "../api/actions";
 
 export interface CommentFormProps {
   autoFocus?: boolean;
@@ -79,7 +79,7 @@ export function CommentForm({
       // when revalidation lands the row, its React key matches the
       // optimistic one and the rendered subtree isn't torn down.
       onOptimisticSubmit?.(optimisticId, body);
-      const result = await leaveComment({
+      const result = await createComment({
         projectId,
         parentCommentId,
         body,

@@ -3,9 +3,9 @@
 import { requireAuth } from "@shared/api/supabase/require-auth";
 import { getZodErrorMessage } from "@shared/lib/validation";
 import { revalidatePath } from "next/cache";
-import { type LeaveCommentInput, leaveCommentInputSchema } from "./schema";
+import { type CreateCommentInput, createCommentInputSchema } from "./schema";
 
-export interface LeaveCommentResult {
+export interface CreateCommentResult {
   commentId?: string;
   error?: string;
   ok: boolean;
@@ -16,10 +16,10 @@ export interface LeaveCommentResult {
  * `parentCommentId` is omitted; a reply otherwise. The DB-level
  * depth-1 trigger rejects reply-to-reply attempts.
  */
-export async function leaveComment(
-  raw: LeaveCommentInput
-): Promise<LeaveCommentResult> {
-  const parsed = leaveCommentInputSchema.safeParse(raw);
+export async function createComment(
+  raw: CreateCommentInput
+): Promise<CreateCommentResult> {
+  const parsed = createCommentInputSchema.safeParse(raw);
   if (!parsed.success) {
     return {
       ok: false,

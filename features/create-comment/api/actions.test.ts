@@ -13,7 +13,7 @@ vi.mock("@shared/api/supabase/server", () => ({
   createClient: vi.fn().mockResolvedValue(mockClient),
 }));
 
-const { leaveComment } = await import("./actions");
+const { createComment } = await import("./actions");
 
 const validInput = { projectId: "p1", body: "Nice work!" };
 
@@ -39,9 +39,9 @@ beforeEach(() => {
   from.mockReset();
 });
 
-describe("leaveComment server action", () => {
+describe("createComment server action", () => {
   it("rejects an empty body without touching auth or db", async () => {
-    const result = await leaveComment({ projectId: "p1", body: "  " });
+    const result = await createComment({ projectId: "p1", body: "  " });
 
     expect(result.ok).toBe(false);
     expect(result.error).toBe("내용을 입력해 주세요.");
@@ -50,7 +50,7 @@ describe("leaveComment server action", () => {
   });
 
   it("rejects a missing projectId without touching auth or db", async () => {
-    const result = await leaveComment({ projectId: "", body: "hi" });
+    const result = await createComment({ projectId: "", body: "hi" });
 
     expect(result.ok).toBe(false);
     expect(from).not.toHaveBeenCalled();
@@ -59,7 +59,7 @@ describe("leaveComment server action", () => {
   it("rejects signed-out callers without touching the db", async () => {
     getClaims.mockResolvedValue({ data: null, error: null });
 
-    const result = await leaveComment(validInput);
+    const result = await createComment(validInput);
 
     expect(result.ok).toBe(false);
     expect(from).not.toHaveBeenCalled();
@@ -72,7 +72,7 @@ describe("leaveComment server action", () => {
     });
     const { insert, single } = stubInsert({ inserted: { id: "c-new" } });
 
-    const result = await leaveComment(validInput);
+    const result = await createComment(validInput);
 
     expect(result).toEqual({ ok: true, commentId: "c-new" });
     expect(insert).toHaveBeenCalledWith(
@@ -95,7 +95,7 @@ describe("leaveComment server action", () => {
     const optimisticId = "11111111-1111-4111-8111-111111111111";
     const { insert } = stubInsert({ inserted: { id: optimisticId } });
 
-    await leaveComment({
+    await createComment({
       ...validInput,
       parentCommentId: "parent-1",
       optimisticId,
@@ -116,7 +116,7 @@ describe("leaveComment server action", () => {
     });
     stubInsert({ error: { message: "boom" } });
 
-    const result = await leaveComment(validInput);
+    const result = await createComment(validInput);
 
     expect(result).toEqual({ ok: false, error: "boom" });
     expect(revalidatePathMock).not.toHaveBeenCalled();
