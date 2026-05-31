@@ -1,4 +1,4 @@
-import type { ProjectImage } from "@entities/project";
+import type { ProjectScreenshot } from "@entities/project";
 import { createClient } from "@shared/api/supabase/server";
 import { SCREENSHOT_BUCKET } from "@shared/config/storage";
 import { cache } from "react";
@@ -19,12 +19,12 @@ export interface ProjectCore {
   github_url: string | null;
   id: string;
   /** All image paths in display order. images[0] is the primary. */
-  images: ProjectImage[];
-  /** Resolved public URLs for the images, same order as `images`. */
-  imageUrls: string[];
-  /** Convenience: equal to `imageUrls[0]` when present. */
-  primaryImageUrl: string;
+  images: ProjectScreenshot[];
+  /** Convenience: equal to `screenshotUrls[0]` when present. */
+  primaryScreenshotUrl: string;
   project_url: string;
+  /** Resolved public URLs for the images, same order as `images`. */
+  screenshotUrls: string[];
   tagline: string;
   title: string;
   updated_at: string;
@@ -62,8 +62,8 @@ export const fetchProjectCore = cache(
     }
 
     const screenshots = supabase.storage.from(SCREENSHOT_BUCKET);
-    const images = parseImages(row.images);
-    const imageUrls = images.map(
+    const images = parseScreenshots(row.images);
+    const screenshotUrls = images.map(
       (img) => screenshots.getPublicUrl(img.path).data.publicUrl
     );
 
@@ -78,8 +78,8 @@ export const fetchProjectCore = cache(
       project_url: row.project_url ?? "",
       github_url: row.github_url ?? null,
       images,
-      imageUrls,
-      primaryImageUrl: imageUrls[0] ?? "",
+      screenshotUrls,
+      primaryScreenshotUrl: screenshotUrls[0] ?? "",
       vote_count: Number(row.vote_count ?? 0),
       author_display_name: row.author_display_name ?? null,
       author_avatar_url: row.author_avatar_url ?? null,
@@ -125,7 +125,7 @@ export async function fetchProjectDetail(
   return { ...core, viewer_has_voted: viewerHasVoted };
 }
 
-function parseImages(value: unknown): ProjectImage[] {
+function parseScreenshots(value: unknown): ProjectScreenshot[] {
   if (!Array.isArray(value)) {
     return [];
   }
@@ -139,5 +139,5 @@ function parseImages(value: unknown): ProjectImage[] {
       }
       return null;
     })
-    .filter((v): v is ProjectImage => v != null);
+    .filter((v): v is ProjectScreenshot => v != null);
 }

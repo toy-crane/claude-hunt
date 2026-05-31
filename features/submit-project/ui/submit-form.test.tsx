@@ -18,7 +18,7 @@ vi.mock("sonner", () => ({
   toast: { success: vi.fn() },
 }));
 
-// Stub ImageSlots: render a fake "add image" button so tests can put
+// Stub ScreenshotSlots: render a fake "add image" button so tests can put
 // the form in any image-state without driving the real DnD UI. The
 // stub also forwards the latest value via a data attribute so we can
 // inspect it.
@@ -26,8 +26,8 @@ let nextSlotId = 0;
 function makeFile(name = "shot.png") {
   return new File([new Uint8Array(8)], name, { type: "image/png" });
 }
-vi.mock("@features/upload-project-images", () => ({
-  ImageSlots: ({
+vi.mock("@features/upload-project-screenshots", () => ({
+  ScreenshotSlots: ({
     value,
     onChange,
     onError,
@@ -103,7 +103,7 @@ describe("SubmitForm", () => {
     fireEvent.submit(form);
 
     expect(
-      await screen.findByTestId("submit-form-error-imagePaths")
+      await screen.findByTestId("submit-form-error-screenshotPaths")
     ).toHaveTextContent("스크린샷을 1장 이상");
     expect(uploadScreenshot).not.toHaveBeenCalled();
     expect(submitProject).not.toHaveBeenCalled();
@@ -124,7 +124,7 @@ describe("SubmitForm", () => {
       screen.getByTestId("submit-form-error-projectUrl")
     ).toHaveTextContent("URL");
     expect(
-      screen.getByTestId("submit-form-error-imagePaths")
+      screen.getByTestId("submit-form-error-screenshotPaths")
     ).toHaveTextContent("스크린샷을 1장 이상");
     expect(uploadScreenshot).not.toHaveBeenCalled();
     expect(submitProject).not.toHaveBeenCalled();
@@ -191,7 +191,7 @@ describe("SubmitForm", () => {
         title: "My App",
         tagline: "A cool tool",
         projectUrl: "https://myapp.com",
-        imagePaths: ["user-1/a.webp", "user-1/b.webp"],
+        screenshotPaths: ["user-1/a.webp", "user-1/b.webp"],
       });
     });
     expect(uploadScreenshot).toHaveBeenCalledTimes(2);
@@ -237,7 +237,7 @@ describe("SubmitForm", () => {
     fireEvent.submit(fillTextFields());
 
     expect(
-      await screen.findByTestId("submit-form-error-imagePaths")
+      await screen.findByTestId("submit-form-error-screenshotPaths")
     ).toHaveTextContent("25 MB");
     expect(submitProject).not.toHaveBeenCalled();
     expect(routerPush).not.toHaveBeenCalled();
@@ -248,7 +248,7 @@ describe("SubmitForm", () => {
     fireEvent.click(screen.getByTestId("image-slots-stub-error"));
 
     expect(
-      await screen.findByTestId("submit-form-error-imagePaths")
+      await screen.findByTestId("submit-form-error-screenshotPaths")
     ).toHaveTextContent("최대 5장까지");
   });
 

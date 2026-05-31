@@ -55,7 +55,7 @@ export async function submitProject(
       tagline: input.tagline,
       project_url: input.projectUrl,
       github_url: input.githubUrl ?? null,
-      images: input.imagePaths.map((path) => ({ path })),
+      images: input.screenshotPaths.map((path) => ({ path })),
     })
     .select("id")
     .single();

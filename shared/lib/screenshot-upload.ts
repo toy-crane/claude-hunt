@@ -1,6 +1,6 @@
 import { createClient } from "@shared/api/supabase/client";
 import { SCREENSHOT_BUCKET } from "@shared/config/storage";
-import { downscaleImage } from "./image";
+import { downscaleScreenshot } from "./screenshot";
 
 export const MAX_SCREENSHOT_BYTES = 25 * 1024 * 1024; // 25 MiB
 export const ALLOWED_SCREENSHOT_MIME_TYPES = [
@@ -50,7 +50,7 @@ export async function uploadScreenshot(
     return { error: check.error };
   }
 
-  const downscale = await downscaleImage(file);
+  const downscale = await downscaleScreenshot(file);
   if (!downscale.ok) {
     return { error: downscale.error };
   }

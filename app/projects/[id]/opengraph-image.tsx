@@ -37,7 +37,7 @@ export default async function Image({ params }: PageProps) {
   const tagline = project?.tagline ?? "";
   const cohort = project?.cohort_label ?? "";
   const author = project?.author_display_name ?? "익명";
-  const primary = project?.primaryImageUrl ?? "";
+  const primary = project?.primaryScreenshotUrl ?? "";
 
   return new ImageResponse(
     <div

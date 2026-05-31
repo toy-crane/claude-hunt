@@ -1,6 +1,6 @@
 "use server";
 
-import type { ProjectImage } from "@entities/project";
+import type { ProjectScreenshot } from "@entities/project";
 import { requireAuth } from "@shared/api/supabase/require-auth";
 import { CACHE_TAGS } from "@shared/config/cache-tags";
 import { SCREENSHOT_BUCKET } from "@shared/config/storage";
@@ -44,14 +44,14 @@ export async function editProject(
     .maybeSingle();
   const previousPaths = new Set<string>();
   if (Array.isArray(current?.images)) {
-    for (const img of current.images as unknown as ProjectImage[]) {
+    for (const img of current.images as unknown as ProjectScreenshot[]) {
       if (img && typeof img.path === "string") {
         previousPaths.add(img.path);
       }
     }
   }
 
-  const nextPaths = new Set(input.imagePaths);
+  const nextPaths = new Set(input.screenshotPaths);
 
   const { data, error } = await supabase
     .from("projects")
@@ -60,7 +60,7 @@ export async function editProject(
       tagline: input.tagline,
       project_url: input.projectUrl,
       github_url: input.githubUrl ?? null,
-      images: input.imagePaths.map((path) => ({ path })),
+      images: input.screenshotPaths.map((path) => ({ path })),
     })
     .eq("id", input.projectId)
     .select("id");

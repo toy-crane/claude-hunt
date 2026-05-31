@@ -57,8 +57,8 @@ export default async function Page({ params, searchParams }: PageProps) {
           tagline: project.tagline,
           projectUrl: project.project_url,
           githubUrl: project.github_url,
-          imageUrls: project.imageUrls,
-          imagePaths: project.images.map((img) => img.path),
+          screenshotUrls: project.screenshotUrls,
+          screenshotPaths: project.images.map((img) => img.path),
         }}
       />
     </main>
