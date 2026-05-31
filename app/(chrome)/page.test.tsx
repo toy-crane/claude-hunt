@@ -126,7 +126,7 @@ describe("home page (/)", () => {
     const jsx = await Page();
     render(jsx);
 
-    // RunnerUpsSection renders both desktop and mobile variants.
+    // RunnersUpSection renders both desktop and mobile variants.
     expect(
       screen.getAllByRole("heading", { name: "대박", level: 4 }).length
     ).toBeGreaterThan(0);

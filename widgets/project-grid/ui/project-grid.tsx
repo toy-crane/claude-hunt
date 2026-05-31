@@ -3,7 +3,7 @@ import { ViewTransition } from "react";
 import type { ProjectGridRow } from "../api/fetch-projects";
 import { EmptyState } from "./empty-state";
 import { ProjectCard } from "./project-card";
-import { RankSlot } from "./rank-badge";
+import { RankSlot } from "./rank-dot";
 
 export interface ProjectGridProps {
   /**

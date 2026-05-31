@@ -72,7 +72,7 @@ vi.mock("@shared/api/supabase/server", () => ({
 }));
 
 const { fetchProjectCore, fetchViewerVote, fetchProjectDetail } = await import(
-  "./queries"
+  "./fetch-project-detail"
 );
 
 beforeEach(() => {

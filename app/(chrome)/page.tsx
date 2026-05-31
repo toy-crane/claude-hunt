@@ -2,7 +2,7 @@ import { fetchProjectCount } from "@widgets/header/server";
 import {
   Eyebrow,
   ProjectsCtaCard,
-  RunnerUpsSection,
+  RunnersUpSection,
   WinnerSpotlight,
 } from "@widgets/winner-spotlight";
 import { fetchMonthlyTopProjects } from "@widgets/winner-spotlight/server";
@@ -50,7 +50,7 @@ export default async function Page() {
 
   const { projects, monthSlug, monthLabel } = monthly;
   const winner = projects[0];
-  const runnerUps = projects.slice(1, 4);
+  const runnersUp = projects.slice(1, 4);
 
   if (!winner) {
     return (
@@ -65,7 +65,7 @@ export default async function Page() {
     <main className="mx-auto flex min-h-svh w-full max-w-6xl flex-col gap-8 bg-background px-6 py-10 text-foreground">
       <Eyebrow monthLabel={monthLabel} monthSlug={monthSlug} />
       <WinnerSpotlight winner={winner} />
-      <RunnerUpsSection runnerUps={runnerUps} />
+      <RunnersUpSection runnersUp={runnersUp} />
       <ProjectsCtaCard projectCount={projectCount} />
     </main>
   );

@@ -7,7 +7,7 @@ import {
 import { formatRelativeKo } from "@shared/lib/format-relative";
 import { Badge } from "@shared/ui/badge";
 import { Button } from "@shared/ui/button";
-import type { ProjectDetail } from "../api/queries";
+import type { ProjectDetail } from "../api/fetch-project-detail";
 import { ImageGallery } from "./image-gallery";
 import { OwnerControls } from "./owner-controls";
 

@@ -9,7 +9,7 @@ import {
 } from "@shared/ui/hover-card";
 import Image from "next/image";
 import Link from "next/link";
-import { RankDot, RankSlot } from "./rank-badge";
+import { RankDot, RankSlot } from "./rank-dot";
 
 export interface ProjectCardProps {
   /**
