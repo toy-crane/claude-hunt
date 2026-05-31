@@ -1,5 +1,5 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
-import { downscaleScreenshot } from "./downscale";
+import { downscaleImage } from "./downscale";
 
 interface CanvasCall {
   convertToBlob: (options?: {
@@ -70,7 +70,7 @@ function makeSourceFile(name = "photo.jpg", type = "image/jpeg"): File {
   return new File([new Uint8Array(1024)], name, { type });
 }
 
-describe("downscaleScreenshot", () => {
+describe("downscaleImage", () => {
   beforeEach(() => {
     canvasCalls.length = 0;
   });
@@ -82,7 +82,7 @@ describe("downscaleScreenshot", () => {
   it("downscales a 4000x3000 source to 1920x1440 and returns a WebP file", async () => {
     installStubs({ bitmap: { width: 4000, height: 3000 } });
 
-    const result = await downscaleScreenshot(makeSourceFile("big-photo.jpg"));
+    const result = await downscaleImage(makeSourceFile("big-photo.jpg"));
 
     expect(result.ok).toBe(true);
     if (!result.ok) {
@@ -98,7 +98,7 @@ describe("downscaleScreenshot", () => {
   it("preserves portrait orientation when height is the longest side", async () => {
     installStubs({ bitmap: { width: 3000, height: 4000 } });
 
-    const result = await downscaleScreenshot(makeSourceFile());
+    const result = await downscaleImage(makeSourceFile());
 
     expect(result.ok).toBe(true);
     expect(canvasCalls[0].width).toBe(1440);
@@ -108,7 +108,7 @@ describe("downscaleScreenshot", () => {
   it("does not upscale small sources (800x600 stays 800x600)", async () => {
     installStubs({ bitmap: { width: 800, height: 600 } });
 
-    const result = await downscaleScreenshot(
+    const result = await downscaleImage(
       makeSourceFile("logo.png", "image/png")
     );
 
@@ -125,7 +125,7 @@ describe("downscaleScreenshot", () => {
   it("returns the decode-failure error when createImageBitmap rejects", async () => {
     installStubs({ bitmapRejects: new Error("decode failed") });
 
-    const result = await downscaleScreenshot(makeSourceFile());
+    const result = await downscaleImage(makeSourceFile());
 
     expect(result).toEqual({
       ok: false,
@@ -139,7 +139,7 @@ describe("downscaleScreenshot", () => {
       convertRejects: new Error("encode failed"),
     });
 
-    const result = await downscaleScreenshot(makeSourceFile());
+    const result = await downscaleImage(makeSourceFile());
 
     expect(result).toEqual({
       ok: false,
@@ -150,7 +150,7 @@ describe("downscaleScreenshot", () => {
   it("passes image/webp + 0.85 quality to convertToBlob", async () => {
     installStubs({ bitmap: { width: 1000, height: 800 } });
 
-    await downscaleScreenshot(makeSourceFile());
+    await downscaleImage(makeSourceFile());
 
     expect(canvasCalls[0].convertToBlob).toHaveBeenCalledWith({
       type: "image/webp",

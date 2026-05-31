@@ -36,11 +36,11 @@ vi.mock("sonner", () => ({
   toast: { success: vi.fn(), error: vi.fn() },
 }));
 
-// Stub ScreenshotSlots so we don't have to drive the real DnD UI — the
+// Stub ImageSlots so we don't have to drive the real DnD UI — the
 // edit form seeds existing images at mount time, which is enough for
 // the submit path under test.
-vi.mock("@features/upload-project-screenshots", () => ({
-  ScreenshotSlots: ({
+vi.mock("@features/upload-project-images", () => ({
+  ImageSlots: ({
     value,
   }: {
     value: { id: string; file: File; preview: string }[];
@@ -53,8 +53,8 @@ const SAVE_LABEL = /저장/;
 
 const initial = {
   githubUrl: null,
-  screenshotPaths: ["user-1/a.webp"],
-  screenshotUrls: ["https://example.com/a.webp"],
+  imagePaths: ["user-1/a.webp"],
+  imageUrls: ["https://example.com/a.webp"],
   projectId: "p1",
   projectUrl: "https://myapp.com",
   tagline: "A cool tool",

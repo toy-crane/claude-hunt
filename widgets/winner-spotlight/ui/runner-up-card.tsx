@@ -1,5 +1,5 @@
 import { RiArrowUpLine } from "@remixicon/react";
-import { SHIMMER_DATA_URL } from "@shared/lib/screenshot/placeholder";
+import { SHIMMER_DATA_URL } from "@shared/lib/image/placeholder";
 import { cn } from "@shared/lib/utils";
 import Image from "next/image";
 import Link from "next/link";

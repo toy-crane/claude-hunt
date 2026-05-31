@@ -2,7 +2,7 @@ import { getZodFieldErrors } from "@shared/lib/validation";
 import { z } from "zod";
 import {
   GITHUB_URL_PATTERN,
-  MAX_PROJECT_SCREENSHOTS,
+  MAX_PROJECT_IMAGES,
   MAX_TAGLINE_LENGTH,
   MAX_TITLE_LENGTH,
 } from "./constants";
@@ -10,7 +10,7 @@ import {
 /**
  * Validation rules shared by submit and edit. The submit/edit schemas
  * extend this so messages and limits stay in lock-step. Image paths
- * are validated as a non-empty array up to MAX_PROJECT_SCREENSHOTS;
+ * are validated as a non-empty array up to MAX_PROJECT_IMAGES;
  * uploads happen client-side first.
  */
 export const projectFieldsSchema = z.object({
@@ -45,12 +45,12 @@ export const projectFieldsSchema = z.object({
         .optional()
     )
     .optional(),
-  screenshotPaths: z
+  imagePaths: z
     .array(z.string().trim().min(1))
     .min(1, "스크린샷을 1장 이상 첨부해 주세요.")
     .max(
-      MAX_PROJECT_SCREENSHOTS,
-      `최대 ${MAX_PROJECT_SCREENSHOTS}장까지 업로드할 수 있어요.`
+      MAX_PROJECT_IMAGES,
+      `최대 ${MAX_PROJECT_IMAGES}장까지 업로드할 수 있어요.`
     ),
 });
 
@@ -60,7 +60,7 @@ export type ProjectFieldName =
   | "tagline"
   | "projectUrl"
   | "githubUrl"
-  | "screenshotPaths";
+  | "imagePaths";
 
 export type ProjectFieldErrors = Partial<Record<ProjectFieldName, string>>;
 
@@ -93,19 +93,19 @@ export function readProjectFieldValues(
 /**
  * Validate the project fields against {@link projectFieldsSchema} so each
  * message can land next to its own field. Uploads happen after this gate,
- * so `screenshotCount` is checked against the array min/max via a placeholder
+ * so `imageCount` is checked against the array min/max via a placeholder
  * of matching length. Returns `null` when everything is valid.
  */
 export function validateProjectFields(
   values: ProjectFieldValues,
-  screenshotCount: number
+  imageCount: number
 ): ProjectFieldErrors | null {
   const parsed = projectFieldsSchema.safeParse({
     title: values.title,
     tagline: values.tagline,
     projectUrl: values.projectUrl,
     githubUrl: values.githubUrl.trim() === "" ? undefined : values.githubUrl,
-    screenshotPaths: Array.from({ length: screenshotCount }, () => "x"),
+    imagePaths: Array.from({ length: imageCount }, () => "x"),
   });
   if (parsed.success) {
     return null;
