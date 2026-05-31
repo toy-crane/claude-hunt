@@ -8,8 +8,8 @@ import { formatRelativeKo } from "@shared/lib/format-relative";
 import { Badge } from "@shared/ui/badge";
 import { Button } from "@shared/ui/button";
 import type { ProjectDetail } from "../api/fetch-project-detail";
-import { ImageGallery } from "./image-gallery";
 import { OwnerControls } from "./owner-controls";
+import { ScreenshotGallery } from "./screenshot-gallery";
 
 export interface HeroProps {
   isAuthenticated: boolean;
@@ -83,8 +83,11 @@ export function Hero({ project, isAuthenticated, viewerUserId }: HeroProps) {
         ) : null}
       </div>
 
-      {project.imageUrls.length > 0 ? (
-        <ImageGallery imageUrls={project.imageUrls} title={project.title} />
+      {project.screenshotUrls.length > 0 ? (
+        <ScreenshotGallery
+          screenshotUrls={project.screenshotUrls}
+          title={project.title}
+        />
       ) : null}
 
       <div

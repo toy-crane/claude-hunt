@@ -27,7 +27,7 @@ const validInput = {
   title: "My App",
   tagline: "A cool tool",
   projectUrl: "https://myapp.com",
-  imagePaths: ["user-1/shot.png"],
+  screenshotPaths: ["user-1/shot.png"],
 };
 
 beforeEach(() => {

@@ -35,7 +35,7 @@ beforeEach(() => {
 });
 
 function stubDelete(options: {
-  imagePaths?: string[];
+  screenshotPaths?: string[];
   deleted: Array<{ id: string }>;
   deleteError?: { message: string };
 }) {
@@ -43,9 +43,9 @@ function stubDelete(options: {
     eq: vi.fn().mockReturnValue({
       maybeSingle: vi.fn().mockResolvedValue({
         data:
-          options.imagePaths === undefined
+          options.screenshotPaths === undefined
             ? null
-            : { images: options.imagePaths.map((path) => ({ path })) },
+            : { images: options.screenshotPaths.map((path) => ({ path })) },
         error: null,
       }),
     }),
@@ -82,7 +82,7 @@ describe("deleteProject server action", () => {
       error: null,
     });
     stubDelete({
-      imagePaths: ["u1/shot.png"],
+      screenshotPaths: ["u1/shot.png"],
       deleted: [{ id: "proj-1" }],
     });
 
@@ -101,7 +101,7 @@ describe("deleteProject server action", () => {
       data: { claims: { sub: "u1" } },
       error: null,
     });
-    stubDelete({ imagePaths: ["u1/shot.png"], deleted: [] });
+    stubDelete({ screenshotPaths: ["u1/shot.png"], deleted: [] });
 
     const result = await deleteProject({ projectId: "proj-1" });
 
@@ -114,7 +114,7 @@ describe("deleteProject server action", () => {
       data: { claims: { sub: "u1" } },
       error: null,
     });
-    stubDelete({ imagePaths: [], deleted: [{ id: "proj-1" }] });
+    stubDelete({ screenshotPaths: [], deleted: [{ id: "proj-1" }] });
 
     const result = await deleteProject({ projectId: "proj-1" });
 
@@ -128,7 +128,7 @@ describe("deleteProject server action", () => {
       error: null,
     });
     stubDelete({
-      imagePaths: ["u1/shot.webp"],
+      screenshotPaths: ["u1/shot.webp"],
       deleted: [{ id: "proj-1" }],
     });
     storageRemove.mockResolvedValueOnce({

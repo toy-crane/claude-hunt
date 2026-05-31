@@ -1,6 +1,6 @@
 import { RiArrowUpLine } from "@remixicon/react";
 import { formatDateYmd } from "@shared/lib/format-date";
-import { SHIMMER_DATA_URL } from "@shared/lib/image";
+import { SHIMMER_DATA_URL } from "@shared/lib/screenshot";
 import Image from "next/image";
 import type { ReactNode } from "react";
 import type { MyProjectRow as MyProjectRowData } from "../api/fetch-my-projects";

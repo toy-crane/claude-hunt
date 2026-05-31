@@ -1,14 +1,14 @@
 "use client";
 
 import { RiArrowLeftSLine, RiArrowRightSLine } from "@remixicon/react";
-import { SHIMMER_DATA_URL } from "@shared/lib/image";
+import { SHIMMER_DATA_URL } from "@shared/lib/screenshot";
 import { cn } from "@shared/lib/utils";
 import NextImage from "next/image";
 import { useCallback, useState } from "react";
 
-export interface ImageGalleryProps {
-  /** Image URLs in display order. imageUrls[0] is the primary. */
-  imageUrls: string[];
+export interface ScreenshotGalleryProps {
+  /** Image URLs in display order. screenshotUrls[0] is the primary. */
+  screenshotUrls: string[];
   /** Project title for image alt text. */
   title: string;
 }
@@ -22,9 +22,12 @@ export interface ImageGalleryProps {
  * Renders the next/image with priority on the visible image so the
  * detail page hits a fast LCP.
  */
-export function ImageGallery({ imageUrls, title }: ImageGalleryProps) {
+export function ScreenshotGallery({
+  screenshotUrls,
+  title,
+}: ScreenshotGalleryProps) {
   const [activeIndex, setActiveIndex] = useState(0);
-  const total = imageUrls.length;
+  const total = screenshotUrls.length;
 
   const goPrev = useCallback(() => {
     setActiveIndex((i) => (i === 0 ? total - 1 : i - 1));
@@ -37,7 +40,7 @@ export function ImageGallery({ imageUrls, title }: ImageGalleryProps) {
     return null;
   }
 
-  const currentUrl = imageUrls[activeIndex] ?? imageUrls[0] ?? "";
+  const currentUrl = screenshotUrls[activeIndex] ?? screenshotUrls[0] ?? "";
 
   return (
     <div className="flex flex-col gap-2" data-testid="project-detail-gallery">
@@ -80,7 +83,7 @@ export function ImageGallery({ imageUrls, title }: ImageGalleryProps) {
           className="flex gap-2 overflow-x-auto p-1"
           data-testid="project-detail-gallery-strip"
         >
-          {imageUrls.map((url, idx) => (
+          {screenshotUrls.map((url, idx) => (
             <button
               aria-current={idx === activeIndex ? "true" : "false"}
               className={cn(

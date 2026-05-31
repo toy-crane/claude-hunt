@@ -30,8 +30,8 @@ const sampleProject: ProjectDetail = {
   author_avatar_url: null,
   author_display_name: "토이크레인",
   images: [],
-  imageUrls: ["https://cdn.example.com/img.png"],
-  primaryImageUrl: "https://cdn.example.com/img.png",
+  screenshotUrls: ["https://cdn.example.com/img.png"],
+  primaryScreenshotUrl: "https://cdn.example.com/img.png",
   vote_count: 0,
   viewer_has_voted: false,
   created_at: "2026-04-01T00:00:00Z",
@@ -70,9 +70,9 @@ describe("buildProjectJsonLd", () => {
     expect(data["@graph"][0]).not.toHaveProperty("author");
   });
 
-  it("omits image when primaryImageUrl is empty", async () => {
+  it("omits image when primaryScreenshotUrl is empty", async () => {
     const { buildProjectJsonLd } = await import("./page");
-    const data = buildProjectJsonLd({ ...sampleProject, primaryImageUrl: "" });
+    const data = buildProjectJsonLd({ ...sampleProject, primaryScreenshotUrl: "" });
     expect(data["@graph"][0]).not.toHaveProperty("image");
   });
 

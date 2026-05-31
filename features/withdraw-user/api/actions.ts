@@ -1,6 +1,6 @@
 "use server";
 
-import type { ProjectImage } from "@entities/project";
+import type { ProjectScreenshot } from "@entities/project";
 import { createAdminClient } from "@shared/api/supabase/admin";
 import { requireAuth } from "@shared/api/supabase/require-auth";
 import { CACHE_TAGS } from "@shared/config/cache-tags";
@@ -34,7 +34,7 @@ export async function withdrawAccount(): Promise<WithdrawAccountResult> {
   const paths = new Set<string>();
   for (const row of projects ?? []) {
     if (Array.isArray(row.images)) {
-      for (const img of row.images as unknown as ProjectImage[]) {
+      for (const img of row.images as unknown as ProjectScreenshot[]) {
         if (img && typeof img.path === "string") {
           paths.add(img.path);
         }

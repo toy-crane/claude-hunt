@@ -4,14 +4,14 @@ const uploadMock = vi.fn();
 const getClaimsMock = vi.fn();
 const createClient = vi.fn();
 
-const downscaleImage = vi.fn();
+const downscaleScreenshot = vi.fn();
 
 vi.mock("@shared/api/supabase/client.ts", () => ({
   createClient: () => createClient(),
 }));
 
-vi.mock("@shared/lib/image/index.ts", () => ({
-  downscaleImage,
+vi.mock("@shared/lib/screenshot/index.ts", () => ({
+  downscaleScreenshot,
 }));
 
 const { MAX_SCREENSHOT_BYTES, uploadScreenshot, validateScreenshotFile } =
@@ -87,7 +87,7 @@ describe("validateScreenshotFile", () => {
 
 describe("uploadScreenshot", () => {
   beforeEach(() => {
-    downscaleImage.mockReset();
+    downscaleScreenshot.mockReset();
     installSupabase();
   });
 
@@ -96,7 +96,7 @@ describe("uploadScreenshot", () => {
 
     expect(result.error).toMatch(MIME_ERROR_REGEX);
     expect(uploadMock).not.toHaveBeenCalled();
-    expect(downscaleImage).not.toHaveBeenCalled();
+    expect(downscaleScreenshot).not.toHaveBeenCalled();
   });
 
   it("returns the size error and never calls storage.upload for oversize files", async () => {
@@ -106,11 +106,11 @@ describe("uploadScreenshot", () => {
 
     expect(result.error).toBe("File must be 25 MB or smaller");
     expect(uploadMock).not.toHaveBeenCalled();
-    expect(downscaleImage).not.toHaveBeenCalled();
+    expect(downscaleScreenshot).not.toHaveBeenCalled();
   });
 
   it("returns the decode-failure error and never calls storage.upload when downscale fails", async () => {
-    downscaleImage.mockResolvedValue({
+    downscaleScreenshot.mockResolvedValue({
       ok: false,
       error: "Could not process this image. Try a different file.",
     });
@@ -127,7 +127,7 @@ describe("uploadScreenshot", () => {
     const downscaled = new File([new Uint8Array(512)], "shot.webp", {
       type: "image/webp",
     });
-    downscaleImage.mockResolvedValue({ ok: true, file: downscaled });
+    downscaleScreenshot.mockResolvedValue({ ok: true, file: downscaled });
 
     const result = await uploadScreenshot(makeFile("shot.jpg", "image/jpeg"));
 
@@ -148,7 +148,7 @@ describe("uploadScreenshot", () => {
     const downscaled = new File([new Uint8Array(512)], "shot.webp", {
       type: "image/webp",
     });
-    downscaleImage.mockResolvedValue({ ok: true, file: downscaled });
+    downscaleScreenshot.mockResolvedValue({ ok: true, file: downscaled });
     installSupabase({ uploadError: { message: "storage quota exceeded" } });
 
     const result = await uploadScreenshot(makeFile());

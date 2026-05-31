@@ -10,7 +10,7 @@ import type {
  * the social preview. Additional fields can be added later (alt text,
  * captions) without a schema migration.
  */
-export interface ProjectImage {
+export interface ProjectScreenshot {
   path: string;
 }
 

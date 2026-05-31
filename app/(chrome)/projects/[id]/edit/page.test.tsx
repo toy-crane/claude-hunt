@@ -41,8 +41,8 @@ interface EditFormProps {
   backHref?: string;
   initial: {
     githubUrl: string | null;
-    imagePaths: string[];
-    imageUrls: string[];
+    screenshotPaths: string[];
+    screenshotUrls: string[];
     projectId: string;
     projectUrl: string;
     tagline: string;
@@ -68,8 +68,8 @@ function makeProject(overrides: Partial<ProjectDetail> = {}): ProjectDetail {
     project_url: "https://myapp.com",
     github_url: null,
     images: [{ path: "owner-1/shot.png" }],
-    imageUrls: ["https://cdn.example/shot.png"],
-    primaryImageUrl: "https://cdn.example/shot.png",
+    screenshotUrls: ["https://cdn.example/shot.png"],
+    primaryScreenshotUrl: "https://cdn.example/shot.png",
     vote_count: 0,
     viewer_has_voted: false,
     author_display_name: "Owner",
@@ -138,7 +138,7 @@ describe("/projects/[id]/edit page", () => {
         project_url: "https://renamed.example",
         github_url: "https://github.com/owner-1/renamed",
         images: [{ path: "owner-1/a.png" }, { path: "owner-1/b.png" }],
-        imageUrls: ["https://cdn/a", "https://cdn/b"],
+        screenshotUrls: ["https://cdn/a", "https://cdn/b"],
       })
     );
 
@@ -155,8 +155,8 @@ describe("/projects/[id]/edit page", () => {
         tagline: "Updated tagline",
         projectUrl: "https://renamed.example",
         githubUrl: "https://github.com/owner-1/renamed",
-        imageUrls: ["https://cdn/a", "https://cdn/b"],
-        imagePaths: ["owner-1/a.png", "owner-1/b.png"],
+        screenshotUrls: ["https://cdn/a", "https://cdn/b"],
+        screenshotPaths: ["owner-1/a.png", "owner-1/b.png"],
       },
     });
   });

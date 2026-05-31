@@ -93,7 +93,7 @@ describe("fetchProjectCore", () => {
     }
     expect(core.id).toBe("p1");
     expect(core.vote_count).toBe(3);
-    expect(core.primaryImageUrl).toBe(
+    expect(core.primaryScreenshotUrl).toBe(
       "https://cdn.example.com/screens/p1/cover.png"
     );
     // Core must not expose viewer-specific fields.

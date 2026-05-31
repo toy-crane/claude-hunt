@@ -6,7 +6,7 @@ const validInput = {
   title: "My App",
   tagline: "A cool tool",
   projectUrl: "https://myapp.com",
-  imagePaths: ["user-1/shot.png"],
+  screenshotPaths: ["user-1/shot.png"],
 };
 
 describe("editProjectInputSchema", () => {
@@ -61,10 +61,10 @@ describe("editProjectInputSchema", () => {
     expect(result.success).toBe(false);
   });
 
-  it("rejects an empty imagePaths array", () => {
+  it("rejects an empty screenshotPaths array", () => {
     const result = editProjectInputSchema.safeParse({
       ...validInput,
-      imagePaths: [],
+      screenshotPaths: [],
     });
     expect(result.success).toBe(false);
   });
