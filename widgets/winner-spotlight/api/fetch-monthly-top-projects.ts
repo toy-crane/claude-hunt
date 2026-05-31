@@ -23,12 +23,13 @@ export type MonthlyTopProject = Pick<
   | "primary_image_path"
   | "created_at"
   | "vote_count"
+  | "cohort_id"
   | "cohort_label"
   | "author_display_name"
 > & { screenshotUrl: string };
 
 const SELECT_COLUMNS =
-  "id, title, tagline, primary_image_path, created_at, vote_count, cohort_label, author_display_name" as const;
+  "id, title, tagline, primary_image_path, created_at, vote_count, cohort_id, cohort_label, author_display_name" as const;
 
 export interface FetchMonthlyTopProjectsResult {
   /** "2026년 5월" — Korean label for the same month. */

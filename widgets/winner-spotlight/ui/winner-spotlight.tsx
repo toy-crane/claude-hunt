@@ -15,6 +15,11 @@ export function WinnerSpotlight({ winner }: WinnerSpotlightProps) {
   const author = winner.author_display_name ?? "익명";
   const authorInitial = author.charAt(0).toUpperCase();
   const href = `/projects/${winner.id}`;
+  // Deep-links the projects board to this project's cohort filter. Only
+  // offered when the row carries a cohort assignment.
+  const cohortHref = winner.cohort_id
+    ? `/projects?cohort=${winner.cohort_id}`
+    : null;
   const screenshot = winner.screenshotUrl || SHIMMER_DATA_URL;
 
   return (
@@ -43,11 +48,22 @@ export function WinnerSpotlight({ winner }: WinnerSpotlightProps) {
         <div className="flex flex-col gap-4">
           <div className="flex flex-col gap-1.5">
             <span className="font-mono text-[10px] text-muted-foreground tracking-wider">
-              {cohort.toUpperCase()}
+              {cohortHref ? (
+                <Link
+                  className="hover:text-foreground hover:underline"
+                  href={cohortHref}
+                >
+                  {cohort.toUpperCase()}
+                </Link>
+              ) : (
+                cohort.toUpperCase()
+              )}
               {submittedAt ? <> · {submittedAt}</> : null}
             </span>
             <h2 className="m-0 font-heading font-medium text-2xl leading-tight tracking-tight">
-              {winner.title}
+              <Link className="hover:underline" href={href}>
+                {winner.title}
+              </Link>
             </h2>
           </div>
           <p className="m-0 text-muted-foreground text-sm leading-relaxed">
