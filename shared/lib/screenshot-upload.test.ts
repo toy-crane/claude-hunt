@@ -2,12 +2,12 @@ import { beforeEach, describe, expect, it, vi } from "vitest";
 
 const uploadMock = vi.fn();
 const getClaimsMock = vi.fn();
-const createClient = vi.fn();
+const createBrowserClient = vi.fn();
 
 const downscaleScreenshot = vi.fn();
 
 vi.mock("@shared/api/supabase/client.ts", () => ({
-  createClient: () => createClient(),
+  createBrowserClient: () => createBrowserClient(),
 }));
 
 vi.mock("@shared/lib/screenshot/index.ts", () => ({
@@ -34,8 +34,8 @@ function installSupabase(options?: { uploadError?: { message: string } }) {
   });
   uploadMock.mockResolvedValue({ error: options?.uploadError ?? null });
 
-  createClient.mockReset();
-  createClient.mockReturnValue({
+  createBrowserClient.mockReset();
+  createBrowserClient.mockReturnValue({
     auth: { getClaims: getClaimsMock },
     storage: {
       from: vi.fn(() => ({ upload: uploadMock })),

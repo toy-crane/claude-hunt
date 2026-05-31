@@ -1,6 +1,6 @@
 "use client";
 
-import { createClient } from "@shared/api/supabase/client";
+import { createBrowserClient } from "@shared/api/supabase/client";
 import { AuthLayout } from "@shared/ui/auth-layout";
 import { Button } from "@shared/ui/button";
 import { GitHubIcon } from "@shared/ui/icons/github";
@@ -16,7 +16,7 @@ export function LoginForm() {
   const [email, setEmail] = useState("");
   const [loading, setLoading] = useState<string | null>(null);
   const [otpSent, setOtpSent] = useState(false);
-  const supabase = createClient();
+  const supabase = createBrowserClient();
   const searchParams = useSearchParams();
 
   function buildCallbackUrl() {

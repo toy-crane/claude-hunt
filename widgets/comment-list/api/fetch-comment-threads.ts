@@ -1,5 +1,5 @@
 import type { ReactionEmoji } from "@entities/reaction";
-import { createClient } from "@shared/api/supabase/server";
+import { createServerClient } from "@shared/api/supabase/server";
 
 export interface CommentReactionSummary {
   count: number;
@@ -44,7 +44,7 @@ interface ReactionAggEntry {
 }
 
 async function fetchProfileMap(
-  supabase: Awaited<ReturnType<typeof createClient>>,
+  supabase: Awaited<ReturnType<typeof createServerClient>>,
   userIds: string[]
 ): Promise<Map<string, ProfileSlice>> {
   const map = new Map<string, ProfileSlice>();
@@ -129,7 +129,7 @@ export async function fetchCommentThreads(
   projectId: string,
   viewerUserId: string | null
 ): Promise<CommentThread[]> {
-  const supabase = await createClient();
+  const supabase = await createServerClient();
   const commentsResult = await supabase
     .from("comments")
     .select("id, user_id, parent_comment_id, body, created_at, updated_at")

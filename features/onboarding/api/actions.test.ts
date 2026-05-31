@@ -22,7 +22,7 @@ const mockClient = {
 };
 
 vi.mock("@shared/api/supabase/server", () => ({
-  createClient: vi.fn().mockResolvedValue(mockClient),
+  createServerClient: vi.fn().mockResolvedValue(mockClient),
 }));
 
 const { completeOnboarding } = await import("./actions");

@@ -21,7 +21,7 @@ const userClient = {
 };
 
 vi.mock("@shared/api/supabase/server", () => ({
-  createClient: vi.fn().mockResolvedValue(userClient),
+  createServerClient: vi.fn().mockResolvedValue(userClient),
 }));
 
 const deleteUser = vi.fn();

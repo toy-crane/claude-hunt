@@ -4,7 +4,7 @@ import { vi } from "vitest";
 const mockClient = createMockSupabaseClient();
 
 vi.mock("@shared/api/supabase/server", () => ({
-  createClient: vi.fn().mockResolvedValue(mockClient),
+  createServerClient: vi.fn().mockResolvedValue(mockClient),
 }));
 
 describe("auth callback", () => {

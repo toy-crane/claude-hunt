@@ -1,4 +1,4 @@
-import { createClient } from "@shared/api/supabase/client";
+import { createBrowserClient } from "@shared/api/supabase/client";
 import { SCREENSHOT_BUCKET } from "@shared/config/storage";
 import { downscaleScreenshot } from "./screenshot";
 
@@ -56,7 +56,7 @@ export async function uploadScreenshot(
   }
   const outputFile = downscale.file;
 
-  const supabase = createClient();
+  const supabase = createBrowserClient();
   const { data, error: claimsError } = await supabase.auth.getClaims();
   if (claimsError || !data) {
     return { error: "You must be signed in to upload a screenshot" };

@@ -22,7 +22,7 @@ vi.mock("next/link", () => ({
 const mockClient = createMockSupabaseClient();
 
 vi.mock("@shared/api/supabase/client", () => ({
-  createClient: () => mockClient,
+  createBrowserClient: () => mockClient,
 }));
 
 vi.mock("next/navigation", () => ({
