@@ -37,12 +37,12 @@ export async function updateDisplayName(
       error: { field: "displayName", message: auth.error },
     };
   }
-  const { supabase, user } = auth;
+  const { supabase, userId } = auth;
 
   const { error: updateError } = await supabase
     .from("profiles")
     .update({ display_name: parsed.data })
-    .eq("id", user.id);
+    .eq("id", userId);
 
   if (updateError) {
     const message = isDisplayNameUniqueViolation(updateError)

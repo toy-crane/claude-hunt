@@ -5,9 +5,9 @@ vi.mock("next/cache", () => ({
   revalidatePath: revalidatePathMock,
 }));
 
-const getUser = vi.fn();
+const getClaims = vi.fn();
 const from = vi.fn();
-const mockClient = { auth: { getUser }, from };
+const mockClient = { auth: { getClaims }, from };
 
 vi.mock("@shared/api/supabase/server", () => ({
   createClient: vi.fn().mockResolvedValue(mockClient),
@@ -45,7 +45,7 @@ function stubDelete(error: { message: string } | null = null) {
 
 beforeEach(() => {
   revalidatePathMock.mockReset();
-  getUser.mockReset();
+  getClaims.mockReset();
   from.mockReset();
 });
 
@@ -58,7 +58,7 @@ describe("toggleReaction server action", () => {
 
     expect(result.ok).toBe(false);
     expect(result.error).toBeDefined();
-    expect(getUser).not.toHaveBeenCalled();
+    expect(getClaims).not.toHaveBeenCalled();
     expect(from).not.toHaveBeenCalled();
   });
 
@@ -66,12 +66,12 @@ describe("toggleReaction server action", () => {
     const result = await toggleReaction({ ...validInput, commentId: "" });
 
     expect(result.ok).toBe(false);
-    expect(getUser).not.toHaveBeenCalled();
+    expect(getClaims).not.toHaveBeenCalled();
     expect(from).not.toHaveBeenCalled();
   });
 
   it("rejects a signed-out caller after schema parse", async () => {
-    getUser.mockResolvedValue({ data: { user: null }, error: null });
+    getClaims.mockResolvedValue({ data: null, error: null });
 
     const result = await toggleReaction(validInput);
 
@@ -80,7 +80,10 @@ describe("toggleReaction server action", () => {
   });
 
   it("inserts a new reaction and revalidates when the viewer hasn't reacted with this emoji", async () => {
-    getUser.mockResolvedValue({ data: { user: { id: "u1" } }, error: null });
+    getClaims.mockResolvedValue({
+      data: { claims: { sub: "u1" } },
+      error: null,
+    });
     const selectQ = stubSelect(null);
     const insertQ = stubInsert();
     let call = 0;
@@ -101,7 +104,10 @@ describe("toggleReaction server action", () => {
   });
 
   it("deletes the existing reaction and revalidates when the viewer already reacted with this emoji", async () => {
-    getUser.mockResolvedValue({ data: { user: { id: "u1" } }, error: null });
+    getClaims.mockResolvedValue({
+      data: { claims: { sub: "u1" } },
+      error: null,
+    });
     const selectQ = stubSelect({ id: "r1" });
     const deleteQ = stubDelete();
     let call = 0;
@@ -118,7 +124,10 @@ describe("toggleReaction server action", () => {
   });
 
   it("surfaces an insert error without state and without revalidate", async () => {
-    getUser.mockResolvedValue({ data: { user: { id: "u1" } }, error: null });
+    getClaims.mockResolvedValue({
+      data: { claims: { sub: "u1" } },
+      error: null,
+    });
     const selectQ = stubSelect(null);
     const insertQ = stubInsert({ message: "insert boom" });
     let call = 0;
@@ -136,7 +145,10 @@ describe("toggleReaction server action", () => {
   });
 
   it("surfaces a delete error without state and without revalidate", async () => {
-    getUser.mockResolvedValue({ data: { user: { id: "u1" } }, error: null });
+    getClaims.mockResolvedValue({
+      data: { claims: { sub: "u1" } },
+      error: null,
+    });
     const selectQ = stubSelect({ id: "r1" });
     const deleteQ = stubDelete({ message: "delete boom" });
     let call = 0;

@@ -33,7 +33,6 @@ export function WinnerSpotlight({ winner }: WinnerSpotlightProps) {
           alt={`${winner.title} 스크린샷`}
           className="object-cover"
           fill
-          placeholder={SHIMMER_DATA_URL}
           priority
           sizes="(max-width: 768px) 100vw, 60vw"
           src={screenshot}

@@ -33,8 +33,8 @@ describe("updateDisplayName", () => {
     updateMock.mockReturnValue({ eq: eqMock });
     eqMock.mockReset();
     eqMock.mockResolvedValue({ error: null });
-    vi.mocked(mockClient.auth.getUser).mockResolvedValue({
-      data: { user: { id: "user-1", email: "alice@example.com" } },
+    vi.mocked(mockClient.auth.getClaims).mockResolvedValue({
+      data: { claims: { sub: "user-1", email: "alice@example.com" } },
       error: null,
     });
   });
@@ -118,8 +118,8 @@ describe("updateDisplayName", () => {
   });
 
   it("returns an auth error when no session exists", async () => {
-    vi.mocked(mockClient.auth.getUser).mockResolvedValue({
-      data: { user: null },
+    vi.mocked(mockClient.auth.getClaims).mockResolvedValue({
+      data: null,
       error: null,
     });
     const { updateDisplayName } = await import("./actions");

@@ -32,7 +32,7 @@ export async function leaveComment(
   if (!auth.ok) {
     return auth;
   }
-  const { supabase, user } = auth;
+  const { supabase, userId } = auth;
 
   const { data: inserted, error } = await supabase
     .from("comments")
@@ -44,7 +44,7 @@ export async function leaveComment(
       // the optimistic CommentItem get torn down mid-interaction.
       id: input.optimisticId,
       project_id: input.projectId,
-      user_id: user.id,
+      user_id: userId,
       parent_comment_id: input.parentCommentId ?? null,
       body: input.body,
     })

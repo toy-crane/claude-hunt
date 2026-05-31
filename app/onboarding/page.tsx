@@ -1,6 +1,7 @@
 import { fetchCohorts } from "@features/cohort-filter/server";
 import { OnboardingForm } from "@features/onboarding";
 import { createClient } from "@shared/api/supabase/server";
+import { getSessionClaims } from "@shared/api/supabase/session";
 import { NOINDEX_METADATA } from "@shared/config/site";
 import type { Metadata } from "next";
 import { redirect } from "next/navigation";
@@ -36,18 +37,16 @@ export default async function OnboardingPage({
   const { next } = await searchParams;
   const safeNext = sanitizeNext(next);
 
-  const supabase = await createClient();
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
-  if (!user) {
+  const claims = await getSessionClaims();
+  if (!claims) {
     redirect("/login");
   }
 
-  // Profile query depends on user.id; cohorts fetch is independent —
+  // Profile query depends on the viewer id; cohorts fetch is independent —
   // run them in parallel to halve the TTFB of this page.
+  const supabase = await createClient();
   const [{ data: profile }, cohorts] = await Promise.all([
-    supabase.from("profiles").select("cohort_id").eq("id", user.id).single(),
+    supabase.from("profiles").select("cohort_id").eq("id", claims.sub).single(),
     fetchCohorts(),
   ]);
 

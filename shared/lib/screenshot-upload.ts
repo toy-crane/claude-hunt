@@ -57,15 +57,12 @@ export async function uploadScreenshot(
   const outputFile = downscale.file;
 
   const supabase = createClient();
-  const {
-    data: { user },
-    error: userError,
-  } = await supabase.auth.getUser();
-  if (userError || !user) {
+  const { data, error: claimsError } = await supabase.auth.getClaims();
+  if (claimsError || !data) {
     return { error: "You must be signed in to upload a screenshot" };
   }
 
-  const path = `${user.id}/${crypto.randomUUID()}.webp`;
+  const path = `${data.claims.sub}/${crypto.randomUUID()}.webp`;
 
   const { error } = await supabase.storage
     .from(SCREENSHOT_BUCKET)

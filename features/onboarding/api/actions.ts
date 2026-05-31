@@ -37,12 +37,12 @@ export async function completeOnboarding(
   if (!auth.ok) {
     return auth;
   }
-  const { supabase, user } = auth;
+  const { supabase, userId, email } = auth;
 
   const { error: upsertError } = await supabase.from("profiles").upsert(
     {
-      id: user.id,
-      email: user.email ?? "",
+      id: userId,
+      email,
       display_name: input.displayName,
       cohort_id: input.cohortId,
     },

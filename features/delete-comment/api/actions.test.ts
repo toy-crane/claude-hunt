@@ -5,9 +5,9 @@ vi.mock("next/cache", () => ({
   revalidatePath: revalidatePathMock,
 }));
 
-const getUser = vi.fn();
+const getClaims = vi.fn();
 const from = vi.fn();
-const mockClient = { auth: { getUser }, from };
+const mockClient = { auth: { getClaims }, from };
 
 vi.mock("@shared/api/supabase/server", () => ({
   createClient: vi.fn().mockResolvedValue(mockClient),
@@ -35,7 +35,7 @@ const validInput = { commentId: "c1", projectId: "p1" };
 
 beforeEach(() => {
   revalidatePathMock.mockReset();
-  getUser.mockReset();
+  getClaims.mockReset();
   from.mockReset();
 });
 
@@ -45,7 +45,7 @@ describe("deleteComment server action", () => {
 
     expect(result.ok).toBe(false);
     expect(result.error).toBe("Invalid input");
-    expect(getUser).not.toHaveBeenCalled();
+    expect(getClaims).not.toHaveBeenCalled();
     expect(from).not.toHaveBeenCalled();
   });
 
@@ -54,12 +54,12 @@ describe("deleteComment server action", () => {
 
     expect(result.ok).toBe(false);
     expect(result.error).toBe("Invalid input");
-    expect(getUser).not.toHaveBeenCalled();
+    expect(getClaims).not.toHaveBeenCalled();
     expect(from).not.toHaveBeenCalled();
   });
 
   it("rejects signed-out callers without touching the db", async () => {
-    getUser.mockResolvedValue({ data: { user: null }, error: null });
+    getClaims.mockResolvedValue({ data: null, error: null });
 
     const result = await deleteComment(validInput);
 
@@ -68,7 +68,10 @@ describe("deleteComment server action", () => {
   });
 
   it("returns ok and revalidates the project page when the delete affects one row", async () => {
-    getUser.mockResolvedValue({ data: { user: { id: "u1" } }, error: null });
+    getClaims.mockResolvedValue({
+      data: { claims: { sub: "u1" } },
+      error: null,
+    });
     const { del, eq } = stubDelete({ deleted: [{ id: "c1" }] });
 
     const result = await deleteComment(validInput);
@@ -80,7 +83,10 @@ describe("deleteComment server action", () => {
   });
 
   it("returns a not-found-or-no-permission error when RLS filters the row out (0 rows returned)", async () => {
-    getUser.mockResolvedValue({ data: { user: { id: "u1" } }, error: null });
+    getClaims.mockResolvedValue({
+      data: { claims: { sub: "u1" } },
+      error: null,
+    });
     stubDelete({ deleted: [] });
 
     const result = await deleteComment(validInput);
@@ -91,7 +97,10 @@ describe("deleteComment server action", () => {
   });
 
   it("surfaces a supabase delete error verbatim", async () => {
-    getUser.mockResolvedValue({ data: { user: { id: "u1" } }, error: null });
+    getClaims.mockResolvedValue({
+      data: { claims: { sub: "u1" } },
+      error: null,
+    });
     stubDelete({ deleted: [], error: { message: "boom" } });
 
     const result = await deleteComment(validInput);

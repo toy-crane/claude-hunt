@@ -5,9 +5,9 @@ vi.mock("next/cache", () => ({
   revalidatePath: revalidatePathMock,
 }));
 
-const getUser = vi.fn();
+const getClaims = vi.fn();
 const from = vi.fn();
-const mockClient = { auth: { getUser }, from };
+const mockClient = { auth: { getClaims }, from };
 
 vi.mock("@shared/api/supabase/server", () => ({
   createClient: vi.fn().mockResolvedValue(mockClient),
@@ -35,7 +35,7 @@ function stubUpdate(options: StubOptions) {
 
 beforeEach(() => {
   revalidatePathMock.mockReset();
-  getUser.mockReset();
+  getClaims.mockReset();
   from.mockReset();
 });
 
@@ -45,7 +45,7 @@ describe("editComment server action", () => {
 
     expect(result.ok).toBe(false);
     expect(result.error).toBe("내용을 입력해 주세요.");
-    expect(getUser).not.toHaveBeenCalled();
+    expect(getClaims).not.toHaveBeenCalled();
     expect(from).not.toHaveBeenCalled();
   });
 
@@ -57,7 +57,7 @@ describe("editComment server action", () => {
   });
 
   it("rejects signed-out callers without touching the db", async () => {
-    getUser.mockResolvedValue({ data: { user: null }, error: null });
+    getClaims.mockResolvedValue({ data: null, error: null });
 
     const result = await editComment(validInput);
 
@@ -66,7 +66,10 @@ describe("editComment server action", () => {
   });
 
   it("updates the comment body and revalidates the project page on success", async () => {
-    getUser.mockResolvedValue({ data: { user: { id: "u1" } }, error: null });
+    getClaims.mockResolvedValue({
+      data: { claims: { sub: "u1" } },
+      error: null,
+    });
     const { update, eq } = stubUpdate({ data: [{ id: "c1" }] });
 
     const result = await editComment(validInput);
@@ -78,7 +81,10 @@ describe("editComment server action", () => {
   });
 
   it("returns a not-found-or-no-permission error when RLS filters the row out (0 rows)", async () => {
-    getUser.mockResolvedValue({ data: { user: { id: "u1" } }, error: null });
+    getClaims.mockResolvedValue({
+      data: { claims: { sub: "u1" } },
+      error: null,
+    });
     stubUpdate({ data: [] });
 
     const result = await editComment(validInput);
@@ -89,7 +95,10 @@ describe("editComment server action", () => {
   });
 
   it("surfaces a supabase update error verbatim and does not revalidate", async () => {
-    getUser.mockResolvedValue({ data: { user: { id: "u1" } }, error: null });
+    getClaims.mockResolvedValue({
+      data: { claims: { sub: "u1" } },
+      error: null,
+    });
     stubUpdate({ error: { message: "boom" } });
 
     const result = await editComment(validInput);

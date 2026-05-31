@@ -5,6 +5,7 @@ import { vi } from "vitest";
 
 export function createMockSupabaseClient(overrides?: {
   getUser?: () => Promise<unknown>;
+  getClaims?: () => Promise<unknown>;
   signInWithOtp?: () => Promise<unknown>;
   signInWithOAuth?: () => Promise<unknown>;
   signOut?: () => Promise<unknown>;
@@ -15,6 +16,10 @@ export function createMockSupabaseClient(overrides?: {
       getUser:
         overrides?.getUser ??
         vi.fn().mockResolvedValue({ data: { user: null }, error: null }),
+      // Default anonymous: getClaims() resolves to no session.
+      getClaims:
+        overrides?.getClaims ??
+        vi.fn().mockResolvedValue({ data: null, error: null }),
       signInWithOtp:
         overrides?.signInWithOtp ?? vi.fn().mockResolvedValue({ error: null }),
       signInWithOAuth:

@@ -1,6 +1,7 @@
 import { cache } from "react";
 
 import { createClient } from "./server";
+import { getSessionClaims } from "./session";
 
 export interface Viewer {
   avatarUrl: string | null;
@@ -13,26 +14,25 @@ export interface Viewer {
 /**
  * Fetch the signed-in viewer's identity + profile slice, deduplicated
  * via React.cache() within a single render tree. Returns `null` for
- * anonymous visitors. The union of columns selected covers every
- * RSC that needs viewer data (Header, home page, settings page), so
- * repeated callers don't re-issue getUser() or re-query profiles.
+ * anonymous visitors. Identity comes from the locally-verified JWT claims
+ * (`getSessionClaims`, no Auth-server round-trip); the profile slice
+ * (display name, avatar, cohort) is read from `profiles` since those are
+ * not carried in the token.
  */
 export const fetchViewer = cache(async (): Promise<Viewer | null> => {
-  const supabase = await createClient();
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
-  if (!user) {
+  const claims = await getSessionClaims();
+  if (!claims) {
     return null;
   }
+  const supabase = await createClient();
   const { data } = await supabase
     .from("profiles")
     .select("display_name, avatar_url, cohort_id, email")
-    .eq("id", user.id)
+    .eq("id", claims.sub)
     .single();
   return {
-    id: user.id,
-    email: data?.email ?? user.email ?? "",
+    id: claims.sub,
+    email: data?.email ?? claims.email ?? "",
     displayName: data?.display_name ?? null,
     avatarUrl: data?.avatar_url ?? null,
     cohortId: data?.cohort_id ?? null,

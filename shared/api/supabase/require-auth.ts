@@ -1,22 +1,30 @@
-import type { User } from "@supabase/supabase-js";
 import { createClient } from "./server";
+import { getSessionClaims } from "./session";
 
 type SupabaseServerClient = Awaited<ReturnType<typeof createClient>>;
 
 export type RequireAuthResult =
-  | { ok: true; supabase: SupabaseServerClient; user: User }
+  | { ok: true; supabase: SupabaseServerClient; userId: string; email: string }
   | { ok: false; error: string };
 
+/**
+ * Gate a server action behind authentication. Resolves the viewer from the
+ * locally-verified JWT claims (`getSessionClaims`) rather than a `getUser()`
+ * round-trip — `claims.sub` is the authenticated user id. Authorization for
+ * the actual mutation is still enforced by RLS on the returned client.
+ */
 export async function requireAuth(
   signedOutMessage: string
 ): Promise<RequireAuthResult> {
-  const supabase = await createClient();
-  const {
-    data: { user },
-    error,
-  } = await supabase.auth.getUser();
-  if (error || !user) {
+  const claims = await getSessionClaims();
+  if (!claims) {
     return { ok: false, error: signedOutMessage };
   }
-  return { ok: true, supabase, user };
+  const supabase = await createClient();
+  return {
+    ok: true,
+    supabase,
+    userId: claims.sub,
+    email: claims.email ?? "",
+  };
 }

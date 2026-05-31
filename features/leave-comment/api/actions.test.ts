@@ -5,9 +5,9 @@ vi.mock("next/cache", () => ({
   revalidatePath: revalidatePathMock,
 }));
 
-const getUser = vi.fn();
+const getClaims = vi.fn();
 const from = vi.fn();
-const mockClient = { auth: { getUser }, from };
+const mockClient = { auth: { getClaims }, from };
 
 vi.mock("@shared/api/supabase/server", () => ({
   createClient: vi.fn().mockResolvedValue(mockClient),
@@ -35,7 +35,7 @@ function stubInsert(options: StubOptions) {
 
 beforeEach(() => {
   revalidatePathMock.mockReset();
-  getUser.mockReset();
+  getClaims.mockReset();
   from.mockReset();
 });
 
@@ -45,7 +45,7 @@ describe("leaveComment server action", () => {
 
     expect(result.ok).toBe(false);
     expect(result.error).toBe("내용을 입력해 주세요.");
-    expect(getUser).not.toHaveBeenCalled();
+    expect(getClaims).not.toHaveBeenCalled();
     expect(from).not.toHaveBeenCalled();
   });
 
@@ -57,7 +57,7 @@ describe("leaveComment server action", () => {
   });
 
   it("rejects signed-out callers without touching the db", async () => {
-    getUser.mockResolvedValue({ data: { user: null }, error: null });
+    getClaims.mockResolvedValue({ data: null, error: null });
 
     const result = await leaveComment(validInput);
 
@@ -66,7 +66,10 @@ describe("leaveComment server action", () => {
   });
 
   it("inserts the comment for the signed-in user and revalidates the project page", async () => {
-    getUser.mockResolvedValue({ data: { user: { id: "u1" } }, error: null });
+    getClaims.mockResolvedValue({
+      data: { claims: { sub: "u1" } },
+      error: null,
+    });
     const { insert, single } = stubInsert({ inserted: { id: "c-new" } });
 
     const result = await leaveComment(validInput);
@@ -85,7 +88,10 @@ describe("leaveComment server action", () => {
   });
 
   it("threads a reply by passing the parent comment id and reusing the optimistic id", async () => {
-    getUser.mockResolvedValue({ data: { user: { id: "u1" } }, error: null });
+    getClaims.mockResolvedValue({
+      data: { claims: { sub: "u1" } },
+      error: null,
+    });
     const optimisticId = "11111111-1111-4111-8111-111111111111";
     const { insert } = stubInsert({ inserted: { id: optimisticId } });
 
@@ -104,7 +110,10 @@ describe("leaveComment server action", () => {
   });
 
   it("surfaces a supabase insert error verbatim and does not revalidate", async () => {
-    getUser.mockResolvedValue({ data: { user: { id: "u1" } }, error: null });
+    getClaims.mockResolvedValue({
+      data: { claims: { sub: "u1" } },
+      error: null,
+    });
     stubInsert({ error: { message: "boom" } });
 
     const result = await leaveComment(validInput);

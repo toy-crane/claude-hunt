@@ -14,10 +14,10 @@ vi.mock("next/cache", () => ({
   updateTag: updateTagMock,
 }));
 
-const getUser = vi.fn();
+const getClaims = vi.fn();
 const from = vi.fn();
 const mockClient = {
-  auth: { getUser },
+  auth: { getClaims },
   from,
 };
 
@@ -51,13 +51,13 @@ function stubProfileUpsert(options: {
 beforeEach(() => {
   revalidatePathMock.mockClear();
   updateTagMock.mockClear();
-  getUser.mockReset();
+  getClaims.mockReset();
   from.mockReset();
 });
 
 describe("completeOnboarding server action", () => {
   it("rejects when the user is not signed in", async () => {
-    getUser.mockResolvedValue({ data: { user: null }, error: null });
+    getClaims.mockResolvedValue({ data: null, error: null });
 
     const result = await completeOnboarding(validInput);
 
@@ -66,7 +66,7 @@ describe("completeOnboarding server action", () => {
   });
 
   it("does not touch the database when the caller is signed out", async () => {
-    getUser.mockResolvedValue({ data: { user: null }, error: null });
+    getClaims.mockResolvedValue({ data: null, error: null });
     const { upsert } = stubProfileUpsert({});
 
     await completeOnboarding(validInput);
@@ -82,7 +82,7 @@ describe("completeOnboarding server action", () => {
 
     expect(result.ok).toBe(false);
     expect(result.error).toBe(DISPLAY_NAME_REQUIRED_MESSAGE);
-    expect(getUser).not.toHaveBeenCalled();
+    expect(getClaims).not.toHaveBeenCalled();
   });
 
   it("rejects whitespace-only display name", async () => {
@@ -116,8 +116,8 @@ describe("completeOnboarding server action", () => {
   });
 
   it("accepts underscore in display name", async () => {
-    getUser.mockResolvedValue({
-      data: { user: { id: "u1", email: "u1@example.com" } },
+    getClaims.mockResolvedValue({
+      data: { claims: { sub: "u1", email: "u1@example.com" } },
       error: null,
     });
     stubProfileUpsert({});
@@ -141,8 +141,8 @@ describe("completeOnboarding server action", () => {
   });
 
   it("upserts the caller's own profile with trimmed display name and cohort id", async () => {
-    getUser.mockResolvedValue({
-      data: { user: { id: "u1", email: "u1@example.com" } },
+    getClaims.mockResolvedValue({
+      data: { claims: { sub: "u1", email: "u1@example.com" } },
       error: null,
     });
     const { upsert } = stubProfileUpsert({});
@@ -166,8 +166,8 @@ describe("completeOnboarding server action", () => {
   });
 
   it("surfaces a Supabase upsert error back to the caller", async () => {
-    getUser.mockResolvedValue({
-      data: { user: { id: "u1", email: "u1@example.com" } },
+    getClaims.mockResolvedValue({
+      data: { claims: { sub: "u1", email: "u1@example.com" } },
       error: null,
     });
     stubProfileUpsert({ upsertError: { message: "permission denied" } });
@@ -179,8 +179,8 @@ describe("completeOnboarding server action", () => {
   });
 
   it("maps the display-name unique violation to 'already taken'", async () => {
-    getUser.mockResolvedValue({
-      data: { user: { id: "u1", email: "u1@example.com" } },
+    getClaims.mockResolvedValue({
+      data: { claims: { sub: "u1", email: "u1@example.com" } },
       error: null,
     });
     stubProfileUpsert({
@@ -198,8 +198,8 @@ describe("completeOnboarding server action", () => {
   });
 
   it("does NOT remap unrelated 23505 errors (other unique constraints pass through)", async () => {
-    getUser.mockResolvedValue({
-      data: { user: { id: "u1", email: "u1@example.com" } },
+    getClaims.mockResolvedValue({
+      data: { claims: { sub: "u1", email: "u1@example.com" } },
       error: null,
     });
     const rawMessage =

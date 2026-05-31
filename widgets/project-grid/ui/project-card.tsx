@@ -100,7 +100,7 @@ export function ProjectCard({
         <HoverCard closeDelay={150} openDelay={150}>
           <HoverCardTrigger asChild>
             <Link
-              className="relative block h-10 w-16 overflow-visible"
+              className="relative block h-10 w-16 overflow-visible bg-muted"
               data-testid="project-card-preview"
               href={detailHref}
             >
@@ -110,7 +110,6 @@ export function ProjectCard({
                   className="h-10 w-16 origin-left object-cover transition-transform duration-200 ease-out group-hover/row:scale-[1.08]"
                   data-testid="project-card-thumb"
                   height={40}
-                  placeholder={SHIMMER_DATA_URL}
                   priority={priority}
                   sizes="64px"
                   src={screenshotUrl}
@@ -209,7 +208,6 @@ export function ProjectCard({
               className="object-cover"
               data-testid="project-card-mobile-thumb"
               fill
-              placeholder={SHIMMER_DATA_URL}
               priority={priority}
               sizes="(max-width: 720px) 100vw, 720px"
               src={screenshotUrl}

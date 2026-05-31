@@ -9,13 +9,13 @@ vi.mock("next/cache", () => ({
   updateTag: updateTagMock,
 }));
 
-const getUser = vi.fn();
+const getClaims = vi.fn();
 const signOut = vi.fn().mockResolvedValue({ error: null });
 const from = vi.fn();
 const storageRemove = vi.fn().mockResolvedValue({ data: [], error: null });
 const storageFrom = vi.fn().mockReturnValue({ remove: storageRemove });
 const userClient = {
-  auth: { getUser, signOut },
+  auth: { getClaims, signOut },
   from,
   storage: { from: storageFrom },
 };
@@ -53,13 +53,13 @@ beforeEach(() => {
   signOut.mockClear();
   deleteUser.mockReset();
   deleteUser.mockResolvedValue({ data: null, error: null });
-  getUser.mockReset();
+  getClaims.mockReset();
   from.mockReset();
 });
 
 describe("withdrawAccount server action", () => {
   it("rejects signed-out callers and never calls admin.deleteUser", async () => {
-    getUser.mockResolvedValue({ data: { user: null }, error: null });
+    getClaims.mockResolvedValue({ data: null, error: null });
 
     const result = await withdrawAccount();
 
@@ -73,7 +73,10 @@ describe("withdrawAccount server action", () => {
   });
 
   it("removes screenshots, deletes the auth user, then signs out (happy path)", async () => {
-    getUser.mockResolvedValue({ data: { user: { id: "u1" } }, error: null });
+    getClaims.mockResolvedValue({
+      data: { claims: { sub: "u1" } },
+      error: null,
+    });
     stubProjects([
       { images: [{ path: "u1/a.png" }] },
       { images: [{ path: "u1/b.png" }] },
@@ -90,7 +93,10 @@ describe("withdrawAccount server action", () => {
   });
 
   it("skips storage.remove when the user has no projects", async () => {
-    getUser.mockResolvedValue({ data: { user: { id: "u2" } }, error: null });
+    getClaims.mockResolvedValue({
+      data: { claims: { sub: "u2" } },
+      error: null,
+    });
     stubProjects([]);
 
     const result = await withdrawAccount();
@@ -101,7 +107,10 @@ describe("withdrawAccount server action", () => {
   });
 
   it("returns an error and does not sign out when admin.deleteUser fails", async () => {
-    getUser.mockResolvedValue({ data: { user: { id: "u3" } }, error: null });
+    getClaims.mockResolvedValue({
+      data: { claims: { sub: "u3" } },
+      error: null,
+    });
     stubProjects([{ images: [{ path: "u3/s.png" }] }]);
     deleteUser.mockResolvedValueOnce({
       data: null,
@@ -118,8 +127,8 @@ describe("withdrawAccount server action", () => {
   });
 
   it("sources the user id from the session, ignoring any stray arguments", async () => {
-    getUser.mockResolvedValue({
-      data: { user: { id: "session-user" } },
+    getClaims.mockResolvedValue({
+      data: { claims: { sub: "session-user" } },
       error: null,
     });
     stubProjects([]);
