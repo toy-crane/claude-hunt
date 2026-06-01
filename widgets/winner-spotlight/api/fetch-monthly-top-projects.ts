@@ -77,8 +77,8 @@ async function fetchMonthlyCore(
  * fallback month when the current month is empty. Returns `null` only
  * when the table has no projects at all.
  *
- * Cached (`projects` tag) so the home page renders as a fully static
- * shell — no uncached read escapes the Suspense-free render.
+ * Cached (`projects` tag) so the home's fallback path resolves from the
+ * cache instead of issuing a fresh DB read on every dynamic render.
  */
 async function fetchLatestProjectCreatedAt(): Promise<string | null> {
   "use cache";
