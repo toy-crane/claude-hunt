@@ -50,8 +50,10 @@ vi.mock("@features/upload-project-images", () => ({
 const { EditForm } = await import("./edit-form");
 
 const SAVE_LABEL = /저장/;
+const LABEL_DESCRIPTION = /프로젝트 설명/;
 
 const initial = {
+  description: null,
   githubUrl: null,
   imagePaths: ["user-1/a.webp"],
   imageUrls: ["https://example.com/a.webp"],
@@ -85,6 +87,37 @@ describe("<EditForm />", () => {
       expect(button.querySelector('[role="status"]')).toBeInTheDocument();
       expect(button.textContent).toContain("저장");
       expect(button.textContent).not.toContain("저장 중");
+    });
+  });
+
+  it("renders a single-line tagline input and the description textarea seeded with its value", () => {
+    render(<EditForm initial={{ ...initial, description: "기존 설명" }} />);
+    expect(screen.getByLabelText("한 줄 소개").tagName).toBe("INPUT");
+    const description = screen.getByLabelText(
+      LABEL_DESCRIPTION
+    ) as HTMLTextAreaElement;
+    expect(description.tagName).toBe("TEXTAREA");
+    expect(description.value).toBe("기존 설명");
+  });
+
+  it("sends the edited description to the server action", async () => {
+    uploadScreenshot.mockResolvedValue({ path: "user-1/a.webp" });
+    editProject.mockResolvedValue({ ok: true });
+
+    render(<EditForm initial={{ ...initial, description: "기존 설명" }} />);
+    fireEvent.change(screen.getByLabelText(LABEL_DESCRIPTION), {
+      target: { value: "새 설명" },
+    });
+    fireEvent.submit(
+      screen
+        .getByRole("button", { name: SAVE_LABEL })
+        .closest("form") as HTMLFormElement
+    );
+
+    await waitFor(() => {
+      expect(editProject).toHaveBeenCalledWith(
+        expect.objectContaining({ description: "새 설명" })
+      );
     });
   });
 

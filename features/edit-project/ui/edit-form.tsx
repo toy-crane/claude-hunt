@@ -1,6 +1,7 @@
 "use client";
 
 import {
+  MAX_DESCRIPTION_LENGTH,
   MAX_TAGLINE_LENGTH,
   MAX_TITLE_LENGTH,
   type ProjectFieldErrors,
@@ -22,6 +23,8 @@ import { toast } from "sonner";
 import { editProject } from "../api/actions";
 
 export interface EditFormInitial {
+  /** Existing long-form body; null when unset. */
+  description: string | null;
   githubUrl: string | null;
   /** Storage paths of existing images, in display order. */
   imagePaths: string[];
@@ -56,6 +59,20 @@ interface NewSlot extends ImageSlot {
 
 type Slot = (ExistingSlot & { kind: "existing" }) | NewSlot;
 
+/** Renders a field error when present; nothing otherwise. */
+function FieldErrorMessage({
+  message,
+  testId,
+}: {
+  message?: string;
+  testId: string;
+}) {
+  if (!message) {
+    return null;
+  }
+  return <FieldError data-testid={testId}>{message}</FieldError>;
+}
+
 /**
  * Owner-only edit form for /projects/[id]/edit. Mirrors the submit
  * form layout including ImageSlots — but the slot list is seeded
@@ -68,6 +85,7 @@ export function EditForm({ backHref, initial }: EditFormProps) {
   const router = useRouter();
   const titleId = useId();
   const taglineId = useId();
+  const descriptionId = useId();
   const urlId = useId();
   const githubUrlId = useId();
   const [slots, setSlots] = useState<Slot[]>(() =>
@@ -163,6 +181,8 @@ export function EditForm({ backHref, initial }: EditFormProps) {
         projectId: initial.projectId,
         title: values.title,
         tagline: values.tagline,
+        description:
+          values.description.trim() === "" ? undefined : values.description,
         projectUrl: values.projectUrl,
         githubUrl:
           values.githubUrl.trim() === "" ? undefined : values.githubUrl,
@@ -200,16 +220,15 @@ export function EditForm({ backHref, initial }: EditFormProps) {
             onChange={() => clearError("title")}
             required
           />
-          {errors.title ? (
-            <FieldError data-testid="edit-form-error-title">
-              {errors.title}
-            </FieldError>
-          ) : null}
+          <FieldErrorMessage
+            message={errors.title}
+            testId="edit-form-error-title"
+          />
         </Field>
 
         <Field data-invalid={errors.tagline ? true : undefined}>
           <FieldLabel htmlFor={taglineId}>한 줄 소개</FieldLabel>
-          <Textarea
+          <Input
             aria-invalid={errors.tagline ? true : undefined}
             defaultValue={initial.tagline}
             disabled={submitting}
@@ -218,13 +237,33 @@ export function EditForm({ backHref, initial }: EditFormProps) {
             name="tagline"
             onChange={() => clearError("tagline")}
             required
-            rows={2}
           />
-          {errors.tagline ? (
-            <FieldError data-testid="edit-form-error-tagline">
-              {errors.tagline}
-            </FieldError>
-          ) : null}
+          <FieldErrorMessage
+            message={errors.tagline}
+            testId="edit-form-error-tagline"
+          />
+        </Field>
+
+        <Field data-invalid={errors.description ? true : undefined}>
+          <FieldLabel htmlFor={descriptionId}>
+            프로젝트 설명{" "}
+            <span className="font-normal text-muted-foreground">(선택)</span>
+          </FieldLabel>
+          <Textarea
+            aria-invalid={errors.description ? true : undefined}
+            defaultValue={initial.description ?? ""}
+            disabled={submitting}
+            id={descriptionId}
+            maxLength={MAX_DESCRIPTION_LENGTH}
+            name="description"
+            onChange={() => clearError("description")}
+            placeholder="프로젝트를 자세히 소개해 주세요 (선택)"
+            rows={5}
+          />
+          <FieldErrorMessage
+            message={errors.description}
+            testId="edit-form-error-description"
+          />
         </Field>
 
         <Field data-invalid={errors.projectUrl ? true : undefined}>
@@ -239,11 +278,10 @@ export function EditForm({ backHref, initial }: EditFormProps) {
             required
             type="url"
           />
-          {errors.projectUrl ? (
-            <FieldError data-testid="edit-form-error-projectUrl">
-              {errors.projectUrl}
-            </FieldError>
-          ) : null}
+          <FieldErrorMessage
+            message={errors.projectUrl}
+            testId="edit-form-error-projectUrl"
+          />
         </Field>
 
         <Field data-invalid={errors.githubUrl ? true : undefined}>
@@ -261,11 +299,10 @@ export function EditForm({ backHref, initial }: EditFormProps) {
             placeholder="https://github.com/owner/repo"
             type="url"
           />
-          {errors.githubUrl ? (
-            <FieldError data-testid="edit-form-error-githubUrl">
-              {errors.githubUrl}
-            </FieldError>
-          ) : null}
+          <FieldErrorMessage
+            message={errors.githubUrl}
+            testId="edit-form-error-githubUrl"
+          />
         </Field>
 
         <Field data-invalid={errors.imagePaths ? true : undefined}>
@@ -278,11 +315,10 @@ export function EditForm({ backHref, initial }: EditFormProps) {
             }
             value={imageSlotsValue}
           />
-          {errors.imagePaths ? (
-            <FieldError data-testid="edit-form-error-imagePaths">
-              {errors.imagePaths}
-            </FieldError>
-          ) : null}
+          <FieldErrorMessage
+            message={errors.imagePaths}
+            testId="edit-form-error-imagePaths"
+          />
         </Field>
       </FieldGroup>
 

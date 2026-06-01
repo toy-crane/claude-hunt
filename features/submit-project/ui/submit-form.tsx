@@ -1,6 +1,7 @@
 "use client";
 
 import {
+  MAX_DESCRIPTION_LENGTH,
   MAX_TAGLINE_LENGTH,
   MAX_TITLE_LENGTH,
   type ProjectFieldErrors,
@@ -52,6 +53,7 @@ export function SubmitForm({ backHref, cohortId: _cohortId }: SubmitFormProps) {
   const router = useRouter();
   const titleId = useId();
   const taglineId = useId();
+  const descriptionId = useId();
   const urlId = useId();
   const githubUrlId = useId();
   const [images, setImages] = useState<ImageSlot[]>([]);
@@ -96,6 +98,8 @@ export function SubmitForm({ backHref, cohortId: _cohortId }: SubmitFormProps) {
       const result = await submitProject({
         title: values.title,
         tagline: values.tagline,
+        description:
+          values.description.trim() === "" ? undefined : values.description,
         projectUrl: values.projectUrl,
         githubUrl:
           values.githubUrl.trim() === "" ? undefined : values.githubUrl,
@@ -154,7 +158,7 @@ export function SubmitForm({ backHref, cohortId: _cohortId }: SubmitFormProps) {
           <FieldLabel htmlFor={taglineId}>
             한 줄 소개 <RequiredMark />
           </FieldLabel>
-          <Textarea
+          <Input
             aria-invalid={errors.tagline ? true : undefined}
             aria-required="true"
             disabled={submitting}
@@ -164,11 +168,29 @@ export function SubmitForm({ backHref, cohortId: _cohortId }: SubmitFormProps) {
             onChange={() => clearError("tagline")}
             placeholder="멋진 도구 한 줄 소개"
             required
-            rows={2}
           />
           {errors.tagline ? (
             <FieldError data-testid="submit-form-error-tagline">
               {errors.tagline}
+            </FieldError>
+          ) : null}
+        </Field>
+
+        <Field data-invalid={errors.description ? true : undefined}>
+          <FieldLabel htmlFor={descriptionId}>프로젝트 설명</FieldLabel>
+          <Textarea
+            aria-invalid={errors.description ? true : undefined}
+            disabled={submitting}
+            id={descriptionId}
+            maxLength={MAX_DESCRIPTION_LENGTH}
+            name="description"
+            onChange={() => clearError("description")}
+            placeholder="프로젝트를 자세히 소개해 주세요 (선택)"
+            rows={5}
+          />
+          {errors.description ? (
+            <FieldError data-testid="submit-form-error-description">
+              {errors.description}
             </FieldError>
           ) : null}
         </Field>
