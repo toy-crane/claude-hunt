@@ -1,11 +1,12 @@
 import { Skeleton } from "@shared/ui/skeleton";
 
-const COMMENT_ROW_KEYS = ["row-1", "row-2", "row-3"];
-
 /**
- * Loading placeholder for {@link CommentList}. Mirrors the section
- * header, the composer (textarea + submit), and a few comment rows so
- * the comment area keeps its height while threads stream in.
+ * Loading placeholder for {@link CommentList}. Mirrors only the parts
+ * that always render — the section header and the composer (textarea +
+ * submit). The comment rows are intentionally omitted: their count is
+ * unknown until threads resolve, so drawing a fixed number of phantom
+ * rows would over-promise and collapse jarringly when a project has no
+ * comments. Real rows stream in below the composer once loaded.
  */
 export function CommentListSkeleton() {
   return (
@@ -18,18 +19,6 @@ export function CommentListSkeleton() {
           <Skeleton className="h-9 w-20" />
         </div>
       </div>
-
-      <ul className="flex flex-col divide-y">
-        {COMMENT_ROW_KEYS.map((key) => (
-          <li className="flex gap-3 py-3" key={key}>
-            <Skeleton className="size-8 shrink-0 rounded-full" />
-            <div className="flex flex-1 flex-col gap-2">
-              <Skeleton className="h-3 w-24" />
-              <Skeleton className="h-4 w-full" />
-            </div>
-          </li>
-        ))}
-      </ul>
     </section>
   );
 }
