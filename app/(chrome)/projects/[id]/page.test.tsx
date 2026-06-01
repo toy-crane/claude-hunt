@@ -77,6 +77,23 @@ describe("buildProjectJsonLd", () => {
     expect(data["@graph"][0]).not.toHaveProperty("image");
   });
 
+  it("includes description in the CreativeWork node when present", async () => {
+    const { buildProjectJsonLd } = await import("./page");
+    const data = buildProjectJsonLd({
+      ...sampleProject,
+      description: "프로젝트 상세 설명입니다.",
+    });
+    expect(data["@graph"][0]).toMatchObject({
+      description: "프로젝트 상세 설명입니다.",
+    });
+  });
+
+  it("omits description from the CreativeWork node when null", async () => {
+    const { buildProjectJsonLd } = await import("./page");
+    const data = buildProjectJsonLd({ ...sampleProject, description: null });
+    expect(data["@graph"][0]).not.toHaveProperty("description");
+  });
+
   it("places site root as the first breadcrumb item", async () => {
     const { buildProjectJsonLd } = await import("./page");
     const data = buildProjectJsonLd(sampleProject);
