@@ -4,7 +4,7 @@
 --   Ownership spoof rejected
 
 BEGIN;
-SELECT plan(19);
+SELECT plan(20);
 
 -- 1. Table exists
 SELECT has_table('public', 'projects', 'projects table should exist');
@@ -15,6 +15,7 @@ SELECT has_column('public', 'projects', 'user_id', 'projects should have user_id
 SELECT has_column('public', 'projects', 'cohort_id', 'projects should have cohort_id column');
 SELECT has_column('public', 'projects', 'title', 'projects should have title column');
 SELECT has_column('public', 'projects', 'tagline', 'projects should have tagline column');
+SELECT has_column('public', 'projects', 'description', 'projects should have description column');
 SELECT has_column('public', 'projects', 'project_url', 'projects should have project_url column');
 SELECT has_column('public', 'projects', 'screenshot_path', 'projects should have screenshot_path column');
 SELECT has_column('public', 'projects', 'created_at', 'projects should have created_at column');

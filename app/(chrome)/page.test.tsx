@@ -66,6 +66,7 @@ const MOCK_ROW: ProjectGridRow = {
   cohort_label: "LG전자 4기",
   title: "비행기 게임",
   tagline: "AI의 역습을 막아주세요",
+  description: null,
   project_url: "https://example.com/p1",
   github_url: null,
   images: [{ path: "p1.webp" }],

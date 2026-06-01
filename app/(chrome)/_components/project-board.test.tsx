@@ -131,6 +131,7 @@ function buildProject(
     cohort_label: "LG전자 1기",
     cohort_name: "LGE-1",
     tagline: `${overrides.title} tagline`,
+    description: null,
     project_url: "https://example.com",
     images: [{ path: `${overrides.id}.png` }],
     primary_image_path: `${overrides.id}.png`,

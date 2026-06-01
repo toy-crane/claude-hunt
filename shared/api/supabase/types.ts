@@ -204,6 +204,7 @@ export type Database = {
         Row: {
           cohort_id: string
           created_at: string
+          description: string | null
           github_url: string | null
           id: string
           images: Json
@@ -218,6 +219,7 @@ export type Database = {
         Insert: {
           cohort_id: string
           created_at?: string
+          description?: string | null
           github_url?: string | null
           id?: string
           images?: Json
@@ -232,6 +234,7 @@ export type Database = {
         Update: {
           cohort_id?: string
           created_at?: string
+          description?: string | null
           github_url?: string | null
           id?: string
           images?: Json
@@ -316,6 +319,7 @@ export type Database = {
           cohort_label: string | null
           cohort_name: string | null
           created_at: string | null
+          description: string | null
           github_url: string | null
           id: string | null
           images: Json | null
