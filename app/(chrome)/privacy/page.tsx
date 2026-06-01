@@ -1,7 +1,5 @@
-import { RiArrowLeftLine } from "@remixicon/react";
 import { Separator } from "@shared/ui/separator";
 import type { Metadata } from "next";
-import Link from "next/link";
 
 export const metadata: Metadata = {
   title: "개인정보 처리방침",
@@ -101,14 +99,6 @@ const REMEDY_CHANNELS = [
 export default function PrivacyPage() {
   return (
     <main className="mx-auto flex min-h-svh w-full max-w-3xl flex-col gap-8 p-6">
-      <Link
-        className="inline-flex w-fit items-center gap-1 text-muted-foreground text-xs hover:text-foreground"
-        href="/"
-      >
-        <RiArrowLeftLine />
-        <span>홈으로</span>
-      </Link>
-
       <header className="flex flex-col gap-2">
         <h1 className="font-heading font-medium text-2xl">개인정보 처리방침</h1>
         <p className="text-muted-foreground text-sm">시행일: 2026년 6월 1일</p>
