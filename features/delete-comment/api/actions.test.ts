@@ -1,8 +1,8 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
-const revalidatePathMock = vi.fn();
+const refreshMock = vi.fn();
 vi.mock("next/cache", () => ({
-  revalidatePath: revalidatePathMock,
+  refresh: refreshMock,
 }));
 
 const getClaims = vi.fn();
@@ -34,7 +34,7 @@ function stubDelete(options: StubOptions) {
 const validInput = { commentId: "c1", projectId: "p1" };
 
 beforeEach(() => {
-  revalidatePathMock.mockReset();
+  refreshMock.mockReset();
   getClaims.mockReset();
   from.mockReset();
 });
@@ -79,7 +79,7 @@ describe("deleteComment server action", () => {
     expect(result).toEqual({ ok: true });
     expect(del).toHaveBeenCalledTimes(1);
     expect(eq).toHaveBeenCalledWith("id", "c1");
-    expect(revalidatePathMock).toHaveBeenCalledWith("/projects/p1");
+    expect(refreshMock).toHaveBeenCalled();
   });
 
   it("returns a not-found-or-no-permission error when RLS filters the row out (0 rows returned)", async () => {
@@ -93,7 +93,7 @@ describe("deleteComment server action", () => {
 
     expect(result.ok).toBe(false);
     expect(result.error).toContain("don't have permission");
-    expect(revalidatePathMock).not.toHaveBeenCalled();
+    expect(refreshMock).not.toHaveBeenCalled();
   });
 
   it("surfaces a supabase delete error verbatim", async () => {
@@ -107,6 +107,6 @@ describe("deleteComment server action", () => {
 
     expect(result.ok).toBe(false);
     expect(result.error).toBe("boom");
-    expect(revalidatePathMock).not.toHaveBeenCalled();
+    expect(refreshMock).not.toHaveBeenCalled();
   });
 });

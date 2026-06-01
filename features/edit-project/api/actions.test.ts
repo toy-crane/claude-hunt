@@ -101,9 +101,6 @@ describe("editProject server action", () => {
     );
     expect(updateEq).toHaveBeenCalledWith("id", validInput.projectId);
     expect(updateTagMock).toHaveBeenCalledWith("projects");
-    expect(revalidatePathMock).toHaveBeenCalledWith(
-      `/projects/${validInput.projectId}`
-    );
     // /settings reads its own list via fetchMyProjects which is not
     // tagged, so we explicitly revalidate the path.
     expect(revalidatePathMock).toHaveBeenCalledWith("/settings");

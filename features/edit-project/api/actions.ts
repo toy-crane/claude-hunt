@@ -83,7 +83,6 @@ export async function editProject(
   }
 
   updateTag(CACHE_TAGS.PROJECTS);
-  revalidatePath(`/projects/${input.projectId}`);
   // Same rationale as deleteProject — /settings reads via
   // fetchMyProjects which sits outside the PROJECTS tag, so an
   // explicit path revalidation is required for the user's own list

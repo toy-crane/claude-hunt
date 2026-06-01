@@ -2,7 +2,7 @@
 
 import { requireAuth } from "@shared/api/supabase/require-auth";
 import { getZodErrorMessage } from "@shared/lib/validation";
-import { revalidatePath } from "next/cache";
+import { refresh } from "next/cache";
 import { type CreateCommentInput, createCommentInputSchema } from "./schema";
 
 export interface CreateCommentResult {
@@ -55,6 +55,6 @@ export async function createComment(
     return { ok: false, error: error.message };
   }
 
-  revalidatePath(`/projects/${input.projectId}`);
+  refresh();
   return { ok: true, commentId: inserted?.id };
 }

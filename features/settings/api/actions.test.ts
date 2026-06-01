@@ -19,10 +19,10 @@ vi.mock("@shared/api/supabase/server", () => ({
   createServerClient: vi.fn().mockResolvedValue(mockClient),
 }));
 
-const revalidatePathMock = vi.fn();
+const refreshMock = vi.fn();
 const updateTagMock = vi.fn();
 vi.mock("next/cache", () => ({
-  revalidatePath: revalidatePathMock,
+  refresh: refreshMock,
   updateTag: updateTagMock,
 }));
 
@@ -48,7 +48,7 @@ describe("updateDisplayName", () => {
     expect(updateMock).toHaveBeenCalledWith({ display_name: "Alice_99" });
     expect(eqMock).toHaveBeenCalledWith("id", "user-1");
     expect(updateTagMock).toHaveBeenCalledWith("projects");
-    expect(revalidatePathMock).toHaveBeenCalledWith("/settings");
+    expect(refreshMock).toHaveBeenCalled();
   });
 
   it("trims whitespace before persisting", async () => {
