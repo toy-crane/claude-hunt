@@ -676,3 +676,93 @@ describe("ProjectCard — mobile stacked card (< 720 px)", () => {
     expect(nonOwnerFooter.className).toBe(ownerFooterClasses);
   });
 });
+
+describe("ProjectCard — stretched-link whole-card navigation", () => {
+  it("makes the row a positioned container for the stretched overlay", () => {
+    render(
+      <ProjectCard
+        project={buildProject()}
+        rank={5}
+        screenshotUrl="https://cdn.example.com/shot.png"
+      />
+    );
+    // The title link's absolute ::after resolves against this `relative`
+    // container, so clicking anywhere on the row reaches the detail page.
+    expect(screen.getByTestId("project-card").className).toContain("relative");
+  });
+
+  it("stretches the desktop title link to cover the whole card", () => {
+    render(
+      <ProjectCard
+        project={buildProject()}
+        rank={5}
+        screenshotUrl="https://cdn.example.com/shot.png"
+      />
+    );
+    const desktop = screen.getByTestId("project-card-desktop");
+    const titleLink = within(desktop).getByText("My App");
+    expect(titleLink.tagName).toBe("A");
+    expect(titleLink.className).toContain("after:absolute");
+    expect(titleLink.className).toContain("after:inset-0");
+  });
+
+  it("stretches the mobile title link to cover the whole card", () => {
+    render(
+      <ProjectCard
+        project={buildProject()}
+        rank={5}
+        screenshotUrl="https://cdn.example.com/shot.png"
+      />
+    );
+    const titleLink = screen.getByTestId("project-card-mobile-title");
+    expect(titleLink.tagName).toBe("A");
+    expect(titleLink.className).toContain("after:absolute");
+    expect(titleLink.className).toContain("after:inset-0");
+  });
+
+  it("raises the desktop vote/owner controls above the overlay so they stay clickable", () => {
+    render(
+      <ProjectCard
+        project={buildProject()}
+        rank={5}
+        renderVoteButton={() => <span data-testid="vote-slot">vote-slot</span>}
+        screenshotUrl="https://cdn.example.com/shot.png"
+      />
+    );
+    const desktop = screen.getByTestId("project-card-desktop");
+    const controls = within(desktop).getByTestId("vote-slot").parentElement;
+    expect(controls?.className).toContain("z-[1]");
+    expect(controls?.className).toContain("relative");
+  });
+
+  it("raises the mobile vote/owner controls above the overlay so they stay clickable", () => {
+    render(
+      <ProjectCard
+        project={buildProject()}
+        rank={5}
+        renderVoteButton={() => (
+          <span data-testid="mobile-vote-slot">vote-slot</span>
+        )}
+        screenshotUrl="https://cdn.example.com/shot.png"
+      />
+    );
+    const footer = screen.getByTestId("project-card-mobile-footer");
+    const controls =
+      within(footer).getByTestId("mobile-vote-slot").parentElement;
+    expect(controls?.className).toContain("z-[1]");
+    expect(controls?.className).toContain("relative");
+  });
+
+  it("raises the desktop thumbnail trigger above the overlay to keep the hover preview working", () => {
+    render(
+      <ProjectCard
+        project={buildProject()}
+        rank={5}
+        screenshotUrl="https://cdn.example.com/shot.png"
+      />
+    );
+    const desktop = screen.getByTestId("project-card-desktop");
+    const trigger = within(desktop).getByTestId("project-card-preview");
+    expect(trigger.className).toContain("z-[1]");
+  });
+});

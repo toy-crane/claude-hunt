@@ -77,7 +77,7 @@ export function ProjectCard({
 
   return (
     <li
-      className="group/row font-mono transition-colors hover:bg-muted min-[720px]:col-span-full min-[720px]:-mx-5 min-[720px]:grid min-[720px]:grid-cols-subgrid min-[720px]:px-5"
+      className="group/row relative font-mono transition-colors hover:bg-muted min-[720px]:col-span-full min-[720px]:-mx-5 min-[720px]:grid min-[720px]:grid-cols-subgrid min-[720px]:px-5"
       data-testid="project-card"
     >
       {/* ─── Desktop row (≥ 720 px) ────────────────────────────── */}
@@ -100,7 +100,7 @@ export function ProjectCard({
         <HoverCard closeDelay={150} openDelay={150}>
           <HoverCardTrigger asChild>
             <Link
-              className="relative block h-10 w-16 overflow-visible bg-muted"
+              className="relative z-[1] block h-10 w-16 overflow-visible bg-muted"
               data-testid="project-card-preview"
               href={detailHref}
             >
@@ -147,7 +147,7 @@ export function ProjectCard({
 
         <div className="flex min-w-0 flex-col gap-0.5">
           <Link
-            className="truncate font-heading font-medium text-sm leading-tight hover:underline"
+            className="truncate font-heading font-medium text-sm leading-tight after:absolute after:inset-0 hover:underline"
             href={detailHref}
           >
             {project.title}
@@ -161,7 +161,7 @@ export function ProjectCard({
           <span className="block truncate text-xs">{author}</span>
         </div>
 
-        <div className="flex items-center gap-1.5">
+        <div className="relative z-[1] flex items-center gap-1.5">
           {ownerSlot}
           {voteSlot}
         </div>
@@ -198,7 +198,7 @@ export function ProjectCard({
 
         {/* Full-width 16:10 thumbnail */}
         <Link
-          className="relative block aspect-[16/10] w-full overflow-hidden bg-muted"
+          className="relative z-[1] block aspect-[16/10] w-full overflow-hidden bg-muted"
           data-testid="project-card-mobile-preview"
           href={detailHref}
         >
@@ -224,7 +224,7 @@ export function ProjectCard({
         {/* Title + tagline */}
         <div className="flex flex-col gap-1">
           <Link
-            className="font-heading font-medium text-base leading-snug hover:underline"
+            className="font-heading font-medium text-base leading-snug after:absolute after:inset-0 hover:underline"
             data-testid="project-card-mobile-title"
             href={detailHref}
           >
@@ -256,7 +256,7 @@ export function ProjectCard({
               </>
             ) : null}
           </div>
-          <div className="flex shrink-0 items-center gap-1">
+          <div className="relative z-[1] flex shrink-0 items-center gap-1">
             {ownerSlot}
             {voteSlot}
           </div>

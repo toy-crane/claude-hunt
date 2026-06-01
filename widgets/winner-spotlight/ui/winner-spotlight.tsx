@@ -23,10 +23,10 @@ export function WinnerSpotlight({ winner }: WinnerSpotlightProps) {
   const screenshot = winner.screenshotUrl || SHIMMER_DATA_URL;
 
   return (
-    <article className="grid grid-cols-1 overflow-hidden rounded-lg bg-card shadow-[inset_0_0_0_1px_rgb(0_0_0/0.1)] md:grid-cols-[1.55fr_1fr]">
+    <article className="relative grid grid-cols-1 overflow-hidden rounded-lg bg-card shadow-[inset_0_0_0_1px_rgb(0_0_0/0.1)] md:grid-cols-[1.55fr_1fr]">
       <Link
         aria-label={`${winner.title} 프로젝트 보기`}
-        className="relative block aspect-[16/10] overflow-hidden bg-muted"
+        className="relative z-[1] block aspect-[16/10] overflow-hidden bg-muted"
         href={href}
       >
         <Image
@@ -49,7 +49,7 @@ export function WinnerSpotlight({ winner }: WinnerSpotlightProps) {
             <span className="font-mono text-[10px] text-muted-foreground tracking-wider">
               {cohortHref ? (
                 <Link
-                  className="hover:text-foreground hover:underline"
+                  className="relative z-[1] hover:text-foreground hover:underline"
                   href={cohortHref}
                 >
                   {cohort.toUpperCase()}
@@ -60,7 +60,10 @@ export function WinnerSpotlight({ winner }: WinnerSpotlightProps) {
               {submittedAt ? <> · {submittedAt}</> : null}
             </span>
             <h2 className="m-0 font-heading font-medium text-2xl leading-tight tracking-tight">
-              <Link className="hover:underline" href={href}>
+              <Link
+                className="after:absolute after:inset-0 hover:underline"
+                href={href}
+              >
                 {winner.title}
               </Link>
             </h2>
@@ -85,7 +88,7 @@ export function WinnerSpotlight({ winner }: WinnerSpotlightProps) {
             </span>
           </div>
           <Link
-            className="inline-flex flex-1 items-center justify-between rounded-md bg-muted px-3.5 py-2.5 font-mono text-foreground text-xs no-underline"
+            className="relative z-[1] inline-flex flex-1 items-center justify-between rounded-md bg-muted px-3.5 py-2.5 font-mono text-foreground text-xs no-underline"
             href={href}
           >
             <span>프로젝트 자세히 보기</span>

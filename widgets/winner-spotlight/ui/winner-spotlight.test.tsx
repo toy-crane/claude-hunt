@@ -3,6 +3,8 @@ import { describe, expect, it } from "vitest";
 import type { MonthlyTopProject } from "../api/fetch-monthly-top-projects";
 import { WinnerSpotlight } from "./winner-spotlight";
 
+const DETAIL_CTA_LABEL = /프로젝트 자세히 보기/;
+
 function makeWinner(
   overrides: Partial<MonthlyTopProject> = {}
 ): MonthlyTopProject {
@@ -44,5 +46,34 @@ describe("WinnerSpotlight", () => {
     );
 
     expect(screen.queryByRole("link", { name: "9기" })).not.toBeInTheDocument();
+  });
+
+  it("stretches the title link so the whole card navigates to the detail page", () => {
+    const { container } = render(<WinnerSpotlight winner={makeWinner()} />);
+
+    // The article is the positioned container the title's ::after fills.
+    const article = container.querySelector("article");
+    expect(article?.className).toContain("relative");
+
+    const titleLink = screen.getByRole("link", { name: "Winner Project" });
+    expect(titleLink.className).toContain("after:absolute");
+    expect(titleLink.className).toContain("after:inset-0");
+  });
+
+  it("raises the real links above the overlay so they stay independently clickable", () => {
+    render(<WinnerSpotlight winner={makeWinner()} />);
+
+    // Thumbnail, cohort filter, and the detail CTA must sit above the
+    // title's stretched ::after — otherwise the overlay would swallow them.
+    const thumbnail = screen.getByRole("link", {
+      name: "Winner Project 프로젝트 보기",
+    });
+    expect(thumbnail.className).toContain("z-[1]");
+
+    const cohortLink = screen.getByRole("link", { name: "9기" });
+    expect(cohortLink.className).toContain("z-[1]");
+
+    const cta = screen.getByRole("link", { name: DETAIL_CTA_LABEL });
+    expect(cta.className).toContain("z-[1]");
   });
 });
