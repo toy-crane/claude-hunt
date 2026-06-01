@@ -2,6 +2,7 @@ import { NuqsProvider } from "@core/providers/nuqs-provider";
 import { fetchCohorts } from "@features/cohort-filter/server";
 import { fetchViewer } from "@shared/api/supabase/viewer";
 import { Skeleton } from "@shared/ui/skeleton";
+import { ProjectGridSkeleton } from "@widgets/project-grid";
 import { fetchProjects } from "@widgets/project-grid/server";
 import type { Metadata } from "next";
 import type { SearchParams } from "nuqs/server";
@@ -86,17 +87,27 @@ export async function BoardData({ searchParams }: PageProps) {
   );
 }
 
-const SKELETON_CHIP_KEYS = ["chip-1", "chip-2", "chip-3", "chip-4"];
+const SKELETON_CHIPS = [
+  { className: "h-6 w-24", key: "chip-1" },
+  { className: "h-6 w-16", key: "chip-2" },
+  { className: "h-6 w-20", key: "chip-3" },
+  { className: "h-6 w-28", key: "chip-4" },
+  { className: "h-6 w-16", key: "chip-5" },
+  { className: "h-6 w-20", key: "chip-6" },
+];
 
 function ProjectBoardSkeleton() {
   return (
     <div className="flex flex-col gap-6" data-testid="project-board-skeleton">
-      <div className="flex flex-wrap gap-2">
-        {SKELETON_CHIP_KEYS.map((key) => (
-          <Skeleton className="h-8 w-20" key={key} />
+      {/* PromptLine */}
+      <Skeleton className="h-4 w-64 max-w-full" />
+      {/* CohortChips — dynamic count, common case ~6 */}
+      <div className="flex flex-wrap items-center gap-1.5">
+        {SKELETON_CHIPS.map((chip) => (
+          <Skeleton className={chip.className} key={chip.key} />
         ))}
       </div>
-      <Skeleton className="h-[28rem] w-full" />
+      <ProjectGridSkeleton />
     </div>
   );
 }

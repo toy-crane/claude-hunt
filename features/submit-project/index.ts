@@ -4,5 +4,6 @@ export type { SubmitProjectInput } from "./api/schema";
 export { submitProjectInputSchema } from "./api/schema";
 export type { SubmitFormProps } from "./ui/submit-form";
 export { SubmitForm } from "./ui/submit-form";
+export { SubmitFormSkeleton } from "./ui/submit-form-skeleton";
 export type { SubmitTriggerProps } from "./ui/submit-trigger";
 export { SubmitTrigger } from "./ui/submit-trigger";
