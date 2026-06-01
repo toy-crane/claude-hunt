@@ -33,7 +33,8 @@ describe("DeleteButton — icon variant", () => {
     // Square sizing is DeleteButton's own contract; corner rounding is
     // governed globally by --radius:0, not by this component, so we don't
     // assert a specific rounded-* utility (it varies by shadcn preset).
-    expect(trigger.className).toContain("size-7");
+    // icon-sm matches the sibling edit button (both size-8 = 32px).
+    expect(trigger.className).toContain("size-8");
   });
 
   it("opens the delete-confirmation dialog when the icon trigger is clicked", async () => {
