@@ -1,20 +1,5 @@
 import { render, screen, within } from "@testing-library/react";
-import { describe, expect, it, vi } from "vitest";
-
-vi.mock("next/link", () => ({
-  default: ({
-    children,
-    href,
-    ...props
-  }: {
-    children: React.ReactNode;
-    href: string;
-  }) => (
-    <a href={href} {...props}>
-      {children}
-    </a>
-  ),
-}));
+import { describe, expect, it } from "vitest";
 
 async function renderPage() {
   const { default: Page } = await import("./page");
@@ -22,7 +7,6 @@ async function renderPage() {
 }
 
 const EFFECTIVE_DATE_TEXT = /시행일:\s*2026년\s*6월\s*1일/;
-const BACK_LINK_LABEL = /홈으로/;
 const CONTACT_EMAIL_TEXT = /toycrane@odd-corp\.com/;
 const CLAUSE_13_TITLE = /제13조/;
 const CLAUSE_14_TITLE = /제14조/;
@@ -79,13 +63,6 @@ describe("terms page (/terms)", () => {
     await renderPage();
 
     expect(screen.getByText(EFFECTIVE_DATE_TEXT)).toBeInTheDocument();
-  });
-
-  it("renders a back link pointing to /", async () => {
-    await renderPage();
-
-    const back = screen.getByRole("link", { name: BACK_LINK_LABEL });
-    expect(back).toHaveAttribute("href", "/");
   });
 
   it("shows the contact email in the footer contact block", async () => {

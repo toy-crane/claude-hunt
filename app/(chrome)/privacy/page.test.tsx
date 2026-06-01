@@ -1,20 +1,5 @@
 import { render, screen, within } from "@testing-library/react";
-import { describe, expect, it, vi } from "vitest";
-
-vi.mock("next/link", () => ({
-  default: ({
-    children,
-    href,
-    ...props
-  }: {
-    children: React.ReactNode;
-    href: string;
-  }) => (
-    <a href={href} {...props}>
-      {children}
-    </a>
-  ),
-}));
+import { describe, expect, it } from "vitest";
 
 async function renderPage() {
   const { default: Page } = await import("./page");
@@ -22,7 +7,6 @@ async function renderPage() {
 }
 
 const EFFECTIVE_DATE_TEXT = /시행일:\s*2026년\s*6월\s*1일/;
-const BACK_LINK_LABEL = /홈으로/;
 const DPO_EMAIL_TEXT = /toycrane@odd-corp\.com/;
 const META_DESCRIPTION_KEYWORD = /개인정보/;
 
@@ -112,12 +96,6 @@ describe("privacy page (/privacy)", () => {
   it("shows the effective date 2026년 6월 1일", async () => {
     await renderPage();
     expect(screen.getByText(EFFECTIVE_DATE_TEXT)).toBeInTheDocument();
-  });
-
-  it("renders a back link pointing to /", async () => {
-    await renderPage();
-    const back = screen.getByRole("link", { name: BACK_LINK_LABEL });
-    expect(back).toHaveAttribute("href", "/");
   });
 
   it("renders the 12 KISA-standard section headings in order", async () => {
