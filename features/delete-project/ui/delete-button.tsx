@@ -23,8 +23,9 @@ export interface DeleteButtonProps {
   projectTitle: string;
   /**
    * Trigger appearance. `"default"` renders the labeled "삭제" button;
-   * `"icon"` renders a 28 px square icon-only button with the same
-   * confirmation flow (used inside the terminal row).
+   * `"icon"` renders a 32 px square icon-only button (matching the
+   * sibling edit button's `icon-sm` size) with the same confirmation
+   * flow (used inside the terminal row).
    */
   variant?: DeleteButtonVariant;
 }
@@ -61,9 +62,8 @@ export function DeleteButton({
         {variant === "icon" ? (
           <Button
             aria-label="프로젝트 삭제"
-            className="size-7"
             data-testid="delete-project-trigger"
-            size="icon"
+            size="icon-sm"
             variant="outline"
           >
             <RiDeleteBinLine className="size-3.5" />
