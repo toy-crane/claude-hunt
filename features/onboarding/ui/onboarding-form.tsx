@@ -24,6 +24,7 @@ import { Spinner } from "@shared/ui/spinner";
 import { useRouter } from "next/navigation";
 import { useId, useState, useTransition } from "react";
 import { completeOnboarding } from "../api/actions";
+import { ONBOARDING_DESCRIPTION, ONBOARDING_TITLE } from "../copy";
 
 export interface OnboardingFormProps {
   cohorts: Cohort[];
@@ -97,10 +98,7 @@ export function OnboardingForm({ cohorts, initialNext }: OnboardingFormProps) {
   const submitDisabled = isPending || isSigningOut || noCohorts;
 
   return (
-    <AuthLayout
-      description="클래스를 선택하고 닉네임을 설정하면 프로젝트를 제출할 수 있어요."
-      title="프로필 설정"
-    >
+    <AuthLayout description={ONBOARDING_DESCRIPTION} title={ONBOARDING_TITLE}>
       <form
         aria-label="온보딩 완료"
         className="flex flex-col gap-6"
