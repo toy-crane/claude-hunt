@@ -11,8 +11,10 @@ import {
 } from "@entities/project";
 import { type ImageSlot, ImageSlots } from "@features/upload-project-images";
 import { uploadScreenshot } from "@shared/lib/screenshot-upload";
+import { blankToUndefined } from "@shared/lib/text";
 import { Button } from "@shared/ui/button";
 import { Field, FieldError, FieldGroup, FieldLabel } from "@shared/ui/field";
+import { FieldErrorMessage } from "@shared/ui/field-error-message";
 import { Input } from "@shared/ui/input";
 import { Spinner } from "@shared/ui/spinner";
 import { Textarea } from "@shared/ui/textarea";
@@ -58,20 +60,6 @@ interface NewSlot extends ImageSlot {
 }
 
 type Slot = (ExistingSlot & { kind: "existing" }) | NewSlot;
-
-/** Renders a field error when present; nothing otherwise. */
-function FieldErrorMessage({
-  message,
-  testId,
-}: {
-  message?: string;
-  testId: string;
-}) {
-  if (!message) {
-    return null;
-  }
-  return <FieldError data-testid={testId}>{message}</FieldError>;
-}
 
 /**
  * Owner-only edit form for /projects/[id]/edit. Mirrors the submit
@@ -181,11 +169,9 @@ export function EditForm({ backHref, initial }: EditFormProps) {
         projectId: initial.projectId,
         title: values.title,
         tagline: values.tagline,
-        description:
-          values.description.trim() === "" ? undefined : values.description,
+        description: blankToUndefined(values.description),
         projectUrl: values.projectUrl,
-        githubUrl:
-          values.githubUrl.trim() === "" ? undefined : values.githubUrl,
+        githubUrl: blankToUndefined(values.githubUrl),
         imagePaths,
       });
       if (!result.ok) {

@@ -5,6 +5,7 @@ import {
   RiGroupLine,
 } from "@remixicon/react";
 import { formatRelativeKo } from "@shared/lib/format-relative";
+import { flattenToSingleLine } from "@shared/lib/text";
 import { Badge } from "@shared/ui/badge";
 import { Button } from "@shared/ui/button";
 import Link from "next/link";
@@ -12,9 +13,6 @@ import type { ProjectDetail } from "../api/fetch-project-detail";
 import { ImageGallery } from "./image-gallery";
 import { OwnerControls } from "./owner-controls";
 
-// Collapse every newline run in the tagline into a single space so a legacy
-// multi-line tagline still renders as one line (the field is one-liner now).
-const TAGLINE_NEWLINES = /\s*\n+\s*/g;
 // Cap consecutive blank lines in the description at a single blank line.
 const DESCRIPTION_BLANK_LINES = /\n{3,}/g;
 
@@ -35,7 +33,7 @@ export function Hero({ project, isAuthenticated, viewerUserId }: HeroProps) {
   const ownedByViewer =
     viewerUserId != null && project.user_id === viewerUserId;
   const submittedAt = formatRelativeKo(project.created_at);
-  const tagline = project.tagline.replace(TAGLINE_NEWLINES, " ").trim();
+  const tagline = flattenToSingleLine(project.tagline);
 
   return (
     <article className="flex flex-col gap-4">

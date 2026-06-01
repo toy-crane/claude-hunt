@@ -11,8 +11,10 @@ import {
 } from "@entities/project";
 import { type ImageSlot, ImageSlots } from "@features/upload-project-images";
 import { uploadScreenshot } from "@shared/lib/screenshot-upload";
+import { blankToUndefined } from "@shared/lib/text";
 import { Button } from "@shared/ui/button";
 import { Field, FieldError, FieldGroup, FieldLabel } from "@shared/ui/field";
+import { FieldErrorMessage } from "@shared/ui/field-error-message";
 import { Input } from "@shared/ui/input";
 import { Spinner } from "@shared/ui/spinner";
 import { Textarea } from "@shared/ui/textarea";
@@ -98,11 +100,9 @@ export function SubmitForm({ backHref, cohortId: _cohortId }: SubmitFormProps) {
       const result = await submitProject({
         title: values.title,
         tagline: values.tagline,
-        description:
-          values.description.trim() === "" ? undefined : values.description,
+        description: blankToUndefined(values.description),
         projectUrl: values.projectUrl,
-        githubUrl:
-          values.githubUrl.trim() === "" ? undefined : values.githubUrl,
+        githubUrl: blankToUndefined(values.githubUrl),
         imagePaths,
       });
       if (!result.ok) {
@@ -147,11 +147,10 @@ export function SubmitForm({ backHref, cohortId: _cohortId }: SubmitFormProps) {
             placeholder="내 앱"
             required
           />
-          {errors.title ? (
-            <FieldError data-testid="submit-form-error-title">
-              {errors.title}
-            </FieldError>
-          ) : null}
+          <FieldErrorMessage
+            message={errors.title}
+            testId="submit-form-error-title"
+          />
         </Field>
 
         <Field data-invalid={errors.tagline ? true : undefined}>
@@ -169,11 +168,10 @@ export function SubmitForm({ backHref, cohortId: _cohortId }: SubmitFormProps) {
             placeholder="멋진 도구 한 줄 소개"
             required
           />
-          {errors.tagline ? (
-            <FieldError data-testid="submit-form-error-tagline">
-              {errors.tagline}
-            </FieldError>
-          ) : null}
+          <FieldErrorMessage
+            message={errors.tagline}
+            testId="submit-form-error-tagline"
+          />
         </Field>
 
         <Field data-invalid={errors.description ? true : undefined}>
@@ -188,11 +186,10 @@ export function SubmitForm({ backHref, cohortId: _cohortId }: SubmitFormProps) {
             placeholder="프로젝트를 자세히 소개해 주세요 (선택)"
             rows={5}
           />
-          {errors.description ? (
-            <FieldError data-testid="submit-form-error-description">
-              {errors.description}
-            </FieldError>
-          ) : null}
+          <FieldErrorMessage
+            message={errors.description}
+            testId="submit-form-error-description"
+          />
         </Field>
 
         <Field data-invalid={errors.projectUrl ? true : undefined}>
@@ -210,11 +207,10 @@ export function SubmitForm({ backHref, cohortId: _cohortId }: SubmitFormProps) {
             required
             type="url"
           />
-          {errors.projectUrl ? (
-            <FieldError data-testid="submit-form-error-projectUrl">
-              {errors.projectUrl}
-            </FieldError>
-          ) : null}
+          <FieldErrorMessage
+            message={errors.projectUrl}
+            testId="submit-form-error-projectUrl"
+          />
         </Field>
 
         <Field data-invalid={errors.githubUrl ? true : undefined}>
@@ -228,11 +224,10 @@ export function SubmitForm({ backHref, cohortId: _cohortId }: SubmitFormProps) {
             placeholder="https://github.com/owner/repo"
             type="url"
           />
-          {errors.githubUrl ? (
-            <FieldError data-testid="submit-form-error-githubUrl">
-              {errors.githubUrl}
-            </FieldError>
-          ) : null}
+          <FieldErrorMessage
+            message={errors.githubUrl}
+            testId="submit-form-error-githubUrl"
+          />
         </Field>
 
         <Field data-invalid={errors.imagePaths ? true : undefined}>
@@ -250,11 +245,10 @@ export function SubmitForm({ backHref, cohortId: _cohortId }: SubmitFormProps) {
             }
             value={images}
           />
-          {errors.imagePaths ? (
-            <FieldError data-testid="submit-form-error-imagePaths">
-              {errors.imagePaths}
-            </FieldError>
-          ) : null}
+          <FieldErrorMessage
+            message={errors.imagePaths}
+            testId="submit-form-error-imagePaths"
+          />
         </Field>
       </FieldGroup>
 

@@ -1,3 +1,4 @@
+import { blankToUndefined, flattenToSingleLine } from "@shared/lib/text";
 import { getZodFieldErrors } from "@shared/lib/validation";
 import { z } from "zod";
 import {
@@ -25,10 +26,9 @@ export const projectFieldsSchema = z.object({
     ),
   tagline: z
     .string()
-    .trim()
     // Collapse any newlines into a single space so the tagline is always one
     // line, no matter what was pasted, before the length check applies.
-    .transform((value) => value.replace(/\s*\n+\s*/g, " ").trim())
+    .transform(flattenToSingleLine)
     .pipe(
       z
         .string()
@@ -40,8 +40,7 @@ export const projectFieldsSchema = z.object({
     ),
   description: z
     .string()
-    .trim()
-    .transform((value) => (value === "" ? undefined : value))
+    .transform(blankToUndefined)
     .pipe(
       z
         .string()
@@ -58,8 +57,7 @@ export const projectFieldsSchema = z.object({
     .url("http:// 또는 https:// 로 시작하는 URL을 입력해 주세요."),
   githubUrl: z
     .string()
-    .trim()
-    .transform((v) => (v === "" ? undefined : v))
+    .transform(blankToUndefined)
     .pipe(
       z
         .string()
@@ -128,10 +126,9 @@ export function validateProjectFields(
   const parsed = projectFieldsSchema.safeParse({
     title: values.title,
     tagline: values.tagline,
-    description:
-      values.description.trim() === "" ? undefined : values.description,
+    description: blankToUndefined(values.description),
     projectUrl: values.projectUrl,
-    githubUrl: values.githubUrl.trim() === "" ? undefined : values.githubUrl,
+    githubUrl: blankToUndefined(values.githubUrl),
     imagePaths: Array.from({ length: imageCount }, () => "x"),
   });
   if (parsed.success) {
