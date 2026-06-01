@@ -11,6 +11,7 @@ import { Spinner } from "@shared/ui/spinner";
 import Link from "next/link";
 import { useSearchParams } from "next/navigation";
 import { useState } from "react";
+import { LOGIN_DESCRIPTION, LOGIN_TITLE } from "../copy";
 
 export function LoginForm() {
   const [email, setEmail] = useState("");
@@ -61,7 +62,7 @@ export function LoginForm() {
   }
 
   return (
-    <AuthLayout description="자유롭게 프로젝트를 공유해 보세요" title="로그인">
+    <AuthLayout description={LOGIN_DESCRIPTION} title={LOGIN_TITLE}>
       <form onSubmit={handleEmailLogin}>
         <div className="grid grid-cols-2 gap-3">
           <Button
