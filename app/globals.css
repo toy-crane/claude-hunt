@@ -155,6 +155,20 @@
     backdrop-filter 180ms ease,
     background 180ms ease;
 }
+/* Touch devices carry no backdrop-filter on the header (see the desktop-only
+   rule below), so we can safely pin it to its own compositing layer here.
+   next/image promotes each image onto its own GPU layer; without this, iOS
+   Safari paints the non-composited sticky header a frame later — and
+   sometimes underneath — those image layers on navigation, so the content
+   flashes in fully before the header appears. translateZ keeps the header on
+   a ready compositing layer so it paints together with the images. Scoped to
+   touch on purpose: a transform on the same element would break the desktop
+   backdrop-filter blur. */
+@media (hover: none), (pointer: coarse) {
+  .site-header {
+    transform: translateZ(0);
+  }
+}
 /* Glass blur only on devices with a fine pointer + hover (desktop).
    On touch devices (iOS Safari especially) a sticky element's
    backdrop-filter is rasterized on a separate compositing layer from the
