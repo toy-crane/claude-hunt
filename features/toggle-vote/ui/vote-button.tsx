@@ -6,6 +6,7 @@ import Link from "next/link";
 import { useOptimistic, useTransition } from "react";
 import { toast } from "sonner";
 import { toggleVote } from "../api/actions";
+import { RollingCount } from "./rolling-count";
 
 const ARIA_LABEL = "추천하기";
 
@@ -123,7 +124,7 @@ export function VoteButton({
       ) : (
         <RiArrowUpLine aria-hidden="true" className={iconSize} />
       )}
-      <span className="tabular-nums">{optimistic.count}</span>
+      <RollingCount className="tabular-nums" value={optimistic.count} />
     </button>
   );
 }

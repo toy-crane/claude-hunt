@@ -12,6 +12,14 @@ vi.mock("../api/actions", () => ({
 vi.mock("sonner", () => ({
   toast: { error: toastErrorMock },
 }));
+// Force the count to render as a plain number (no AnimatePresence) so these
+// assertions stay deterministic — jsdom has no matchMedia, so motion would
+// otherwise animate and emit act() warnings. The roll itself is covered in
+// rolling-count.test.tsx.
+vi.mock("motion/react", async (importOriginal) => ({
+  ...(await importOriginal<typeof import("motion/react")>()),
+  useReducedMotion: () => true,
+}));
 
 import { VoteButton } from "./vote-button";
 
