@@ -28,6 +28,7 @@ export function buildProjectJsonLd(project: ProjectDetail) {
         "@type": "CreativeWork",
         name: project.title,
         abstract: project.tagline,
+        ...(project.description && { description: project.description }),
         url: projectUrl,
         ...(project.primaryImageUrl && { image: project.primaryImageUrl }),
         ...(project.author_display_name && {

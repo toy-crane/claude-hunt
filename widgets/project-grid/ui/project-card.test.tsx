@@ -45,6 +45,7 @@ function buildProject(
     cohort_name: "LGE-1",
     title: "My App",
     tagline: "A cool tool",
+    description: null,
     project_url: "https://myapp.com",
     images: [{ path: "user-1/screenshot.png" }],
     primary_image_path: "user-1/screenshot.png",

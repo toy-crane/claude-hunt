@@ -14,6 +14,10 @@ create table public.projects (
   images jsonb not null default '[]',
   -- Optional GitHub repository URL — when set, the detail page exposes a "GitHub 저장소 보기" link.
   github_url text null check (github_url is null or github_url ~ '^https://github\.com/[^/[:space:]]+/[^/[:space:]]+/?$'),
+  -- Optional long-form body shown on the detail page between the gallery and the
+  -- action row. tagline stays the required one-liner (app caps it at 60); this
+  -- carries the longer story. Brand-new column, so a strict 1..1000 CHECK is safe.
+  description text null check (description is null or char_length(description) between 1 and 1000),
   vote_count bigint not null default 0,
   created_at timestamptz not null default now(),
   updated_at timestamptz not null default now()

@@ -40,6 +40,7 @@ vi.mock("@widgets/project-detail", () => ({
 interface EditFormProps {
   backHref?: string;
   initial: {
+    description: string | null;
     githubUrl: string | null;
     imagePaths: string[];
     imageUrls: string[];
@@ -65,6 +66,7 @@ function makeProject(overrides: Partial<ProjectDetail> = {}): ProjectDetail {
     cohort_name: null,
     title: "My App",
     tagline: "A cool tool",
+    description: null,
     project_url: "https://myapp.com",
     github_url: null,
     images: [{ path: "owner-1/shot.png" }],
@@ -153,6 +155,7 @@ describe("/projects/[id]/edit page", () => {
         projectId: "proj-1",
         title: "Renamed",
         tagline: "Updated tagline",
+        description: null,
         projectUrl: "https://renamed.example",
         githubUrl: "https://github.com/owner-1/renamed",
         imageUrls: ["https://cdn/a", "https://cdn/b"],

@@ -14,6 +14,7 @@ select
   c.label as cohort_label,
   p.title,
   p.tagline,
+  p.description,
   p.project_url,
   p.github_url,
   p.images,

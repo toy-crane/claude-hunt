@@ -136,6 +136,40 @@ describe("submitProject server action", () => {
     expect(revalidatePathMock).toHaveBeenCalledWith("/settings");
   });
 
+  it("writes the description to the insert when provided", async () => {
+    getClaims.mockResolvedValue({
+      data: { claims: { sub: "u1" } },
+      error: null,
+    });
+    const { insertQuery } = stubProfileThenInsert({
+      cohortId: "cohort-1",
+      insertedId: "proj-1",
+    });
+
+    await submitProject({ ...validInput, description: "자세한 설명입니다." });
+
+    expect(insertQuery.insert).toHaveBeenCalledWith(
+      expect.objectContaining({ description: "자세한 설명입니다." })
+    );
+  });
+
+  it("writes a null description when omitted", async () => {
+    getClaims.mockResolvedValue({
+      data: { claims: { sub: "u1" } },
+      error: null,
+    });
+    const { insertQuery } = stubProfileThenInsert({
+      cohortId: "cohort-1",
+      insertedId: "proj-1",
+    });
+
+    await submitProject(validInput);
+
+    expect(insertQuery.insert).toHaveBeenCalledWith(
+      expect.objectContaining({ description: null })
+    );
+  });
+
   it("surfaces storage/db errors back to the caller", async () => {
     getClaims.mockResolvedValue({
       data: { claims: { sub: "u1" } },

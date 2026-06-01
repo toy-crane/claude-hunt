@@ -54,6 +54,7 @@ function buildProject(overrides: Partial<ProjectDetail> = {}): ProjectDetail {
     cohort_name: "LGE-1",
     title: "My App",
     tagline: "A cool tool for tracking habits",
+    description: null,
     project_url: "https://myapp.com",
     github_url: null,
     images: [{ path: "user-alice/p1.webp" }],
@@ -87,6 +88,47 @@ describe("<Hero />", () => {
     expect(screen.getByText("LG전자 1기")).toBeInTheDocument();
     expect(screen.getByText("Alice")).toBeInTheDocument();
     expect(screen.getByTestId("vote-button")).toHaveTextContent("128");
+  });
+
+  it("renders the description section when the project has a description", () => {
+    render(
+      <Hero
+        isAuthenticated={false}
+        project={buildProject({
+          description: "첫 문단입니다.\n\n둘째 문단입니다.",
+        })}
+        viewerUserId={null}
+      />
+    );
+    const description = screen.getByTestId("project-detail-description");
+    expect(description).toHaveTextContent("첫 문단입니다.");
+    expect(description).toHaveTextContent("둘째 문단입니다.");
+  });
+
+  it("omits the description section when there is no description", () => {
+    render(
+      <Hero
+        isAuthenticated={false}
+        project={buildProject({ description: null })}
+        viewerUserId={null}
+      />
+    );
+    expect(
+      screen.queryByTestId("project-detail-description")
+    ).not.toBeInTheDocument();
+  });
+
+  it("flattens a multi-line tagline into a single line", () => {
+    render(
+      <Hero
+        isAuthenticated={false}
+        project={buildProject({ tagline: "첫 줄\n둘째 줄" })}
+        viewerUserId={null}
+      />
+    );
+    const tagline = screen.getByTestId("project-detail-tagline");
+    expect(tagline).toHaveTextContent("첫 줄 둘째 줄");
+    expect(tagline.textContent).not.toContain("\n");
   });
 
   it("links the cohort badge to the project list filtered by that cohort", () => {

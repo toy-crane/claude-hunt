@@ -66,13 +66,14 @@ const { SubmitForm } = await import("./submit-form");
 
 const LABEL_TITLE = /제목/;
 const LABEL_TAGLINE = /한 줄 소개/;
+const LABEL_DESCRIPTION = /프로젝트 설명/;
 const LABEL_URL = /프로젝트 URL/;
 const LABEL_GITHUB = /GitHub/;
 const SUBMIT_LABEL = /프로젝트 제출/;
 
 function fillTextFields() {
   const title = screen.getByLabelText(LABEL_TITLE) as HTMLInputElement;
-  const tagline = screen.getByLabelText(LABEL_TAGLINE) as HTMLTextAreaElement;
+  const tagline = screen.getByLabelText(LABEL_TAGLINE) as HTMLInputElement;
   const url = screen.getByLabelText(LABEL_URL) as HTMLInputElement;
   fireEvent.change(title, { target: { value: "My App" } });
   fireEvent.change(tagline, { target: { value: "A cool tool" } });
@@ -95,6 +96,33 @@ describe("SubmitForm", () => {
   it("renders an enabled Submit button when cohortId is set", () => {
     render(<SubmitForm cohortId="cohort-1" />);
     expect(screen.getByRole("button", { name: "프로젝트 제출" })).toBeEnabled();
+  });
+
+  it("renders a single-line tagline input and an optional description textarea", () => {
+    render(<SubmitForm cohortId="cohort-1" />);
+    expect(screen.getByLabelText(LABEL_TAGLINE).tagName).toBe("INPUT");
+    const description = screen.getByLabelText(LABEL_DESCRIPTION);
+    expect(description.tagName).toBe("TEXTAREA");
+    expect(description).not.toBeRequired();
+  });
+
+  it("passes the description to the server action when provided", async () => {
+    uploadScreenshot.mockResolvedValue({ path: "user-1/a.webp" });
+    submitProject.mockResolvedValue({ ok: true, projectId: "p1" });
+
+    render(<SubmitForm cohortId="cohort-1" />);
+    addOneImage();
+    const form = fillTextFields();
+    fireEvent.change(screen.getByLabelText(LABEL_DESCRIPTION), {
+      target: { value: "자세한 설명입니다." },
+    });
+    fireEvent.submit(form);
+
+    await vi.waitFor(() => {
+      expect(submitProject).toHaveBeenCalledWith(
+        expect.objectContaining({ description: "자세한 설명입니다." })
+      );
+    });
   });
 
   it("rejects submit when no images are attached", async () => {
@@ -147,7 +175,7 @@ describe("SubmitForm", () => {
     render(<SubmitForm cohortId="cohort-1" />);
     addOneImage();
     const title = screen.getByLabelText(LABEL_TITLE) as HTMLInputElement;
-    const tagline = screen.getByLabelText(LABEL_TAGLINE) as HTMLTextAreaElement;
+    const tagline = screen.getByLabelText(LABEL_TAGLINE) as HTMLInputElement;
     const url = screen.getByLabelText(LABEL_URL) as HTMLInputElement;
     fireEvent.change(title, { target: { value: "My App" } });
     fireEvent.change(tagline, { target: { value: "A cool tool" } });

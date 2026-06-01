@@ -19,6 +19,8 @@ export interface ProjectCore {
   cohort_label: string | null;
   cohort_name: string | null;
   created_at: string;
+  /** Optional long-form body shown on the detail page. Null when unset. */
+  description: string | null;
   github_url: string | null;
   id: string;
   /** All image paths in display order. images[0] is the primary. */
@@ -86,6 +88,7 @@ export async function fetchProjectCore(
     cohort_name: row.cohort_name ?? null,
     title: row.title ?? "",
     tagline: row.tagline ?? "",
+    description: row.description ?? null,
     project_url: row.project_url ?? "",
     github_url: row.github_url ?? null,
     images,

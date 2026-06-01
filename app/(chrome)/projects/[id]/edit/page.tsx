@@ -55,6 +55,7 @@ export default async function Page({ params, searchParams }: PageProps) {
           projectId: project.id,
           title: project.title,
           tagline: project.tagline,
+          description: project.description,
           projectUrl: project.project_url,
           githubUrl: project.github_url,
           imageUrls: project.imageUrls,
