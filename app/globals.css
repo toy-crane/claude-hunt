@@ -155,9 +155,19 @@
     backdrop-filter 180ms ease,
     background 180ms ease;
 }
-html.is-scrolled .site-header {
-  background: color-mix(in oklch, var(--background) 80%, transparent);
-  backdrop-filter: saturate(140%) blur(8px);
+/* Glass blur only on devices with a fine pointer + hover (desktop).
+   On touch devices (iOS Safari especially) a sticky element's
+   backdrop-filter is rasterized on a separate compositing layer from the
+   scroll, so the blur lags behind during scroll and the content behind
+   flashes through the header before it repaints. Gating the effect on a
+   non-touch pointer sidesteps that bug — and the extra mobile GPU cost —
+   while the header stays fully opaque (`bg-background`) on mobile. */
+@media (hover: hover) and (pointer: fine) {
+  html.is-scrolled .site-header {
+    background: color-mix(in oklch, var(--background) 80%, transparent);
+    -webkit-backdrop-filter: saturate(140%) blur(8px);
+    backdrop-filter: saturate(140%) blur(8px);
+  }
 }
 
 @media (prefers-reduced-motion: reduce) {
