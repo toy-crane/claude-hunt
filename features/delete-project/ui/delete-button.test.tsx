@@ -30,7 +30,9 @@ describe("DeleteButton — icon variant", () => {
     const trigger = screen.getByTestId("delete-project-trigger");
     expect(trigger).toHaveAttribute("aria-label", "프로젝트 삭제");
     expect(trigger).toHaveTextContent("");
-    expect(trigger.className).toContain("rounded-none");
+    // Square sizing is DeleteButton's own contract; corner rounding is
+    // governed globally by --radius:0, not by this component, so we don't
+    // assert a specific rounded-* utility (it varies by shadcn preset).
     expect(trigger.className).toContain("size-7");
   });
 

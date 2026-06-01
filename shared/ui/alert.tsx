@@ -3,7 +3,7 @@ import { cva, type VariantProps } from "class-variance-authority";
 import type * as React from "react";
 
 const alertVariants = cva(
-  "group/alert relative grid w-full gap-0.5 rounded-none border px-2.5 py-2 text-left text-xs has-data-[slot=alert-action]:relative has-[>svg]:grid-cols-[auto_1fr] has-[>svg]:gap-x-2 has-data-[slot=alert-action]:pr-18 *:[svg:not([class*='size-'])]:size-4 *:[svg]:row-span-2 *:[svg]:translate-y-0 *:[svg]:text-current",
+  "group/alert relative grid w-full gap-0.5 rounded-lg border px-4 py-3 text-left text-sm has-data-[slot=alert-action]:relative has-[>svg]:grid-cols-[auto_1fr] has-[>svg]:gap-x-2.5 has-data-[slot=alert-action]:pr-18 *:[svg:not([class*='size-'])]:size-4 *:[svg]:row-span-2 *:[svg]:translate-y-0.5 *:[svg]:text-current",
   {
     variants: {
       variant: {
@@ -37,7 +37,7 @@ function AlertTitle({ className, ...props }: React.ComponentProps<"div">) {
   return (
     <div
       className={cn(
-        "font-heading font-medium group-has-[>svg]/alert:col-start-2 [&_a]:underline [&_a]:underline-offset-3 [&_a]:hover:text-foreground",
+        "font-medium group-has-[>svg]/alert:col-start-2 [&_a]:underline [&_a]:underline-offset-3 [&_a]:hover:text-foreground",
         className
       )}
       data-slot="alert-title"
@@ -53,7 +53,7 @@ function AlertDescription({
   return (
     <div
       className={cn(
-        "text-balance text-muted-foreground text-xs/relaxed md:text-pretty [&_a]:underline [&_a]:underline-offset-3 [&_a]:hover:text-foreground [&_p:not(:last-child)]:mb-2",
+        "text-balance text-muted-foreground text-sm md:text-pretty [&_a]:underline [&_a]:underline-offset-3 [&_a]:hover:text-foreground [&_p:not(:last-child)]:mb-4",
         className
       )}
       data-slot="alert-description"
@@ -65,10 +65,7 @@ function AlertDescription({
 function AlertAction({ className, ...props }: React.ComponentProps<"div">) {
   return (
     <div
-      className={cn(
-        "absolute top-[calc(--spacing(1.25))] right-[calc(--spacing(1.25))]",
-        className
-      )}
+      className={cn("absolute top-2.5 right-3", className)}
       data-slot="alert-action"
       {...props}
     />
