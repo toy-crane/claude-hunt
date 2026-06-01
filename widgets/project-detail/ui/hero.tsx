@@ -12,6 +12,12 @@ import type { ProjectDetail } from "../api/fetch-project-detail";
 import { ImageGallery } from "./image-gallery";
 import { OwnerControls } from "./owner-controls";
 
+// Collapse every newline run in the tagline into a single space so a legacy
+// multi-line tagline still renders as one line (the field is one-liner now).
+const TAGLINE_NEWLINES = /\s*\n+\s*/g;
+// Cap consecutive blank lines in the description at a single blank line.
+const DESCRIPTION_BLANK_LINES = /\n{3,}/g;
+
 export interface HeroProps {
   isAuthenticated: boolean;
   project: ProjectDetail;
@@ -29,6 +35,7 @@ export function Hero({ project, isAuthenticated, viewerUserId }: HeroProps) {
   const ownedByViewer =
     viewerUserId != null && project.user_id === viewerUserId;
   const submittedAt = formatRelativeKo(project.created_at);
+  const tagline = project.tagline.replace(TAGLINE_NEWLINES, " ").trim();
 
   return (
     <article className="flex flex-col gap-4">
@@ -36,10 +43,10 @@ export function Hero({ project, isAuthenticated, viewerUserId }: HeroProps) {
         <div className="flex min-w-0 flex-col gap-2">
           <h1 className="font-heading font-medium text-2xl">{project.title}</h1>
           <p
-            className="whitespace-pre-line text-base leading-relaxed"
+            className="text-base leading-relaxed"
             data-testid="project-detail-tagline"
           >
-            {project.tagline}
+            {tagline}
           </p>
         </div>
         <div className="flex shrink-0 items-start gap-2">
@@ -90,6 +97,15 @@ export function Hero({ project, isAuthenticated, viewerUserId }: HeroProps) {
 
       {project.imageUrls.length > 0 ? (
         <ImageGallery imageUrls={project.imageUrls} title={project.title} />
+      ) : null}
+
+      {project.description ? (
+        <section
+          className="whitespace-pre-line text-pretty text-base leading-relaxed"
+          data-testid="project-detail-description"
+        >
+          {project.description.replace(DESCRIPTION_BLANK_LINES, "\n\n")}
+        </section>
       ) : null}
 
       <div
