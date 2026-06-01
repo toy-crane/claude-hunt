@@ -151,19 +151,12 @@
 }
 
 .site-header {
-  /* Pin the header to a persistent compositing layer. iOS Safari otherwise
-     re-creates the backdrop-filter layer when the header repaints on
-     back-navigation (scroll restore re-applies `is-scrolled`), dropping the
-     blur for one frame so the content behind flashes through sharply, then
-     re-blurs. translateZ(0) keeps the layer alive across the repaint. */
-  transform: translateZ(0);
   transition:
     backdrop-filter 180ms ease,
     background 180ms ease;
 }
 html.is-scrolled .site-header {
   background: color-mix(in oklch, var(--background) 80%, transparent);
-  -webkit-backdrop-filter: saturate(140%) blur(8px);
   backdrop-filter: saturate(140%) blur(8px);
 }
 
