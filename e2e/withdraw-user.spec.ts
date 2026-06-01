@@ -182,7 +182,7 @@ test("withdraw cascade-deletes the account, screenshots, and votes", async ({
     expect(peerVotesBefore).toBe(1);
 
     // Home renders both the user's own card and the peer card.
-    await page.goto("/");
+    await page.goto("/projects");
     await expect(
       page
         .getByTestId("project-card")
@@ -285,8 +285,8 @@ test("canceling the withdraw dialog preserves the user's data", async ({
       page.getByRole("button", { name: WITHDRAW_LABEL })
     ).toBeVisible();
 
-    // User's own card still on home, peer vote count unchanged.
-    await page.goto("/");
+    // User's own card still on the projects board, peer vote count unchanged.
+    await page.goto("/projects");
     await expect(
       page
         .getByTestId("project-card")
