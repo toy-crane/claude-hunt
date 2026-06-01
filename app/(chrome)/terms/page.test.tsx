@@ -21,14 +21,14 @@ async function renderPage() {
   render(<Page />);
 }
 
-const EFFECTIVE_DATE_TEXT = /시행일:\s*2026년\s*4월\s*16일/;
+const EFFECTIVE_DATE_TEXT = /시행일:\s*2026년\s*6월\s*1일/;
 const BACK_LINK_LABEL = /홈으로/;
-const CONTACT_EMAIL_TEXT = /alwaysfun2183@gmail\.com/;
+const CONTACT_EMAIL_TEXT = /toycrane@odd-corp\.com/;
 const CLAUSE_13_TITLE = /제13조/;
 const CLAUSE_14_TITLE = /제14조/;
 const KR_LAW_TEXT = /대한민국/;
-const SEOUL_COURT_TEXT = /서울중앙지방법원/;
-const CLAUSE_14_SENTENCE = /본 약관은 2026년 4월 16일부터 시행됩니다\./;
+const SEOUL_COURT_TEXT = /서울동부지방법원/;
+const CLAUSE_14_SENTENCE = /본 약관은 2026년 6월 1일부터 시행됩니다\./;
 const META_DESCRIPTION_KEYWORD = /약관/;
 
 const EXPECTED_SECTION_HEADINGS = [
@@ -37,7 +37,7 @@ const EXPECTED_SECTION_HEADINGS = [
   /^제3조 \(약관의 게시와 개정\)$/,
   /^제4조 \(이용계약의 체결\)$/,
   /^제5조 \(회원 정보의 관리\)$/,
-  /^제6조 \(운영자의 의무\)$/,
+  /^제6조 \(회사의 의무\)$/,
   /^제7조 \(회원의 의무\)$/,
   /^제8조 \(서비스의 제공 및 변경\)$/,
   /^제9조 \(서비스 이용의 제한\)$/,
@@ -75,7 +75,7 @@ describe("terms page (/terms)", () => {
     expect(metadata.description).toMatch(META_DESCRIPTION_KEYWORD);
   });
 
-  it("shows the effective date 2026년 4월 16일", async () => {
+  it("shows the effective date 2026년 6월 1일", async () => {
     await renderPage();
 
     expect(screen.getByText(EFFECTIVE_DATE_TEXT)).toBeInTheDocument();
@@ -107,7 +107,7 @@ describe("terms page (/terms)", () => {
     }
   });
 
-  it("clause 13 (준거법 및 관할) names Korean law and the Seoul Central District Court", async () => {
+  it("clause 13 (준거법 및 관할) names Korean law and the Seoul Eastern District Court", async () => {
     await renderPage();
 
     const clause = screen

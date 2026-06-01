@@ -20,7 +20,7 @@ const CLAUSES = [
   },
   { id: "t-4", title: "제4조 (이용계약의 체결)", short: "이용계약의 체결" },
   { id: "t-5", title: "제5조 (회원 정보의 관리)", short: "회원 정보의 관리" },
-  { id: "t-6", title: "제6조 (운영자의 의무)", short: "운영자의 의무" },
+  { id: "t-6", title: "제6조 (회사의 의무)", short: "회사의 의무" },
   { id: "t-7", title: "제7조 (회원의 의무)", short: "회원의 의무" },
   {
     id: "t-8",
@@ -56,7 +56,7 @@ export default function TermsPage() {
 
       <header className="flex flex-col gap-2">
         <h1 className="font-heading font-medium text-2xl">서비스 이용약관</h1>
-        <p className="text-muted-foreground text-sm">시행일: 2026년 4월 16일</p>
+        <p className="text-muted-foreground text-sm">시행일: 2026년 6월 1일</p>
       </header>
 
       <nav aria-label="목차" className="rounded-md border p-4">
@@ -81,10 +81,10 @@ export default function TermsPage() {
             제1조 (목적)
           </h2>
           <p>
-            본 약관은 claude-hunt(이하 "서비스")가 제공하는 Claude Code
-            클래스(수강 기수) 프로젝트 쇼케이스 서비스의 이용과 관련하여,
-            운영자와 회원 간의 권리, 의무 및 책임사항, 기타 필요한 사항을
-            규정하는 것을 목적으로 합니다.
+            본 약관은 주식회사 오디디(이하 "회사")가 운영하는 claude-hunt(이하
+            "서비스")가 제공하는 Claude Code 클래스(수강 기수) 프로젝트 쇼케이스
+            서비스의 이용과 관련하여, 회사와 회원 간의 권리, 의무 및 책임사항,
+            기타 필요한 사항을 규정하는 것을 목적으로 합니다.
           </p>
         </section>
 
@@ -103,7 +103,7 @@ export default function TermsPage() {
               태그라인, 스크린샷 등 일체의 콘텐츠
             </li>
             <li>
-              <strong>클래스</strong>: 운영자가 운영하는 강의 그룹(수강 기수)
+              <strong>클래스</strong>: 회사가 운영하는 강의 그룹(수강 기수)
             </li>
           </ul>
         </section>
@@ -113,9 +113,9 @@ export default function TermsPage() {
             제3조 (약관의 게시와 개정)
           </h2>
           <p>
-            운영자는 본 약관을 서비스 내 페이지(/terms)에 게시합니다. 운영자는
-            관련 법령을 위배하지 않는 범위에서 본 약관을 개정할 수 있으며,
-            약관이 개정되는 경우 적용일자 및 개정 사유를 명시하여{" "}
+            회사는 본 약관을 서비스 내 페이지(/terms)에 게시합니다. 회사는 관련
+            법령을 위배하지 않는 범위에서 본 약관을 개정할 수 있으며, 약관이
+            개정되는 경우 적용일자 및 개정 사유를 명시하여{" "}
             <strong>시행 7일 전</strong>부터 공지합니다. 다만 회원에게 불리하게
             개정되는 경우에는 <strong>시행 30일 전</strong>부터 공지합니다.
           </p>
@@ -139,18 +139,18 @@ export default function TermsPage() {
           <p>
             회원의 닉네임은 서비스 전체에서 고유해야 합니다. 회원은 설정
             페이지에서 언제든 닉네임을 수정할 수 있으며, 타인에게 오인을 주는
-            닉네임의 사용이 확인될 경우 운영자는 수정을 요청하거나 해당 닉네임의
+            닉네임의 사용이 확인될 경우 회사는 수정을 요청하거나 해당 닉네임의
             사용을 제한할 수 있습니다.
           </p>
         </section>
 
         <section aria-labelledby="t-6" className="flex flex-col gap-2">
           <h2 className="font-semibold text-base" id="t-6">
-            제6조 (운영자의 의무)
+            제6조 (회사의 의무)
           </h2>
           <p>
-            운영자는 서비스를 안정적이고 지속적으로 제공하기 위해 노력하며,
-            회원의 개인정보를 본 서비스의 개인정보 처리방침에 따라 보호합니다.
+            회사는 서비스를 안정적이고 지속적으로 제공하기 위해 노력하며, 회원의
+            개인정보를 본 서비스의 개인정보 처리방침에 따라 보호합니다.
           </p>
         </section>
 
@@ -183,7 +183,7 @@ export default function TermsPage() {
             제8조 (서비스의 제공 및 변경)
           </h2>
           <p>
-            본 서비스는 무료로 제공됩니다. 운영자는 서비스의 품질 개선, 기술적
+            본 서비스는 무료로 제공됩니다. 회사는 서비스의 품질 개선, 기술적
             필요성, 정기 점검 등의 사유로 서비스의 일부 또는 전부를 변경하거나
             일시 중단할 수 있습니다.
           </p>
@@ -194,7 +194,7 @@ export default function TermsPage() {
             제9조 (서비스 이용의 제한)
           </h2>
           <p>
-            운영자는 회원이 본 약관의 의무를 위반하거나 서비스의 정상적 운영을
+            회사는 회원이 본 약관의 의무를 위반하거나 서비스의 정상적 운영을
             방해한 경우, 게시물을 삭제하거나 해당 회원의 이용을 일시 정지 또는
             영구 탈퇴 처리할 수 있습니다.
           </p>
@@ -207,7 +207,7 @@ export default function TermsPage() {
           <p>
             회원이 제출한 게시물의 저작권은 해당 회원에게 귀속됩니다. 다만
             회원은 서비스 내에서 게시물이 정상적으로 노출되고 공유될 수 있도록
-            운영자에게 서비스 운영 목적 범위 내의 비독점적, 무상 이용
+            회사에게 서비스 운영 목적 범위 내의 비독점적, 무상 이용
             허락(디스플레이, 미리보기, 섬네일 생성 등)을 부여합니다.
           </p>
         </section>
@@ -217,11 +217,11 @@ export default function TermsPage() {
             제11조 (면책조항)
           </h2>
           <p>
-            본 서비스는 무상으로 제공되는 개인 운영 서비스이며, 운영자는
-            천재지변, 불가항력, 제3자가 제공하는 인프라(호스팅·인증 등)의 장애로
-            인한 손해에 대하여 책임을 지지 않습니다. 회원이 서비스에 제출한
-            게시물의 내용 및 타 회원의 게시물로 인해 발생한 분쟁에 대해서도
-            운영자는 책임을 지지 않습니다.
+            본 서비스는 무상으로 제공되며, 회사는 천재지변, 불가항력, 제3자가
+            제공하는 인프라(호스팅·인증 등)의 장애 등 회사의 고의 또는 중대한
+            과실 없이 발생한 손해에 대하여 책임을 지지 않습니다. 회원이 서비스에
+            제출한 게시물의 내용 및 타 회원의 게시물로 인해 발생한 분쟁에
+            대해서도 회사는 책임을 지지 않습니다.
           </p>
         </section>
 
@@ -242,8 +242,8 @@ export default function TermsPage() {
           </h2>
           <p>
             본 약관은 <strong>대한민국</strong> 법률을 준거법으로 하며, 본
-            서비스의 이용과 관련하여 운영자와 회원 사이에 발생한 분쟁에 대해서는{" "}
-            <strong>서울중앙지방법원</strong>을 전속 관할 법원으로 합니다.
+            서비스의 이용과 관련하여 회사와 회원 사이에 발생한 분쟁에 대해서는{" "}
+            <strong>서울동부지방법원</strong>을 전속 관할 법원으로 합니다.
           </p>
         </section>
 
@@ -251,25 +251,35 @@ export default function TermsPage() {
           <h2 className="font-semibold text-base" id="t-14">
             제14조 (시행일)
           </h2>
-          <p>본 약관은 2026년 4월 16일부터 시행됩니다.</p>
+          <p>본 약관은 2026년 6월 1일부터 시행됩니다.</p>
         </section>
       </article>
 
       <Separator />
 
       <aside
-        aria-label="문의"
+        aria-label="사업자 정보"
         className="flex flex-col gap-1 rounded-md border p-4 text-sm"
       >
-        <span className="font-medium">문의</span>
+        <span className="font-medium">사업자 정보</span>
         <span className="text-muted-foreground">
-          운영자: toycrane (개인 운영)
+          상호: 주식회사 오디디 (ODD Inc.)
+        </span>
+        <span className="text-muted-foreground">대표이사: 김한울</span>
+        <span className="text-muted-foreground">
+          사업자등록번호: 836-87-03504
         </span>
         <span className="text-muted-foreground">
-          이메일: alwaysfun2183@gmail.com
+          통신판매업신고번호: 제2025-서울송파-0765호
+        </span>
+        <span className="text-muted-foreground">
+          주소: 서울특별시 송파구 중대로 207, 대명빌딩 2층 201-제이126호(가락동)
+        </span>
+        <span className="text-muted-foreground">
+          이메일: toycrane@odd-corp.com
         </span>
         <span className="mt-1 text-muted-foreground text-xs">
-          시행일: 2026-04-16
+          시행일: 2026-06-01
         </span>
       </aside>
     </main>
