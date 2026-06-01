@@ -91,7 +91,7 @@ export function Hero({ project, isAuthenticated, viewerUserId }: HeroProps) {
         className="flex flex-col items-end gap-2"
         data-testid="project-detail-actions"
       >
-        <Button asChild className="gap-2" size="lg">
+        <Button asChild className="gap-2">
           <a
             href={project.project_url}
             rel="noopener noreferrer ugc"
