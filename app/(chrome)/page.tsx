@@ -4,7 +4,9 @@ import {
   Eyebrow,
   ProjectsCtaCard,
   RunnersUpSection,
+  RunnersUpSkeleton,
   WinnerSpotlight,
+  WinnerSpotlightSkeleton,
 } from "@widgets/winner-spotlight";
 import { fetchMonthlyTopProjects } from "@widgets/winner-spotlight/server";
 import type { Metadata } from "next";
@@ -90,12 +92,24 @@ export async function HomeContent() {
 function HomeSkeleton() {
   return (
     <div className="flex flex-col gap-8" data-testid="home-skeleton">
-      <Skeleton className="h-6 w-64" />
-      <Skeleton className="h-72 w-full" />
-      <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
-        <Skeleton className="h-40 w-full" />
-        <Skeleton className="h-40 w-full" />
-        <Skeleton className="h-40 w-full" />
+      {/* Eyebrow: prompt line + title + subtitle */}
+      <div className="flex flex-col items-start gap-2">
+        <Skeleton className="h-3 w-56" />
+        <Skeleton className="h-8 w-48" />
+        <Skeleton className="h-4 w-40" />
+      </div>
+
+      <WinnerSpotlightSkeleton />
+      <RunnersUpSkeleton />
+
+      {/* ProjectsCtaCard */}
+      <div className="mt-2 flex items-center justify-between rounded-md border border-dashed bg-background px-6 py-5">
+        <div className="flex flex-col gap-1">
+          <Skeleton className="h-3 w-24" />
+          <Skeleton className="h-4 w-56" />
+          <Skeleton className="h-3 w-40" />
+        </div>
+        <Skeleton className="h-4 w-28" />
       </div>
     </div>
   );

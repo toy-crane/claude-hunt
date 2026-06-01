@@ -6,5 +6,7 @@ export type { RunnerUpCardProps } from "./ui/runner-up-card";
 export { RunnerUpCard } from "./ui/runner-up-card";
 export type { RunnersUpSectionProps } from "./ui/runners-up-section";
 export { RunnersUpSection } from "./ui/runners-up-section";
+export { RunnersUpSkeleton } from "./ui/runners-up-skeleton";
 export type { WinnerSpotlightProps } from "./ui/winner-spotlight";
 export { WinnerSpotlight } from "./ui/winner-spotlight";
+export { WinnerSpotlightSkeleton } from "./ui/winner-spotlight-skeleton";
