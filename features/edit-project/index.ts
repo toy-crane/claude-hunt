@@ -4,3 +4,4 @@ export type { EditProjectInput } from "./api/schema";
 export { editProjectInputSchema } from "./api/schema";
 export type { EditFormInitial, EditFormProps } from "./ui/edit-form";
 export { EditForm } from "./ui/edit-form";
+export { EditFormSkeleton } from "./ui/edit-form-skeleton";
