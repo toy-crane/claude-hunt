@@ -91,7 +91,7 @@ update public.profiles
 ------------------------------------------------------------------------------
 
 insert into public.projects (
-  id, user_id, cohort_id, title, tagline, project_url, github_url, images
+  id, user_id, cohort_id, title, tagline, description, project_url, github_url, images
 ) values
   (
     '00000000-0000-0000-0000-0000000000a1',
@@ -99,6 +99,9 @@ insert into public.projects (
     (select id from public.cohorts where name = 'LGE-1'),
     'Paint Studio',
     '웹에서 바로 쓰는 간단한 드로잉 툴',
+    $$Paint Studio는 설치 없이 브라우저에서 바로 그림을 그릴 수 있는 드로잉 툴이에요.
+
+레이어, 브러시 프리셋, PNG 내보내기를 지원하고 작업물은 자동으로 저장돼요.$$,
     'https://paint-studio.example.com',
     'https://github.com/claude-hunt/paint-studio',
     jsonb_build_array(
@@ -112,6 +115,7 @@ insert into public.projects (
     (select id from public.cohorts where name = 'LGE-2'),
     'Note Keeper',
     '마크다운으로 빠르게 메모하고 태그로 정리해요',
+    null,
     'https://note-keeper.example.com',
     null,
     jsonb_build_array(
@@ -125,6 +129,7 @@ insert into public.projects (
     (select id from public.cohorts where name = 'Inflearn'),
     'Focus Timer',
     '뽀모도로 방식으로 집중 세션을 기록해 주는 타이머',
+    null,
     'https://focus-timer.example.com',
     null,
     jsonb_build_array(
