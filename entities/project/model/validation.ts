@@ -2,6 +2,7 @@ import { getZodFieldErrors } from "@shared/lib/validation";
 import { z } from "zod";
 import {
   GITHUB_URL_PATTERN,
+  MAX_DESCRIPTION_LENGTH,
   MAX_PROJECT_IMAGES,
   MAX_TAGLINE_LENGTH,
   MAX_TITLE_LENGTH,
@@ -25,11 +26,32 @@ export const projectFieldsSchema = z.object({
   tagline: z
     .string()
     .trim()
-    .min(1, "한 줄 소개을 입력해 주세요.")
-    .max(
-      MAX_TAGLINE_LENGTH,
-      `한 줄 소개은 ${MAX_TAGLINE_LENGTH}자 이하로 입력해 주세요.`
+    // Collapse any newlines into a single space so the tagline is always one
+    // line, no matter what was pasted, before the length check applies.
+    .transform((value) => value.replace(/\s*\n+\s*/g, " ").trim())
+    .pipe(
+      z
+        .string()
+        .min(1, "한 줄 소개을 입력해 주세요.")
+        .max(
+          MAX_TAGLINE_LENGTH,
+          `한 줄 소개은 ${MAX_TAGLINE_LENGTH}자 이하로 입력해 주세요.`
+        )
     ),
+  description: z
+    .string()
+    .trim()
+    .transform((value) => (value === "" ? undefined : value))
+    .pipe(
+      z
+        .string()
+        .max(
+          MAX_DESCRIPTION_LENGTH,
+          `프로젝트 설명은 ${MAX_DESCRIPTION_LENGTH}자 이하로 입력해 주세요.`
+        )
+        .optional()
+    )
+    .optional(),
   projectUrl: z
     .string()
     .trim()
@@ -58,6 +80,7 @@ export const projectFieldsSchema = z.object({
 export type ProjectFieldName =
   | "title"
   | "tagline"
+  | "description"
   | "projectUrl"
   | "githubUrl"
   | "imagePaths";
@@ -65,6 +88,7 @@ export type ProjectFieldName =
 export type ProjectFieldErrors = Partial<Record<ProjectFieldName, string>>;
 
 export interface ProjectFieldValues {
+  description: string;
   githubUrl: string;
   projectUrl: string;
   tagline: string;
@@ -85,6 +109,7 @@ export function readProjectFieldValues(
   return {
     title: get("title"),
     tagline: get("tagline"),
+    description: get("description"),
     projectUrl: get("projectUrl"),
     githubUrl: get("githubUrl"),
   };
@@ -103,6 +128,8 @@ export function validateProjectFields(
   const parsed = projectFieldsSchema.safeParse({
     title: values.title,
     tagline: values.tagline,
+    description:
+      values.description.trim() === "" ? undefined : values.description,
     projectUrl: values.projectUrl,
     githubUrl: values.githubUrl.trim() === "" ? undefined : values.githubUrl,
     imagePaths: Array.from({ length: imageCount }, () => "x"),
