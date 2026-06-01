@@ -100,14 +100,18 @@ export async function fetchProjects(
 }
 
 /**
- * Cookie-free variant for contexts that cannot call `cookies()` — currently
- * `app/opengraph-image.tsx`, where the route is regenerated on an ISR schedule
- * and must not depend on a per-request auth session. Orders the same way as
- * `fetchProjects` so the OG image mirrors the homepage's top-N exactly.
+ * Cookie-free, cached top-N used by the root OG image. Tagged `projects`
+ * (busted by project mutations); the hourly cacheLife is the staleness
+ * ceiling for social previews. Orders the same way as `fetchProjects` so the
+ * OG image mirrors the homepage's top-N.
  */
 export async function fetchTopProjects(
   options: FetchTopProjectsOptions = {}
 ): Promise<TopProjectRow[]> {
+  "use cache";
+  cacheTag(CACHE_TAGS.PROJECTS);
+  cacheLife("hours");
+
   const limit = options.limit ?? 6;
   const supabase = createAnonServerClient();
   const result = await supabase

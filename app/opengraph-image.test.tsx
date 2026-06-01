@@ -260,11 +260,6 @@ describe("app/opengraph-image — live data", () => {
     fetchTopProjectsMock.mockReset();
   });
 
-  it("exports revalidate = 3600 so scrapers do not re-query the DB on every hit", async () => {
-    const mod = await import("./opengraph-image");
-    expect(mod.revalidate).toBe(3600);
-  });
-
   it("is an async default export (returns a Promise)", () => {
     fetchTopProjectsMock.mockResolvedValueOnce([]);
     const result = OpenGraphImage();
