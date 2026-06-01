@@ -22,5 +22,5 @@ async function loadProjectCount(): Promise<number> {
 export const fetchProjectCount = productionCache(
   loadProjectCount,
   ["header-project-count"],
-  { revalidate: 60, tags: [CACHE_TAGS.PROJECTS_GRID] }
+  { revalidate: 60, tags: [CACHE_TAGS.PROJECTS] }
 );

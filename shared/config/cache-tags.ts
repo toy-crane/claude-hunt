@@ -11,7 +11,7 @@ export const CACHE_TAGS = {
    * and any profile update that changes display name or avatar (the
    * view joins through the author profile).
    */
-  PROJECTS_GRID: "projects-grid",
+  PROJECTS: "projects",
   /**
    * Cohort list shared by the dropdown and chips. Bust when an admin
    * adds, renames, or removes a cohort.

@@ -90,7 +90,7 @@ describe("deleteProject server action", () => {
 
     expect(result.ok).toBe(true);
     expect(storageRemove).toHaveBeenCalledWith(["u1/shot.png"]);
-    expect(updateTagMock).toHaveBeenCalledWith("projects-grid");
+    expect(updateTagMock).toHaveBeenCalledWith("projects");
     // /settings reads its own list via fetchMyProjects which is not
     // tagged, so we explicitly revalidate the path.
     expect(revalidatePathMock).toHaveBeenCalledWith("/settings");
@@ -140,6 +140,6 @@ describe("deleteProject server action", () => {
 
     expect(result.ok).toBe(true);
     expect(storageRemove).toHaveBeenCalledTimes(1);
-    expect(updateTagMock).toHaveBeenCalledWith("projects-grid");
+    expect(updateTagMock).toHaveBeenCalledWith("projects");
   });
 });

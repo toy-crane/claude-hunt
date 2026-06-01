@@ -65,7 +65,7 @@ function cachedLoad(startUtc: string, endUtc: string, limit: number) {
   return productionCache(
     () => loadMonthlyCore(startUtc, endUtc, limit),
     ["winner-spotlight-monthly", startUtc, String(limit)],
-    { revalidate: 60, tags: [CACHE_TAGS.PROJECTS_GRID] }
+    { revalidate: 60, tags: [CACHE_TAGS.PROJECTS] }
   )();
 }
 

@@ -47,7 +47,7 @@ describe("updateDisplayName", () => {
     expect(result).toEqual({ ok: true });
     expect(updateMock).toHaveBeenCalledWith({ display_name: "Alice_99" });
     expect(eqMock).toHaveBeenCalledWith("id", "user-1");
-    expect(updateTagMock).toHaveBeenCalledWith("projects-grid");
+    expect(updateTagMock).toHaveBeenCalledWith("projects");
     expect(revalidatePathMock).toHaveBeenCalledWith("/settings");
   });
 

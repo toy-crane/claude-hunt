@@ -69,9 +69,9 @@ export async function deleteProject(
     await supabase.storage.from(SCREENSHOT_BUCKET).remove([...orphans]);
   }
 
-  updateTag(CACHE_TAGS.PROJECTS_GRID);
+  updateTag(CACHE_TAGS.PROJECTS);
   // Invalidate the Next router cache for routes that fetch the user's
-  // own project list outside the PROJECTS_GRID tag (e.g. /settings'
+  // own project list outside the PROJECTS tag (e.g. /settings'
   // 내 프로젝트 section reads via fetchMyProjects, which is uncached
   // and untagged).
   revalidatePath("/settings");

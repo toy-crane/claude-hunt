@@ -55,7 +55,7 @@ export async function updateDisplayName(
   }
 
   // display_name surfaces in the cached projects grid as author_display_name.
-  updateTag(CACHE_TAGS.PROJECTS_GRID);
+  updateTag(CACHE_TAGS.PROJECTS);
   revalidatePath("/settings");
   return { ok: true };
 }

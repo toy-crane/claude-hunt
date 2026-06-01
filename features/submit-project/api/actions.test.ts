@@ -130,7 +130,7 @@ describe("submitProject server action", () => {
         images: [{ path: "user-1/shot.png" }],
       })
     );
-    expect(updateTagMock).toHaveBeenCalledWith("projects-grid");
+    expect(updateTagMock).toHaveBeenCalledWith("projects");
     // The settings 내 프로젝트 list reads via the uncached fetchMyProjects,
     // so submit must revalidate /settings like delete/edit do.
     expect(revalidatePathMock).toHaveBeenCalledWith("/settings");

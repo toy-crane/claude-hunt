@@ -89,7 +89,7 @@ describe("withdrawAccount server action", () => {
     expect(storageRemove).toHaveBeenCalledWith(["u1/a.png", "u1/b.png"]);
     expect(deleteUser).toHaveBeenCalledWith("u1");
     expect(signOut).toHaveBeenCalledTimes(1);
-    expect(updateTagMock).toHaveBeenCalledWith("projects-grid");
+    expect(updateTagMock).toHaveBeenCalledWith("projects");
   });
 
   it("skips storage.remove when the user has no projects", async () => {

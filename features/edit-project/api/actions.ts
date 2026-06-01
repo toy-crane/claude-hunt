@@ -82,10 +82,10 @@ export async function editProject(
     await supabase.storage.from(SCREENSHOT_BUCKET).remove(orphans);
   }
 
-  updateTag(CACHE_TAGS.PROJECTS_GRID);
+  updateTag(CACHE_TAGS.PROJECTS);
   revalidatePath(`/projects/${input.projectId}`);
   // Same rationale as deleteProject — /settings reads via
-  // fetchMyProjects which sits outside the PROJECTS_GRID tag, so an
+  // fetchMyProjects which sits outside the PROJECTS tag, so an
   // explicit path revalidation is required for the user's own list
   // to reflect title/tagline/screenshot changes on next visit.
   revalidatePath("/settings");

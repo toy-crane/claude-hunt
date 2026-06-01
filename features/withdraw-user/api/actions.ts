@@ -55,7 +55,7 @@ export async function withdrawAccount(): Promise<WithdrawAccountResult> {
   await supabase.auth.signOut();
   // Cascading delete removes the user's projects and votes; the cached
   // grid must reflect that on next visit.
-  updateTag(CACHE_TAGS.PROJECTS_GRID);
+  updateTag(CACHE_TAGS.PROJECTS);
   // Bust the home + settings Router Caches so the dialog's
   // `router.replace('/')` lands on a fresh anonymous render.
   revalidatePath("/");

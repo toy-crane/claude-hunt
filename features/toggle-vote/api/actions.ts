@@ -44,7 +44,7 @@ export async function toggleVote(projectId: string): Promise<ToggleVoteResult> {
     if (deleteError) {
       return { ok: false, error: deleteError.message };
     }
-    updateTag(CACHE_TAGS.PROJECTS_GRID);
+    updateTag(CACHE_TAGS.PROJECTS);
     revalidatePath(`/projects/${projectId}`);
     return { ok: true, voted: false };
   }
@@ -55,7 +55,7 @@ export async function toggleVote(projectId: string): Promise<ToggleVoteResult> {
   if (insertError) {
     return { ok: false, error: insertError.message };
   }
-  updateTag(CACHE_TAGS.PROJECTS_GRID);
+  updateTag(CACHE_TAGS.PROJECTS);
   revalidatePath(`/projects/${projectId}`);
   return { ok: true, voted: true };
 }

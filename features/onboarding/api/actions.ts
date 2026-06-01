@@ -58,6 +58,6 @@ export async function completeOnboarding(
 
   // display_name surfaces in the projects_with_vote_count view as
   // author_display_name, so the cached grid must be invalidated.
-  updateTag(CACHE_TAGS.PROJECTS_GRID);
+  updateTag(CACHE_TAGS.PROJECTS);
   return { ok: true };
 }

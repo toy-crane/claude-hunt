@@ -54,7 +54,7 @@ async function loadProjectGridCore(): Promise<ProjectGridCore[]> {
 const fetchProjectGridCore = productionCache(
   loadProjectGridCore,
   ["project-grid-core"],
-  { revalidate: 60, tags: [CACHE_TAGS.PROJECTS_GRID] }
+  { revalidate: 60, tags: [CACHE_TAGS.PROJECTS] }
 );
 
 /**
