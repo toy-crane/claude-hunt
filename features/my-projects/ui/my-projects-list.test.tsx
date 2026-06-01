@@ -1,20 +1,6 @@
 import { render, screen, within } from "@testing-library/react";
-import { describe, expect, it, vi } from "vitest";
+import { describe, expect, it } from "vitest";
 import type { MyProjectRow } from "../api/fetch-my-projects";
-
-vi.mock("next/image", () => ({
-  default: ({
-    alt,
-    src,
-    className,
-  }: {
-    alt: string;
-    src: string;
-    className?: string;
-  }) => (
-    <div aria-label={alt} className={className} data-src={src} role="img" />
-  ),
-}));
 
 const { MyProjectsList } = await import("./my-projects-list");
 

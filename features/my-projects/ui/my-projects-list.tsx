@@ -43,8 +43,7 @@ export function MyProjectsList({
         data-testid="my-projects-table"
       >
         {/* Header — desktop only */}
-        <div className="hidden grid-cols-[62px_1fr_56px_72px_72px] items-center gap-2.5 border-border border-b bg-muted px-3 py-2 font-mono text-[11px] text-muted-foreground min-[720px]:grid">
-          <span />
+        <div className="hidden grid-cols-[1fr_56px_72px_72px] items-center gap-2.5 border-border border-b bg-muted px-3 py-2 font-mono text-[11px] text-muted-foreground min-[720px]:grid">
           <span>제목</span>
           <span className="text-right">추천</span>
           <span>제출일</span>
