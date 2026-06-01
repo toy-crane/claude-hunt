@@ -65,6 +65,7 @@ function makeProject(overrides: Partial<ProjectDetail> = {}): ProjectDetail {
     cohort_name: null,
     title: "My App",
     tagline: "A cool tool",
+    description: null,
     project_url: "https://myapp.com",
     github_url: null,
     images: [{ path: "owner-1/shot.png" }],

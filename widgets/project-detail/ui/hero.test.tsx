@@ -54,6 +54,7 @@ function buildProject(overrides: Partial<ProjectDetail> = {}): ProjectDetail {
     cohort_name: "LGE-1",
     title: "My App",
     tagline: "A cool tool for tracking habits",
+    description: null,
     project_url: "https://myapp.com",
     github_url: null,
     images: [{ path: "user-alice/p1.webp" }],

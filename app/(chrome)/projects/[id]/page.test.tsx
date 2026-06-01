@@ -21,6 +21,7 @@ const sampleProject: ProjectDetail = {
   id: "abc-123",
   title: "샘플 프로젝트",
   tagline: "한 줄 설명",
+  description: null,
   project_url: "https://example.com",
   github_url: null,
   cohort_id: null,
