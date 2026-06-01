@@ -21,9 +21,9 @@ async function renderPage() {
   render(<Page />);
 }
 
-const EFFECTIVE_DATE_TEXT = /시행일:\s*2026년\s*4월\s*16일/;
+const EFFECTIVE_DATE_TEXT = /시행일:\s*2026년\s*6월\s*1일/;
 const BACK_LINK_LABEL = /홈으로/;
-const DPO_EMAIL_TEXT = /alwaysfun2183@gmail\.com/;
+const DPO_EMAIL_TEXT = /toycrane@odd-corp\.com/;
 const META_DESCRIPTION_KEYWORD = /개인정보/;
 
 const EXPECTED_SECTION_HEADINGS = [
@@ -70,8 +70,8 @@ const SECTION_3_PHRASE = /지체 없이/;
 const SECTION_4_THIRD_PARTY = /제3자에게 제공하지 않/;
 const SECTION_12_7_DAY = /7일/;
 const SECTION_12_30_DAY = /30일/;
-const SECTION_12_DATE = /2026-04-16/;
-const DPO_NAME = /toycrane/;
+const SECTION_12_DATE = /2026-06-01/;
+const DPO_NAME = /김한울/;
 
 const HEADING_2 = /^2\./;
 const HEADING_3 = /^3\./;
@@ -109,7 +109,7 @@ describe("privacy page (/privacy)", () => {
     expect(metadata.description).toMatch(META_DESCRIPTION_KEYWORD);
   });
 
-  it("shows the effective date 2026년 4월 16일", async () => {
+  it("shows the effective date 2026년 6월 1일", async () => {
     await renderPage();
     expect(screen.getByText(EFFECTIVE_DATE_TEXT)).toBeInTheDocument();
   });
@@ -207,7 +207,7 @@ describe("privacy page (/privacy)", () => {
     }
   });
 
-  it("section 10 (DPO) shows toycrane and the contact email", async () => {
+  it("section 10 (DPO) shows 김한울 and the contact email", async () => {
     await renderPage();
 
     const clause = screen

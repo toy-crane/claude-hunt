@@ -111,7 +111,7 @@ export default function PrivacyPage() {
 
       <header className="flex flex-col gap-2">
         <h1 className="font-heading font-medium text-2xl">개인정보 처리방침</h1>
-        <p className="text-muted-foreground text-sm">시행일: 2026년 4월 16일</p>
+        <p className="text-muted-foreground text-sm">시행일: 2026년 6월 1일</p>
       </header>
 
       <nav aria-label="목차" className="rounded-md border p-4">
@@ -135,7 +135,10 @@ export default function PrivacyPage() {
           <h2 className="font-semibold text-base" id="p-1">
             1. 개인정보의 처리 목적
           </h2>
-          <p>claude-hunt는 다음의 목적을 위하여 개인정보를 처리합니다.</p>
+          <p>
+            주식회사 오디디(이하 "회사")는 claude-hunt 서비스 운영을 위해 다음의
+            목적으로 개인정보를 처리합니다.
+          </p>
           <ul className="list-disc pl-5">
             <li>회원 식별 및 인증</li>
             <li>프로젝트 게시 및 업보트 집계</li>
@@ -240,7 +243,7 @@ export default function PrivacyPage() {
             <li>전 구간 HTTPS 전송</li>
             <li>Supabase Row-Level Security(RLS)로 행 단위 접근 통제</li>
             <li>스토리지 및 데이터베이스 서버 측 암호화</li>
-            <li>운영자 관리 키의 최소 권한 원칙</li>
+            <li>회사 관리 키의 최소 권한 원칙</li>
           </ul>
         </section>
 
@@ -278,14 +281,14 @@ export default function PrivacyPage() {
           </p>
           <div className="rounded-md border p-3">
             <p>
-              <span className="font-medium">성명 / 닉네임:</span> toycrane
+              <span className="font-medium">성명:</span> 김한울
             </p>
             <p>
               <span className="font-medium">직책:</span> 개인정보 보호책임자
+              (대표이사)
             </p>
             <p>
-              <span className="font-medium">이메일:</span>{" "}
-              alwaysfun2183@gmail.com
+              <span className="font-medium">이메일:</span> toycrane@odd-corp.com
             </p>
           </div>
         </section>
@@ -319,7 +322,7 @@ export default function PrivacyPage() {
             <strong>30일</strong> 전부터 공지합니다.
           </p>
           <p className="text-muted-foreground">
-            본 개인정보 처리방침의 시행일: 2026-04-16
+            본 개인정보 처리방침의 시행일: 2026-06-01
           </p>
         </section>
       </article>
@@ -327,18 +330,28 @@ export default function PrivacyPage() {
       <Separator />
 
       <aside
-        aria-label="문의"
+        aria-label="사업자 정보"
         className="flex flex-col gap-1 rounded-md border p-4 text-sm"
       >
-        <span className="font-medium">문의</span>
+        <span className="font-medium">사업자 정보</span>
         <span className="text-muted-foreground">
-          운영자: toycrane (개인 운영)
+          상호: 주식회사 오디디 (ODD Inc.)
+        </span>
+        <span className="text-muted-foreground">대표이사: 김한울</span>
+        <span className="text-muted-foreground">
+          사업자등록번호: 836-87-03504
         </span>
         <span className="text-muted-foreground">
-          이메일: alwaysfun2183@gmail.com
+          통신판매업신고번호: 제2025-서울송파-0765호
+        </span>
+        <span className="text-muted-foreground">
+          주소: 서울특별시 송파구 중대로 207, 대명빌딩 2층 201-제이126호(가락동)
+        </span>
+        <span className="text-muted-foreground">
+          이메일: toycrane@odd-corp.com
         </span>
         <span className="mt-1 text-muted-foreground text-xs">
-          시행일: 2026-04-16
+          시행일: 2026-06-01
         </span>
       </aside>
     </main>
