@@ -3,11 +3,13 @@ import { Skeleton } from "@shared/ui/skeleton";
 /**
  * Loading placeholder for {@link Hero}. Mirrors the real render order —
  * title + tagline with the vote button pinned top-right, the meta line,
- * the 16:10 image, then the visit CTA — so the detail page doesn't jump
- * when the content streams in.
+ * the 16:10 image, a short description block, then the visit CTA — so the
+ * detail page doesn't jump when the content streams in.
  *
- * Sized for the common case (project has at least one image). The
- * optional GitHub link and owner controls are omitted on purpose.
+ * Sized for the common case (project has an image). The description is
+ * optional in the data, but featured/most-linked projects carry one, so a
+ * couple of lines are reserved to avoid a downward jump when it streams in.
+ * The optional GitHub link and owner controls are omitted on purpose.
  */
 export function HeroSkeleton() {
   return (
@@ -24,6 +26,12 @@ export function HeroSkeleton() {
       <Skeleton className="h-4 w-40" />
 
       <Skeleton className="aspect-[16/10] w-full" />
+
+      {/* description (optional in data; reserved for the common featured case) */}
+      <div className="flex flex-col gap-2">
+        <Skeleton className="h-4 w-full" />
+        <Skeleton className="h-4 w-3/4" />
+      </div>
 
       <div className="flex flex-col items-end gap-2">
         <Skeleton className="h-10 w-36" />
