@@ -45,10 +45,10 @@ describe("editProjectInputSchema", () => {
     expect(result.success).toBe(false);
   });
 
-  it("rejects a tagline longer than 140 chars", () => {
+  it("rejects a tagline longer than 60 chars", () => {
     const result = editProjectInputSchema.safeParse({
       ...validInput,
-      tagline: "y".repeat(141),
+      tagline: "y".repeat(61),
     });
     expect(result.success).toBe(false);
   });
