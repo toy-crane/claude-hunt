@@ -2,9 +2,9 @@ import { Skeleton } from "@shared/ui/skeleton";
 
 /**
  * Loading placeholder for {@link SubmitForm}. Mirrors the field group
- * (제목 · 한 줄 소개 textarea · 프로젝트 URL · GitHub · 스크린샷 dropzone)
- * and the right-aligned 취소 / 제출 buttons, so the new-project page keeps
- * its height while the form streams in.
+ * (제목 · 한 줄 소개 · 프로젝트 설명 textarea · 프로젝트 URL · GitHub ·
+ * 스크린샷 dropzone) and the right-aligned 취소 / 제출 buttons, so the
+ * new-project page keeps its height while the form streams in.
  */
 export function SubmitFormSkeleton() {
   return (
@@ -16,7 +16,11 @@ export function SubmitFormSkeleton() {
         </div>
         <div className="flex flex-col gap-3">
           <Skeleton className="h-4 w-20" />
-          <Skeleton className="h-16 w-full" />
+          <Skeleton className="h-9 w-full" />
+        </div>
+        <div className="flex flex-col gap-3">
+          <Skeleton className="h-4 w-20" />
+          <Skeleton className="h-32 w-full" />
         </div>
         <div className="flex flex-col gap-3">
           <Skeleton className="h-4 w-24" />
