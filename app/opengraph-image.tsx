@@ -7,7 +7,6 @@ import type { CSSProperties, ReactElement } from "react";
 export const alt = "claude-hunt — Claude Code 수강생들의 프로젝트";
 export const size = { width: 1200, height: 630 };
 export const contentType = "image/png";
-export const revalidate = 3600;
 
 // Colors — mirror artifacts/improve-og-image/references/project/colors_and_type.css.
 const TERRACOTTA = "#c15f3c";

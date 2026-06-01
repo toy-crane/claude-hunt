@@ -5,7 +5,7 @@ import { createAdminClient } from "@shared/api/supabase/admin";
 import { requireAuth } from "@shared/api/supabase/require-auth";
 import { CACHE_TAGS } from "@shared/config/cache-tags";
 import { SCREENSHOT_BUCKET } from "@shared/config/storage";
-import { revalidatePath, updateTag } from "next/cache";
+import { updateTag } from "next/cache";
 
 export type WithdrawAccountResult = { ok: true } | { error: string; ok: false };
 
@@ -54,12 +54,10 @@ export async function withdrawAccount(): Promise<WithdrawAccountResult> {
 
   await supabase.auth.signOut();
   // Cascading delete removes the user's projects and votes; the cached
-  // grid must reflect that on next visit.
-  updateTag(CACHE_TAGS.PROJECTS_GRID);
-  // Bust the home + settings Router Caches so the dialog's
-  // `router.replace('/')` lands on a fresh anonymous render.
-  revalidatePath("/");
-  revalidatePath("/settings");
+  // grid must reflect that on next visit. The home/header viewer slots are
+  // dynamic (PPR) and re-fetch on the post-withdraw `router.replace('/')`,
+  // so they render anonymous without an explicit path revalidation.
+  updateTag(CACHE_TAGS.PROJECTS);
 
   return { ok: true };
 }

@@ -1,8 +1,8 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
-const revalidatePathMock = vi.fn();
+const refreshMock = vi.fn();
 vi.mock("next/cache", () => ({
-  revalidatePath: revalidatePathMock,
+  refresh: refreshMock,
 }));
 
 const getClaims = vi.fn();
@@ -44,7 +44,7 @@ function stubDelete(error: { message: string } | null = null) {
 }
 
 beforeEach(() => {
-  revalidatePathMock.mockReset();
+  refreshMock.mockReset();
   getClaims.mockReset();
   from.mockReset();
 });
@@ -100,7 +100,7 @@ describe("toggleReaction server action", () => {
       user_id: "u1",
       emoji: "👍",
     });
-    expect(revalidatePathMock).toHaveBeenCalledWith("/projects/p1");
+    expect(refreshMock).toHaveBeenCalled();
   });
 
   it("deletes the existing reaction and revalidates when the viewer already reacted with this emoji", async () => {
@@ -120,7 +120,7 @@ describe("toggleReaction server action", () => {
 
     expect(result).toEqual({ ok: true, state: "removed" });
     expect(deleteQ.delete).toHaveBeenCalled();
-    expect(revalidatePathMock).toHaveBeenCalledWith("/projects/p1");
+    expect(refreshMock).toHaveBeenCalled();
   });
 
   it("surfaces an insert error without state and without revalidate", async () => {
@@ -141,7 +141,7 @@ describe("toggleReaction server action", () => {
     expect(result.ok).toBe(false);
     expect(result.error).toBe("insert boom");
     expect(result.state).toBeUndefined();
-    expect(revalidatePathMock).not.toHaveBeenCalled();
+    expect(refreshMock).not.toHaveBeenCalled();
   });
 
   it("surfaces a delete error without state and without revalidate", async () => {
@@ -162,6 +162,6 @@ describe("toggleReaction server action", () => {
     expect(result.ok).toBe(false);
     expect(result.error).toBe("delete boom");
     expect(result.state).toBeUndefined();
-    expect(revalidatePathMock).not.toHaveBeenCalled();
+    expect(refreshMock).not.toHaveBeenCalled();
   });
 });

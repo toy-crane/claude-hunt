@@ -67,9 +67,9 @@ export async function submitProject(
     };
   }
 
-  updateTag(CACHE_TAGS.PROJECTS_GRID);
+  updateTag(CACHE_TAGS.PROJECTS);
   // Mirror delete/edit: the /settings 내 프로젝트 list reads via
-  // fetchMyProjects, which is uncached and untagged, so the PROJECTS_GRID
+  // fetchMyProjects, which is uncached and untagged, so the PROJECTS
   // tag does not reach it. Revalidate the path so a project submitted from
   // the settings → 새 프로젝트 flow shows up on return without a hard refresh.
   revalidatePath("/settings");

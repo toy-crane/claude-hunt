@@ -1,8 +1,8 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
-const revalidatePathMock = vi.fn();
+const refreshMock = vi.fn();
 vi.mock("next/cache", () => ({
-  revalidatePath: revalidatePathMock,
+  refresh: refreshMock,
 }));
 
 const getClaims = vi.fn();
@@ -34,7 +34,7 @@ function stubInsert(options: StubOptions) {
 }
 
 beforeEach(() => {
-  revalidatePathMock.mockReset();
+  refreshMock.mockReset();
   getClaims.mockReset();
   from.mockReset();
 });
@@ -84,7 +84,7 @@ describe("createComment server action", () => {
       })
     );
     expect(single).toHaveBeenCalledTimes(1);
-    expect(revalidatePathMock).toHaveBeenCalledWith("/projects/p1");
+    expect(refreshMock).toHaveBeenCalled();
   });
 
   it("threads a reply by passing the parent comment id and reusing the optimistic id", async () => {
@@ -119,6 +119,6 @@ describe("createComment server action", () => {
     const result = await createComment(validInput);
 
     expect(result).toEqual({ ok: false, error: "boom" });
-    expect(revalidatePathMock).not.toHaveBeenCalled();
+    expect(refreshMock).not.toHaveBeenCalled();
   });
 });

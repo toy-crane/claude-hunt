@@ -1,19 +1,17 @@
-import { SubmitTrigger } from "@features/submit-project";
-import { fetchViewer } from "@shared/api/supabase/viewer";
-import { Button } from "@shared/ui/button";
 import { Logo } from "@shared/ui/logo";
-import Link from "next/link";
+import { Suspense } from "react";
 
 import { fetchProjectCount } from "../api/fetch-project-count";
-import { HeaderMenu } from "./header-menu";
-import { HeaderNav } from "./header-nav";
+import { HeaderNav, HeaderNavFallback } from "./header-nav";
 import { HeaderScrollEffect } from "./header-scroll-effect";
+import { HeaderAuthFallback, HeaderViewerSlot } from "./header-viewer-slot";
 
 export async function Header() {
-  const [viewer, projectCount] = await Promise.all([
-    fetchViewer(),
-    fetchProjectCount(),
-  ]);
+  // `fetchProjectCount` is viewer-agnostic (cached); it renders into the
+  // static shell. The nav's active-link highlight (usePathname) and the
+  // viewer-specific corner (auth cookie) are request-dynamic, so each sits
+  // behind its own Suspense boundary and streams in per request.
+  const projectCount = await fetchProjectCount();
 
   return (
     <header className="site-header sticky top-0 z-50 border-b bg-background">
@@ -21,24 +19,27 @@ export async function Header() {
       <div className="mx-auto flex w-full max-w-6xl items-center justify-between px-6 py-3">
         <div className="flex items-center gap-6">
           <Logo />
-          <HeaderNav className="hidden md:flex" projectCount={projectCount} />
+          <Suspense
+            fallback={
+              <HeaderNavFallback
+                className="hidden md:flex"
+                projectCount={projectCount}
+              />
+            }
+          >
+            <HeaderNav className="hidden md:flex" projectCount={projectCount} />
+          </Suspense>
         </div>
         <div className="flex items-center gap-2">
-          <SubmitTrigger isAuthenticated={Boolean(viewer)} />
-          {viewer ? (
-            <HeaderMenu
-              avatarUrl={viewer.avatarUrl}
-              displayName={viewer.displayName}
-            />
-          ) : (
-            <Button asChild size="sm" variant="outline">
-              <Link href="/login">로그인</Link>
-            </Button>
-          )}
+          <Suspense fallback={<HeaderAuthFallback />}>
+            <HeaderViewerSlot />
+          </Suspense>
         </div>
       </div>
       <div className="mx-auto w-full max-w-6xl border-t px-6 md:hidden">
-        <HeaderNav projectCount={projectCount} />
+        <Suspense fallback={<HeaderNavFallback projectCount={projectCount} />}>
+          <HeaderNav projectCount={projectCount} />
+        </Suspense>
       </div>
     </header>
   );

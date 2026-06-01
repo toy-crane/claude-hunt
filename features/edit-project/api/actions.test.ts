@@ -100,10 +100,7 @@ describe("editProject server action", () => {
       })
     );
     expect(updateEq).toHaveBeenCalledWith("id", validInput.projectId);
-    expect(updateTagMock).toHaveBeenCalledWith("projects-grid");
-    expect(revalidatePathMock).toHaveBeenCalledWith(
-      `/projects/${validInput.projectId}`
-    );
+    expect(updateTagMock).toHaveBeenCalledWith("projects");
     // /settings reads its own list via fetchMyProjects which is not
     // tagged, so we explicitly revalidate the path.
     expect(revalidatePathMock).toHaveBeenCalledWith("/settings");
@@ -221,6 +218,6 @@ describe("editProject server action", () => {
 
     expect(result.ok).toBe(true);
     expect(storageRemove).toHaveBeenCalledTimes(1);
-    expect(updateTagMock).toHaveBeenCalledWith("projects-grid");
+    expect(updateTagMock).toHaveBeenCalledWith("projects");
   });
 });

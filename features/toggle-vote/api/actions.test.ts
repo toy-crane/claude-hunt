@@ -77,8 +77,7 @@ describe("toggleVote server action", () => {
       user_id: "u1",
       project_id: "p1",
     });
-    expect(updateTagMock).toHaveBeenCalledWith("projects-grid");
-    expect(revalidatePathMock).toHaveBeenCalledWith("/projects/p1");
+    expect(updateTagMock).toHaveBeenCalledWith("projects");
   });
 
   it("deletes the existing vote on second call (toggle off)", async () => {
@@ -101,8 +100,7 @@ describe("toggleVote server action", () => {
 
     expect(result.ok).toBe(true);
     expect(result.voted).toBe(false);
-    expect(updateTagMock).toHaveBeenCalledWith("projects-grid");
-    expect(revalidatePathMock).toHaveBeenCalledWith("/projects/p1");
+    expect(updateTagMock).toHaveBeenCalledWith("projects");
   });
 
   it("surfaces a DB error (e.g. self-vote trigger) on insert", async () => {

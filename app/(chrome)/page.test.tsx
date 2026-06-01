@@ -22,6 +22,12 @@ vi.mock("next/image", () => ({
   default: ({ alt }: { alt: string }) => <span aria-label={alt} role="img" />,
 }));
 
+// HomeContent awaits connection() to opt into request-time rendering; stub it
+// so the component runs synchronously in jsdom.
+vi.mock("next/server", () => ({
+  connection: vi.fn().mockResolvedValue(undefined),
+}));
+
 const fetchViewerMock = vi.fn();
 const fetchProjectCountMock = vi.fn();
 const fetchMonthlyTopProjectsMock =
@@ -95,8 +101,8 @@ describe("home page (/)", () => {
       monthlyResult([MOCK_ROW, RUNNER_UP_A])
     );
 
-    const { default: Page } = await import("./page");
-    const jsx = await Page();
+    const { HomeContent } = await import("./page");
+    const jsx = await HomeContent();
     render(jsx);
 
     expect(
@@ -107,8 +113,8 @@ describe("home page (/)", () => {
   it("renders the winner spotlight with the top project's title", async () => {
     fetchMonthlyTopProjectsMock.mockResolvedValue(monthlyResult([MOCK_ROW]));
 
-    const { default: Page } = await import("./page");
-    const jsx = await Page();
+    const { HomeContent } = await import("./page");
+    const jsx = await HomeContent();
     render(jsx);
 
     expect(
@@ -122,8 +128,8 @@ describe("home page (/)", () => {
       monthlyResult([MOCK_ROW, RUNNER_UP_A])
     );
 
-    const { default: Page } = await import("./page");
-    const jsx = await Page();
+    const { HomeContent } = await import("./page");
+    const jsx = await HomeContent();
     render(jsx);
 
     // RunnersUpSection renders both desktop and mobile variants.
@@ -135,8 +141,8 @@ describe("home page (/)", () => {
   it("renders the projects CTA with the total project count", async () => {
     fetchMonthlyTopProjectsMock.mockResolvedValue(monthlyResult([MOCK_ROW]));
 
-    const { default: Page } = await import("./page");
-    const jsx = await Page();
+    const { HomeContent } = await import("./page");
+    const jsx = await HomeContent();
     render(jsx);
 
     expect(screen.getByText("전체 45개 프로젝트 둘러보기")).toBeInTheDocument();
@@ -145,8 +151,8 @@ describe("home page (/)", () => {
   it("falls back gracefully when no monthly projects are returned", async () => {
     fetchMonthlyTopProjectsMock.mockResolvedValue(monthlyResult([]));
 
-    const { default: Page } = await import("./page");
-    const jsx = await Page();
+    const { HomeContent } = await import("./page");
+    const jsx = await HomeContent();
     render(jsx);
 
     expect(
@@ -163,8 +169,8 @@ describe("home page (/)", () => {
       })
     );
 
-    const { default: Page } = await import("./page");
-    const jsx = await Page();
+    const { HomeContent } = await import("./page");
+    const jsx = await HomeContent();
     render(jsx);
 
     expect(

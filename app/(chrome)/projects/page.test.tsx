@@ -27,6 +27,10 @@ vi.mock("../_components/project-board", () => ({
   ProjectBoard: () => <div data-testid="project-board-stub" />,
 }));
 
+vi.mock("@core/providers/nuqs-provider", () => ({
+  NuqsProvider: ({ children }: { children: React.ReactNode }) => children,
+}));
+
 const SIGNED_IN_VIEWER = {
   id: "user-1",
   email: "alice@example.com",
@@ -45,8 +49,8 @@ describe("/projects page", () => {
   it("renders the project board for signed-out visitors", async () => {
     fetchViewerMock.mockResolvedValue(null);
 
-    const { default: Page } = await import("./page");
-    const jsx = await Page({ searchParams: Promise.resolve({}) });
+    const { BoardData } = await import("./page");
+    const jsx = await BoardData({ searchParams: Promise.resolve({}) });
     render(jsx);
 
     expect(screen.getByTestId("project-board-stub")).toBeInTheDocument();
@@ -55,8 +59,8 @@ describe("/projects page", () => {
   it("renders the project board for signed-in visitors", async () => {
     fetchViewerMock.mockResolvedValue(SIGNED_IN_VIEWER);
 
-    const { default: Page } = await import("./page");
-    const jsx = await Page({ searchParams: Promise.resolve({}) });
+    const { BoardData } = await import("./page");
+    const jsx = await BoardData({ searchParams: Promise.resolve({}) });
     render(jsx);
 
     expect(screen.getByTestId("project-board-stub")).toBeInTheDocument();

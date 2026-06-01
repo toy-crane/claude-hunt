@@ -2,8 +2,8 @@ import type { ProjectWithVoteCount } from "@entities/vote";
 import { createAnonServerClient } from "@shared/api/supabase/anon-server";
 import { createServerClient } from "@shared/api/supabase/server";
 import { CACHE_TAGS } from "@shared/config/cache-tags";
-import { productionCache } from "@shared/lib/cache";
 import { withScreenshotUrls } from "@shared/lib/screenshot-url";
+import { cacheLife, cacheTag } from "next/cache";
 
 export interface FetchProjectsOptions {
   /**
@@ -29,9 +29,17 @@ export interface FetchTopProjectsOptions {
   limit?: number;
 }
 
-async function loadProjectGridCore(): Promise<ProjectGridCore[]> {
-  // Anonymous client — the function MUST NOT depend on cookies/headers so
-  // that `unstable_cache` can safely persist the result across requests.
+/**
+ * Cached read of the landing-page grid rows. Tagged with `projects` so
+ * mutations invalidate it via `updateTag`; `cacheLife("minutes")` is a
+ * safety net behind the tag. Uses the anonymous client so the entry stays
+ * cookie-free and can be reused across requests under `use cache`.
+ */
+async function fetchProjectGridCore(): Promise<ProjectGridCore[]> {
+  "use cache";
+  cacheTag(CACHE_TAGS.PROJECTS);
+  cacheLife("minutes");
+
   const supabase = createAnonServerClient();
   const { data, error } = await supabase
     .from("projects_with_vote_count")
@@ -45,17 +53,6 @@ async function loadProjectGridCore(): Promise<ProjectGridCore[]> {
 
   return withScreenshotUrls(supabase, data ?? []);
 }
-
-/**
- * Cached read of the landing-page grid rows. Tagged with
- * `projects-grid` so mutations invalidate it via `updateTag`; the 60s
- * `revalidate` is a safety net behind the tag.
- */
-const fetchProjectGridCore = productionCache(
-  loadProjectGridCore,
-  ["project-grid-core"],
-  { revalidate: 60, tags: [CACHE_TAGS.PROJECTS_GRID] }
-);
 
 /**
  * Returns the set of project ids the viewer has voted on. Caller is
@@ -103,14 +100,18 @@ export async function fetchProjects(
 }
 
 /**
- * Cookie-free variant for contexts that cannot call `cookies()` — currently
- * `app/opengraph-image.tsx`, where the route is regenerated on an ISR schedule
- * and must not depend on a per-request auth session. Orders the same way as
- * `fetchProjects` so the OG image mirrors the homepage's top-N exactly.
+ * Cookie-free, cached top-N used by the root OG image. Tagged `projects`
+ * (busted by project mutations); the hourly cacheLife is the staleness
+ * ceiling for social previews. Orders the same way as `fetchProjects` so the
+ * OG image mirrors the homepage's top-N.
  */
 export async function fetchTopProjects(
   options: FetchTopProjectsOptions = {}
 ): Promise<TopProjectRow[]> {
+  "use cache";
+  cacheTag(CACHE_TAGS.PROJECTS);
+  cacheLife("hours");
+
   const limit = options.limit ?? 6;
   const supabase = createAnonServerClient();
   const result = await supabase

@@ -10,6 +10,13 @@ vi.mock("@shared/api/supabase/anon-server", () => ({
   }),
 }));
 
+// fetchSitemapProjects uses `use cache`; stub the cache primitives (no-op
+// under the vitest transform) so the real query path runs.
+vi.mock("next/cache", () => ({
+  cacheTag: vi.fn(),
+  cacheLife: vi.fn(),
+}));
+
 describe("sitemap", () => {
   beforeEach(() => {
     vi.clearAllMocks();

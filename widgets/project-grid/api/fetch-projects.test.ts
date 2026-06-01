@@ -1,12 +1,11 @@
 import { vi } from "vitest";
 
-// `unstable_cache` is the real Data Cache wrapper in production. In tests
-// we collapse it to the identity function so each spec sees fresh mock
-// data and we can focus on data flow rather than cache behavior.
+// The cached reads use the `use cache` directive (a no-op under the vitest
+// transform); stub the cache primitives so each spec exercises the real
+// query path with fresh mock data.
 vi.mock("next/cache", () => ({
-  unstable_cache: <T>(fn: T) => fn,
-  revalidateTag: vi.fn(),
-  revalidatePath: vi.fn(),
+  cacheTag: vi.fn(),
+  cacheLife: vi.fn(),
 }));
 
 const anonProjectsSelectMock = vi.fn();

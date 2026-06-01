@@ -1,5 +1,6 @@
 import { fetchViewer } from "@shared/api/supabase/viewer";
 import { SITE_URL } from "@shared/config/site";
+import { Skeleton } from "@shared/ui/skeleton";
 import { CommentList, fetchCommentThreads } from "@widgets/comment-list";
 import {
   fetchProjectDetail,
@@ -8,6 +9,7 @@ import {
 } from "@widgets/project-detail";
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
+import { Suspense } from "react";
 
 interface PageProps {
   params: Promise<{ id: string }>;
@@ -88,7 +90,21 @@ export async function generateMetadata({
   };
 }
 
-export default async function Page({ params }: PageProps) {
+export default function Page({ params }: PageProps) {
+  // `params`, the auth cookie (fetchViewer), and the comment threads are all
+  // request-bound, so the entire detail body streams in behind one Suspense
+  // boundary. The cached project core (fetchProjectCore inside
+  // fetchProjectDetail) still resolves from the cross-request cache.
+  return (
+    <main className="mx-auto flex min-h-svh w-full max-w-3xl flex-col gap-6 bg-background p-6 pb-24 text-foreground">
+      <Suspense fallback={<ProjectDetailSkeleton />}>
+        <ProjectDetailContent params={params} />
+      </Suspense>
+    </main>
+  );
+}
+
+async function ProjectDetailContent({ params }: PageProps) {
   const { id } = await params;
   const viewer = await fetchViewer();
   const viewerId = viewer?.id ?? null;
@@ -101,7 +117,7 @@ export default async function Page({ params }: PageProps) {
   }
 
   return (
-    <main className="mx-auto flex min-h-svh w-full max-w-3xl flex-col gap-6 bg-background p-6 pb-24 text-foreground">
+    <>
       <script
         // biome-ignore lint/security/noDangerouslySetInnerHtml: JSON.stringify of a server-controlled object built from typed project data — required for JSON-LD injection
         dangerouslySetInnerHTML={{
@@ -115,6 +131,16 @@ export default async function Page({ params }: PageProps) {
         viewerUserId={viewerId}
       />
       <CommentList projectId={project.id} threads={threads} viewer={viewer} />
-    </main>
+    </>
+  );
+}
+
+function ProjectDetailSkeleton() {
+  return (
+    <div className="flex flex-col gap-6" data-testid="project-detail-skeleton">
+      <Skeleton className="h-64 w-full" />
+      <Skeleton className="h-8 w-2/3" />
+      <Skeleton className="h-32 w-full" />
+    </div>
   );
 }

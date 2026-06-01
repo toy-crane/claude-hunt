@@ -2,7 +2,7 @@
 
 import { requireAuth } from "@shared/api/supabase/require-auth";
 import { getZodErrorMessage } from "@shared/lib/validation";
-import { revalidatePath } from "next/cache";
+import { refresh } from "next/cache";
 import { type EditCommentInput, editCommentInputSchema } from "./schema";
 
 export interface EditCommentResult {
@@ -50,6 +50,6 @@ export async function editComment(
     };
   }
 
-  revalidatePath(`/projects/${input.projectId}`);
+  refresh();
   return { ok: true };
 }

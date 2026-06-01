@@ -2,7 +2,7 @@
 
 import { requireAuth } from "@shared/api/supabase/require-auth";
 import { getZodErrorMessage } from "@shared/lib/validation";
-import { revalidatePath } from "next/cache";
+import { refresh } from "next/cache";
 import { type ToggleReactionInput, toggleReactionInputSchema } from "./schema";
 
 export interface ToggleReactionResult {
@@ -52,7 +52,7 @@ export async function toggleReaction(
     if (error) {
       return { ok: false, error: error.message };
     }
-    revalidatePath(`/projects/${input.projectId}`);
+    refresh();
     return { ok: true, state: "removed" };
   }
 
@@ -64,6 +64,6 @@ export async function toggleReaction(
   if (error) {
     return { ok: false, error: error.message };
   }
-  revalidatePath(`/projects/${input.projectId}`);
+  refresh();
   return { ok: true, state: "added" };
 }

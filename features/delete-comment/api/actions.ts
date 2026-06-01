@@ -1,7 +1,7 @@
 "use server";
 
 import { requireAuth } from "@shared/api/supabase/require-auth";
-import { revalidatePath } from "next/cache";
+import { refresh } from "next/cache";
 
 export interface DeleteCommentInput {
   commentId: string;
@@ -48,6 +48,6 @@ export async function deleteComment(
     };
   }
 
-  revalidatePath(`/projects/${input.projectId}`);
+  refresh();
   return { ok: true };
 }

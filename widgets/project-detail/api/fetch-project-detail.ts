@@ -1,13 +1,16 @@
 import type { ProjectImage } from "@entities/project";
+import { createAnonServerClient } from "@shared/api/supabase/anon-server";
 import { createServerClient } from "@shared/api/supabase/server";
+import { CACHE_TAGS } from "@shared/config/cache-tags";
 import { SCREENSHOT_BUCKET } from "@shared/config/storage";
+import { cacheLife, cacheTag } from "next/cache";
 import { cache } from "react";
 
 /**
  * Viewer-agnostic project detail row. Shared across every caller of the
  * detail route (metadata + page + OG) regardless of whether a viewer is
  * signed in, so the underlying `projects_with_vote_count` query can hit
- * the React.cache dedup with identical `(id)` arguments.
+ * one cache entry per id.
  */
 export interface ProjectCore {
   author_avatar_url: string | null;
@@ -39,59 +42,68 @@ export interface ProjectDetail extends ProjectCore {
 /**
  * Reads a single project's viewer-agnostic row. Joins through
  * `projects_with_vote_count` for cohort label + author display fields
- * (anon-readable) and resolves every image path to a public storage
- * URL up front. Wrapped in `cache()` so `generateMetadata(id)` and
- * `Page(id, …)` share one Supabase query in the same render tree.
+ * (anon-readable) and resolves every image path to a public storage URL
+ * up front.
+ *
+ * Cached with `use cache` (tag `projects`) so it persists across requests
+ * and de-dupes `generateMetadata(id)` + `Page(id)` within one render. Uses
+ * the anonymous client so the entry stays cookie-free.
  *
  * Returns `null` when no row matches the id.
  */
-export const fetchProjectCore = cache(
-  async (id: string): Promise<ProjectCore | null> => {
-    const supabase = await createServerClient();
-    const { data: row, error } = await supabase
-      .from("projects_with_vote_count")
-      .select("*")
-      .eq("id", id)
-      .maybeSingle();
+export async function fetchProjectCore(
+  id: string
+): Promise<ProjectCore | null> {
+  "use cache";
+  cacheTag(CACHE_TAGS.PROJECTS);
+  cacheLife("minutes");
 
-    if (error) {
-      throw error;
-    }
-    if (!row || row.id == null) {
-      return null;
-    }
+  const supabase = createAnonServerClient();
+  const { data: row, error } = await supabase
+    .from("projects_with_vote_count")
+    .select("*")
+    .eq("id", id)
+    .maybeSingle();
 
-    const screenshots = supabase.storage.from(SCREENSHOT_BUCKET);
-    const images = parseImages(row.images);
-    const imageUrls = images.map(
-      (img) => screenshots.getPublicUrl(img.path).data.publicUrl
-    );
-
-    return {
-      id: row.id,
-      user_id: row.user_id ?? "",
-      cohort_id: row.cohort_id ?? null,
-      cohort_label: row.cohort_label ?? null,
-      cohort_name: row.cohort_name ?? null,
-      title: row.title ?? "",
-      tagline: row.tagline ?? "",
-      project_url: row.project_url ?? "",
-      github_url: row.github_url ?? null,
-      images,
-      imageUrls,
-      primaryImageUrl: imageUrls[0] ?? "",
-      vote_count: Number(row.vote_count ?? 0),
-      author_display_name: row.author_display_name ?? null,
-      author_avatar_url: row.author_avatar_url ?? null,
-      created_at: row.created_at ?? "",
-      updated_at: row.updated_at ?? "",
-    };
+  if (error) {
+    throw error;
   }
-);
+  if (!row || row.id == null) {
+    return null;
+  }
+
+  const screenshots = supabase.storage.from(SCREENSHOT_BUCKET);
+  const images = parseImages(row.images);
+  const imageUrls = images.map(
+    (img) => screenshots.getPublicUrl(img.path).data.publicUrl
+  );
+
+  return {
+    id: row.id,
+    user_id: row.user_id ?? "",
+    cohort_id: row.cohort_id ?? null,
+    cohort_label: row.cohort_label ?? null,
+    cohort_name: row.cohort_name ?? null,
+    title: row.title ?? "",
+    tagline: row.tagline ?? "",
+    project_url: row.project_url ?? "",
+    github_url: row.github_url ?? null,
+    images,
+    imageUrls,
+    primaryImageUrl: imageUrls[0] ?? "",
+    vote_count: Number(row.vote_count ?? 0),
+    author_display_name: row.author_display_name ?? null,
+    author_avatar_url: row.author_avatar_url ?? null,
+    created_at: row.created_at ?? "",
+    updated_at: row.updated_at ?? "",
+  };
+}
 
 /**
  * Checks whether the signed-in viewer has voted on a specific project.
- * Cached so multiple callers in one render share a single `votes` lookup.
+ * Viewer/cookie-bound, so it stays request-scoped via `React.cache` (NOT
+ * `use cache`) — multiple callers in one render share a single `votes`
+ * lookup without persisting a per-viewer result across requests.
  */
 export const fetchViewerVote = cache(
   async (projectId: string, viewerUserId: string): Promise<boolean> => {

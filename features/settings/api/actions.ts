@@ -8,7 +8,7 @@ import {
 import { requireAuth } from "@shared/api/supabase/require-auth";
 import { CACHE_TAGS } from "@shared/config/cache-tags";
 import { getZodErrorMessage } from "@shared/lib/validation";
-import { revalidatePath, updateTag } from "next/cache";
+import { refresh, updateTag } from "next/cache";
 
 export type UpdateDisplayNameResult =
   | { ok: true }
@@ -55,7 +55,7 @@ export async function updateDisplayName(
   }
 
   // display_name surfaces in the cached projects grid as author_display_name.
-  updateTag(CACHE_TAGS.PROJECTS_GRID);
-  revalidatePath("/settings");
+  updateTag(CACHE_TAGS.PROJECTS);
+  refresh();
   return { ok: true };
 }

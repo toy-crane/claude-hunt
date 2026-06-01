@@ -1,8 +1,8 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
-const revalidatePathMock = vi.fn();
+const refreshMock = vi.fn();
 vi.mock("next/cache", () => ({
-  revalidatePath: revalidatePathMock,
+  refresh: refreshMock,
 }));
 
 const getClaims = vi.fn();
@@ -34,7 +34,7 @@ function stubUpdate(options: StubOptions) {
 }
 
 beforeEach(() => {
-  revalidatePathMock.mockReset();
+  refreshMock.mockReset();
   getClaims.mockReset();
   from.mockReset();
 });
@@ -77,7 +77,7 @@ describe("editComment server action", () => {
     expect(result).toEqual({ ok: true });
     expect(update).toHaveBeenCalledWith({ body: "edited body" });
     expect(eq).toHaveBeenCalledWith("id", "c1");
-    expect(revalidatePathMock).toHaveBeenCalledWith("/projects/p1");
+    expect(refreshMock).toHaveBeenCalled();
   });
 
   it("returns a not-found-or-no-permission error when RLS filters the row out (0 rows)", async () => {
@@ -91,7 +91,7 @@ describe("editComment server action", () => {
 
     expect(result.ok).toBe(false);
     expect(result.error).toContain("don't have permission");
-    expect(revalidatePathMock).not.toHaveBeenCalled();
+    expect(refreshMock).not.toHaveBeenCalled();
   });
 
   it("surfaces a supabase update error verbatim and does not revalidate", async () => {
@@ -104,6 +104,6 @@ describe("editComment server action", () => {
     const result = await editComment(validInput);
 
     expect(result).toEqual({ ok: false, error: "boom" });
-    expect(revalidatePathMock).not.toHaveBeenCalled();
+    expect(refreshMock).not.toHaveBeenCalled();
   });
 });

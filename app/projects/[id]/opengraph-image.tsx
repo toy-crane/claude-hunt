@@ -6,7 +6,6 @@ import { ImageResponse } from "next/og";
 export const alt = "claude-hunt — 프로젝트 상세";
 export const size = { width: 1200, height: 630 };
 export const contentType = "image/png";
-export const revalidate = 3600;
 
 const BG = "#ffffff";
 const INK = "#252525";

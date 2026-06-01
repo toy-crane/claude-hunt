@@ -25,7 +25,19 @@ export default defineConfig({
     baseURL: "http://localhost:3000",
     trace: "on-first-retry",
   },
-  projects: [{ name: "chromium", use: { ...devices["Desktop Chrome"] } }],
+  projects: [
+    // Enables Draft Mode and saves the bypass cookie so chromium contexts
+    // read fresh (uncached) data — see e2e/draft.setup.ts.
+    { name: "setup", testMatch: /draft\.setup\.ts/ },
+    {
+      name: "chromium",
+      use: {
+        ...devices["Desktop Chrome"],
+        storageState: "e2e/.auth/draft.json",
+      },
+      dependencies: ["setup"],
+    },
+  ],
   webServer: {
     command: "bun run dev",
     url: "http://localhost:3000",

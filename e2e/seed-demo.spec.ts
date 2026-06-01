@@ -19,11 +19,11 @@ const SEEDED_COHORTS: readonly {
   { name: "Inflearn", re: INFLEARN_RE, projectTitle: "Focus Timer" },
 ];
 
-test.describe("seed demo data — home page renders three cards", () => {
-  test("home page renders the three seeded project cards with image/png screenshots", async ({
+test.describe("seed demo data — projects board renders seeded cards", () => {
+  test("projects board renders the three seeded project cards with image/png screenshots", async ({
     page,
   }) => {
-    await page.goto("/");
+    await page.goto("/projects");
 
     for (const { projectTitle } of SEEDED_COHORTS) {
       const card = page
@@ -45,7 +45,7 @@ test.describe("seed demo data — home page renders three cards", () => {
   test("the three seeded cards reference three distinct authors", async ({
     page,
   }) => {
-    await page.goto("/");
+    await page.goto("/projects");
     const authors = new Set<string>();
     for (const { projectTitle } of SEEDED_COHORTS) {
       const card = page
@@ -61,7 +61,7 @@ test.describe("seed demo data — home page renders three cards", () => {
     test(`cohort filter '${cohort.name}' surfaces its seeded project`, async ({
       page,
     }) => {
-      await page.goto("/");
+      await page.goto("/projects");
       const chips = page.getByTestId("cohort-chips");
       await chips.getByRole("button", { name: cohort.re }).click();
 
@@ -75,7 +75,7 @@ test.describe("seed demo data — home page renders three cards", () => {
   }
 
   test("cohort filter 'LGE-3' surfaces no seeded cards", async ({ page }) => {
-    await page.goto("/");
+    await page.goto("/projects");
     const chips = page.getByTestId("cohort-chips");
     await chips.getByRole("button", { name: LGE_3_RE }).click();
 
@@ -92,7 +92,7 @@ test.describe("seed demo data — home page renders three cards", () => {
   test("restoring 'All cohorts' restores all three seeded cards", async ({
     page,
   }) => {
-    await page.goto("/");
+    await page.goto("/projects");
     const chips = page.getByTestId("cohort-chips");
 
     await chips.getByRole("button", { name: LGE_1_RE }).click();

@@ -1,12 +1,21 @@
 import type { Cohort } from "@entities/cohort";
 import { createAnonServerClient } from "@shared/api/supabase/anon-server";
 import { CACHE_TAGS } from "@shared/config/cache-tags";
-import { productionCache } from "@shared/lib/cache";
+import { cacheLife, cacheTag } from "next/cache";
 
-async function loadCohorts(): Promise<Cohort[]> {
-  // Anon client — cohorts are public reference data and the read MUST NOT
-  // depend on cookies so `unstable_cache` can persist the result across
-  // requests.
+/**
+ * Cohort list shared by the dropdown and the chips. Tagged with `cohorts`
+ * so an admin tool could bust it on demand via `updateTag`; today cohorts
+ * are managed outside the app (seed / migrations), so the
+ * `cacheLife("minutes")` window is what surfaces newly inserted cohorts —
+ * e.g. on the onboarding screen — within ~1 minute. Anonymous client →
+ * cookie-free and reusable across requests under `use cache`.
+ */
+export async function fetchCohorts(): Promise<Cohort[]> {
+  "use cache";
+  cacheTag(CACHE_TAGS.COHORTS);
+  cacheLife("minutes");
+
   const supabase = createAnonServerClient();
   const { data, error } = await supabase
     .from("cohorts")
@@ -17,14 +26,3 @@ async function loadCohorts(): Promise<Cohort[]> {
   }
   return data ?? [];
 }
-
-/**
- * Cohort list shared by the dropdown and the chips. Tagged so admin
- * tooling can bust on demand via `revalidateTag`. The 60-second
- * `revalidate` keeps the hot-path cheap while letting newly inserted
- * cohorts surface on the onboarding screen within ~1 minute.
- */
-export const fetchCohorts = productionCache(loadCohorts, ["cohorts"], {
-  revalidate: 60,
-  tags: [CACHE_TAGS.COHORTS],
-});
