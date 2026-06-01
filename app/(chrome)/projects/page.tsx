@@ -1,3 +1,4 @@
+import { NuqsProvider } from "@core/providers/nuqs-provider";
 import { fetchCohorts } from "@features/cohort-filter/server";
 import { fetchViewer } from "@shared/api/supabase/viewer";
 import { Skeleton } from "@shared/ui/skeleton";
@@ -69,14 +70,19 @@ export async function BoardData({ searchParams }: PageProps) {
     viewerUserId: viewer?.id ?? null,
   });
 
+  // nuqs adapter lives here (not the root layout) so its `useSearchParams`
+  // read stays inside this page's Suspense boundary instead of forcing the
+  // whole app dynamic under Cache Components.
   return (
-    <ProjectBoard
-      cohorts={cohorts}
-      initialCohortId={cohort}
-      isAuthenticated={Boolean(viewer)}
-      projects={projects}
-      viewerUserId={viewer?.id ?? null}
-    />
+    <NuqsProvider>
+      <ProjectBoard
+        cohorts={cohorts}
+        initialCohortId={cohort}
+        isAuthenticated={Boolean(viewer)}
+        projects={projects}
+        viewerUserId={viewer?.id ?? null}
+      />
+    </NuqsProvider>
   );
 }
 

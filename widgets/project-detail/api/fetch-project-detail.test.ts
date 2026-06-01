@@ -71,6 +71,18 @@ vi.mock("@shared/api/supabase/server", () => ({
   createServerClient: vi.fn().mockResolvedValue(supabase),
 }));
 
+// fetchProjectCore now uses the cookie-free anon client under `use cache`.
+vi.mock("@shared/api/supabase/anon-server", () => ({
+  createAnonServerClient: vi.fn(() => supabase),
+}));
+
+// `use cache` directive is a no-op under the vitest transform; stub the
+// cache primitives so the cached fns run as plain async functions.
+vi.mock("next/cache", () => ({
+  cacheTag: vi.fn(),
+  cacheLife: vi.fn(),
+}));
+
 const { fetchProjectCore, fetchViewerVote, fetchProjectDetail } = await import(
   "./fetch-project-detail"
 );

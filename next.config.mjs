@@ -12,6 +12,10 @@ const isLocalSupabase =
 
 /** @type {import('next').NextConfig} */
 const nextConfig = {
+  // Cache Components: dynamic-by-default + PPR. `use cache` functions
+  // prerender into a static shell; uncached/cookie reads stream in behind
+  // Suspense boundaries.
+  cacheComponents: true,
   images: {
     dangerouslyAllowLocalIP: isLocalSupabase,
     remotePatterns: [

@@ -27,6 +27,10 @@ vi.mock("../_components/project-board", () => ({
   ProjectBoard: () => <div data-testid="project-board-stub" />,
 }));
 
+vi.mock("@core/providers/nuqs-provider", () => ({
+  NuqsProvider: ({ children }: { children: React.ReactNode }) => children,
+}));
+
 const SIGNED_IN_VIEWER = {
   id: "user-1",
   email: "alice@example.com",

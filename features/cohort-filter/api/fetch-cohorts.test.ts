@@ -1,9 +1,8 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
 vi.mock("next/cache", () => ({
-  unstable_cache: <T>(fn: T) => fn,
-  revalidateTag: vi.fn(),
-  revalidatePath: vi.fn(),
+  cacheTag: vi.fn(),
+  cacheLife: vi.fn(),
 }));
 
 const order = vi.fn();

@@ -11,11 +11,21 @@ export interface HeaderNavProps {
   projectCount: number;
 }
 
-export function HeaderNav({ projectCount, className }: HeaderNavProps) {
-  const pathname = usePathname();
-  const isHome = pathname === "/";
-  const isProjects = pathname.startsWith("/projects");
+interface HeaderNavViewProps extends HeaderNavProps {
+  isHome: boolean;
+  isProjects: boolean;
+}
 
+/**
+ * Presentational nav. No hooks, so it renders into the static shell (and as
+ * the {@link HeaderNavFallback}) without reading the dynamic pathname.
+ */
+function HeaderNavView({
+  projectCount,
+  className,
+  isHome,
+  isProjects,
+}: HeaderNavViewProps) {
   return (
     <nav
       aria-label="주요 내비게이션"
@@ -34,6 +44,34 @@ export function HeaderNav({ projectCount, className }: HeaderNavProps) {
         강의자료
       </NavLink>
     </nav>
+  );
+}
+
+export function HeaderNav({ projectCount, className }: HeaderNavProps) {
+  const pathname = usePathname();
+  return (
+    <HeaderNavView
+      className={className}
+      isHome={pathname === "/"}
+      isProjects={pathname.startsWith("/projects")}
+      projectCount={projectCount}
+    />
+  );
+}
+
+/**
+ * Active-state-free nav for the Suspense fallback / static shell. `usePathname`
+ * is request-dynamic, so the real {@link HeaderNav} (with the active-link
+ * highlight) hydrates over this on the client.
+ */
+export function HeaderNavFallback({ projectCount, className }: HeaderNavProps) {
+  return (
+    <HeaderNavView
+      className={className}
+      isHome={false}
+      isProjects={false}
+      projectCount={projectCount}
+    />
   );
 }
 

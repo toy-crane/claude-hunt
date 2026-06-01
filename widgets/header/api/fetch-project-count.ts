@@ -1,8 +1,18 @@
 import { createAnonServerClient } from "@shared/api/supabase/anon-server";
 import { CACHE_TAGS } from "@shared/config/cache-tags";
-import { productionCache } from "@shared/lib/cache";
+import { cacheLife, cacheTag } from "next/cache";
 
-async function loadProjectCount(): Promise<number> {
+/**
+ * Total project count for the header nav badge and the home CTA card.
+ * Shares the `projects` cache tag with the landing grid so an
+ * insert/delete invalidates both at once. Anonymous client → cookie-free,
+ * so it renders into the static shell under `use cache`.
+ */
+export async function fetchProjectCount(): Promise<number> {
+  "use cache";
+  cacheTag(CACHE_TAGS.PROJECTS);
+  cacheLife("minutes");
+
   const supabase = createAnonServerClient();
   const { count, error } = await supabase
     .from("projects")
@@ -13,14 +23,3 @@ async function loadProjectCount(): Promise<number> {
   }
   return count ?? 0;
 }
-
-/**
- * Total project count for the header nav badge and the home CTA card.
- * Shares the `projects-grid` cache tag with the landing grid so an
- * insert/delete invalidates both at once.
- */
-export const fetchProjectCount = productionCache(
-  loadProjectCount,
-  ["header-project-count"],
-  { revalidate: 60, tags: [CACHE_TAGS.PROJECTS] }
-);
