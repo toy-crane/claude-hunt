@@ -2,7 +2,6 @@
 
 import { CommentForm } from "@features/create-comment";
 import type { Viewer } from "@shared/api/supabase/viewer";
-import { Empty, EmptyHeader, EmptyTitle } from "@shared/ui/empty";
 import { useOptimistic } from "react";
 import type { CommentRow, CommentThread } from "../api/fetch-comment-threads";
 import { CommentItem } from "./comment-item";
@@ -173,13 +172,7 @@ export function CommentList({ threads, projectId, viewer }: CommentListProps) {
         projectId={projectId}
       />
 
-      {optimisticThreads.length === 0 ? (
-        <Empty className="border p-8" data-testid="comment-list-empty">
-          <EmptyHeader>
-            <EmptyTitle className="text-base">아직 댓글이 없어요</EmptyTitle>
-          </EmptyHeader>
-        </Empty>
-      ) : (
+      {optimisticThreads.length > 0 && (
         <ul className="flex flex-col divide-y" data-testid="comment-list-items">
           {optimisticThreads.map((thread) => (
             <li
