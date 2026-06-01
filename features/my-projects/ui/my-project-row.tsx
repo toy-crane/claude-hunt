@@ -1,7 +1,5 @@
 import { RiArrowUpLine } from "@remixicon/react";
 import { formatDateYmd } from "@shared/lib/format-date";
-import { SHIMMER_DATA_URL } from "@shared/lib/image";
-import Image from "next/image";
 import type { ReactNode } from "react";
 import type { MyProjectRow as MyProjectRowData } from "../api/fetch-my-projects";
 
@@ -23,23 +21,9 @@ export function MyProjectRow({ project, actions }: MyProjectRowProps) {
 
   return (
     <div
-      className="group/row grid grid-cols-[40px_1fr_auto] items-center gap-2.5 border-border border-b px-3 py-2.5 last:border-b-0 hover:bg-muted/50 min-[720px]:grid-cols-[62px_1fr_56px_72px_72px] min-[720px]:gap-2.5 min-[720px]:px-3 min-[720px]:py-2"
+      className="group/row grid grid-cols-[1fr_auto] items-center gap-2.5 border-border border-b px-3 py-2.5 last:border-b-0 hover:bg-muted/50 min-[720px]:grid-cols-[1fr_56px_72px_72px] min-[720px]:gap-2.5 min-[720px]:px-3 min-[720px]:py-2"
       data-testid="my-project-row"
     >
-      {/* Thumbnail — 40×40 on mobile, 48×27 on desktop */}
-      <div className="relative size-10 shrink-0 overflow-hidden bg-muted min-[720px]:h-[27px] min-[720px]:w-12">
-        {project.screenshotUrl ? (
-          <Image
-            alt={`${title} 스크린샷`}
-            className="object-cover"
-            fill
-            placeholder={SHIMMER_DATA_URL}
-            sizes="(max-width: 720px) 40px, 48px"
-            src={project.screenshotUrl}
-          />
-        ) : null}
-      </div>
-
       {/* Title + tagline (desktop) / Title + meta (mobile) */}
       <div className="flex min-w-0 flex-col gap-0.5">
         <span className="truncate font-medium font-mono text-[13px] min-[720px]:font-heading">
