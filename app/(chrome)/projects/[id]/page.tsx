@@ -1,10 +1,14 @@
 import { fetchViewer } from "@shared/api/supabase/viewer";
 import { SITE_URL } from "@shared/config/site";
-import { Skeleton } from "@shared/ui/skeleton";
-import { CommentList, fetchCommentThreads } from "@widgets/comment-list";
+import {
+  CommentList,
+  CommentListSkeleton,
+  fetchCommentThreads,
+} from "@widgets/comment-list";
 import {
   fetchProjectDetail,
   Hero,
+  HeroSkeleton,
   type ProjectDetail,
 } from "@widgets/project-detail";
 import type { Metadata } from "next";
@@ -138,9 +142,8 @@ async function ProjectDetailContent({ params }: PageProps) {
 function ProjectDetailSkeleton() {
   return (
     <div className="flex flex-col gap-6" data-testid="project-detail-skeleton">
-      <Skeleton className="h-64 w-full" />
-      <Skeleton className="h-8 w-2/3" />
-      <Skeleton className="h-32 w-full" />
+      <HeroSkeleton />
+      <CommentListSkeleton />
     </div>
   );
 }
