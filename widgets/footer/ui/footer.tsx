@@ -6,7 +6,6 @@ import Link from "next/link";
 
 const REPO_URL = "https://github.com/toy-crane/claude-hunt";
 const ISSUE_URL = `${REPO_URL}/issues/new`;
-const CREATOR_URL = "https://toycrane.xyz";
 const COPYRIGHT_YEAR = 2026;
 
 export function Footer() {
@@ -41,17 +40,6 @@ export function Footer() {
               <span>Feedback</span>
             </a>
           </Button>
-          <span className="px-2.5 text-xs">
-            Built by{" "}
-            <a
-              className="underline-offset-4 hover:underline"
-              href={CREATOR_URL}
-              rel="noopener noreferrer"
-              target="_blank"
-            >
-              toycrane
-            </a>
-          </span>
         </nav>
       </div>
     </footer>
