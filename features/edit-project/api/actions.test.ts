@@ -141,6 +141,38 @@ describe("editProject server action", () => {
     );
   });
 
+  it("writes the description to the update when provided", async () => {
+    getClaims.mockResolvedValue({
+      data: { claims: { sub: "u1" } },
+      error: null,
+    });
+    const { update } = stubFrom({
+      updateRows: [{ id: validInput.projectId }],
+    });
+
+    await editProject({ ...validInput, description: "수정된 설명입니다." });
+
+    expect(update).toHaveBeenCalledWith(
+      expect.objectContaining({ description: "수정된 설명입니다." })
+    );
+  });
+
+  it("writes a null description when omitted", async () => {
+    getClaims.mockResolvedValue({
+      data: { claims: { sub: "u1" } },
+      error: null,
+    });
+    const { update } = stubFrom({
+      updateRows: [{ id: validInput.projectId }],
+    });
+
+    await editProject(validInput);
+
+    expect(update).toHaveBeenCalledWith(
+      expect.objectContaining({ description: null })
+    );
+  });
+
   it("removes the previous screenshot from storage after a successful replace", async () => {
     getClaims.mockResolvedValue({
       data: { claims: { sub: "u1" } },

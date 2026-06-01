@@ -53,6 +53,7 @@ export async function submitProject(
       cohort_id: profile.cohort_id,
       title: input.title,
       tagline: input.tagline,
+      description: input.description ?? null,
       project_url: input.projectUrl,
       github_url: input.githubUrl ?? null,
       images: input.imagePaths.map((path) => ({ path })),
