@@ -2,10 +2,8 @@ import { beforeEach, describe, expect, it, vi } from "vitest";
 
 const SIGNED_IN_REGEX = /signed in/i;
 
-const revalidatePathMock = vi.fn();
 const updateTagMock = vi.fn();
 vi.mock("next/cache", () => ({
-  revalidatePath: revalidatePathMock,
   updateTag: updateTagMock,
 }));
 
@@ -46,7 +44,6 @@ function stubProjects(
 }
 
 beforeEach(() => {
-  revalidatePathMock.mockClear();
   updateTagMock.mockClear();
   storageRemove.mockClear();
   storageFrom.mockClear();
