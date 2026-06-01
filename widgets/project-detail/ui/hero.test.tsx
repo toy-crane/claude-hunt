@@ -89,6 +89,29 @@ describe("<Hero />", () => {
     expect(screen.getByTestId("vote-button")).toHaveTextContent("128");
   });
 
+  it("links the cohort badge to the project list filtered by that cohort", () => {
+    render(
+      <Hero
+        isAuthenticated={false}
+        project={buildProject()}
+        viewerUserId={null}
+      />
+    );
+    const cohortLink = screen.getByRole("link", { name: "LG전자 1기" });
+    expect(cohortLink).toHaveAttribute("href", "/projects?cohort=cohort-1");
+  });
+
+  it("omits the cohort badge when the project has no cohort", () => {
+    render(
+      <Hero
+        isAuthenticated={false}
+        project={buildProject({ cohort_id: null, cohort_label: null })}
+        viewerUserId={null}
+      />
+    );
+    expect(screen.queryByText("LG전자 1기")).not.toBeInTheDocument();
+  });
+
   it("opens the project URL in a new tab via the visit button", () => {
     render(
       <Hero
