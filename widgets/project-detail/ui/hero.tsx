@@ -7,6 +7,7 @@ import {
 import { formatRelativeKo } from "@shared/lib/format-relative";
 import { Badge } from "@shared/ui/badge";
 import { Button } from "@shared/ui/button";
+import Link from "next/link";
 import type { ProjectDetail } from "../api/fetch-project-detail";
 import { ImageGallery } from "./image-gallery";
 import { OwnerControls } from "./owner-controls";
@@ -63,11 +64,15 @@ export function Hero({ project, isAuthenticated, viewerUserId }: HeroProps) {
         className="flex flex-wrap items-center gap-2 text-muted-foreground text-sm"
         data-testid="project-detail-meta"
       >
-        {project.cohort_label ? (
+        {project.cohort_id && project.cohort_label ? (
           <>
-            <Badge className="gap-1" variant="outline">
-              <RiGroupLine aria-hidden="true" className="size-3" />
-              {project.cohort_label}
+            <Badge asChild className="gap-1" variant="outline">
+              <Link
+                href={`/projects?cohort=${encodeURIComponent(project.cohort_id)}`}
+              >
+                <RiGroupLine aria-hidden="true" className="size-3" />
+                {project.cohort_label}
+              </Link>
             </Badge>
             <span aria-hidden="true">·</span>
           </>
