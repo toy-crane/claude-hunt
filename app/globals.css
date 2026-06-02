@@ -150,22 +150,6 @@
   }
 }
 
-.site-header {
-  /* Keep the blur layer ALWAYS mounted; only the background tint changes on
-     scroll. iOS Safari creates/destroys the backdrop-filter compositing layer
-     whenever the property is toggled on or off — which is exactly what happened
-     on the `is-scrolled` flip during back-navigation: the list restores its
-     scroll position, flipping the class false→true, and for one frame Safari
-     paints the header unfiltered so the content behind bleeds through sharply
-     before the blur re-applies (header → content → header). A constant filter
-     is never recreated, and because the blur is already in place while the
-     background tint transitions, nothing sharp ever shows through. At the top
-     the opaque background hides the (invisible) blur, so there is no visual
-     cost. */
-  -webkit-backdrop-filter: saturate(140%) blur(8px);
-  backdrop-filter: saturate(140%) blur(8px);
-  transition: background 180ms ease;
-}
 /* Scope view transitions to the list-reorder animation only. The project grid
    wraps each card in <ViewTransition>, so a card slides to its new rank when a
    vote reorders the list — that animation lives in each card's own group. The
@@ -177,9 +161,6 @@
 ::view-transition-new(root) {
   animation: none;
 }
-html.is-scrolled .site-header {
-  background: color-mix(in oklch, var(--background) 80%, transparent);
-}
 
 @media (prefers-reduced-motion: reduce) {
   ::view-transition-old(*),
@@ -188,8 +169,5 @@ html.is-scrolled .site-header {
   ::view-transition-image-pair(*) {
     animation-duration: 0s !important;
     animation-delay: 0s !important;
-  }
-  .site-header {
-    transition: none;
   }
 }
