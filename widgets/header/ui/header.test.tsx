@@ -55,4 +55,15 @@ describe("<Header />", () => {
     // HeaderNav renders the count in both the desktop and mobile navs.
     expect(screen.getAllByText("45").length).toBeGreaterThan(0);
   });
+
+  it("anchors the sticky header with its own view-transition-name", async () => {
+    // The header must opt out of the root view-transition snapshot, otherwise
+    // Safari drops the sticky header for a frame on back navigation (flicker).
+    // The paired CSS lives in app/globals.css under ::view-transition-*(site-header).
+    const { Header } = await import("./header");
+    render(await Header());
+
+    const banner = screen.getByRole("banner");
+    expect(banner.className).toContain("[view-transition-name:site-header]");
+  });
 });
