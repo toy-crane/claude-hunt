@@ -56,14 +56,17 @@ describe("<Header />", () => {
     expect(screen.getAllByText("45").length).toBeGreaterThan(0);
   });
 
-  it("anchors the sticky header with its own view-transition-name", async () => {
-    // The header must opt out of the root view-transition snapshot, otherwise
-    // Safari drops the sticky header for a frame on back navigation (flicker).
-    // The paired CSS lives in app/globals.css under ::view-transition-*(site-header).
+  it("hardens the sticky header against iOS Safari navigation flicker", async () => {
+    // Forward nav: own view-transition-name keeps it out of the root snapshot
+    // (paired CSS in app/globals.css). Back nav (no view transition): GPU-layer
+    // promotion stops Safari from re-rasterizing the sticky header when
+    // cacheComponents toggles the previous route to display:none.
     const { Header } = await import("./header");
     render(await Header());
 
     const banner = screen.getByRole("banner");
     expect(banner.className).toContain("[view-transition-name:site-header]");
+    expect(banner.className).toContain("[transform:translateZ(0)]");
+    expect(banner.className).toContain("[backface-visibility:hidden]");
   });
 });

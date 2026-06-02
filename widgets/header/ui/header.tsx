@@ -13,7 +13,15 @@ export async function Header() {
   const projectCount = await fetchProjectCount();
 
   return (
-    <header className="sticky top-0 z-50 border-b bg-background [view-transition-name:site-header]">
+    // The header is sticky, so it flickers during navigation on iOS Safari:
+    // - Forward nav runs a view transition; [view-transition-name:site-header]
+    //   (paired with rules in globals.css) lifts it out of the root snapshot so
+    //   it doesn't cross-fade. Back nav skips view transitions entirely.
+    // - On back nav, cacheComponents toggles the previous route's subtree to
+    //   display:none (React Activity); Safari re-rasterizes the sticky header
+    //   for a frame, dropping it. translateZ(0)+backface-visibility:hidden
+    //   promote it to its own compositor layer so it's not repainted.
+    <header className="sticky top-0 z-50 border-b bg-background [backface-visibility:hidden] [transform:translateZ(0)] [view-transition-name:site-header]">
       <div className="mx-auto flex w-full max-w-6xl items-center justify-between px-6 py-3">
         <div className="flex items-center gap-6">
           <Logo />
