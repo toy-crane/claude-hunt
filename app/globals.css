@@ -164,11 +164,22 @@
     backdrop-filter 180ms ease,
     background 180ms ease;
 }
-/* Keep the header stationary during page transitions instead of fading/moving
-   with the root snapshot, and paint it above the cross-fading page content. */
+/* Keep the header stationary during any transition instead of letting it
+   fade/move with the page, and paint it above the rest. */
 ::view-transition-group(site-header) {
   animation: none;
   z-index: 1000;
+}
+/* Scope view transitions to the list-reorder animation only. The project grid
+   wraps each card in <ViewTransition>, so a card slides to its new rank when a
+   vote reorders the list — that animation lives in each card's own group. The
+   whole-page cross-fade the root group runs on every navigation is an unwanted
+   side effect, so silence it: navigation becomes an instant cut while the card
+   moves still animate. */
+::view-transition-group(root),
+::view-transition-old(root),
+::view-transition-new(root) {
+  animation: none;
 }
 html.is-scrolled .site-header {
   background: color-mix(in oklch, var(--background) 80%, transparent);
