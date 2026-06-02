@@ -165,9 +165,14 @@ max_indexes = 5
 enabled = true
 # The base URL of your website. Used as an allow-list for redirects and for constructing URLs used
 # in emails.
-site_url = "http://localhost:3000"
+site_url = "https://claude-hunt.localhost"
 # A list of *exact* URLs that auth providers are permitted to redirect to post authentication.
-additional_redirect_urls = ["http://localhost:3000/auth/callback"]
+# Served via portless (https://claude-hunt.localhost); the wildcard covers worktree
+# subdomains (https://<worktree>.claude-hunt.localhost).
+additional_redirect_urls = [
+  "https://claude-hunt.localhost/auth/callback",
+  "https://*.claude-hunt.localhost/auth/callback",
+]
 # How long tokens are valid for, in seconds. Defaults to 3600 (1 hour), maximum 604,800 (1 week).
 jwt_expiry = 3600
 # JWT issuer URL. If not set, defaults to the local API URL (http://127.0.0.1:<port>/auth/v1).
