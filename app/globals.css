@@ -150,21 +150,16 @@
   }
 }
 
-.site-header {
-  /* Pin the header to a persistent compositing layer. iOS Safari otherwise
-     re-creates the backdrop-filter layer when the header repaints on
-     back-navigation (scroll restore re-applies `is-scrolled`), dropping the
-     blur for one frame so the content behind flashes through sharply, then
-     re-blurs. translateZ(0) keeps the layer alive across the repaint. */
-  transform: translateZ(0);
-  transition:
-    backdrop-filter 180ms ease,
-    background 180ms ease;
-}
-html.is-scrolled .site-header {
-  background: color-mix(in oklch, var(--background) 80%, transparent);
-  -webkit-backdrop-filter: saturate(140%) blur(8px);
-  backdrop-filter: saturate(140%) blur(8px);
+/* Scope view transitions to the list-reorder animation only. The project grid
+   wraps each card in <ViewTransition>, so a card slides to its new rank when a
+   vote reorders the list — that animation lives in each card's own group. The
+   whole-page cross-fade the root group runs on every navigation is an unwanted
+   side effect, so silence it: navigation becomes an instant cut while the card
+   moves still animate. */
+::view-transition-group(root),
+::view-transition-old(root),
+::view-transition-new(root) {
+  animation: none;
 }
 
 @media (prefers-reduced-motion: reduce) {
@@ -174,8 +169,5 @@ html.is-scrolled .site-header {
   ::view-transition-image-pair(*) {
     animation-duration: 0s !important;
     animation-delay: 0s !important;
-  }
-  .site-header {
-    transition: none;
   }
 }

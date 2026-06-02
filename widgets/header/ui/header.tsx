@@ -3,7 +3,6 @@ import { Suspense } from "react";
 
 import { fetchProjectCount } from "../api/fetch-project-count";
 import { HeaderNav, HeaderNavFallback } from "./header-nav";
-import { HeaderScrollEffect } from "./header-scroll-effect";
 import { HeaderAuthFallback, HeaderViewerSlot } from "./header-viewer-slot";
 
 export async function Header() {
@@ -14,8 +13,7 @@ export async function Header() {
   const projectCount = await fetchProjectCount();
 
   return (
-    <header className="site-header sticky top-0 z-50 border-b bg-background">
-      <HeaderScrollEffect />
+    <header className="sticky top-0 z-50 border-b bg-background">
       <div className="mx-auto flex w-full max-w-6xl items-center justify-between px-6 py-3">
         <div className="flex items-center gap-6">
           <Logo />
