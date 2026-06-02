@@ -151,15 +151,24 @@
 }
 
 .site-header {
-  /* Pin the header to a persistent compositing layer. iOS Safari otherwise
-     re-creates the backdrop-filter layer when the header repaints on
-     back-navigation (scroll restore re-applies `is-scrolled`), dropping the
-     blur for one frame so the content behind flashes through sharply, then
-     re-blurs. translateZ(0) keeps the layer alive across the repaint. */
-  transform: translateZ(0);
+  /* The project grid wraps each card in React's <ViewTransition>, so every
+     navigation (back included) runs document.startViewTransition(). Without
+     its own name the sticky header is captured into the root snapshot and
+     cross-faded with the whole page: for those frames its backdrop-filter
+     blends out, the content behind bleeds through sharply, then the live
+     header snaps back (header → content → header). A dedicated transition
+     name lifts the header into a standalone group that holds still above the
+     cross-fade, so it never tears through. */
+  view-transition-name: site-header;
   transition:
     backdrop-filter 180ms ease,
     background 180ms ease;
+}
+/* Keep the header stationary during page transitions instead of fading/moving
+   with the root snapshot, and paint it above the cross-fading page content. */
+::view-transition-group(site-header) {
+  animation: none;
+  z-index: 1000;
 }
 html.is-scrolled .site-header {
   background: color-mix(in oklch, var(--background) 80%, transparent);
