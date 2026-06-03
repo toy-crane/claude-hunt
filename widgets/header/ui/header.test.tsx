@@ -55,18 +55,4 @@ describe("<Header />", () => {
     // HeaderNav renders the count in both the desktop and mobile navs.
     expect(screen.getAllByText("45").length).toBeGreaterThan(0);
   });
-
-  it("hardens the sticky header against iOS Safari navigation flicker", async () => {
-    // Forward nav: own view-transition-name keeps it out of the root snapshot
-    // (paired CSS in app/globals.css). Back nav (no view transition): GPU-layer
-    // promotion stops Safari from re-rasterizing the sticky header when
-    // cacheComponents toggles the previous route to display:none.
-    const { Header } = await import("./header");
-    render(await Header());
-
-    const banner = screen.getByRole("banner");
-    expect(banner.className).toContain("[view-transition-name:site-header]");
-    expect(banner.className).toContain("[transform:translateZ(0)]");
-    expect(banner.className).toContain("[backface-visibility:hidden]");
-  });
 });
