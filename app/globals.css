@@ -150,18 +150,6 @@
   }
 }
 
-/* Scope view transitions to the list-reorder animation only. The project grid
-   wraps each card in <ViewTransition>, so a card slides to its new rank when a
-   vote reorders the list — that animation lives in each card's own group. The
-   whole-page cross-fade the root group runs on every navigation is an unwanted
-   side effect, so silence it: navigation becomes an instant cut while the card
-   moves still animate. */
-::view-transition-group(root),
-::view-transition-old(root),
-::view-transition-new(root) {
-  animation: none;
-}
-
 @media (prefers-reduced-motion: reduce) {
   ::view-transition-old(*),
   ::view-transition-new(*),
