@@ -33,8 +33,13 @@ vi.mock("../api/actions.ts", () => ({
 }));
 
 const signOutMock = vi.fn().mockResolvedValue({ error: null });
+const getUserMock = vi
+  .fn()
+  .mockResolvedValue({ data: { user: { id: "user-123" } } });
 vi.mock("@shared/api/supabase/client.ts", () => ({
-  createBrowserClient: () => ({ auth: { signOut: signOutMock } }),
+  createBrowserClient: () => ({
+    auth: { signOut: signOutMock, getUser: getUserMock },
+  }),
 }));
 
 const { OnboardingForm } = await import("./onboarding-form");
@@ -81,6 +86,7 @@ describe("OnboardingForm", () => {
     replaceMock.mockClear();
     completeOnboardingMock.mockReset();
     signOutMock.mockClear();
+    getUserMock.mockClear();
   });
 
   it("renders display name input, cohort selector, continue, and sign out", () => {
