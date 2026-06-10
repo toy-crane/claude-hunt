@@ -14,6 +14,7 @@ import { Field, FieldLabel } from "@shared/ui/field";
 import { Input } from "@shared/ui/input";
 import { Spinner } from "@shared/ui/spinner";
 import { useRouter } from "next/navigation";
+import posthog from "posthog-js";
 import { useId, useState, useTransition } from "react";
 
 import { withdrawAccount } from "../api/actions";
@@ -46,6 +47,8 @@ export function WithdrawDialog({ email }: WithdrawDialogProps) {
     startTransition(async () => {
       const result = await withdrawAccount();
       if (result.ok) {
+        posthog.capture("account_withdrawn");
+        posthog.reset();
         router.replace("/");
         return;
       }

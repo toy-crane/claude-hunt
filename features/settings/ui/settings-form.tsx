@@ -10,6 +10,7 @@ import { Field, FieldGroup, FieldLabel } from "@shared/ui/field";
 import { Input } from "@shared/ui/input";
 import { Spinner } from "@shared/ui/spinner";
 import { useRouter } from "next/navigation";
+import posthog from "posthog-js";
 import { useId, useState, useTransition } from "react";
 import { toast } from "sonner";
 
@@ -46,6 +47,7 @@ export function SettingsForm({
       const result = await updateDisplayName(parsed.data);
       if (result.ok) {
         toast.success("닉네임을 변경했어요.");
+        posthog.capture("display_name_updated");
         router.refresh();
         return;
       }

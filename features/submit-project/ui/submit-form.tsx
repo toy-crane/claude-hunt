@@ -20,6 +20,7 @@ import { Spinner } from "@shared/ui/spinner";
 import { Textarea } from "@shared/ui/textarea";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
+import posthog from "posthog-js";
 import { useId, useState } from "react";
 import { toast } from "sonner";
 import { submitProject } from "../api/actions";
@@ -119,6 +120,11 @@ export function SubmitForm({ backHref, cohortId: _cohortId }: SubmitFormProps) {
       form.reset();
       setImages([]);
       toast.success("프로젝트를 제출했어요.");
+      posthog.capture("project_submitted", {
+        project_id: result.projectId,
+        has_github_url: Boolean(values.githubUrl),
+        image_count: imagePaths.length,
+      });
       // When the user came from a specific entry point (e.g. /settings),
       // honor it for both success and fallback paths. Otherwise default
       // to the new project's detail page (which doesn't exist until the

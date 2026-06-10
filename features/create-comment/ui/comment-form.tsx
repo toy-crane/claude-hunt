@@ -5,6 +5,7 @@ import { Button } from "@shared/ui/button";
 import { Spinner } from "@shared/ui/spinner";
 import { Textarea } from "@shared/ui/textarea";
 import Link from "next/link";
+import posthog from "posthog-js";
 import { useId, useState, useTransition } from "react";
 import { toast } from "sonner";
 import { createComment } from "../api/actions";
@@ -96,6 +97,11 @@ export function CommentForm({
       toast.success(
         parentCommentId ? "답글을 등록했어요." : "댓글을 등록했어요."
       );
+      posthog.capture("comment_created", {
+        project_id: projectId,
+        is_reply: Boolean(parentCommentId),
+        body_length: body.length,
+      });
       onCancel?.();
     });
   }

@@ -5,6 +5,7 @@ import { RiEmotionHappyLine } from "@remixicon/react";
 import { cn } from "@shared/lib/utils";
 import { Popover, PopoverContent, PopoverTrigger } from "@shared/ui/popover";
 import { useRouter } from "next/navigation";
+import posthog from "posthog-js";
 import {
   type RefObject,
   useEffect,
@@ -101,6 +102,11 @@ export function ReactionRow({
         );
         return;
       }
+      posthog.capture("reaction_toggled", {
+        project_id: projectId,
+        comment_id: commentId,
+        emoji,
+      });
       router.refresh();
     });
   }

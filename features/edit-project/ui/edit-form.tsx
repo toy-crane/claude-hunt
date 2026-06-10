@@ -20,6 +20,7 @@ import { Spinner } from "@shared/ui/spinner";
 import { Textarea } from "@shared/ui/textarea";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
+import posthog from "posthog-js";
 import { useId, useState } from "react";
 import { toast } from "sonner";
 import { editProject } from "../api/actions";
@@ -185,6 +186,11 @@ export function EditForm({ backHref, initial }: EditFormProps) {
         return;
       }
       toast.success("저장했어요.");
+      posthog.capture("project_edited", {
+        project_id: initial.projectId,
+        has_github_url: Boolean(values.githubUrl),
+        image_count: imagePaths.length,
+      });
       router.push(resolvedBackHref);
       router.refresh();
     } finally {

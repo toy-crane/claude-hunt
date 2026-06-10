@@ -3,6 +3,7 @@
 import { RiArrowUpFill, RiArrowUpLine } from "@remixicon/react";
 import { cn } from "@shared/lib/utils";
 import Link from "next/link";
+import posthog from "posthog-js";
 import { useOptimistic, useTransition } from "react";
 import { toast } from "sonner";
 import { toggleVote } from "../api/actions";
@@ -108,7 +109,12 @@ export function VoteButton({
           result.error ??
             "추천을 저장하지 못했어요. 잠시 후 다시 시도해 주세요."
         );
+        return;
       }
+      posthog.capture("vote_toggled", {
+        project_id: projectId,
+        action: optimistic.voted ? "remove" : "add",
+      });
     });
   }
 

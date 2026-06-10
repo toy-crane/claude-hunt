@@ -22,6 +22,7 @@ import {
 import { Separator } from "@shared/ui/separator";
 import { Spinner } from "@shared/ui/spinner";
 import { useRouter } from "next/navigation";
+import posthog from "posthog-js";
 import { useId, useState, useTransition } from "react";
 import { completeOnboarding } from "../api/actions";
 import { ONBOARDING_DESCRIPTION, ONBOARDING_TITLE } from "../copy";
@@ -83,6 +84,17 @@ export function OnboardingForm({ cohorts, initialNext }: OnboardingFormProps) {
         );
         return;
       }
+      const supabase = createBrowserClient();
+      const { data } = await supabase.auth.getUser();
+      if (data.user) {
+        posthog.identify(data.user.id, {
+          display_name: input.displayName,
+          cohort_id: input.cohortId,
+        });
+      }
+      posthog.capture("onboarding_completed", {
+        cohort_id: input.cohortId,
+      });
       router.replace(initialNext);
     });
   }

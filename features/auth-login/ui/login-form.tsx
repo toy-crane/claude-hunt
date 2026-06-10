@@ -10,6 +10,7 @@ import { Label } from "@shared/ui/label";
 import { Spinner } from "@shared/ui/spinner";
 import Link from "next/link";
 import { useSearchParams } from "next/navigation";
+import posthog from "posthog-js";
 import { useState } from "react";
 import { LOGIN_DESCRIPTION, LOGIN_TITLE } from "../copy";
 
@@ -31,6 +32,7 @@ export function LoginForm() {
 
   async function handleOAuthLogin(provider: "github" | "google") {
     setLoading(provider);
+    posthog.capture("login_initiated", { provider });
     const { error } = await supabase.auth.signInWithOAuth({
       provider,
       options: {
@@ -46,6 +48,7 @@ export function LoginForm() {
   async function handleEmailLogin(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault();
     setLoading("email");
+    posthog.capture("login_initiated", { provider: "email" });
     const { error } = await supabase.auth.signInWithOtp({
       email,
       options: {

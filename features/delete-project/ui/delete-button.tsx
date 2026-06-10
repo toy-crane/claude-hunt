@@ -13,6 +13,7 @@ import {
 } from "@shared/ui/dialog";
 import { Spinner } from "@shared/ui/spinner";
 import { useRouter } from "next/navigation";
+import posthog from "posthog-js";
 import { useState } from "react";
 import { deleteProject } from "../api/actions";
 
@@ -52,6 +53,7 @@ export function DeleteButton({
       );
       return;
     }
+    posthog.capture("project_deleted", { project_id: projectId });
     setOpen(false);
     // Re-render the route's server components so the deleted row
     // disappears from any list (e.g. settings 내 프로젝트) without a
