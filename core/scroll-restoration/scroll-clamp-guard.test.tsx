@@ -14,7 +14,6 @@ beforeAll(() => {
 
 afterEach(() => {
   cleanup();
-  vi.unstubAllGlobals();
   vi.useRealTimers();
   document.body.style.minHeight = "";
   scrollHeight = 0;
@@ -68,24 +67,7 @@ describe("ScrollClampGuard", () => {
     expect(document.body.style.minHeight).toBe("");
   });
 
-  it("releases the extension two frames after the restore scroll arrives", () => {
-    vi.stubGlobal("requestAnimationFrame", (cb: FrameRequestCallback) => {
-      cb(0);
-      return 0;
-    });
-    render(<ScrollClampGuard />);
-    scrollHeight = 25_000;
-    fireScroll();
-    scrollHeight = 1200;
-    fireTraversal();
-    expect(document.body.style.minHeight).toBe("25000px");
-
-    fireScroll();
-
-    expect(document.body.style.minHeight).toBe("");
-  });
-
-  it("releases the extension after a timeout when no restore scroll arrives", () => {
+  it("keeps the extension alive when scroll events arrive before the timeout", () => {
     vi.useFakeTimers();
     render(<ScrollClampGuard />);
     scrollHeight = 25_000;
@@ -94,22 +76,47 @@ describe("ScrollClampGuard", () => {
     fireTraversal();
     expect(document.body.style.minHeight).toBe("25000px");
 
-    vi.advanceTimersByTime(2000);
+    fireScroll();
+    vi.advanceTimersByTime(1000);
+    fireScroll();
+
+    expect(document.body.style.minHeight).toBe("25000px");
+  });
+
+  it("does not record the inflated height while an extension is active", () => {
+    vi.useFakeTimers();
+    render(<ScrollClampGuard />);
+    scrollHeight = 25_000;
+    fireScroll();
+    scrollHeight = 1200;
+    fireTraversal();
+
+    // 연장 중 scroll은 기록을 남기지 않아야, 짧은 페이지 URL로 이동한 뒤의
+    // 트래버설이 부풀려진 높이로 연장되지 않는다.
+    window.history.replaceState({}, "", "/detail");
+    fireScroll();
+    vi.advanceTimersByTime(3000);
+    fireTraversal();
 
     expect(document.body.style.minHeight).toBe("");
   });
 
-  it("keeps a newer extension alive when the previous release chain fires late", () => {
-    const frames: FrameRequestCallback[] = [];
-    vi.stubGlobal("requestAnimationFrame", (cb: FrameRequestCallback) => {
-      frames.push(cb);
-      return frames.length;
-    });
-    const flushFrames = () => {
-      for (const cb of frames.splice(0)) {
-        cb(0);
-      }
-    };
+  it("releases the extension after the timeout", () => {
+    vi.useFakeTimers();
+    render(<ScrollClampGuard />);
+    scrollHeight = 25_000;
+    fireScroll();
+    scrollHeight = 1200;
+    fireTraversal();
+    expect(document.body.style.minHeight).toBe("25000px");
+
+    vi.advanceTimersByTime(3000);
+
+    expect(document.body.style.minHeight).toBe("");
+  });
+
+  it("supersedes a previous extension when a new traversal arrives", () => {
+    vi.useFakeTimers();
     render(<ScrollClampGuard />);
     scrollHeight = 25_000;
     fireScroll();
@@ -121,16 +128,18 @@ describe("ScrollClampGuard", () => {
     window.history.replaceState({}, "", "/");
     fireTraversal();
     expect(document.body.style.minHeight).toBe("25000px");
-    fireScroll();
 
+    vi.advanceTimersByTime(2000);
     window.history.replaceState({}, "", "/detail");
     fireTraversal();
     expect(document.body.style.minHeight).toBe("30000px");
 
-    flushFrames();
-    flushFrames();
-
+    // 이전 연장의 남은 타이머(1초 뒤)가 새 연장을 풀지 않아야 한다.
+    vi.advanceTimersByTime(1000);
     expect(document.body.style.minHeight).toBe("30000px");
+
+    vi.advanceTimersByTime(2000);
+    expect(document.body.style.minHeight).toBe("");
   });
 
   it("releases the extension when the guard unmounts", () => {
