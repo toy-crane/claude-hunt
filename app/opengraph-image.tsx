@@ -422,7 +422,7 @@ export function OgElement({
               maxWidth: 420,
             }}
           >
-            마음에 드는 프로젝트에 응원을 보내주세요.
+            마음에 드는 프로젝트에 응원을 보내 주세요.
           </div>
         </div>
         <div style={{ display: "flex", flexDirection: "column", gap: 14 }}>
