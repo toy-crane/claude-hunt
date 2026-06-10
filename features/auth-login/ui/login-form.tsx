@@ -104,7 +104,7 @@ export function LoginForm() {
         {otpSent ? (
           <div className="space-y-4 text-center">
             <p className="text-sm">
-              <strong>{email}</strong> 으로 매직 링크를 보냈어요. 이메일을
+              <strong>{email}</strong> 주소로 매직 링크를 보냈어요. 이메일을
               확인하고 로그인해 주세요.
             </p>
             <Button
@@ -115,7 +115,7 @@ export function LoginForm() {
               type="button"
               variant="link"
             >
-              다른 이메일로 시도
+              다른 이메일로 시도하기
             </Button>
           </div>
         ) : (
@@ -145,15 +145,15 @@ export function LoginForm() {
         )}
 
         <p className="mt-6 text-center text-muted-foreground text-xs">
-          계속 진행하면{" "}
+          계속하면{" "}
           <Link className="underline hover:text-foreground" href="/terms">
             서비스 이용약관
-          </Link>{" "}
+          </Link>
           과{" "}
           <Link className="underline hover:text-foreground" href="/privacy">
             개인정보 처리방침
           </Link>
-          에 동의하는 것으로 간주됩니다.
+          에 동의하게 돼요.
         </p>
       </form>
     </AuthLayout>
