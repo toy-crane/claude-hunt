@@ -19,7 +19,7 @@ export function ProjectsCtaCard({ projectCount }: ProjectsCtaCardProps) {
           전체 {projectCount}개 프로젝트 둘러보기
         </span>
         <span className="text-muted-foreground text-xs">
-          기수별 필터 · 정렬 · 직접 응원하기
+          클래스별 필터 · 정렬 · 직접 추천하기
         </span>
       </div>
       <span className="inline-flex items-center gap-2 font-mono text-foreground text-xs">
