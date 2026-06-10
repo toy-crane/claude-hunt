@@ -77,7 +77,7 @@ const PERSONAL_DATA_ITEMS = [
     label: "프로젝트",
     detail: "회원이 제출한 제목, URL, 태그라인, 스크린샷",
   },
-  { label: "투표 기록", detail: "프로젝트 업보트 집계" },
+  { label: "추천 기록", detail: "프로젝트 추천 집계" },
   { label: "IP 주소", detail: "접속 로그 (서비스 운영용)" },
   { label: "User-Agent", detail: "접속 로그 (서비스 운영용)" },
 ];

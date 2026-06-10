@@ -5,7 +5,7 @@ import type { MyProjectRow } from "../api/fetch-my-projects";
 const { MyProjectsList } = await import("./my-projects-list");
 
 const TOTAL_COUNT_RE = /총 2개의 프로젝트/;
-const NEW_PROJECT_CTA_RE = /새 프로젝트 등록하기/;
+const NEW_PROJECT_CTA_RE = /새 프로젝트 제출하기/;
 
 function buildProject(overrides: Partial<MyProjectRow> = {}): MyProjectRow {
   return {
@@ -93,7 +93,7 @@ describe("<MyProjectsList />", () => {
 
     expect(screen.getByTestId("my-projects-empty")).toBeInTheDocument();
     expect(
-      screen.getByText("아직 등록한 프로젝트가 없어요.")
+      screen.getByText("아직 제출한 프로젝트가 없어요.")
     ).toBeInTheDocument();
 
     const cta = screen.getByRole("link", { name: NEW_PROJECT_CTA_RE });

@@ -23,14 +23,12 @@ export async function updateDisplayName(
       ok: false,
       error: {
         field: "displayName",
-        message: getZodErrorMessage(parsed.error, "Invalid display name"),
+        message: getZodErrorMessage(parsed.error, "닉네임을 확인해 주세요."),
       },
     };
   }
 
-  const auth = await requireAuth(
-    "You must be signed in to update your display name"
-  );
+  const auth = await requireAuth("로그인이 풀렸어요. 다시 로그인해 주세요.");
   if (!auth.ok) {
     return {
       ok: false,

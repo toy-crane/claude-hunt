@@ -19,12 +19,12 @@ export async function submitProject(
   if (!parsed.success) {
     return {
       ok: false,
-      error: getZodErrorMessage(parsed.error, "Invalid input"),
+      error: getZodErrorMessage(parsed.error, "입력한 내용을 확인해 주세요."),
     };
   }
   const input = parsed.data;
 
-  const auth = await requireAuth("You must be signed in to submit a project");
+  const auth = await requireAuth("로그인 후 프로젝트를 제출할 수 있어요.");
   if (!auth.ok) {
     return auth;
   }
@@ -36,13 +36,15 @@ export async function submitProject(
     .eq("id", userId)
     .single();
   if (profileError || !profile) {
-    return { ok: false, error: "Could not load your profile" };
+    return {
+      ok: false,
+      error: "프로필을 불러오지 못했어요. 잠시 후 다시 시도해 주세요.",
+    };
   }
   if (!profile.cohort_id) {
     return {
       ok: false,
-      error:
-        "Contact your instructor to get assigned to a cohort before submitting a project",
+      error: "아직 클래스에 배정되지 않았어요. 강사에게 문의해 주세요.",
     };
   }
 
@@ -64,7 +66,9 @@ export async function submitProject(
   if (insertError || !inserted) {
     return {
       ok: false,
-      error: insertError?.message ?? "Could not submit project",
+      error:
+        insertError?.message ??
+        "프로젝트를 제출하지 못했어요. 잠시 후 다시 시도해 주세요.",
     };
   }
 

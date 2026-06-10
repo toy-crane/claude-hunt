@@ -1,7 +1,7 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
-const SIGNED_IN_REGEX = /signed in/i;
-const INSTRUCTOR_REGEX = /instructor/i;
+const SIGNED_IN_REGEX = /로그인/;
+const INSTRUCTOR_REGEX = /강사/;
 
 const revalidatePathMock = vi.fn();
 const updateTagMock = vi.fn();

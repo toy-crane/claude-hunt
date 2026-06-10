@@ -26,10 +26,13 @@ export async function deleteProject(
 ): Promise<DeleteProjectResult> {
   const projectId = input.projectId;
   if (!projectId || typeof projectId !== "string") {
-    return { ok: false, error: "Invalid project id" };
+    return {
+      ok: false,
+      error: "프로젝트를 삭제하지 못했어요. 새로고침한 뒤 다시 시도해 주세요.",
+    };
   }
 
-  const auth = await requireAuth("You must be signed in to delete a project");
+  const auth = await requireAuth("로그인이 풀렸어요. 다시 로그인해 주세요.");
   if (!auth.ok) {
     return auth;
   }
@@ -53,7 +56,8 @@ export async function deleteProject(
   if (!deleted || deleted.length === 0) {
     return {
       ok: false,
-      error: "Project not found or you don't have permission to delete it",
+      error:
+        "프로젝트를 삭제하지 못했어요. 내가 제출한 프로젝트만 삭제할 수 있어요.",
     };
   }
 

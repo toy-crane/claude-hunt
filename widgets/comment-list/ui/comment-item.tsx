@@ -94,10 +94,13 @@ export function CommentItem({
         projectId,
       });
       if (!result.ok) {
-        toast.error(result.error ?? "삭제하지 못했어요.");
+        toast.error(
+          result.error ??
+            "댓글을 삭제하지 못했어요. 잠시 후 다시 시도해 주세요."
+        );
         return;
       }
-      toast.success("댓글이 삭제됐어요.");
+      toast.success("댓글을 삭제했어요.");
     });
   }
 
@@ -145,7 +148,7 @@ export function CommentItem({
                       setEditing(true);
                     }}
                   >
-                    편집
+                    수정
                   </DropdownMenuItem>
                   <DropdownMenuItem
                     disabled={deleting}
@@ -242,7 +245,7 @@ export function CommentItem({
               onClick={handleConfirmDelete}
             >
               {deleting ? <Spinner data-icon="inline-start" /> : null}
-              삭제
+              삭제하기
             </AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>

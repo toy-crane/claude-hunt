@@ -9,8 +9,8 @@ import {
 const EMAIL_LABEL_RE = /이메일/;
 const CONTINUE_BTN_RE = /계속/;
 const MAGIC_LINK_TEXT_RE = /매직 링크/;
-const WITHDRAW_LABEL = /^탈퇴$/;
-const DELETE_ACCOUNT_BTN_RE = /^계정 삭제$/;
+const WITHDRAW_LABEL = /^계정 삭제$/;
+const DELETE_ACCOUNT_BTN_RE = /^삭제하기$/;
 const CANCEL_LABEL = /^취소$/;
 const TYPE_PROMPT_REGEX = /확인을 위해 .* 입력해 주세요/;
 const USER_MENU_RE = /계정 메뉴 열기|로그아웃/;

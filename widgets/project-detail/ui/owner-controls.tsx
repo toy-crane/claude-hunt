@@ -42,10 +42,13 @@ export function OwnerControls({ projectId, projectTitle }: OwnerControlsProps) {
     try {
       const result = await deleteProject({ projectId });
       if (!result.ok) {
-        toast.error(result.error ?? "삭제하지 못했어요.");
+        toast.error(
+          result.error ??
+            "프로젝트를 삭제하지 못했어요. 잠시 후 다시 시도해 주세요."
+        );
         return;
       }
-      toast.success("프로젝트가 삭제됐어요.");
+      toast.success("프로젝트를 삭제했어요.");
       setConfirmOpen(false);
       router.push("/");
       router.refresh();
@@ -74,15 +77,15 @@ export function OwnerControls({ projectId, projectTitle }: OwnerControlsProps) {
           <AlertDialogHeader>
             <AlertDialogTitle>이 프로젝트를 삭제할까요?</AlertDialogTitle>
             <AlertDialogDescription>
-              "{projectTitle}"이(가) 보드에서 사라지고, 첨부된 이미지도 함께
-              삭제됩니다. 이 동작은 되돌릴 수 없어요.
+              "{projectTitle}" 프로젝트와 첨부한 이미지가 함께 삭제돼요. 되돌릴
+              수 없어요.
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
             <AlertDialogCancel disabled={deleting}>취소</AlertDialogCancel>
             <AlertDialogAction disabled={deleting} onClick={handleDelete}>
               {deleting ? <Spinner data-icon="inline-start" /> : null}
-              삭제
+              삭제하기
             </AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>

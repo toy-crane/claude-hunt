@@ -90,7 +90,7 @@ describe("editComment server action", () => {
     const result = await editComment(validInput);
 
     expect(result.ok).toBe(false);
-    expect(result.error).toContain("don't have permission");
+    expect(result.error).toContain("이미 삭제됐거나 내가 쓴 댓글이 아니에요");
     expect(refreshMock).not.toHaveBeenCalled();
   });
 

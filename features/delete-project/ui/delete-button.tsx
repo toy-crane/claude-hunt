@@ -46,7 +46,10 @@ export function DeleteButton({
     const result = await deleteProject({ projectId });
     setDeleting(false);
     if (!result.ok) {
-      setError(result.error ?? "프로젝트를 삭제할 수 없어요.");
+      setError(
+        result.error ??
+          "프로젝트를 삭제하지 못했어요. 잠시 후 다시 시도해 주세요."
+      );
       return;
     }
     setOpen(false);
@@ -82,7 +85,8 @@ export function DeleteButton({
         <DialogHeader>
           <DialogTitle>프로젝트를 삭제할까요?</DialogTitle>
           <DialogDescription>
-            "{projectTitle}"을(를) 그리드에서 제거합니다. 되돌릴 수 없어요.
+            "{projectTitle}" 프로젝트와 첨부한 이미지가 함께 삭제돼요. 되돌릴 수
+            없어요.
           </DialogDescription>
         </DialogHeader>
         {error ? (
@@ -111,7 +115,7 @@ export function DeleteButton({
             variant="destructive"
           >
             {deleting ? <Spinner data-icon="inline-start" /> : null}
-            삭제
+            삭제하기
           </Button>
         </DialogFooter>
       </DialogContent>

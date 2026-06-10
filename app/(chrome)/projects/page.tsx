@@ -12,7 +12,7 @@ import { projectsSearchParamsCache } from "../_search-params";
 
 const PROJECTS_TITLE = "프로젝트 보드 — 클로드 헌트";
 const PROJECTS_DESCRIPTION =
-  "Claude Code 수강생들이 만든 프로젝트를 둘러보고 응원해 주세요.";
+  "Claude Code 수강생들이 만든 프로젝트를 둘러보고 응원해 보세요.";
 
 export const metadata: Metadata = {
   title: { absolute: PROJECTS_TITLE },

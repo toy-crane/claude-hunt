@@ -41,7 +41,7 @@ export function EditCommentInline({
       return;
     }
     if (overLimit) {
-      setError(`${MAX_COMMENT_BODY}자까지 작성할 수 있어요`);
+      setError(`${MAX_COMMENT_BODY}자까지 쓸 수 있어요.`);
       return;
     }
     const body = value;
@@ -57,10 +57,13 @@ export function EditCommentInline({
         body,
       });
       if (!result.ok) {
-        toast.error(result.error ?? "수정하지 못했어요.");
+        toast.error(
+          result.error ??
+            "댓글을 수정하지 못했어요. 잠시 후 다시 시도해 주세요."
+        );
         return;
       }
-      toast.success("수정됐어요.");
+      toast.success("댓글을 수정했어요.");
     });
   }
 

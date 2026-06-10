@@ -18,7 +18,8 @@ export async function toggleVote(projectId: string): Promise<ToggleVoteResult> {
   if (!projectId || typeof projectId !== "string") {
     return {
       ok: false,
-      error: "추천할 프로젝트를 찾지 못했어요. 새로고침 후 다시 시도해 주세요.",
+      error:
+        "추천할 프로젝트를 찾지 못했어요. 새로고침한 뒤 다시 시도해 주세요.",
     };
   }
 

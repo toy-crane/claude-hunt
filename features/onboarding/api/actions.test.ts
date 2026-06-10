@@ -4,7 +4,7 @@ import {
 } from "@entities/profile";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
-const SIGNED_IN_REGEX = /signed in/i;
+const SIGNED_IN_REGEX = /로그인/;
 const COHORT_UUID = "a1b2c3d4-5678-4abc-9def-0123456789ab";
 
 const revalidatePathMock = vi.fn();

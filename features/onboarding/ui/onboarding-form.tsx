@@ -77,7 +77,10 @@ export function OnboardingForm({ cohorts, initialNext }: OnboardingFormProps) {
     startTransition(async () => {
       const result = await completeOnboarding(input);
       if (!result.ok) {
-        setSubmitError(result.error ?? "온보딩을 완료할 수 없어요.");
+        setSubmitError(
+          result.error ??
+            "프로필을 저장하지 못했어요. 잠시 후 다시 시도해 주세요."
+        );
         return;
       }
       router.replace(initialNext);
@@ -100,7 +103,7 @@ export function OnboardingForm({ cohorts, initialNext }: OnboardingFormProps) {
   return (
     <AuthLayout description={ONBOARDING_DESCRIPTION} title={ONBOARDING_TITLE}>
       <form
-        aria-label="온보딩 완료"
+        aria-label="프로필 설정"
         className="flex flex-col gap-6"
         noValidate
         onSubmit={handleSubmit}

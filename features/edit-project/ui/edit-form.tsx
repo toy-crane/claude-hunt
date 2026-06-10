@@ -160,7 +160,11 @@ export function EditForm({ backHref, initial }: EditFormProps) {
         );
       const failed = uploadResults.find((r) => r.error || !r.path);
       if (failed) {
-        setErrors({ imagePaths: failed.error ?? "업로드에 실패했어요." });
+        setErrors({
+          imagePaths:
+            failed.error ??
+            "스크린샷을 올리지 못했어요. 잠시 후 다시 시도해 주세요.",
+        });
         return;
       }
       const imagePaths = uploadResults.map((r) => r.path as string);
@@ -175,10 +179,12 @@ export function EditForm({ backHref, initial }: EditFormProps) {
         imagePaths,
       });
       if (!result.ok) {
-        setSubmitError(result.error ?? "저장하지 못했어요.");
+        setSubmitError(
+          result.error ?? "저장하지 못했어요. 잠시 후 다시 시도해 주세요."
+        );
         return;
       }
-      toast.success("저장됐어요.");
+      toast.success("저장했어요.");
       router.push(resolvedBackHref);
       router.refresh();
     } finally {
@@ -243,7 +249,7 @@ export function EditForm({ backHref, initial }: EditFormProps) {
             maxLength={MAX_DESCRIPTION_LENGTH}
             name="description"
             onChange={() => clearError("description")}
-            placeholder="프로젝트를 자세히 소개해 주세요 (선택)"
+            placeholder="프로젝트를 자세히 소개해 주세요"
             rows={5}
           />
           <FieldErrorMessage

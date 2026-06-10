@@ -13,7 +13,7 @@ const CONTINUE_BTN_RE = /계속/;
 const MAGIC_LINK_TEXT_RE = /매직 링크/;
 const SUBMIT_PROJECT_BTN_RE = /프로젝트 제출/;
 const SUBMIT_PROJECT_TRIGGER_RE = /프로젝트 제출/;
-const PROJECT_SUBMITTED_TOAST_RE = /프로젝트가 제출되었어요/;
+const PROJECT_SUBMITTED_TOAST_RE = /프로젝트를 제출했어요/;
 const SAVE_CHANGES_BTN_RE = /저장/;
 const LOGIN_URL_RE = /\/login$/;
 const SUPABASE_STORAGE_URL_RE =
@@ -170,7 +170,7 @@ async function deleteProjectFromDetail(page: Page): Promise<void> {
   const owner = page.getByTestId("project-detail-owner-controls");
   await owner.getByRole("button", { name: "삭제" }).click();
   const dialog = page.getByRole("alertdialog");
-  await dialog.getByRole("button", { name: "삭제" }).click();
+  await dialog.getByRole("button", { name: "삭제하기" }).click();
   await page.waitForURL("http://localhost:3000/", { timeout: 30_000 });
 }
 

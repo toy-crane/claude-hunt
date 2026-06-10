@@ -115,7 +115,7 @@ describe("<SettingsForm />", () => {
     await waitFor(() => {
       expect(mocks.updateDisplayName).toHaveBeenCalledWith("Bob_123");
     });
-    expect(mocks.toastSuccess).toHaveBeenCalledWith("닉네임이 변경되었어요.");
+    expect(mocks.toastSuccess).toHaveBeenCalledWith("닉네임을 변경했어요.");
     expect(mocks.routerRefresh).toHaveBeenCalledTimes(1);
     expect((input as HTMLInputElement).value).toBe("Bob_123");
   });
@@ -242,7 +242,7 @@ describe("<SettingsForm />", () => {
     await waitFor(() => {
       expect(mocks.updateDisplayName).toHaveBeenCalledWith("alice");
     });
-    expect(mocks.toastSuccess).toHaveBeenCalledWith("닉네임이 변경되었어요.");
+    expect(mocks.toastSuccess).toHaveBeenCalledWith("닉네임을 변경했어요.");
     expect(screen.queryByText(DUPLICATE_MESSAGE)).not.toBeInTheDocument();
   });
 

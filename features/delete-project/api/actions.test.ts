@@ -1,6 +1,6 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
-const FORBIDDEN_REGEX = /permission/;
+const FORBIDDEN_REGEX = /내가 제출한 프로젝트만 삭제할 수 있어요/;
 
 const revalidatePathMock = vi.fn();
 const updateTagMock = vi.fn();
