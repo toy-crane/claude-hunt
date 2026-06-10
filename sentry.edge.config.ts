@@ -5,8 +5,13 @@
 
 import { init } from "@sentry/nextjs";
 
+import { env } from "@shared/config/env";
+
 init({
-  dsn: "https://9049dfa1af4ee580e59d0ec7d3637b52@o33145.ingest.us.sentry.io/4511538825003008",
+  dsn: env.NEXT_PUBLIC_SENTRY_DSN,
+
+  // Local dev sessions must not pollute the production Sentry project.
+  enabled: process.env.NODE_ENV === "production",
 
   // Define how likely traces are sampled. Adjust this value in production, or use tracesSampler for greater control.
   tracesSampleRate: 1,
