@@ -162,13 +162,20 @@
   animation: none;
 }
 
-/* 진단 전용(?sdbg=fixed): 헤더 fixed 전환 실험 — 검증 후 제거 */
-html.sdbg-fixed-hdr header.sticky {
+/* 진단 전용(?fix=...): 깜빡임 처방 후보들 — 검증 후 제거 */
+/* layer: 헤더를 독립 GPU 컴포지터 레이어로 승격해 복원 스크롤 중 리페인트 회피 */
+html.sdbg-fix-layer header.sticky {
+  transform: translateZ(0);
+  backface-visibility: hidden;
+  will-change: transform;
+}
+/* fixed: sticky 대신 fixed로 전환해 sticky 고유 재배치 경로 회피 */
+html.sdbg-fix-fixed header.sticky {
   position: fixed;
   inset-inline: 0;
   top: 0;
 }
-html.sdbg-fixed-hdr body {
+html.sdbg-fix-fixed body {
   padding-top: 95px;
 }
 
