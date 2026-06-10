@@ -131,7 +131,7 @@ export default function PrivacyPage() {
           </p>
           <ul className="list-disc pl-5">
             <li>회원 식별 및 인증</li>
-            <li>프로젝트 게시 및 업보트 집계</li>
+            <li>프로젝트 게시 및 추천 집계</li>
             <li>서비스 품질 개선 및 문의 응대</li>
           </ul>
         </section>
