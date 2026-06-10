@@ -18,13 +18,6 @@ const nextConfig = {
   // prerender into a static shell; uncached/cookie reads stream in behind
   // Suspense boundaries.
   cacheComponents: true,
-  // Wire navigation through React's View Transition integration so transitions
-  // are explicit and controllable (transition types, per-element opt-out)
-  // rather than firing implicitly. We scope the actual animation down to the
-  // list reorder in globals.css by silencing the root (whole-page) group.
-  experimental: {
-    viewTransition: true,
-  },
   images: {
     dangerouslyAllowLocalIP: isLocalSupabase,
     remotePatterns: [
