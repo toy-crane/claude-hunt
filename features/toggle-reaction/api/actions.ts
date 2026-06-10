@@ -25,12 +25,15 @@ export async function toggleReaction(
   if (!parsed.success) {
     return {
       ok: false,
-      error: getZodErrorMessage(parsed.error, "Invalid input"),
+      error: getZodErrorMessage(
+        parsed.error,
+        "반응을 저장하지 못했어요. 잠시 후 다시 시도해 주세요."
+      ),
     };
   }
   const input = parsed.data;
 
-  const auth = await requireAuth("You must be signed in to react");
+  const auth = await requireAuth("로그인 후 반응을 남길 수 있어요.");
   if (!auth.ok) {
     return auth;
   }

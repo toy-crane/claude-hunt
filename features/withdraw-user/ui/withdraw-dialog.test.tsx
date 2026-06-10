@@ -2,9 +2,9 @@ import { render, screen, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
-const WITHDRAW_TRIGGER_LABEL = /^탈퇴$/;
-const DELETE_ACCOUNT_TITLE = /^계정 삭제$/;
-const DELETE_ACCOUNT_BUTTON_NAME = /^계정 삭제$/;
+const WITHDRAW_TRIGGER_LABEL = /^계정 삭제$/;
+const DELETE_ACCOUNT_TITLE = /^계정을 삭제할까요\?$/;
+const DELETE_ACCOUNT_BUTTON_NAME = /^삭제하기$/;
 const CANCEL_LABEL = /^취소$/;
 const TYPE_PROMPT_REGEX = /확인을 위해 .* 입력해 주세요/;
 const LIST_PROFILE_REGEX = /프로필/;
@@ -221,7 +221,7 @@ describe("<WithdrawDialog />", () => {
       const button = getConfirmButton();
       expect(button).toBeDisabled();
       expect(button.querySelector('[role="status"]')).toBeInTheDocument();
-      expect(button.textContent).toContain("계정 삭제");
+      expect(button.textContent).toContain("삭제하기");
       expect(button.textContent).not.toContain("삭제 중");
     });
   });

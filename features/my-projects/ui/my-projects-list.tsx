@@ -26,10 +26,10 @@ export function MyProjectsList({
         className="flex flex-col items-center gap-3 border border-border border-dashed p-8 text-center text-muted-foreground text-xs"
         data-testid="my-projects-empty"
       >
-        <p>아직 등록한 프로젝트가 없어요.</p>
+        <p>아직 제출한 프로젝트가 없어요.</p>
         <Button asChild size="sm" variant="outline">
           <Link href="/projects/new?from=settings">
-            <RiAddLine />새 프로젝트 등록하기
+            <RiAddLine />새 프로젝트 제출하기
           </Link>
         </Button>
       </div>

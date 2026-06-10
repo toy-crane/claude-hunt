@@ -1,7 +1,7 @@
 const MAX_LONG_EDGE = 1920;
 const WEBP_QUALITY = 0.85;
 const DECODE_ERROR_MESSAGE =
-  "Could not process this image. Try a different file.";
+  "이미지를 불러오지 못했어요. 다른 파일로 다시 시도해 주세요.";
 
 export type DownscaleResult =
   | { ok: true; file: File }

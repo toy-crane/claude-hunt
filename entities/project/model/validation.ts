@@ -20,10 +20,7 @@ export const projectFieldsSchema = z.object({
     .string()
     .trim()
     .min(1, "제목을 입력해 주세요.")
-    .max(
-      MAX_TITLE_LENGTH,
-      `제목은 ${MAX_TITLE_LENGTH}자 이하로 입력해 주세요.`
-    ),
+    .max(MAX_TITLE_LENGTH, `제목은 ${MAX_TITLE_LENGTH}자까지 쓸 수 있어요.`),
   tagline: z
     .string()
     // Collapse any newlines into a single space so the tagline is always one
@@ -32,10 +29,10 @@ export const projectFieldsSchema = z.object({
     .pipe(
       z
         .string()
-        .min(1, "한 줄 소개을 입력해 주세요.")
+        .min(1, "한 줄 소개를 입력해 주세요.")
         .max(
           MAX_TAGLINE_LENGTH,
-          `한 줄 소개은 ${MAX_TAGLINE_LENGTH}자 이하로 입력해 주세요.`
+          `한 줄 소개는 ${MAX_TAGLINE_LENGTH}자까지 쓸 수 있어요.`
         )
     ),
   description: z
@@ -46,7 +43,7 @@ export const projectFieldsSchema = z.object({
         .string()
         .max(
           MAX_DESCRIPTION_LENGTH,
-          `프로젝트 설명은 ${MAX_DESCRIPTION_LENGTH}자 이하로 입력해 주세요.`
+          `프로젝트 설명은 ${MAX_DESCRIPTION_LENGTH}자까지 쓸 수 있어요.`
         )
         .optional()
     )
@@ -61,7 +58,7 @@ export const projectFieldsSchema = z.object({
     .pipe(
       z
         .string()
-        .regex(GITHUB_URL_PATTERN, "GitHub 저장소 주소를 입력해주세요")
+        .regex(GITHUB_URL_PATTERN, "GitHub 저장소 주소를 입력해 주세요.")
         .optional()
     )
     .optional(),

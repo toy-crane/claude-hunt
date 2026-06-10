@@ -46,7 +46,7 @@ export default async function Page({ params, searchParams }: PageProps) {
       <header className="flex flex-col gap-1">
         <h1 className="font-heading font-medium text-2xl">프로젝트 편집</h1>
         <p className="text-muted-foreground text-sm">
-          저장하면 보드와 상세 페이지가 즉시 갱신돼요.
+          저장하면 보드와 상세 페이지에 바로 반영돼요.
         </p>
       </header>
       <EditForm

@@ -63,13 +63,13 @@ export function WithdrawDialog({ email }: WithdrawDialogProps) {
           type="button"
           variant="destructive"
         >
-          탈퇴
+          계정 삭제
         </Button>
       </DialogTrigger>
       <DialogContent>
         <DialogHeader>
-          <DialogTitle>계정 삭제</DialogTitle>
-          <DialogDescription>다음 항목이 영구 삭제됩니다:</DialogDescription>
+          <DialogTitle>계정을 삭제할까요?</DialogTitle>
+          <DialogDescription>다음 항목이 영구 삭제돼요:</DialogDescription>
         </DialogHeader>
 
         <ul className="ml-4 list-disc text-muted-foreground text-xs/relaxed">
@@ -81,9 +81,8 @@ export function WithdrawDialog({ email }: WithdrawDialogProps) {
 
         <Field data-invalid={error === null ? undefined : ""}>
           <FieldLabel htmlFor={confirmationId}>
-            확인을 위해{" "}
-            <span className="font-medium text-foreground">{email}</span> 을(를)
-            입력해 주세요.
+            확인을 위해 이메일 주소를 똑같이 입력해 주세요:{" "}
+            <span className="font-medium text-foreground">{email}</span>
           </FieldLabel>
           <Input
             aria-invalid={error !== null}
@@ -123,7 +122,7 @@ export function WithdrawDialog({ email }: WithdrawDialogProps) {
             variant="destructive"
           >
             {isPending ? <Spinner data-icon="inline-start" /> : null}
-            계정 삭제
+            삭제하기
           </Button>
         </DialogFooter>
       </DialogContent>

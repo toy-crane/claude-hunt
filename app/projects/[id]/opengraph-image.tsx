@@ -123,7 +123,7 @@ export default async function Image({ params }: PageProps) {
             alignItems: "center",
           }}
         >
-          <span>by {author}</span>
+          <span>{author}</span>
           <span>·</span>
           <span>claude-hunt</span>
         </div>

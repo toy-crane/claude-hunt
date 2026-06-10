@@ -44,7 +44,9 @@ describe("deleteComment server action", () => {
     const result = await deleteComment({ commentId: "", projectId: "p1" });
 
     expect(result.ok).toBe(false);
-    expect(result.error).toBe("Invalid input");
+    expect(result.error).toBe(
+      "댓글을 삭제하지 못했어요. 새로고침한 뒤 다시 시도해 주세요."
+    );
     expect(getClaims).not.toHaveBeenCalled();
     expect(from).not.toHaveBeenCalled();
   });
@@ -53,7 +55,9 @@ describe("deleteComment server action", () => {
     const result = await deleteComment({ commentId: "c1", projectId: "" });
 
     expect(result.ok).toBe(false);
-    expect(result.error).toBe("Invalid input");
+    expect(result.error).toBe(
+      "댓글을 삭제하지 못했어요. 새로고침한 뒤 다시 시도해 주세요."
+    );
     expect(getClaims).not.toHaveBeenCalled();
     expect(from).not.toHaveBeenCalled();
   });
@@ -92,7 +96,7 @@ describe("deleteComment server action", () => {
     const result = await deleteComment(validInput);
 
     expect(result.ok).toBe(false);
-    expect(result.error).toContain("don't have permission");
+    expect(result.error).toContain("이미 삭제됐거나 내가 쓴 댓글이 아니에요");
     expect(refreshMock).not.toHaveBeenCalled();
   });
 

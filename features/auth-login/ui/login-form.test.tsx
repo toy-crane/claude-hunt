@@ -136,13 +136,13 @@ describe("login", () => {
 
     await waitFor(() => {
       expect(
-        screen.getByRole("button", { name: "다른 이메일로 시도" })
+        screen.getByRole("button", { name: "다른 이메일로 시도하기" })
       ).toBeInTheDocument();
     });
 
     // Click "Try another email"
     await user.click(
-      screen.getByRole("button", { name: "다른 이메일로 시도" })
+      screen.getByRole("button", { name: "다른 이메일로 시도하기" })
     );
 
     // Email input reappears with empty value

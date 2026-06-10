@@ -125,7 +125,7 @@ describe("app/opengraph-image (1200x630)", () => {
     const { container } = renderOg();
     const text = container.textContent ?? "";
     expect(text).toContain("Claude Code 수강생들의 프로젝트.");
-    expect(text).toContain("마음에 드는 프로젝트에 응원을 보내주세요.");
+    expect(text).toContain("마음에 드는 프로젝트에 응원을 보내 주세요.");
     expect(text).toContain("지금 인기 프로젝트");
     expect(text).toContain("claude-hunt.com");
   });
@@ -359,7 +359,7 @@ describe("app/opengraph-image — live data", () => {
     // Static copy still renders
     expect(text).toContain("claude-hunt");
     expect(text).toContain("Claude Code 수강생들의 프로젝트.");
-    expect(text).toContain("마음에 드는 프로젝트에 응원을 보내주세요.");
+    expect(text).toContain("마음에 드는 프로젝트에 응원을 보내 주세요.");
     expect(text).toContain("claude-hunt.com");
     const cards = container.querySelectorAll('[data-og-role="card"]');
     expect(cards).toHaveLength(0);

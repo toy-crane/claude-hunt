@@ -92,7 +92,11 @@ export function SubmitForm({ backHref, cohortId: _cohortId }: SubmitFormProps) {
       );
       const failed = uploads.find((u) => u.error || !u.path);
       if (failed) {
-        setErrors({ imagePaths: failed.error ?? "업로드에 실패했어요." });
+        setErrors({
+          imagePaths:
+            failed.error ??
+            "스크린샷을 올리지 못했어요. 잠시 후 다시 시도해 주세요.",
+        });
         return;
       }
       const imagePaths = uploads.map((u) => u.path as string);
@@ -106,12 +110,15 @@ export function SubmitForm({ backHref, cohortId: _cohortId }: SubmitFormProps) {
         imagePaths,
       });
       if (!result.ok) {
-        setSubmitError(result.error ?? "프로젝트를 제출할 수 없어요.");
+        setSubmitError(
+          result.error ??
+            "프로젝트를 제출하지 못했어요. 잠시 후 다시 시도해 주세요."
+        );
         return;
       }
       form.reset();
       setImages([]);
-      toast.success("프로젝트가 제출되었어요.");
+      toast.success("프로젝트를 제출했어요.");
       // When the user came from a specific entry point (e.g. /settings),
       // honor it for both success and fallback paths. Otherwise default
       // to the new project's detail page (which doesn't exist until the

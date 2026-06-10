@@ -22,11 +22,11 @@ describe("auth-error", () => {
     render(<AuthCodeError />);
 
     expect(
-      screen.getByRole("heading", { name: "인증 오류" })
+      screen.getByRole("heading", { name: "로그인하지 못했어요" })
     ).toBeInTheDocument();
 
     expect(
-      screen.getByText("로그인 중에 문제가 발생했어요. 다시 시도해 주세요.")
+      screen.getByText("잠시 문제가 생겼어요. 다시 시도해 주세요.")
     ).toBeInTheDocument();
 
     const backLink = screen.getByRole("link", { name: "로그인으로 돌아가기" });

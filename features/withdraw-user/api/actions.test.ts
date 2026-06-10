@@ -1,6 +1,6 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
-const SIGNED_IN_REGEX = /signed in/i;
+const SIGNED_IN_REGEX = /다시 로그인해 주세요/;
 
 const updateTagMock = vi.fn();
 vi.mock("next/cache", () => ({

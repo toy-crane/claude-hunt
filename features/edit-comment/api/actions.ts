@@ -23,12 +23,15 @@ export async function editComment(
   if (!parsed.success) {
     return {
       ok: false,
-      error: getZodErrorMessage(parsed.error, "Invalid input"),
+      error: getZodErrorMessage(
+        parsed.error,
+        "댓글을 수정하지 못했어요. 입력한 내용을 확인해 주세요."
+      ),
     };
   }
   const input = parsed.data;
 
-  const auth = await requireAuth("You must be signed in to edit a comment");
+  const auth = await requireAuth("로그인이 풀렸어요. 다시 로그인해 주세요.");
   if (!auth.ok) {
     return auth;
   }
@@ -46,7 +49,8 @@ export async function editComment(
   if (!data || data.length === 0) {
     return {
       ok: false,
-      error: "Comment not found or you don't have permission to edit it",
+      error:
+        "댓글을 수정하지 못했어요. 이미 삭제됐거나 내가 쓴 댓글이 아니에요.",
     };
   }
 

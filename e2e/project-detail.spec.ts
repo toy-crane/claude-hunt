@@ -9,7 +9,7 @@ import {
 const EMAIL_LABEL_RE = /이메일/;
 const CONTINUE_BTN_RE = /계속/;
 const MAGIC_LINK_TEXT_RE = /매직 링크/;
-const COMMENT_PLACEHOLDER_RE = /의견을 남겨주세요/;
+const COMMENT_PLACEHOLDER_RE = /댓글을 남겨 주세요/;
 const SUBMIT_COMMENT_BTN_RE = /^등록$/;
 const EDIT_MENU_RE = /^편집$/;
 const DELETE_MENU_RE = /^삭제$/;
@@ -204,7 +204,7 @@ test("anonymous visitor sees comments but the form is replaced with a login prom
   }
   await page.goto(`/projects/${seeded.id}`);
   await expect(page).toHaveURL(new RegExp(`/projects/${seeded.id}$`));
-  // The form is replaced with a "로그인하고 의견 남기기" prompt.
+  // The form is replaced with a "로그인하고 댓글 남기기" prompt.
   await expect(page.getByTestId("comment-form-anon-prompt")).toBeVisible();
   await expect(page.getByPlaceholder(COMMENT_PLACEHOLDER_RE)).toHaveCount(0);
 });

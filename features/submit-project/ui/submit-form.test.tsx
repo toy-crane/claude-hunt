@@ -53,7 +53,7 @@ vi.mock("@features/upload-project-images", () => ({
       </button>
       <button
         data-testid="image-slots-stub-error"
-        onClick={() => onError?.("최대 5장까지 업로드할 수 있어요")}
+        onClick={() => onError?.("최대 5장까지 업로드할 수 있어요.")}
         type="button"
       >
         trigger error
@@ -198,7 +198,7 @@ describe("SubmitForm", () => {
 
     expect(
       await screen.findByTestId("submit-form-error-githubUrl")
-    ).toHaveTextContent("GitHub 저장소 주소를 입력해주세요");
+    ).toHaveTextContent("GitHub 저장소 주소를 입력해 주세요.");
     expect(submitProject).not.toHaveBeenCalled();
   });
 
@@ -242,7 +242,7 @@ describe("SubmitForm", () => {
     uploadScreenshot.mockResolvedValue({ path: "user-1/a.webp" });
     submitProject.mockResolvedValue({
       ok: false,
-      error: "Could not submit project",
+      error: "프로젝트를 제출하지 못했어요. 잠시 후 다시 시도해 주세요.",
     });
 
     render(<SubmitForm cohortId="cohort-1" />);
@@ -251,13 +251,13 @@ describe("SubmitForm", () => {
 
     expect(
       await screen.findByTestId("submit-form-submit-error")
-    ).toHaveTextContent("Could not submit project");
+    ).toHaveTextContent("프로젝트를 제출하지 못했어요.");
     expect(routerPush).not.toHaveBeenCalled();
   });
 
   it("surfaces an upload error without calling the server action", async () => {
     uploadScreenshot.mockResolvedValue({
-      error: "File must be 25 MB or smaller",
+      error: "파일은 25MB까지 올릴 수 있어요.",
     });
 
     render(<SubmitForm cohortId="cohort-1" />);
@@ -266,7 +266,7 @@ describe("SubmitForm", () => {
 
     expect(
       await screen.findByTestId("submit-form-error-imagePaths")
-    ).toHaveTextContent("25 MB");
+    ).toHaveTextContent("파일은 25MB까지 올릴 수 있어요.");
     expect(submitProject).not.toHaveBeenCalled();
     expect(routerPush).not.toHaveBeenCalled();
   });

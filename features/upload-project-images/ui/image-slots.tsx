@@ -97,14 +97,16 @@ export function ImageSlots({
       }
       const remaining = MAX_PROJECT_IMAGES - value.length;
       if (files.length > remaining) {
-        onError?.("최대 5장까지 업로드할 수 있어요");
+        onError?.("최대 5장까지 업로드할 수 있어요.");
         return;
       }
       const next: ImageSlot[] = [];
       for (const file of files) {
         const v = validateScreenshotFile(file);
         if (!v.ok) {
-          onError?.(v.error ?? "업로드할 수 없는 파일이에요");
+          onError?.(
+            v.error ?? "업로드할 수 없는 파일이에요. 다른 파일을 선택해 주세요."
+          );
           return;
         }
         next.push({

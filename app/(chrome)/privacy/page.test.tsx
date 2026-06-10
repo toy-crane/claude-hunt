@@ -32,7 +32,7 @@ const SECTION_2_KEYWORDS = [
   /프로필 이미지/,
   /소속 클래스/,
   /프로젝트/,
-  /투표 기록/,
+  /추천 기록/,
   /IP 주소/,
   /User-Agent/,
 ];

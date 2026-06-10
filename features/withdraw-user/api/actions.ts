@@ -16,7 +16,7 @@ export type WithdrawAccountResult = { ok: true } | { error: string; ok: false };
  * is always read from the verified session claims — never from arguments.
  */
 export async function withdrawAccount(): Promise<WithdrawAccountResult> {
-  const auth = await requireAuth("You must be signed in to withdraw");
+  const auth = await requireAuth("로그인이 풀렸어요. 다시 로그인해 주세요.");
   if (!auth.ok) {
     return auth;
   }

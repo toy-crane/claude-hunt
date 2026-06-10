@@ -25,12 +25,12 @@ export async function editProject(
   if (!parsed.success) {
     return {
       ok: false,
-      error: getZodErrorMessage(parsed.error, "Invalid input"),
+      error: getZodErrorMessage(parsed.error, "입력한 내용을 확인해 주세요."),
     };
   }
   const input = parsed.data;
 
-  const auth = await requireAuth("You must be signed in to edit a project");
+  const auth = await requireAuth("로그인이 풀렸어요. 다시 로그인해 주세요.");
   if (!auth.ok) {
     return auth;
   }
@@ -72,7 +72,8 @@ export async function editProject(
   if (!data || data.length === 0) {
     return {
       ok: false,
-      error: "Project not found or you don't have permission to edit it",
+      error:
+        "프로젝트를 편집하지 못했어요. 내가 제출한 프로젝트만 편집할 수 있어요.",
     };
   }
 

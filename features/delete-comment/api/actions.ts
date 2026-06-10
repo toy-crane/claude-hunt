@@ -23,10 +23,13 @@ export async function deleteComment(
   input: DeleteCommentInput
 ): Promise<DeleteCommentResult> {
   if (!(input.commentId && input.projectId)) {
-    return { ok: false, error: "Invalid input" };
+    return {
+      ok: false,
+      error: "댓글을 삭제하지 못했어요. 새로고침한 뒤 다시 시도해 주세요.",
+    };
   }
 
-  const auth = await requireAuth("You must be signed in to delete a comment");
+  const auth = await requireAuth("로그인이 풀렸어요. 다시 로그인해 주세요.");
   if (!auth.ok) {
     return auth;
   }
@@ -44,7 +47,8 @@ export async function deleteComment(
   if (!data || data.length === 0) {
     return {
       ok: false,
-      error: "Comment not found or you don't have permission to delete it",
+      error:
+        "댓글을 삭제하지 못했어요. 이미 삭제됐거나 내가 쓴 댓글이 아니에요.",
     };
   }
 

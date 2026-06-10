@@ -50,7 +50,7 @@ export function CommentForm({
         data-testid="comment-form-anon-prompt"
       >
         <Link className="underline" href="/login">
-          로그인하고 의견 남기기
+          로그인하고 댓글 남기기
         </Link>
       </div>
     );
@@ -65,7 +65,7 @@ export function CommentForm({
       return;
     }
     if (overLimit) {
-      setError(`${MAX_COMMENT_BODY}자까지 작성할 수 있어요`);
+      setError(`${MAX_COMMENT_BODY}자까지 쓸 수 있어요.`);
       return;
     }
     const body = value;
@@ -86,12 +86,15 @@ export function CommentForm({
         optimisticId,
       });
       if (!result.ok) {
-        setError(result.error ?? "댓글을 등록하지 못했어요.");
+        setError(
+          result.error ??
+            "댓글을 등록하지 못했어요. 잠시 후 다시 시도해 주세요."
+        );
         setValue(body);
         return;
       }
       toast.success(
-        parentCommentId ? "답글이 등록됐어요." : "댓글이 등록됐어요."
+        parentCommentId ? "답글을 등록했어요." : "댓글을 등록했어요."
       );
       onCancel?.();
     });
@@ -110,7 +113,7 @@ export function CommentForm({
         disabled={isPending}
         id={textareaId}
         onChange={(e) => setValue(e.target.value)}
-        placeholder="의견을 남겨주세요"
+        placeholder="댓글을 남겨 주세요"
         rows={size === "compact" ? 2 : 3}
         value={value}
       />

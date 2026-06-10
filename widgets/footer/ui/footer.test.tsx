@@ -5,7 +5,7 @@ import { Footer } from "./footer";
 
 const COPYRIGHT_TEXT = /© 2026 claude-hunt/i;
 const GITHUB_LABEL = /github/i;
-const FEEDBACK_LABEL = /feedback/i;
+const FEEDBACK_LABEL = /피드백/;
 const TERMS_LABEL = /^이용약관$/;
 const PRIVACY_LABEL = /^개인정보 처리방침$/;
 const NOOPENER = /noopener/;

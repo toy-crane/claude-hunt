@@ -104,7 +104,10 @@ export function VoteButton({
       applyOptimistic();
       const result = await toggleVote(projectId);
       if (!result.ok) {
-        toast.error(result.error ?? "투표를 저장하지 못했어요.");
+        toast.error(
+          result.error ??
+            "추천을 저장하지 못했어요. 잠시 후 다시 시도해 주세요."
+        );
       }
     });
   }

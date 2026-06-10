@@ -95,7 +95,10 @@ export function ReactionRow({
         emoji,
       });
       if (!result.ok) {
-        toast.error(result.error ?? "반응을 저장하지 못했어요.");
+        toast.error(
+          result.error ??
+            "반응을 저장하지 못했어요. 잠시 후 다시 시도해 주세요."
+        );
         return;
       }
       router.refresh();
