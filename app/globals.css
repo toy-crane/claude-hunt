@@ -162,6 +162,16 @@
   animation: none;
 }
 
+/* 진단 전용(?sdbg=fixed): 헤더 fixed 전환 실험 — 검증 후 제거 */
+html.sdbg-fixed-hdr header.sticky {
+  position: fixed;
+  inset-inline: 0;
+  top: 0;
+}
+html.sdbg-fixed-hdr body {
+  padding-top: 95px;
+}
+
 @media (prefers-reduced-motion: reduce) {
   ::view-transition-old(*),
   ::view-transition-new(*),
