@@ -4,6 +4,7 @@ import { Geist_Mono, Inter, JetBrains_Mono } from "next/font/google";
 
 import "./globals.css";
 import { ThemeProvider } from "@core/providers/theme-provider";
+import { ScrollClampGuard } from "@core/scroll-restoration/scroll-clamp-guard";
 import { cn } from "@shared/lib/utils";
 import { Toaster } from "@shared/ui/sonner";
 import { Analytics } from "@vercel/analytics/next";
@@ -117,6 +118,7 @@ export default function RootLayout({
           {children}
           <Toaster />
         </ThemeProvider>
+        <ScrollClampGuard />
         <Analytics />
         <SpeedInsights />
       </body>
