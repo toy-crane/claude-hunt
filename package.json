@@ -25,6 +25,7 @@
     "@dnd-kit/sortable": "^10.0.0",
     "@dnd-kit/utilities": "^3.2.2",
     "@remixicon/react": "^4.9.0",
+    "@sentry/nextjs": "^10",
     "@supabase/ssr": "^0.9.0",
     "@supabase/supabase-js": "^2.100.0",
     "@t3-oss/env-nextjs": "^0.13.11",
