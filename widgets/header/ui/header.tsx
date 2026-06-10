@@ -17,7 +17,11 @@ export async function Header() {
   // 위치가 한 박자 늦게 재계산돼 화면 밖으로 사라졌다 돌아오는 깜빡임이 생긴다
   // (스크롤된 리스트→상세→뒤로가기에서 항상 재현). fixed는 뷰포트에 고정돼 스크롤
   // 오프셋과 무관하므로 재계산 창이 없어 깜빡이지 않는다. sticky로 되돌리지 말 것
-  // — 흐름에서 빠지는 만큼의 본문 오프셋은 app/(chrome)/layout.tsx 가 책임진다.
+  //
+  // fixed라 흐름에서 빠지는 만큼의 본문 오프셋은 globals.css의 --header-height가
+  // 책임진다(app/(chrome)/layout.tsx가 소비). 이 헤더의 줄 수·세로 패딩(py-3,
+  // 모바일 nav row)을 바꿔 실제 높이가 변하면 --header-height(94/57px)도 같은
+  // 커밋에서 함께 갱신할 것 — 안 그러면 본문이 가리거나 빈 띠가 생긴다.
   return (
     <header className="fixed inset-x-0 top-0 z-50 border-b bg-background">
       <div className="mx-auto flex w-full max-w-6xl items-center justify-between px-6 py-3">

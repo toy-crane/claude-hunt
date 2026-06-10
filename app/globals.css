@@ -86,6 +86,12 @@
   --term-rank-1: #f59e0b;
   --term-rank-2: #71717a;
   --term-rank-3: #c2410c;
+
+  /* fixed 헤더가 흐름에서 빠져 차지하지 않는 공간을 본문이 보정할 때, 그리고
+     앵커 점프가 헤더 밑에 멈출 때 쓰는 단일 진실 공급원. 모바일은 2줄
+     (로고/버튼 + 탭) = 94px, md 이상은 1줄 = 57px(아래 미디어쿼리에서 재정의).
+     헤더 마크업(줄 수·세로 패딩)을 바꿔 실제 높이가 변하면 이 값도 함께 고칠 것. */
+  --header-height: 94px;
 }
 
 .dark {
@@ -127,6 +133,15 @@
   --term-rank-3: #ffa657;
 }
 
+/* --header-height 반응형 분기. Tailwind v4의 @theme 변수는 미디어쿼리에서
+   재정의할 수 없으므로 :root 일반 변수로 둔다. 768px는 Tailwind 기본 md
+   브레이크포인트와 일치시킨다(헤더가 md에서 1줄로 접힘). */
+@media (min-width: 768px) {
+  :root {
+    --header-height: 57px;
+  }
+}
+
 @layer base {
   * {
     @apply border-border outline-ring/50;
@@ -135,6 +150,7 @@
     @apply bg-background text-foreground;
   }
   html {
+    scroll-padding-top: var(--header-height);
     @apply font-sans;
   }
 }
