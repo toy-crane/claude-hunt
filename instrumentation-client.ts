@@ -8,8 +8,13 @@ import {
   replayIntegration,
 } from "@sentry/nextjs";
 
+import { env } from "@shared/config/env";
+
 init({
-  dsn: "https://9049dfa1af4ee580e59d0ec7d3637b52@o33145.ingest.us.sentry.io/4511538825003008",
+  dsn: env.NEXT_PUBLIC_SENTRY_DSN,
+
+  // Local dev sessions must not pollute the production Sentry project.
+  enabled: process.env.NODE_ENV === "production",
 
   // Add optional integrations for additional features
   integrations: [replayIntegration()],
