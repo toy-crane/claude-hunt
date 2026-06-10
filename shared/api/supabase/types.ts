@@ -263,6 +263,33 @@ export type Database = {
           },
         ]
       }
+      subscribers: {
+        Row: {
+          consented_at: string
+          created_at: string
+          email: string
+          id: string
+          source: string
+          updated_at: string
+        }
+        Insert: {
+          consented_at?: string
+          created_at?: string
+          email: string
+          id?: string
+          source?: string
+          updated_at?: string
+        }
+        Update: {
+          consented_at?: string
+          created_at?: string
+          email?: string
+          id?: string
+          source?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
       votes: {
         Row: {
           created_at: string
