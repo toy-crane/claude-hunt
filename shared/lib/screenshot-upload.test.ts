@@ -17,7 +17,7 @@ vi.mock("@shared/lib/image/index.ts", () => ({
 const { MAX_SCREENSHOT_BYTES, uploadScreenshot, validateScreenshotFile } =
   await import("./screenshot-upload");
 
-const MIME_ERROR_REGEX = /JPEG, PNG, or WebP/;
+const MIME_ERROR_REGEX = /JPEG, PNG, WebP/;
 const USER_SCOPED_WEBP_PATH_REGEX = /^user-1\/.+\.webp$/;
 const WEBP_EXTENSION_REGEX = /\.webp$/;
 
@@ -70,7 +70,7 @@ describe("validateScreenshotFile", () => {
     );
     const result = validateScreenshotFile(file);
     expect(result.ok).toBe(false);
-    expect(result.error).toBe("File must be 25 MB or smaller");
+    expect(result.error).toBe("파일은 25MB까지 올릴 수 있어요.");
   });
 
   it("accepts a 24 MB JPEG (just under the cap)", () => {
@@ -104,7 +104,7 @@ describe("uploadScreenshot", () => {
       makeFile("big.png", "image/png", 26 * 1024 * 1024)
     );
 
-    expect(result.error).toBe("File must be 25 MB or smaller");
+    expect(result.error).toBe("파일은 25MB까지 올릴 수 있어요.");
     expect(uploadMock).not.toHaveBeenCalled();
     expect(downscaleImage).not.toHaveBeenCalled();
   });
@@ -112,13 +112,13 @@ describe("uploadScreenshot", () => {
   it("returns the decode-failure error and never calls storage.upload when downscale fails", async () => {
     downscaleImage.mockResolvedValue({
       ok: false,
-      error: "Could not process this image. Try a different file.",
+      error: "이미지를 불러오지 못했어요. 다른 파일로 다시 시도해 주세요.",
     });
 
     const result = await uploadScreenshot(makeFile());
 
     expect(result.error).toBe(
-      "Could not process this image. Try a different file."
+      "이미지를 불러오지 못했어요. 다른 파일로 다시 시도해 주세요."
     );
     expect(uploadMock).not.toHaveBeenCalled();
   });

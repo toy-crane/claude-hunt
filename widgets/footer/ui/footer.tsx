@@ -37,7 +37,7 @@ export function Footer() {
           <Button asChild size="sm" variant="ghost">
             <a href={ISSUE_URL} rel="noopener noreferrer" target="_blank">
               <RiChat3Line data-icon="inline-start" />
-              <span>Feedback</span>
+              <span>피드백</span>
             </a>
           </Button>
         </nav>

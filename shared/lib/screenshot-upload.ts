@@ -19,14 +19,14 @@ export interface ValidateScreenshotResult {
 
 export function validateScreenshotFile(file: File): ValidateScreenshotResult {
   if (file.size > MAX_SCREENSHOT_BYTES) {
-    return { ok: false, error: "File must be 25 MB or smaller" };
+    return { ok: false, error: "파일은 25MB까지 올릴 수 있어요." };
   }
   if (
     !ALLOWED_SCREENSHOT_MIME_TYPES.includes(file.type as AllowedScreenshotMime)
   ) {
     return {
       ok: false,
-      error: "Only JPEG, PNG, or WebP images are allowed",
+      error: "JPEG, PNG, WebP 이미지만 올릴 수 있어요.",
     };
   }
   return { ok: true };
@@ -59,7 +59,7 @@ export async function uploadScreenshot(
   const supabase = createBrowserClient();
   const { data, error: claimsError } = await supabase.auth.getClaims();
   if (claimsError || !data) {
-    return { error: "You must be signed in to upload a screenshot" };
+    return { error: "로그인이 풀렸어요. 다시 로그인해 주세요." };
   }
 
   const path = `${data.claims.sub}/${crypto.randomUUID()}.webp`;

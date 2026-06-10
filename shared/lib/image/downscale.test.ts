@@ -129,7 +129,7 @@ describe("downscaleImage", () => {
 
     expect(result).toEqual({
       ok: false,
-      error: "Could not process this image. Try a different file.",
+      error: "이미지를 불러오지 못했어요. 다른 파일로 다시 시도해 주세요.",
     });
   });
 
@@ -143,7 +143,7 @@ describe("downscaleImage", () => {
 
     expect(result).toEqual({
       ok: false,
-      error: "Could not process this image. Try a different file.",
+      error: "이미지를 불러오지 못했어요. 다른 파일로 다시 시도해 주세요.",
     });
   });
 
