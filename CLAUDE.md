@@ -22,15 +22,12 @@ Each phase has a human review gate. Do not advance until the current phase is va
 
 ## Linear
 
-- Linear is the single source of truth for every new requirement in this repo. All new bugs, features, refactors, chores, and docs work — including meta-tooling (skills, hooks, rules) — start as Linear issues in the `claude-hunt` team.
-- Use the `capture-issue` skill (triggers: `capture`, `캡쳐`, `이슈 만들어`, etc.) to create issues. Do not call `save_issue` directly for new issues — the skill enforces team and label defaults.
-- Use the `triage-issues` skill to classify Backlog issues for AI delegation. Only `ai-ready` issues are dispatch candidates.
-- Use the `dispatch-issue` skill (designed for Desktop scheduled task with worktree isolation) to auto-pick the oldest `ai-ready` issue, implement it, and open a PR. Failed dispatches receive the `dispatch-failed` label.
-- Allowed labels (team-scoped on `claude-hunt`):
-  - **Category** (exactly one per issue): `bug`, `feat`, `refactor`, `chore`, `docs`
-  - **Triage** (at most one per issue): `ai-ready`, `needs-human`, `needs-clarification`
-  - **Dispatch status** (at most one per issue): `dispatch-failed`
-- Team id: `400292c4-1535-4271-81df-e7b83257a207`. Issue identifiers: `CLA-N`.
+- Linear is the single source of truth for every new requirement in this repo. All new bugs, features, refactors, chores, and docs work — including meta-tooling (skills, hooks, rules) — start as Linear issues in the Claude Hunt team (identifiers `CLA-N`).
+- The issue loop is three skills, and humans only merge:
+  - `capture-issue` creates issues — the only intake gate. Do not call `save_issue` directly for new issues.
+  - `triage` classifies issues along 3 axes (decision/verification/impact) and leaves an agent brief on `ai-ready` issues.
+  - `dispatch-issue` works `ai-ready` issues in per-issue worktrees through to a PR. Failed dispatches get the `dispatch-failed` label.
+- Single sources under `docs/agents/`: label scheme and the 3-axis gate in `triage-labels.md`; Linear tool rules, team UUID, state transitions, and branch naming in `issue-tracker.md`.
 
 ## Development Workflow
 
