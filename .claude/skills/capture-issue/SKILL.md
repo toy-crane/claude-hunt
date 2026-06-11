@@ -10,9 +10,9 @@ The single ingestion gate for new requirements in this repo. Move fast: don't pr
 
 ## Locked parameters — never deviate
 
-When calling `mcp__claude_ai_Linear__save_issue`:
+When calling the Linear `save_issue` tool (see `docs/agents/issue-tracker.md` for tool gotchas):
 
-- `team`: `"claude-hunt"` (id `400292c4-1535-4271-81df-e7b83257a207`)
+- `team`: `400292c4-1535-4271-81df-e7b83257a207` — the Claude Hunt team. Pass the UUID or the display name `"Claude Hunt"`, never the slug `claude-hunt` (some Linear MCP servers silently fail to resolve it)
 - `assignee`: `"me"`
 - `state`: `"Backlog"`
 - Do not set `project`, `priority`, `estimate`, `cycle`, `milestone`.
@@ -61,9 +61,9 @@ Use this exact markdown — heading levels and order are part of the contract fo
 Do not add extra sections, timestamps, repo names, or HTML wrappers.
 
 ### 6. Create the issue
-Call `mcp__claude_ai_Linear__save_issue` with:
+Call `save_issue` with:
 
-- `team: "claude-hunt"`
+- `team: "400292c4-1535-4271-81df-e7b83257a207"`
 - `assignee: "me"`
 - `state: "Backlog"`
 - `title`
@@ -87,7 +87,7 @@ Stop. Do not propose next actions. Do not echo the description.
 
 ## Hard constraints
 
-- Never call `mcp__claude_ai_Linear__save_issue` for a new issue outside this flow.
-- Never set `team` to anything other than `"claude-hunt"`.
+- Never call `save_issue` for a new issue outside this flow.
+- Never set `team` to anything other than the Claude Hunt team.
 - Never apply a label outside `bug` / `feat` / `refactor` / `chore` / `docs`. Never leave labels empty.
 - Never ask more than one clarifying question per capture.
