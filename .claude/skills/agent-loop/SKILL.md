@@ -21,7 +21,7 @@ An orchestrator. It does no classification or code work itself — it calls the 
 
 ## Slack
 
-Posting, reading, and reacting all go through `slack.sh` (bash + curl + jq) in this directory. The bot `Maestro` (user_id `U0BA0TVGNEQ`) posts to #agent-hunt under the display name "hunt loop" (avatar = the app icon). The token is `SLACK_BOT_TOKEN` in the repo-root `.env.local` (gitignored — never commit it).
+Posting, reading, and reacting all go through `slack.sh` (bash + curl + jq) in this directory. The bot `Maestro` (user_id `U0BA0TVGNEQ`) posts to #agent-hunt under its own profile (Maestro + app icon). Which loop is speaking is carried by the digest header (`🤖 hunt loop`), not the sender name. The token is `SLACK_BOT_TOKEN` in the repo-root `.env.local` (gitignored — never commit it).
 
 ```
 .claude/skills/agent-loop/slack.sh post    --channel hunt --text <message>                 # → ts

@@ -49,8 +49,7 @@ channel_id() {
     *)        echo "" ;;
   esac
 }
-# 아이콘 기본값 없음: 앱 아바타(Display Information 의 App icon)가 보인다. --icon 으로만 덮어쓴다.
-default_as() { case "$1" in hunt) echo "hunt loop" ;; *) echo "playbook loop" ;; esac; }
+# 이름·아이콘 기본값 없음: 봇 프로필(Maestro + 앱 아이콘)이 그대로 보인다. --as·--icon 으로만 덮어쓴다.
 
 api_post() {
   # api_post <method> <json-payload>
@@ -86,7 +85,6 @@ done
 [ -n "$CHANNEL" ] || die "--channel 필요 (playbook|hunt|C... ID)"
 CH="$(channel_id "$CHANNEL")"
 [ -n "$CH" ] || die "알 수 없는 채널: $CHANNEL"
-[ -n "$AS" ] || AS="$(default_as "$CHANNEL")"
 
 require_ok() {
   # require_ok <응답json> <동작이름> [성공취급할에러]
@@ -104,7 +102,7 @@ case "$cmd" in
   post)
     [ -n "$TEXT" ] || die "--text 필요"
     payload="$(jq -n --arg ch "$CH" --arg t "$TEXT" --arg u "$AS" --arg i "$ICON" \
-      '{channel:$ch, text:$t, username:$u} + (if $i != "" then {icon_emoji:$i} else {} end)')"
+      '{channel:$ch, text:$t} + (if $u != "" then {username:$u} else {} end) + (if $i != "" then {icon_emoji:$i} else {} end)')"
     resp="$(api_post chat.postMessage "$payload")"
     require_ok "$resp" post
     echo "$resp" | jq -r '.ts'
@@ -113,7 +111,7 @@ case "$cmd" in
     [ -n "$TEXT" ]   || die "--text 필요"
     [ -n "$THREAD" ] || die "--thread 필요"
     payload="$(jq -n --arg ch "$CH" --arg t "$TEXT" --arg u "$AS" --arg i "$ICON" --arg tt "$THREAD" \
-      '{channel:$ch, text:$t, username:$u, thread_ts:$tt} + (if $i != "" then {icon_emoji:$i} else {} end)')"
+      '{channel:$ch, text:$t, thread_ts:$tt} + (if $u != "" then {username:$u} else {} end) + (if $i != "" then {icon_emoji:$i} else {} end)')"
     resp="$(api_post chat.postMessage "$payload")"
     require_ok "$resp" reply
     echo "$resp" | jq -r '.ts'
