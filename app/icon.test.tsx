@@ -15,7 +15,7 @@ vi.mock("next/og", () => ({
 }));
 
 // jsdom serializes hex colors to rgb(...) in computed styles.
-const INK_RGB = "rgb(26, 21, 18)";
+const INK_RGB = "rgb(10, 10, 10)";
 const WHITE_RGB = "rgb(255, 255, 255)";
 
 describe("app/icon", () => {

@@ -11,14 +11,14 @@ export function IconElement(): React.ReactElement {
   return (
     <div
       style={{
-        background: "#fdf6ee",
+        background: "#ffffff",
         width: "100%",
         height: "100%",
         display: "flex",
         alignItems: "center",
         justifyContent: "center",
         gap: 2,
-        color: "#1a1512",
+        color: "#0a0a0a",
         fontFamily: MONO_STACK,
         fontSize: 24,
         fontWeight: 700,
