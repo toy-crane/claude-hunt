@@ -54,6 +54,7 @@ export function buildProjectJsonLd(project: ProjectDetail) {
             "@type": "ListItem",
             position: 2,
             name: project.title,
+            item: projectUrl,
           },
         ],
       },

@@ -109,9 +109,24 @@ describe("buildProjectJsonLd", () => {
           "@type": "ListItem",
           position: 2,
           name: sampleProject.title,
+          item: "https://www.claude-hunt.com/projects/abc-123",
         },
       ],
     });
+  });
+
+  it("gives every breadcrumb item a non-empty absolute URL", async () => {
+    const { buildProjectJsonLd } = await import("./page");
+    const data = buildProjectJsonLd(sampleProject);
+    const breadcrumb = data["@graph"][1] as {
+      itemListElement: Array<{ item?: string }>;
+    };
+    for (const entry of breadcrumb.itemListElement) {
+      expect(typeof entry.item).toBe("string");
+      expect(entry.item).not.toBe("");
+    }
+    const last = breadcrumb.itemListElement.at(-1);
+    expect(last?.item).toBe("https://www.claude-hunt.com/projects/abc-123");
   });
 });
 
