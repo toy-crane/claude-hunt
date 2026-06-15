@@ -14,20 +14,14 @@ describe("robots", () => {
     expect(rules.allow).toBe("/");
   });
 
-  it("disallows auth-only routes that should not appear in search results", () => {
+  it("does not disallow any path so per-page noindex tags stay crawlable", () => {
+    // Auth-only routes rely on a per-page `noindex` tag instead of a
+    // robots.txt disallow. A disallow would block the crawl and stop
+    // Googlebot from ever reading that noindex tag, so there must be none.
     const rules = robots().rules;
     if (Array.isArray(rules)) {
       throw new Error("Expected a single rules object, not an array");
     }
-    expect(rules.disallow).toEqual(
-      expect.arrayContaining([
-        "/login",
-        "/onboarding",
-        "/settings",
-        "/projects/new",
-        "/projects/*/edit",
-        "/auth/",
-      ])
-    );
+    expect(rules.disallow).toBeUndefined();
   });
 });
