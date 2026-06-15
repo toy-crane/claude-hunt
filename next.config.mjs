@@ -14,6 +14,14 @@ const isLocalSupabase =
 
 /** @type {import('next').NextConfig} */
 const nextConfig = {
+  experimental: {
+    // Turbopack's font downloader bundles its own CA roots and ignores the
+    // system trust store. Behind a TLS-intercepting egress proxy (some CI /
+    // agent environments), that breaks the next/font/google fetch during
+    // `next build` even when the domain is reachable. Use system certificates
+    // so the proxy CA is trusted. No-op on hosts with a normal trust chain.
+    turbopackUseSystemTlsCerts: true,
+  },
   async rewrites() {
     return [
       {
