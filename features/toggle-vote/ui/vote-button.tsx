@@ -40,6 +40,14 @@ export interface VoteButtonProps {
   ownedByViewer: boolean;
   projectId: string;
   /**
+   * Appended to every `data-testid` (e.g. `vote-button-idle-desktop`) so
+   * two instances rendered for different breakpoints stay individually
+   * addressable. CSS `md:` visibility does not deduplicate testids or the
+   * a11y tree under jsdom, so callers that mount the button twice must
+   * pass distinct suffixes. Omitted → bare testids (single-instance use).
+   */
+  testIdSuffix?: string;
+  /**
    * Visual layout variant. `"stacked"` (default) is the legacy pill with
    * the icon stacked over the count. `"inline"` is a compact horizontal,
    * square-cornered variant used inside the terminal-board row list.
@@ -60,7 +68,10 @@ export function VoteButton({
   alreadyVoted,
   isAuthenticated,
   variant = "stacked",
+  testIdSuffix,
 }: VoteButtonProps) {
+  const testId = (base: string) =>
+    testIdSuffix ? `${base}-${testIdSuffix}` : base;
   const [optimistic, applyOptimistic] = useOptimistic<VoteState, void>(
     { voted: alreadyVoted, count: voteCount },
     (state) => ({
@@ -78,7 +89,7 @@ export function VoteButton({
 
   if (ownedByViewer) {
     return (
-      <div className={ownerClass} data-testid="vote-owner-count">
+      <div className={ownerClass} data-testid={testId("vote-owner-count")}>
         <RiArrowUpLine aria-hidden="true" className={iconSize} />
         <span className="sr-only">추천 수</span>
         <span className="tabular-nums">{voteCount}</span>
@@ -91,7 +102,7 @@ export function VoteButton({
       <Link
         aria-label={ARIA_LABEL}
         className={cn(baseClass, IDLE_COLORS)}
-        data-testid="vote-button-signin"
+        data-testid={testId("vote-button-signin")}
         href="/login"
       >
         <RiArrowUpLine aria-hidden="true" className={iconSize} />
@@ -123,7 +134,9 @@ export function VoteButton({
       aria-label={ARIA_LABEL}
       aria-pressed={optimistic.voted}
       className={cn(baseClass, optimistic.voted ? VOTED_COLORS : IDLE_COLORS)}
-      data-testid={optimistic.voted ? "vote-button-voted" : "vote-button-idle"}
+      data-testid={testId(
+        optimistic.voted ? "vote-button-voted" : "vote-button-idle"
+      )}
       disabled={isPending}
       onClick={handleClick}
       type="button"

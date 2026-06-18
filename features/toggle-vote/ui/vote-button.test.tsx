@@ -282,3 +282,16 @@ describe("VoteButton (owner)", () => {
     expect(container.querySelector("[aria-pressed]")).toBeNull();
   });
 });
+
+describe("VoteButton (testIdSuffix)", () => {
+  it("appends the suffix to the testid so two instances stay addressable", () => {
+    render(<VoteButton {...baseProps} testIdSuffix="desktop" />);
+    expect(screen.getByTestId("vote-button-idle-desktop")).toBeInTheDocument();
+    expect(screen.queryByTestId("vote-button-idle")).toBeNull();
+  });
+
+  it("leaves the testid bare when no suffix is given", () => {
+    render(<VoteButton {...baseProps} />);
+    expect(screen.getByTestId("vote-button-idle")).toBeInTheDocument();
+  });
+});
