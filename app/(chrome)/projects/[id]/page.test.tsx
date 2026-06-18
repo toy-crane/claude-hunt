@@ -5,7 +5,10 @@ const fetchProjectDetailMock = vi.fn();
 
 vi.mock("@widgets/project-detail", () => ({
   fetchProjectDetail: fetchProjectDetailMock,
-  Hero: () => null,
+  ImageGallery: () => null,
+  ProjectSummary: () => null,
+  ProjectDescription: () => null,
+  ProjectActionBar: () => null,
 }));
 
 vi.mock("@widgets/comment-list", () => ({

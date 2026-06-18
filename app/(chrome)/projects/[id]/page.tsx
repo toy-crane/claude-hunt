@@ -1,5 +1,7 @@
 import { fetchViewer } from "@shared/api/supabase/viewer";
 import { SITE_URL } from "@shared/config/site";
+import { cn } from "@shared/lib/utils";
+import { Skeleton } from "@shared/ui/skeleton";
 import {
   CommentList,
   CommentListSkeleton,
@@ -7,13 +9,22 @@ import {
 } from "@widgets/comment-list";
 import {
   fetchProjectDetail,
-  Hero,
-  HeroSkeleton,
+  ImageGallery,
+  ProjectActionBar,
+  ProjectDescription,
   type ProjectDetail,
+  ProjectSummary,
 } from "@widgets/project-detail";
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import { Suspense } from "react";
+
+// Two stacked grids share this template so the description (left, row 2)
+// lines up under the gallery and the comments (right, row 2) under the
+// summary. Children carry explicit col/row placement so a null
+// description or a project with no images never reshuffles the cells.
+const SPOTLIGHT_GRID_CLASS =
+  "lg:grid lg:grid-cols-[1.55fr_1fr] lg:items-start lg:gap-x-7 lg:gap-y-8";
 
 interface PageProps {
   params: Promise<{ id: string }>;
@@ -102,7 +113,7 @@ export default function Page({ params }: PageProps) {
   // boundary. The cached project core (fetchProjectCore inside
   // fetchProjectDetail) still resolves from the cross-request cache.
   return (
-    <main className="mx-auto flex min-h-svh w-full max-w-3xl flex-col gap-6 bg-background p-6 pb-24 text-foreground">
+    <main className="mx-auto flex min-h-svh w-full max-w-3xl flex-col gap-6 bg-background p-6 pb-28 text-foreground md:pb-16 lg:max-w-6xl">
       <Suspense fallback={<ProjectDetailSkeleton />}>
         <ProjectDetailContent params={params} />
       </Suspense>
@@ -122,6 +133,8 @@ async function ProjectDetailContent({ params }: PageProps) {
     notFound();
   }
 
+  const hasImages = project.imageUrls.length > 0;
+
   return (
     <>
       <script
@@ -131,12 +144,52 @@ async function ProjectDetailContent({ params }: PageProps) {
         }}
         type="application/ld+json"
       />
-      <Hero
+      <p
+        className="font-mono text-[11px] text-muted-foreground"
+        data-testid="project-detail-breadcrumb"
+      >
+        <span aria-hidden="true" className="text-accent-terracotta">
+          $
+        </span>{" "}
+        claude-hunt show {project.title}
+      </p>
+
+      <div
+        className={cn("flex flex-col gap-8", hasImages && SPOTLIGHT_GRID_CLASS)}
+      >
+        {hasImages ? (
+          <ImageGallery
+            className="lg:col-start-1 lg:row-start-1"
+            imageUrls={project.imageUrls}
+            title={project.title}
+          />
+        ) : null}
+        <ProjectSummary
+          className="lg:col-start-2 lg:row-start-1"
+          isAuthenticated={Boolean(viewer)}
+          project={project}
+          viewerUserId={viewerId}
+        />
+        {project.description ? (
+          <ProjectDescription
+            className="lg:col-start-1 lg:row-start-2"
+            description={project.description}
+          />
+        ) : null}
+        <div className="lg:col-start-2 lg:row-start-2">
+          <CommentList
+            projectId={project.id}
+            threads={threads}
+            viewer={viewer}
+          />
+        </div>
+      </div>
+
+      <ProjectActionBar
         isAuthenticated={Boolean(viewer)}
         project={project}
         viewerUserId={viewerId}
       />
-      <CommentList projectId={project.id} threads={threads} viewer={viewer} />
     </>
   );
 }
@@ -144,8 +197,24 @@ async function ProjectDetailContent({ params }: PageProps) {
 function ProjectDetailSkeleton() {
   return (
     <div className="flex flex-col gap-6" data-testid="project-detail-skeleton">
-      <HeroSkeleton />
-      <CommentListSkeleton />
+      <Skeleton className="h-3 w-48" />
+      <div className={cn("flex flex-col gap-8", SPOTLIGHT_GRID_CLASS)}>
+        <Skeleton className="aspect-[16/10] w-full lg:col-start-1 lg:row-start-1" />
+        <div className="flex flex-col gap-4 lg:col-start-2 lg:row-start-1">
+          <Skeleton className="h-3 w-40" />
+          <Skeleton className="h-7 w-2/3" />
+          <Skeleton className="h-4 w-full" />
+          <Skeleton className="h-4 w-4/5" />
+          <Skeleton className="h-12 w-full" />
+        </div>
+        <div className="flex flex-col gap-2 lg:col-start-1 lg:row-start-2">
+          <Skeleton className="h-4 w-full" />
+          <Skeleton className="h-4 w-3/4" />
+        </div>
+        <div className="lg:col-start-2 lg:row-start-2">
+          <CommentListSkeleton />
+        </div>
+      </div>
     </div>
   );
 }

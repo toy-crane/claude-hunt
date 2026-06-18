@@ -1,35 +1,23 @@
 import { render, screen } from "@testing-library/react";
 import { describe, expect, it, vi } from "vitest";
 import type { ProjectDetail } from "../api/fetch-project-detail";
-import { Hero } from "./hero";
+import { ProjectSummary } from "./project-summary";
 
 const VISIT_BUTTON_NAME = /프로젝트 방문하기/;
-
-vi.mock("next/image", () => ({
-  default: ({
-    alt,
-    src,
-    "data-testid": dataTestId,
-  }: {
-    alt: string;
-    src: string;
-    "data-testid"?: string;
-  }) => (
-    <div aria-label={alt} data-src={src} data-testid={dataTestId} role="img" />
-  ),
-}));
 
 vi.mock("@features/toggle-vote", () => ({
   VoteButton: ({
     voteCount,
     ownedByViewer,
+    testIdSuffix,
   }: {
     voteCount: number;
     ownedByViewer: boolean;
+    testIdSuffix?: string;
   }) => (
     <button
       data-owned={String(ownedByViewer)}
-      data-testid="vote-button"
+      data-testid={`vote-button-${testIdSuffix ?? "bare"}`}
       type="button"
     >
       {voteCount}
@@ -70,10 +58,10 @@ function buildProject(overrides: Partial<ProjectDetail> = {}): ProjectDetail {
   };
 }
 
-describe("<Hero />", () => {
+describe("<ProjectSummary />", () => {
   it("renders title, full tagline, cohort, author, and vote count", () => {
     render(
-      <Hero
+      <ProjectSummary
         isAuthenticated={false}
         project={buildProject()}
         viewerUserId={null}
@@ -87,40 +75,12 @@ describe("<Hero />", () => {
     );
     expect(screen.getByText("LG전자 1기")).toBeInTheDocument();
     expect(screen.getByText("Alice")).toBeInTheDocument();
-    expect(screen.getByTestId("vote-button")).toHaveTextContent("128");
-  });
-
-  it("renders the description section when the project has a description", () => {
-    render(
-      <Hero
-        isAuthenticated={false}
-        project={buildProject({
-          description: "첫 문단입니다.\n\n둘째 문단입니다.",
-        })}
-        viewerUserId={null}
-      />
-    );
-    const description = screen.getByTestId("project-detail-description");
-    expect(description).toHaveTextContent("첫 문단입니다.");
-    expect(description).toHaveTextContent("둘째 문단입니다.");
-  });
-
-  it("omits the description section when there is no description", () => {
-    render(
-      <Hero
-        isAuthenticated={false}
-        project={buildProject({ description: null })}
-        viewerUserId={null}
-      />
-    );
-    expect(
-      screen.queryByTestId("project-detail-description")
-    ).not.toBeInTheDocument();
+    expect(screen.getByTestId("vote-button-desktop")).toHaveTextContent("128");
   });
 
   it("flattens a multi-line tagline into a single line", () => {
     render(
-      <Hero
+      <ProjectSummary
         isAuthenticated={false}
         project={buildProject({ tagline: "첫 줄\n둘째 줄" })}
         viewerUserId={null}
@@ -131,9 +91,9 @@ describe("<Hero />", () => {
     expect(tagline.textContent).not.toContain("\n");
   });
 
-  it("links the cohort badge to the project list filtered by that cohort", () => {
+  it("links the cohort to the project list filtered by that cohort", () => {
     render(
-      <Hero
+      <ProjectSummary
         isAuthenticated={false}
         project={buildProject()}
         viewerUserId={null}
@@ -143,9 +103,9 @@ describe("<Hero />", () => {
     expect(cohortLink).toHaveAttribute("href", "/projects?cohort=cohort-1");
   });
 
-  it("omits the cohort badge when the project has no cohort", () => {
+  it("omits the cohort link when the project has no cohort", () => {
     render(
-      <Hero
+      <ProjectSummary
         isAuthenticated={false}
         project={buildProject({ cohort_id: null, cohort_label: null })}
         viewerUserId={null}
@@ -156,7 +116,7 @@ describe("<Hero />", () => {
 
   it("opens the project URL in a new tab via the visit button", () => {
     render(
-      <Hero
+      <ProjectSummary
         isAuthenticated={false}
         project={buildProject()}
         viewerUserId={null}
@@ -170,7 +130,7 @@ describe("<Hero />", () => {
 
   it("hides the GitHub link when github_url is null", () => {
     render(
-      <Hero
+      <ProjectSummary
         isAuthenticated={false}
         project={buildProject({ github_url: null })}
         viewerUserId={null}
@@ -183,7 +143,7 @@ describe("<Hero />", () => {
 
   it("renders the GitHub link when github_url is set, opening in a new tab", () => {
     render(
-      <Hero
+      <ProjectSummary
         isAuthenticated={false}
         project={buildProject({
           github_url: "https://github.com/octocat/hello",
@@ -197,30 +157,33 @@ describe("<Hero />", () => {
     expect(link).toHaveAttribute("rel", "noopener noreferrer ugc");
   });
 
-  it("flags the vote button as owned when the viewer is the author (self-vote prevented)", () => {
+  it("flags the vote button as owned and shows owner controls for the author", () => {
     render(
-      <Hero
+      <ProjectSummary
         isAuthenticated={true}
         project={buildProject()}
         viewerUserId="user-alice"
       />
     );
-    expect(screen.getByTestId("vote-button")).toHaveAttribute(
+    expect(screen.getByTestId("vote-button-desktop")).toHaveAttribute(
       "data-owned",
       "true"
     );
+    expect(
+      screen.getByTestId("project-detail-owner-controls")
+    ).toBeInTheDocument();
   });
 
-  it("anonymous and signed-in visitors see the same project content", () => {
-    const project = buildProject();
-    const { container: anonContainer } = render(
-      <Hero isAuthenticated={false} project={project} viewerUserId={null} />
+  it("hides owner controls for a non-author viewer", () => {
+    render(
+      <ProjectSummary
+        isAuthenticated={true}
+        project={buildProject()}
+        viewerUserId="user-bob"
+      />
     );
-    const anonText = anonContainer.textContent ?? "";
-    const { container: authedContainer } = render(
-      <Hero isAuthenticated={true} project={project} viewerUserId="user-bob" />
-    );
-    const authedText = authedContainer.textContent ?? "";
-    expect(anonText).toBe(authedText);
+    expect(
+      screen.queryByTestId("project-detail-owner-controls")
+    ).not.toBeInTheDocument();
   });
 });
