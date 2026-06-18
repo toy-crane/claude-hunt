@@ -22,71 +22,54 @@ describe("<ImageGallery />", () => {
     expect(container.firstChild).toBeNull();
   });
 
-  it("renders only the primary image when there is exactly one", () => {
+  it("renders only the primary image with no thumbnails when there is exactly one", () => {
     render(<ImageGallery imageUrls={["a.png"]} title="X" />);
     expect(
       screen.getByTestId("project-detail-primary-image")
     ).toBeInTheDocument();
     expect(
-      screen.queryByTestId("project-detail-gallery-strip")
-    ).not.toBeInTheDocument();
-    expect(
-      screen.queryByTestId("project-detail-gallery-prev")
+      screen.queryByTestId("project-detail-gallery-thumb")
     ).not.toBeInTheDocument();
   });
 
-  it("renders the thumb strip and arrows when there are multiple images", () => {
+  it("renders one thumbnail per image when there are multiple", () => {
     render(<ImageGallery imageUrls={["a.png", "b.png", "c.png"]} title="X" />);
-    expect(
-      screen.getByTestId("project-detail-gallery-strip")
-    ).toBeInTheDocument();
     expect(screen.getAllByTestId("project-detail-gallery-thumb")).toHaveLength(
       3
     );
-    expect(
-      screen.getByTestId("project-detail-gallery-prev")
-    ).toBeInTheDocument();
-    expect(
-      screen.getByTestId("project-detail-gallery-next")
-    ).toBeInTheDocument();
   });
 
-  it("advances to the next image when the right arrow is clicked", () => {
-    render(<ImageGallery imageUrls={["a.png", "b.png", "c.png"]} title="X" />);
-    fireEvent.click(screen.getByTestId("project-detail-gallery-next"));
-    expect(screen.getByTestId("project-detail-primary-image")).toHaveAttribute(
-      "data-src",
-      "b.png"
-    );
-  });
-
-  it("wraps from the last image to the first when the right arrow is clicked at the end", () => {
-    render(<ImageGallery imageUrls={["a.png", "b.png"]} title="X" />);
-    const next = screen.getByTestId("project-detail-gallery-next");
-    fireEvent.click(next); // → b
-    fireEvent.click(next); // → wrap to a
-    expect(screen.getByTestId("project-detail-primary-image")).toHaveAttribute(
-      "data-src",
-      "a.png"
-    );
-  });
-
-  it("wraps from the first image to the last when the left arrow is clicked at the start", () => {
-    render(<ImageGallery imageUrls={["a.png", "b.png"]} title="X" />);
-    fireEvent.click(screen.getByTestId("project-detail-gallery-prev"));
-    expect(screen.getByTestId("project-detail-primary-image")).toHaveAttribute(
-      "data-src",
-      "b.png"
-    );
-  });
-
-  it("jumps to a specific image when its thumbnail is clicked", () => {
+  it("jumps the primary image to a thumbnail when it is clicked", () => {
     render(<ImageGallery imageUrls={["a.png", "b.png", "c.png"]} title="X" />);
     const thumbs = screen.getAllByTestId("project-detail-gallery-thumb");
     fireEvent.click(thumbs[2] as HTMLElement);
     expect(screen.getByTestId("project-detail-primary-image")).toHaveAttribute(
       "data-src",
       "c.png"
+    );
+  });
+
+  it("marks the active thumbnail with aria-current", () => {
+    render(<ImageGallery imageUrls={["a.png", "b.png"]} title="X" />);
+    const thumbs = screen.getAllByTestId("project-detail-gallery-thumb");
+    expect(thumbs[0]).toHaveAttribute("aria-current", "true");
+    expect(thumbs[1]).toHaveAttribute("aria-current", "false");
+
+    fireEvent.click(thumbs[1] as HTMLElement);
+    expect(thumbs[0]).toHaveAttribute("aria-current", "false");
+    expect(thumbs[1]).toHaveAttribute("aria-current", "true");
+  });
+
+  it("forwards the className to the gallery root for grid placement", () => {
+    render(
+      <ImageGallery
+        className="lg:col-start-1"
+        imageUrls={["a.png"]}
+        title="X"
+      />
+    );
+    expect(screen.getByTestId("project-detail-gallery").className).toContain(
+      "lg:col-start-1"
     );
   });
 });
