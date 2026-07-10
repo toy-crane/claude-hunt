@@ -8,7 +8,7 @@ import {
   type UniqueIdentifier,
   useDroppable,
 } from "@dnd-kit/core";
-import { arrayMove } from "@dnd-kit/sortable";
+import { type AnimateLayoutChanges, arrayMove } from "@dnd-kit/sortable";
 import { MAX_PROJECT_IMAGES } from "@entities/project";
 import { RiAddLine, RiCloseLine, RiUploadCloud2Line } from "@remixicon/react";
 import {
@@ -17,13 +17,26 @@ import {
 } from "@shared/lib/screenshot-upload";
 import { cn } from "@shared/lib/utils";
 import {
+  defaultSortableAnimateLayoutChanges,
   Sortable,
   SortableItem,
   SortableItemHandle,
 } from "@shared/ui/sortable";
 import NextImage from "next/image";
-import { useCallback, useEffect, useId, useRef, useState } from "react";
+import {
+  startTransition,
+  useCallback,
+  useEffect,
+  useId,
+  useRef,
+  useState,
+  ViewTransition,
+} from "react";
 import { promoteToPrimary } from "../lib/promote";
+
+// share 클래스 토큰 — 슬롯마다 다른 view-transition-name(name=image-slot-*)에
+// 공통 애니메이션 정의를 입힌다. CSS는 app/globals.css의 .morph-slot 규칙.
+const MORPH_SHARE_CLASS = "morph-slot";
 
 export interface ImageSlot {
   file: File;
@@ -66,6 +79,12 @@ function makeSlotId(): string {
  * two sizes in one list makes rectSortingStrategy preview reorders with
  * non-uniform scale transforms that visibly distort the images.
  *
+ * Promoting a thumbnail (by drag or the "대표로 지정" button) commits
+ * inside a transition so React's <ViewTransition> can morph the size
+ * change instead of an instant swap — dnd-kit's own drop/layout
+ * animations don't interpolate size, so without this the promoted image
+ * would pop into place.
+ *
  * State management is local to this component (not delegated to
  * @reui/use-file-upload) because that hook does not expose a way to
  * replace the array — reorder requires array replacement, and going
@@ -83,6 +102,16 @@ export function ImageSlots({
   const inputId = useId();
   const inputRef = useRef<HTMLInputElement | null>(null);
   const [dragging, setDragging] = useState(false);
+  const [overPromoteTarget, setOverPromoteTarget] = useState(false);
+
+  // 승격 커밋 중에만 true — dnd-kit의 정착 FLIP과 ViewTransition의 morph가
+  // 같은 프레임에서 경쟁하지 않도록 FLIP을 끈다. 패시브 이펙트는 dnd-kit의
+  // 레이아웃 이펙트보다 늦게 실행되므로, 매 렌더 후 false로 재무장해도
+  // 이번 커밋의 FLIP 판단에는 늦지 않는다.
+  const suppressFlipRef = useRef(false);
+  useEffect(() => {
+    suppressFlipRef.current = false;
+  });
 
   // Track every preview URL we've created so we can revoke on remove
   // and on unmount. revokeObjectURL is a no-op for non-blob URLs, so
@@ -107,6 +136,9 @@ export function ImageSlots({
     },
     []
   );
+
+  const primary = value[0] ?? null;
+  const thumbs = value.slice(1);
 
   const handleAdd = useCallback(
     (incoming: FileList | File[]) => {
@@ -139,18 +171,33 @@ export function ImageSlots({
     [value, onChange, onError]
   );
 
+  // 승격/대표 제거는 이 커밋 경로로 — FLIP을 끄고 트랜지션으로 감싸
+  // ViewTransition의 크기 morph가 유일한 애니메이션이 되게 한다.
+  const commitMorph = useCallback(
+    (next: ImageSlot[]) => {
+      suppressFlipRef.current = true;
+      startTransition(() => onChange(next));
+    },
+    [onChange]
+  );
+
   const handleRemove = useCallback(
     (id: string) => {
-      onChange(value.filter((s) => s.id !== id));
+      const next = value.filter((s) => s.id !== id);
+      if (id === primary?.id) {
+        commitMorph(next);
+      } else {
+        onChange(next);
+      }
     },
-    [value, onChange]
+    [value, primary, onChange, commitMorph]
   );
 
   const promote = useCallback(
     (id: string) => {
-      onChange(promoteToPrimary(value, id));
+      commitMorph(promoteToPrimary(value, id));
     },
-    [value, onChange]
+    [value, commitMorph]
   );
 
   const canAddMore = value.length < MAX_PROJECT_IMAGES;
@@ -189,9 +236,6 @@ export function ImageSlots({
     },
     [disabled, handleAdd]
   );
-
-  const primary = value[0] ?? null;
-  const thumbs = value.slice(1);
 
   const handleSortValueChange = useCallback(
     (next: ImageSlot[]) => {
@@ -232,6 +276,28 @@ export function ImageSlots({
       onChange([primary, ...arrayMove(thumbs, activeIndex, overIndex)]);
     },
     [primary, thumbs, onChange, promote]
+  );
+
+  // 승격 드롭 중엔 고스트 정착 애니메이션을 꺼서 ViewTransition의 morph만
+  // 보이게 한다. drag-end에서는 리셋하지 않는다 — 정착 애니메이션은
+  // 드롭된 이후 값을 늦게 읽으므로, 다음 드래그 시작에서만 리셋해도 된다.
+  const handleSortDragStart = useCallback(() => {
+    setOverPromoteTarget(false);
+  }, []);
+  const handleSortDragOver = useCallback(
+    (event: { over: { id: UniqueIdentifier } | null }) => {
+      setOverPromoteTarget(event.over?.id === PRIMARY_DROP_ID);
+    },
+    []
+  );
+  const handleSortDragCancel = useCallback(() => {
+    setOverPromoteTarget(false);
+  }, []);
+
+  const thumbAnimateLayoutChanges: AnimateLayoutChanges = useCallback(
+    (args) =>
+      !suppressFlipRef.current && defaultSortableAnimateLayoutChanges(args),
+    []
   );
 
   const renderOverlay = useCallback(
@@ -278,7 +344,11 @@ export function ImageSlots({
       <Sortable
         className="group/sortable flex flex-col gap-3"
         collisionDetection={promoteCollisionDetection}
+        dropAnimation={overPromoteTarget ? null : undefined}
         getItemValue={(slot: ImageSlot) => slot.id}
+        onDragCancel={handleSortDragCancel}
+        onDragOver={handleSortDragOver}
+        onDragStart={handleSortDragStart}
         onMove={handleMove}
         onValueChange={handleSortValueChange}
         renderOverlay={renderOverlay}
@@ -288,6 +358,7 @@ export function ImageSlots({
         {primary ? (
           <PrimarySlot
             disabled={disabled}
+            key={primary.id}
             onRemove={() => handleRemove(primary.id)}
             slot={primary}
           />
@@ -317,26 +388,34 @@ export function ImageSlots({
           <div className="grid grid-cols-4 gap-2">
             {thumbs.map((slot) => (
               <SortableItem
-                className="group/thumb relative aspect-square"
+                animateLayoutChanges={thumbAnimateLayoutChanges}
+                className="relative aspect-square"
                 data-testid="image-slot-thumb-filled"
                 disabled={disabled}
                 key={slot.id}
                 value={slot.id}
               >
-                <div className="absolute inset-0 overflow-hidden rounded-md border bg-muted">
-                  <NextImage
-                    alt="썸네일"
-                    className="object-cover"
-                    fill
-                    sizes="120px"
-                    src={slot.preview}
-                  />
-                </div>
+                <ViewTransition
+                  default="none"
+                  name={`image-slot-${slot.id}`}
+                  share={MORPH_SHARE_CLASS}
+                  update="auto"
+                >
+                  <div className="absolute inset-0 overflow-hidden rounded-md border bg-muted">
+                    <NextImage
+                      alt="썸네일"
+                      className="object-cover"
+                      fill
+                      sizes="120px"
+                      src={slot.preview}
+                    />
+                  </div>
+                </ViewTransition>
                 {/* 타일 전체가 드래그 핸들. 버튼은 이 레이어 위에 온다. */}
                 <SortableItemHandle className="absolute inset-0 touch-manipulation" />
                 <button
                   aria-label="썸네일 이미지 제거"
-                  className="absolute top-1 right-1 inline-flex size-5 items-center justify-center rounded-sm bg-background/80 text-foreground backdrop-blur hover:bg-background"
+                  className="absolute top-1 right-1 inline-flex size-5 items-center justify-center rounded-sm bg-background/80 text-foreground backdrop-blur transition duration-150 ease-out hover:bg-background active:scale-95"
                   disabled={disabled}
                   onClick={() => handleRemove(slot.id)}
                   type="button"
@@ -401,21 +480,28 @@ function PrimarySlot({
       data-testid="image-slot-primary-filled"
       ref={setNodeRef}
     >
-      <div className="absolute inset-0 overflow-hidden rounded-md border bg-muted">
-        <NextImage
-          alt="대표 이미지"
-          className="object-cover"
-          fill
-          sizes="(max-width: 768px) 100vw, 768px"
-          src={slot.preview}
-        />
-      </div>
+      <ViewTransition
+        default="none"
+        name={`image-slot-${slot.id}`}
+        share={MORPH_SHARE_CLASS}
+        update="auto"
+      >
+        <div className="absolute inset-0 overflow-hidden rounded-md border bg-muted">
+          <NextImage
+            alt="대표 이미지"
+            className="object-cover"
+            fill
+            sizes="(max-width: 768px) 100vw, 768px"
+            src={slot.preview}
+          />
+        </div>
+      </ViewTransition>
       <span className="absolute bottom-2 left-2 rounded-sm bg-primary px-1.5 py-0.5 font-medium text-primary-foreground text-xs">
         대표
       </span>
       <button
         aria-label="대표 이미지 제거"
-        className="absolute top-2 right-2 inline-flex size-7 items-center justify-center rounded-sm bg-background/80 text-foreground backdrop-blur hover:bg-background"
+        className="absolute top-2 right-2 inline-flex size-7 items-center justify-center rounded-sm bg-background/80 text-foreground backdrop-blur transition duration-150 ease-out hover:bg-background active:scale-95"
         disabled={disabled}
         onClick={onRemove}
         type="button"

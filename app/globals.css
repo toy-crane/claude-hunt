@@ -203,6 +203,26 @@
   animation: none;
 }
 
+/* Shared-element morph for promoting a thumbnail to the primary project
+   image (and demoting the previous primary into the thumbnail row). The
+   `morph-slot` share class is applied to every slot's ViewTransition, so
+   one animation definition covers all of them regardless of each slot's
+   own view-transition-name. The mid-transition blur masks the crossfade
+   between the 16:10 and square crops of the same image. */
+::view-transition-group(.morph-slot) {
+  animation-duration: 260ms;
+}
+
+::view-transition-image-pair(.morph-slot) {
+  animation-name: image-slot-via-blur;
+}
+
+@keyframes image-slot-via-blur {
+  30% {
+    filter: blur(3px);
+  }
+}
+
 @media (prefers-reduced-motion: reduce) {
   ::view-transition-old(*),
   ::view-transition-new(*),
