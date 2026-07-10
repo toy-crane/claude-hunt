@@ -6,7 +6,7 @@
 -- having already been applied).
 
 begin;
-select plan(12);
+select plan(13);
 
 -- 1. Three demo profiles exist with the expected stable IDs.
 select is(
@@ -152,6 +152,26 @@ select is(
        )),
   3,
   'every demo project primary image path matches an uploaded storage object'
+);
+
+-- 12. GoTrue token columns are backfilled to '' (not NULL) on demo users.
+--     GoTrue scans them into non-nullable Go strings, so a NULL row breaks
+--     the admin API (generateLink, getUserById) with "converting NULL to
+--     string is unsupported".
+select is(
+  (select count(*)::int
+     from auth.users
+     where id in (
+       '00000000-0000-0000-0000-00000000000a',
+       '00000000-0000-0000-0000-00000000000b',
+       '00000000-0000-0000-0000-00000000000c'
+     )
+       and confirmation_token = ''
+       and recovery_token = ''
+       and email_change_token_new = ''
+       and email_change = ''),
+  3,
+  'demo auth.users rows backfill GoTrue token columns to empty strings'
 );
 
 select * from finish();
