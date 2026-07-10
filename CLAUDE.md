@@ -74,7 +74,25 @@ Test names describe the behavior in natural language — do not use scenario IDs
 ### E2E preconditions
 - `supabase start` running (API on `:54321`)
 - `.env.local` contains `SUPABASE_SECRET_KEY` (copy from `supabase status`) — required server env, validated at app boot
+- `.env.local` contains `DEV_LOGIN_ENABLED=true` — required by `e2e/auth/dev-login.spec.ts`; a dev server started before the flag was added must be restarted
 - `bunx playwright install chromium` (once)
+
+### Local AI testing (dev-login)
+
+`GET /auth/dev-login?email=<seeded>[&next=/path]` signs the browser in as an existing local account with one URL visit (no magic-link email round-trip) and redirects to `next` (default `/`). Use it to test any authenticated page locally — from the browser preview, Playwright, or curl.
+
+Seeded accounts (`supabase/seed.sql`, restored by `supabase db reset`):
+
+| Email | display_name | Cohort | Owns project |
+|-------|--------------|--------|--------------|
+| `alice@example.com` | 지우 | LGE-1 | Paint Studio |
+| `bob@example.com` | 하늘 | LGE-2 | Note Keeper |
+| `carol@example.com` | 소라 | Inflearn | Focus Timer |
+| `operator@example.com` | 두루미 | TOYCRANE (operator) | — |
+
+Preconditions and limits:
+- `DEV_LOGIN_ENABLED=true` in `.env.local` (never set in Vercel). The route also 404s on production builds and non-local Supabase URLs.
+- Emails must be `@example.com` or `@test.local`, and the user must already exist — unknown emails get 400 (no auto-signup). Test new-user onboarding through the real magic-link flow instead (Mailpit at `:54324`).
 
 ## Architecture — Feature-Sliced Design (FSD)
 
