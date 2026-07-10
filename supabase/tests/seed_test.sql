@@ -6,22 +6,23 @@
 -- having already been applied).
 
 begin;
-select plan(13);
+select plan(15);
 
--- 1. Three demo profiles exist with the expected stable IDs.
+-- 1. Four demo profiles exist with the expected stable IDs.
 select is(
   (select count(*)::int
      from public.profiles
      where id in (
        '00000000-0000-0000-0000-00000000000a',
        '00000000-0000-0000-0000-00000000000b',
-       '00000000-0000-0000-0000-00000000000c'
+       '00000000-0000-0000-0000-00000000000c',
+       '00000000-0000-0000-0000-00000000000d'
      )),
-  3,
-  'seed creates three demo profiles with stable IDs'
+  4,
+  'seed creates four demo profiles with stable IDs'
 );
 
--- 2-4. Each demo profile has display_name + cohort_id set and the cohort
+-- 2-5. Each demo profile has display_name + cohort_id set and the cohort
 --     mapping is exactly the one seed.sql prescribes.
 select is(
   (select c.name
@@ -50,35 +51,47 @@ select is(
   'Carol is assigned to cohort Inflearn'
 );
 
--- 5. display_name is populated for every demo profile.
+select is(
+  (select c.name
+     from public.profiles p
+     join public.cohorts c on c.id = p.cohort_id
+     where p.id = '00000000-0000-0000-0000-00000000000d'),
+  'TOYCRANE'::text,
+  'the operator is assigned to cohort TOYCRANE'
+);
+
+-- 6. display_name is populated for every demo profile.
 select is(
   (select count(*)::int
      from public.profiles
      where id in (
        '00000000-0000-0000-0000-00000000000a',
        '00000000-0000-0000-0000-00000000000b',
-       '00000000-0000-0000-0000-00000000000c'
+       '00000000-0000-0000-0000-00000000000c',
+       '00000000-0000-0000-0000-00000000000d'
      )
        and display_name is not null
        and length(btrim(display_name)) > 0),
-  3,
+  4,
   'every demo profile has a non-empty display_name'
 );
 
--- 6. All three display_names are distinct (Scenario 1 — "three distinct authors").
+-- 7. All four display_names are distinct (Scenario 1 — "three distinct
+--    authors" among the students, plus the operator).
 select is(
   (select count(distinct display_name)::int
      from public.profiles
      where id in (
        '00000000-0000-0000-0000-00000000000a',
        '00000000-0000-0000-0000-00000000000b',
-       '00000000-0000-0000-0000-00000000000c'
+       '00000000-0000-0000-0000-00000000000c',
+       '00000000-0000-0000-0000-00000000000d'
      )),
-  3,
+  4,
   'demo profile display_names are distinct'
 );
 
--- 7. LGE-3 has no projects assigned via demo seed (empty-cohort case).
+-- 8. LGE-3 has no projects assigned via demo seed (empty-cohort case).
 select is(
   (select count(*)::int
      from public.profiles p
@@ -88,7 +101,7 @@ select is(
   'LGE-3 has no seeded profiles (empty-cohort case)'
 );
 
--- 8. Three demo projects exist (one per demo user).
+-- 9. Three demo projects exist (one per student user).
 select is(
   (select count(*)::int
      from public.projects
@@ -98,10 +111,20 @@ select is(
        '00000000-0000-0000-0000-00000000000c'
      )),
   3,
-  'seed creates three demo projects (one per demo user)'
+  'seed creates three demo projects (one per student user)'
 );
 
--- 9. Each demo project's cohort matches its owner's cohort.
+-- 10. The operator owns no seeded projects (keeps the public board and the
+--     seeded-demo e2e assertions untouched).
+select is(
+  (select count(*)::int
+     from public.projects
+     where user_id = '00000000-0000-0000-0000-00000000000d'),
+  0,
+  'the operator owns no seeded projects'
+);
+
+-- 11. Each demo project's cohort matches its owner's cohort.
 select is(
   (select count(*)::int
      from public.projects p
@@ -116,7 +139,7 @@ select is(
   'each demo project cohort matches the owner profile cohort'
 );
 
--- 10. Cohort-filtered counts: LGE-1, LGE-2, Inflearn each return exactly 1;
+-- 12. Cohort-filtered counts: LGE-1, LGE-2, Inflearn each return exactly 1;
 --     LGE-3 returns 0.
 select is(
   (select count(*)::int
@@ -135,7 +158,7 @@ select is(
   'LGE-3 has zero seeded projects'
 );
 
--- 11. Every demo project's primary image path resolves to a row in
+-- 13. Every demo project's primary image path resolves to a row in
 --     storage.objects under the project-screenshots bucket.
 select is(
   (select count(*)::int
@@ -154,7 +177,7 @@ select is(
   'every demo project primary image path matches an uploaded storage object'
 );
 
--- 12. GoTrue token columns are backfilled to '' (not NULL) on demo users.
+-- 14. GoTrue token columns are backfilled to '' (not NULL) on demo users.
 --     GoTrue scans them into non-nullable Go strings, so a NULL row breaks
 --     the admin API (generateLink, getUserById) with "converting NULL to
 --     string is unsupported".
@@ -164,13 +187,14 @@ select is(
      where id in (
        '00000000-0000-0000-0000-00000000000a',
        '00000000-0000-0000-0000-00000000000b',
-       '00000000-0000-0000-0000-00000000000c'
+       '00000000-0000-0000-0000-00000000000c',
+       '00000000-0000-0000-0000-00000000000d'
      )
        and confirmation_token = ''
        and recovery_token = ''
        and email_change_token_new = ''
        and email_change = ''),
-  3,
+  4,
   'demo auth.users rows backfill GoTrue token columns to empty strings'
 );
 
