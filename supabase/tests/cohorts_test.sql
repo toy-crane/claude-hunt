@@ -1,7 +1,8 @@
 -- pgTAP tests for the cohorts table:
 --   schema shape (id / name unique / label / created_at / updated_at)
 --   RLS: anon + authenticated can select
---   Seed contract: the four (name, label) pairs defined in supabase/seed.sql
+--   Seed contract: the five (name, label) pairs defined in supabase/seed.sql
+--   (including the operator-only TOYCRANE cohort, hidden from app lists)
 --   No write policies (admin-only via seed)
 
 BEGIN;
@@ -23,7 +24,7 @@ SELECT is(
   'RLS should be enabled on cohorts'
 );
 
--- 7. Seed contract: exactly the four (name, label) pairs from supabase/seed.sql
+-- 7. Seed contract: exactly the five (name, label) pairs from supabase/seed.sql
 SET local role anon;
 SELECT results_eq(
   $$SELECT name, label FROM public.cohorts ORDER BY name$$,
@@ -31,8 +32,9 @@ SELECT results_eq(
     ('Inflearn'::text, '인프런'::text),
     ('LGE-1'::text,    'LG전자 1기'::text),
     ('LGE-2'::text,    'LG전자 2기'::text),
-    ('LGE-3'::text,    'LG전자 3기'::text)$$,
-  'Anon sees exactly the four seeded (name, label) cohort pairs'
+    ('LGE-3'::text,    'LG전자 3기'::text),
+    ('TOYCRANE'::text, 'toycrane'::text)$$,
+  'Anon sees exactly the five seeded (name, label) cohort pairs'
 );
 
 -- 8. Authenticated can also see cohorts
@@ -56,8 +58,8 @@ SET local request.jwt.claims TO '{"sub": "00000000-0000-0000-0000-0000000c0001"}
 SELECT cmp_ok(
   (SELECT count(*)::int FROM cohorts),
   '=',
-  4,
-  'Authenticated user sees exactly the four seeded cohorts'
+  5,
+  'Authenticated user sees exactly the five seeded cohorts'
 );
 
 -- 9. Unique constraint on name
