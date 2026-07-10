@@ -38,22 +38,31 @@ declare
   u2 uuid := '00000000-0000-0000-0000-00000000000b';
   u3 uuid := '00000000-0000-0000-0000-00000000000c';
 begin
+  -- The four token columns must be '' (not NULL): GoTrue scans them into
+  -- non-nullable Go strings, so a NULL row breaks the admin API
+  -- (generateLink, getUserById) with "converting NULL to string is
+  -- unsupported" — same class of bug as the listUsers 500 documented in
+  -- e2e/helpers/supabase-admin.ts.
   insert into auth.users (
     id, instance_id, aud, role, email, email_confirmed_at,
-    raw_app_meta_data, raw_user_meta_data, created_at, updated_at
+    raw_app_meta_data, raw_user_meta_data, created_at, updated_at,
+    confirmation_token, recovery_token, email_change_token_new, email_change
   ) values
     (u1, '00000000-0000-0000-0000-000000000000', 'authenticated', 'authenticated',
      'alice@example.com', now(),
      '{"provider":"email","providers":["email"]}'::jsonb,
-     '{"full_name":"Alice Kim"}'::jsonb, now(), now()),
+     '{"full_name":"Alice Kim"}'::jsonb, now(), now(),
+     '', '', '', ''),
     (u2, '00000000-0000-0000-0000-000000000000', 'authenticated', 'authenticated',
      'bob@example.com', now(),
      '{"provider":"email","providers":["email"]}'::jsonb,
-     '{"full_name":"Bob Lee"}'::jsonb, now(), now()),
+     '{"full_name":"Bob Lee"}'::jsonb, now(), now(),
+     '', '', '', ''),
     (u3, '00000000-0000-0000-0000-000000000000', 'authenticated', 'authenticated',
      'carol@example.com', now(),
      '{"provider":"email","providers":["email"]}'::jsonb,
-     '{"full_name":"Carol Park"}'::jsonb, now(), now())
+     '{"full_name":"Carol Park"}'::jsonb, now(), now(),
+     '', '', '', '')
   on conflict (id) do nothing;
 
   insert into auth.identities (
