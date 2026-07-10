@@ -2,6 +2,12 @@
 /node_modules
 /.pnp
 .pnp.*
+
+# lockfiles — bun is the only package manager; a stale package-lock.json makes
+# Vercel install with npm and hit peer-dep ERESOLVE. Keep bun.lock only.
+/package-lock.json
+/yarn.lock
+/pnpm-lock.yaml
 .yarn/*
 !.yarn/patches
 !.yarn/plugins
