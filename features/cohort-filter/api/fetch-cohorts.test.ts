@@ -6,8 +6,7 @@ vi.mock("next/cache", () => ({
 }));
 
 const order = vi.fn();
-const not = vi.fn(() => ({ order }));
-const select = vi.fn(() => ({ not }));
+const select = vi.fn(() => ({ order }));
 const from = vi.fn(() => ({ select }));
 
 vi.mock("@shared/api/supabase/anon-server", () => ({
@@ -18,11 +17,11 @@ const { fetchCohorts } = await import("./fetch-cohorts");
 
 const COHORT_A = { id: "c1", name: "A" };
 const COHORT_B = { id: "c2", name: "B" };
+const COHORT_TOYCRANE = { id: "c3", name: "TOYCRANE" };
 
 beforeEach(() => {
   from.mockClear();
   select.mockClear();
-  not.mockClear();
   order.mockReset();
 });
 
@@ -37,12 +36,15 @@ describe("fetchCohorts", () => {
     expect(rows).toEqual([COHORT_A, COHORT_B]);
   });
 
-  it("excludes the operator-only TOYCRANE cohort from the query", async () => {
-    order.mockResolvedValue({ data: [COHORT_A], error: null });
+  it("keeps the operator-only TOYCRANE cohort in the list (board chips and settings display need it)", async () => {
+    order.mockResolvedValue({
+      data: [COHORT_A, COHORT_TOYCRANE],
+      error: null,
+    });
 
-    await fetchCohorts();
+    const rows = await fetchCohorts();
 
-    expect(not).toHaveBeenCalledWith("name", "in", "(TOYCRANE)");
+    expect(rows).toEqual([COHORT_A, COHORT_TOYCRANE]);
   });
 
   it("returns an empty array when there are no cohorts (null data)", async () => {

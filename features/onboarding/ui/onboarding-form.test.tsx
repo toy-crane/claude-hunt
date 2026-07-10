@@ -62,6 +62,13 @@ const cohorts: Cohort[] = [
     updated_at: "2026-04-14T00:00:00Z",
   },
 ];
+const TOYCRANE_COHORT: Cohort = {
+  id: "c1b2c3d4-5678-4abc-9def-0123456789ab",
+  name: "TOYCRANE",
+  label: "toycrane",
+  created_at: "2026-07-06T00:00:00Z",
+  updated_at: "2026-07-06T00:00:00Z",
+};
 
 async function pickCohort(name: string) {
   const user = userEvent.setup();
@@ -346,6 +353,31 @@ describe("OnboardingForm", () => {
     expect(screen.getByTestId("onboarding-submit")).toBeDisabled();
     expect(screen.getByLabelText("닉네임")).toBeInTheDocument();
     expect(screen.getByTestId("onboarding-sign-out")).toBeEnabled();
+  });
+
+  it("does not offer the operator-only TOYCRANE cohort as an option", async () => {
+    render(
+      <OnboardingForm cohorts={[...cohorts, TOYCRANE_COHORT]} initialNext="/" />
+    );
+
+    const user = userEvent.setup();
+    await user.click(screen.getByTestId("onboarding-cohort-trigger"));
+
+    const options = await screen.findAllByRole("option");
+    expect(options.map((option) => option.textContent)).toEqual([
+      "LG전자 1기",
+      "LG전자 2기",
+    ]);
+  });
+
+  it("treats a list with only the operator-only cohort as empty (no selector, submit disabled)", () => {
+    render(<OnboardingForm cohorts={[TOYCRANE_COHORT]} initialNext="/" />);
+
+    expect(screen.getByTestId("onboarding-no-cohorts")).toBeInTheDocument();
+    expect(
+      screen.queryByTestId("onboarding-cohort-trigger")
+    ).not.toBeInTheDocument();
+    expect(screen.getByTestId("onboarding-submit")).toBeDisabled();
   });
 
   it("signs out and redirects to /login when the sign out button is clicked", async () => {

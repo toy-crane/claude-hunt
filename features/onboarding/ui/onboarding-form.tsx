@@ -1,6 +1,6 @@
 "use client";
 
-import type { Cohort } from "@entities/cohort";
+import { type Cohort, isSelectableCohort } from "@entities/cohort";
 import {
   DISPLAY_NAME_REQUIRED_MESSAGE,
   displayNameSchema,
@@ -46,7 +46,9 @@ export function OnboardingForm({ cohorts, initialNext }: OnboardingFormProps) {
   const [submitError, setSubmitError] = useState<string | null>(null);
   const [isPending, startTransition] = useTransition();
   const [isSigningOut, setIsSigningOut] = useState(false);
-  const noCohorts = cohorts.length === 0;
+  // 온보딩은 "새로 선택"하는 화면이므로 운영자 전용 cohort는 옵션에서 제외.
+  const selectableCohorts = cohorts.filter(isSelectableCohort);
+  const noCohorts = selectableCohorts.length === 0;
 
   function validate(): { displayName: string; cohortId: string } | null {
     const parsed = displayNameSchema.safeParse(displayName);
@@ -173,7 +175,7 @@ export function OnboardingForm({ cohorts, initialNext }: OnboardingFormProps) {
                   <SelectValue placeholder="클래스를 선택하세요" />
                 </SelectTrigger>
                 <SelectContent>
-                  {cohorts.map((cohort) => (
+                  {selectableCohorts.map((cohort) => (
                     <SelectItem key={cohort.id} value={cohort.id}>
                       {cohort.label}
                     </SelectItem>

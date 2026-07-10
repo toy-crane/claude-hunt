@@ -1,6 +1,6 @@
 "use client";
 
-import type { Cohort } from "@entities/cohort";
+import { type Cohort, isSelectableCohort } from "@entities/cohort";
 import {
   DISPLAY_NAME_REQUIRED_MESSAGE,
   displayNameSchema,
@@ -43,14 +43,20 @@ export function SettingsForm({
   const emailId = useId();
   const cohortFieldId = useId();
   const [displayName, setDisplayName] = useState(initialDisplayName);
-  // A cohort missing from the list (no cohort yet, or the hidden
-  // operator-only TOYCRANE) starts unselected so the placeholder shows and
-  // the hidden id is never re-submitted.
+  // 현재 소속은 운영자 전용 cohort(TOYCRANE)여도 그대로 표시한다. 목록에
+  // 아예 없는 id(소속 없음 등)만 미선택으로 시작해 placeholder를 보여준다.
   const [selectedCohortId, setSelectedCohortId] = useState(() =>
     initialCohortId && cohorts.some((cohort) => cohort.id === initialCohortId)
       ? initialCohortId
       : COHORT_UNSELECTED
   );
+  // 옵션은 선택 가능한 cohort만 노출한다. 현재 소속이 선택 불가 cohort면
+  // 값 표시를 위해 disabled 옵션으로만 추가한다 — 다른 클래스로 바꿀 수는
+  // 있지만 새로 고르거나 되돌아올 수는 없다.
+  const selectableCohorts = cohorts.filter(isSelectableCohort);
+  const currentCohort = cohorts.find((cohort) => cohort.id === initialCohortId);
+  const nonSelectableCurrentCohort =
+    currentCohort && !isSelectableCohort(currentCohort) ? currentCohort : null;
   const [displayNameError, setDisplayNameError] = useState<string | null>(null);
   const [cohortError, setCohortError] = useState<string | null>(null);
   const [isPending, startTransition] = useTransition();
@@ -128,7 +134,12 @@ export function SettingsForm({
                 <SelectValue placeholder="클래스를 선택하세요" />
               </SelectTrigger>
               <SelectContent>
-                {cohorts.map((cohort) => (
+                {nonSelectableCurrentCohort ? (
+                  <SelectItem disabled value={nonSelectableCurrentCohort.id}>
+                    {nonSelectableCurrentCohort.label}
+                  </SelectItem>
+                ) : null}
+                {selectableCohorts.map((cohort) => (
                   <SelectItem key={cohort.id} value={cohort.id}>
                     {cohort.label}
                   </SelectItem>
