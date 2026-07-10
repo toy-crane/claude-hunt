@@ -24,6 +24,25 @@ describe("auth callback", () => {
     expect(res.headers.get("location")).toBe("http://app.test/dashboard");
   });
 
+  it("redirects to the forwarded origin when behind a reverse proxy", async () => {
+    const { GET } = await import("./route");
+    const res = await GET(
+      new Request(
+        "https://localhost:4293/auth/callback?code=abc&next=/settings",
+        {
+          headers: {
+            "x-forwarded-host": "wt.claude-hunt.localhost",
+            "x-forwarded-proto": "https",
+          },
+        }
+      )
+    );
+
+    expect(res.headers.get("location")).toBe(
+      "https://wt.claude-hunt.localhost/settings"
+    );
+  });
+
   it("sanitizes non-local next param to '/'", async () => {
     const { GET } = await import("./route");
     const res = await GET(

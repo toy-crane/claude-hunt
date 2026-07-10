@@ -1,6 +1,7 @@
 import { createAdminClient } from "@shared/api/supabase/admin";
 import { createServerClient } from "@shared/api/supabase/server";
 import { env } from "@shared/config/env";
+import { getRequestOrigin } from "@shared/lib/request-origin";
 import { NextResponse } from "next/server";
 
 const ALLOWED_EMAIL_DOMAINS = ["example.com", "test.local"];
@@ -33,7 +34,8 @@ export async function GET(request: Request) {
     return notFound();
   }
 
-  const { searchParams, origin } = new URL(request.url);
+  const { searchParams } = new URL(request.url);
+  const origin = getRequestOrigin(request);
   let next = searchParams.get("next") ?? "/";
   if (!next.startsWith("/")) {
     next = "/";
