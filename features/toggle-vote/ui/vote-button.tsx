@@ -12,10 +12,10 @@ import { RollingCount } from "./rolling-count";
 const ARIA_LABEL = "추천하기";
 
 const STACKED_BASE_CLASS =
-  "inline-flex flex-col items-center justify-center min-w-14 gap-0.5 rounded-md border px-2 py-2 text-sm font-semibold leading-none outline-none transition-colors focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background disabled:pointer-events-none disabled:opacity-60";
+  "inline-flex flex-col items-center justify-center min-w-14 gap-0.5 rounded-md border px-2 py-2 text-sm font-semibold leading-none outline-none transition-[color,background-color,border-color,scale] duration-150 ease-[cubic-bezier(0.23,1,0.32,1)] active:scale-[0.97] focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background disabled:pointer-events-none";
 
 const INLINE_BASE_CLASS =
-  "inline-flex flex-row items-center justify-center gap-1.5 rounded-none border h-8 px-3 font-mono text-xs font-semibold leading-none outline-none transition-colors focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background disabled:pointer-events-none disabled:opacity-60";
+  "inline-flex flex-row items-center justify-center gap-1.5 rounded-none border h-8 px-3 font-mono text-xs font-semibold leading-none outline-none transition-[color,background-color,border-color,scale] duration-150 ease-[cubic-bezier(0.23,1,0.32,1)] active:scale-[0.97] focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background disabled:pointer-events-none";
 
 const IDLE_COLORS =
   "border-border bg-background text-foreground hover:bg-muted";

@@ -99,6 +99,13 @@ describe("VoteButton (signed-in non-owner)", () => {
     expect(svg).not.toBeNull();
   });
 
+  it("gives instant press feedback and never dims while the request is in flight", () => {
+    render(<VoteButton {...baseProps} />);
+    const button = screen.getByRole("button");
+    expect(button.className).toContain("active:scale-[0.97]");
+    expect(button.className).not.toContain("opacity-60");
+  });
+
   it("shows the optimistic count and pressed state while the server call is in flight", async () => {
     const deferred = createDeferred<{ ok: true; voted: true }>();
     toggleVoteMock.mockReturnValue(deferred.promise);
