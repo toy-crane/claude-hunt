@@ -5,12 +5,13 @@
 --
 -- What this seeds:
 --   1. Cohorts (names + Korean labels)
---   2. Three demo users in auth.users (+ auth.identities), one per cohort.
+--   2. Four demo users in auth.users (+ auth.identities): one student per
+--      student cohort, plus the operator (TOYCRANE cohort, no project).
 --      Password is not set — demo sign-in is out of scope.
 --      Profiles are auto-created by the `handle_new_user` trigger, then
 --      updated here to set `display_name` and `cohort_id`.
---   3. Three projects (one per user), each referencing a screenshot key
---      that the CLI uploads into the `project-screenshots` bucket via
+--   3. Three projects (one per student user), each referencing a screenshot
+--      key that the CLI uploads into the `project-screenshots` bucket via
 --      `objects_path` in config.toml.
 
 ------------------------------------------------------------------------------
@@ -37,6 +38,7 @@ declare
   u1 uuid := '00000000-0000-0000-0000-00000000000a';
   u2 uuid := '00000000-0000-0000-0000-00000000000b';
   u3 uuid := '00000000-0000-0000-0000-00000000000c';
+  u4 uuid := '00000000-0000-0000-0000-00000000000d';
 begin
   -- The four token columns must be '' (not NULL): GoTrue scans them into
   -- non-nullable Go strings, so a NULL row breaks the admin API
@@ -62,6 +64,11 @@ begin
      'carol@example.com', now(),
      '{"provider":"email","providers":["email"]}'::jsonb,
      '{"full_name":"Carol Park"}'::jsonb, now(), now(),
+     '', '', '', ''),
+    (u4, '00000000-0000-0000-0000-000000000000', 'authenticated', 'authenticated',
+     'operator@example.com', now(),
+     '{"provider":"email","providers":["email"]}'::jsonb,
+     '{"full_name":"Toy Crane"}'::jsonb, now(), now(),
      '', '', '', '')
   on conflict (id) do nothing;
 
@@ -74,7 +81,9 @@ begin
     (u2, u2, jsonb_build_object('sub', u2::text, 'email', 'bob@example.com'),
      'email', u2::text, now(), now(), now()),
     (u3, u3, jsonb_build_object('sub', u3::text, 'email', 'carol@example.com'),
-     'email', u3::text, now(), now(), now())
+     'email', u3::text, now(), now(), now()),
+    (u4, u4, jsonb_build_object('sub', u4::text, 'email', 'operator@example.com'),
+     'email', u4::text, now(), now(), now())
   on conflict (provider, provider_id) do nothing;
 end $$;
 
@@ -97,8 +106,16 @@ update public.profiles
       cohort_id = (select id from public.cohorts where name = 'Inflearn')
   where id = '00000000-0000-0000-0000-00000000000c';
 
+-- The operator account: TOYCRANE cohort, no project. Lets local testing
+-- exercise the operator-cohort viewpoint (e.g. the settings page showing a
+-- non-selectable cohort).
+update public.profiles
+  set display_name = '두루미',
+      cohort_id = (select id from public.cohorts where name = 'TOYCRANE')
+  where id = '00000000-0000-0000-0000-00000000000d';
+
 ------------------------------------------------------------------------------
--- 3. Demo projects (one per user). Fixed IDs so the Acceptance check
+-- 3. Demo projects (one per student user). Fixed IDs so the Acceptance check
 --    "same image URLs across resets" holds — the public bucket URL
 --    includes the object key, which is keyed by user UUID + filename.
 ------------------------------------------------------------------------------
