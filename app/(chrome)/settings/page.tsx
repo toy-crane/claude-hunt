@@ -53,9 +53,6 @@ export default async function SettingsPage() {
     fetchCohorts(),
     fetchMyProjects(viewer.id),
   ]);
-  const cohortLabel = viewer.cohortId
-    ? (cohorts.find((cohort) => cohort.id === viewer.cohortId)?.label ?? null)
-    : null;
 
   return (
     <main className="mx-auto flex min-h-svh w-full max-w-2xl flex-col gap-8 p-6">
@@ -74,8 +71,9 @@ export default async function SettingsPage() {
         <Card>
           <CardContent>
             <SettingsForm
-              cohortLabel={cohortLabel}
+              cohorts={cohorts}
               email={viewer.email}
+              initialCohortId={viewer.cohortId}
               initialDisplayName={viewer.displayName ?? ""}
             />
           </CardContent>

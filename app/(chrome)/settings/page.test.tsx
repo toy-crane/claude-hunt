@@ -80,15 +80,21 @@ vi.mock("@features/withdraw-user", () => ({
 
 vi.mock("@features/settings", () => ({
   SettingsForm: ({
-    cohortLabel,
+    cohorts,
     email,
+    initialCohortId,
     initialDisplayName,
   }: {
-    cohortLabel?: string | null;
+    cohorts: { id: string; label: string }[];
     email: string;
+    initialCohortId?: string | null;
     initialDisplayName: string;
   }) => (
-    <div data-testid="settings-form-stub">
+    <div
+      data-cohort-ids={cohorts.map((cohort) => cohort.id).join(",")}
+      data-initial-cohort-id={initialCohortId ?? ""}
+      data-testid="settings-form-stub"
+    >
       <label htmlFor="display-name">
         Display name
         <input defaultValue={initialDisplayName} id="display-name" />
@@ -97,12 +103,6 @@ vi.mock("@features/settings", () => ({
         Email
         <input defaultValue={email} disabled id="email" type="email" />
       </label>
-      {cohortLabel ? (
-        <label htmlFor="cohort">
-          Cohort
-          <input defaultValue={cohortLabel} disabled id="cohort" />
-        </label>
-      ) : null}
     </div>
   ),
 }));
@@ -184,7 +184,7 @@ describe("settings page", () => {
     expect(cta).toHaveAttribute("href", "/projects/new?from=settings");
   });
 
-  it("passes the viewer's cohort label to the settings form", async () => {
+  it("passes the cohort list and the viewer's cohort id to the settings form", async () => {
     fetchViewerMock.mockResolvedValue({
       id: "user-1",
       email: "alice@example.com",
@@ -201,12 +201,12 @@ describe("settings page", () => {
     const jsx = await Page();
     render(jsx);
 
-    const cohortInput = screen.getByLabelText("Cohort") as HTMLInputElement;
-    expect(cohortInput).toBeDisabled();
-    expect(cohortInput.value).toBe("2기");
+    const stub = screen.getByTestId("settings-form-stub");
+    expect(stub).toHaveAttribute("data-cohort-ids", "cohort-1,cohort-2");
+    expect(stub).toHaveAttribute("data-initial-cohort-id", "cohort-2");
   });
 
-  it("omits the cohort field when the viewer has no cohort", async () => {
+  it("passes an empty cohort id when the viewer has no cohort", async () => {
     fetchViewerMock.mockResolvedValue({
       id: "user-1",
       email: "alice@example.com",
@@ -222,7 +222,9 @@ describe("settings page", () => {
     const jsx = await Page();
     render(jsx);
 
-    expect(screen.queryByLabelText("Cohort")).not.toBeInTheDocument();
+    const stub = screen.getByTestId("settings-form-stub");
+    expect(stub).toHaveAttribute("data-cohort-ids", "cohort-1");
+    expect(stub).toHaveAttribute("data-initial-cohort-id", "");
   });
 
   it("renders the Delete account row with a Withdraw button and warning text in Danger Zone", async () => {

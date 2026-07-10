@@ -1,5 +1,6 @@
 "use client";
 
+import type { Cohort } from "@entities/cohort";
 import {
   DISPLAY_NAME_REQUIRED_MESSAGE,
   displayNameSchema,
@@ -8,56 +9,87 @@ import { getZodErrorMessage } from "@shared/lib/validation";
 import { Button } from "@shared/ui/button";
 import { Field, FieldGroup, FieldLabel } from "@shared/ui/field";
 import { Input } from "@shared/ui/input";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@shared/ui/select";
 import { Spinner } from "@shared/ui/spinner";
 import { useRouter } from "next/navigation";
 import posthog from "posthog-js";
 import { useId, useState, useTransition } from "react";
 import { toast } from "sonner";
 
-import { updateDisplayName } from "../api/actions";
+import { updateProfile } from "../api/actions";
 
 export interface SettingsFormProps {
-  cohortLabel?: string | null;
+  cohorts: Cohort[];
   email: string;
+  initialCohortId?: string | null;
   initialDisplayName: string;
 }
 
+const COHORT_UNSELECTED = "";
+
 export function SettingsForm({
-  cohortLabel,
-  initialDisplayName,
+  cohorts,
   email,
+  initialCohortId,
+  initialDisplayName,
 }: SettingsFormProps) {
   const displayNameId = useId();
   const emailId = useId();
   const cohortFieldId = useId();
   const [displayName, setDisplayName] = useState(initialDisplayName);
-  const [error, setError] = useState<string | null>(null);
+  // A cohort missing from the list (no cohort yet, or the hidden
+  // operator-only TOYCRANE) starts unselected so the placeholder shows and
+  // the hidden id is never re-submitted.
+  const [selectedCohortId, setSelectedCohortId] = useState(() =>
+    initialCohortId && cohorts.some((cohort) => cohort.id === initialCohortId)
+      ? initialCohortId
+      : COHORT_UNSELECTED
+  );
+  const [displayNameError, setDisplayNameError] = useState<string | null>(null);
+  const [cohortError, setCohortError] = useState<string | null>(null);
   const [isPending, startTransition] = useTransition();
   const router = useRouter();
 
   function handleSubmit(event: React.FormEvent<HTMLFormElement>) {
     event.preventDefault();
-    setError(null);
+    setDisplayNameError(null);
+    setCohortError(null);
     const parsed = displayNameSchema.safeParse(displayName);
     if (!parsed.success) {
-      setError(getZodErrorMessage(parsed.error, DISPLAY_NAME_REQUIRED_MESSAGE));
+      setDisplayNameError(
+        getZodErrorMessage(parsed.error, DISPLAY_NAME_REQUIRED_MESSAGE)
+      );
       return;
     }
     startTransition(async () => {
-      const result = await updateDisplayName(parsed.data);
+      const result = await updateProfile({
+        displayName: parsed.data,
+        cohortId:
+          selectedCohortId === COHORT_UNSELECTED ? undefined : selectedCohortId,
+      });
       if (result.ok) {
-        toast.success("닉네임을 변경했어요.");
-        posthog.capture("display_name_updated");
+        toast.success("프로필을 저장했어요.");
+        posthog.capture("profile_updated");
         router.refresh();
         return;
       }
-      setError(result.error.message);
+      if (result.error.field === "cohortId") {
+        setCohortError(result.error.message);
+        return;
+      }
+      setDisplayNameError(result.error.message);
     });
   }
 
   return (
     <form
-      aria-label="닉네임 변경"
+      aria-label="프로필 수정"
       className="flex flex-col gap-6"
       onSubmit={handleSubmit}
     >
@@ -74,37 +106,64 @@ export function SettingsForm({
           />
         </Field>
 
-        {cohortLabel ? (
-          <Field data-disabled="">
+        {cohorts.length > 0 ? (
+          <Field data-invalid={cohortError === null ? undefined : ""}>
             <FieldLabel htmlFor={cohortFieldId}>클래스</FieldLabel>
-            <Input
-              disabled
-              id={cohortFieldId}
-              name="cohort"
-              readOnly
-              type="text"
-              value={cohortLabel}
-            />
+            <Select
+              disabled={isPending}
+              onValueChange={(value) => {
+                setSelectedCohortId(value);
+                if (cohortError) {
+                  setCohortError(null);
+                }
+              }}
+              value={selectedCohortId}
+            >
+              <SelectTrigger
+                aria-invalid={cohortError !== null}
+                className="w-full"
+                data-testid="settings-cohort-trigger"
+                id={cohortFieldId}
+              >
+                <SelectValue placeholder="클래스를 선택하세요" />
+              </SelectTrigger>
+              <SelectContent>
+                {cohorts.map((cohort) => (
+                  <SelectItem key={cohort.id} value={cohort.id}>
+                    {cohort.label}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+            {cohortError ? (
+              <p
+                className="text-destructive text-xs"
+                data-testid="settings-cohort-error"
+                role="alert"
+              >
+                {cohortError}
+              </p>
+            ) : null}
           </Field>
         ) : null}
 
-        <Field data-invalid={error === null ? undefined : ""}>
+        <Field data-invalid={displayNameError === null ? undefined : ""}>
           <FieldLabel htmlFor={displayNameId}>닉네임</FieldLabel>
           <Input
-            aria-invalid={error !== null}
+            aria-invalid={displayNameError !== null}
             disabled={isPending}
             id={displayNameId}
             name="displayName"
             onChange={(event) => setDisplayName(event.target.value)}
             value={displayName}
           />
-          {error ? (
+          {displayNameError ? (
             <p
               className="text-destructive text-xs"
               data-testid="settings-display-name-error"
               role="alert"
             >
-              {error}
+              {displayNameError}
             </p>
           ) : null}
         </Field>

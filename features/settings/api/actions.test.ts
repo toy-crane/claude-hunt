@@ -5,6 +5,8 @@ import {
 import { createMockSupabaseClient } from "@shared/lib/test-utils";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
+const COHORT_ID = "0f34e07e-3d4f-4bcb-9c31-2a1f4778a25e";
+
 const updateMock = vi.fn().mockResolvedValue({ error: null });
 const eqMock = vi.fn().mockResolvedValue({ error: null });
 
@@ -26,7 +28,7 @@ vi.mock("next/cache", () => ({
   updateTag: updateTagMock,
 }));
 
-describe("updateDisplayName", () => {
+describe("updateProfile", () => {
   beforeEach(() => {
     vi.clearAllMocks();
     updateMock.mockReset();
@@ -39,10 +41,10 @@ describe("updateDisplayName", () => {
     });
   });
 
-  it("updates the profile row and revalidates / on a valid input", async () => {
-    const { updateDisplayName } = await import("./actions");
+  it("updates only the display name when no cohort is provided", async () => {
+    const { updateProfile } = await import("./actions");
 
-    const result = await updateDisplayName("Alice_99");
+    const result = await updateProfile({ displayName: "Alice_99" });
 
     expect(result).toEqual({ ok: true });
     expect(updateMock).toHaveBeenCalledWith({ display_name: "Alice_99" });
@@ -51,19 +53,50 @@ describe("updateDisplayName", () => {
     expect(refreshMock).toHaveBeenCalled();
   });
 
-  it("trims whitespace before persisting", async () => {
-    const { updateDisplayName } = await import("./actions");
+  it("updates both the display name and the cohort when a cohort is provided", async () => {
+    const { updateProfile } = await import("./actions");
 
-    const result = await updateDisplayName("  Alice  ");
+    const result = await updateProfile({
+      cohortId: COHORT_ID,
+      displayName: "Alice_99",
+    });
+
+    expect(result).toEqual({ ok: true });
+    expect(updateMock).toHaveBeenCalledWith({
+      cohort_id: COHORT_ID,
+      display_name: "Alice_99",
+    });
+    expect(eqMock).toHaveBeenCalledWith("id", "user-1");
+  });
+
+  it("rejects a non-uuid cohort id without calling update", async () => {
+    const { updateProfile } = await import("./actions");
+
+    const result = await updateProfile({
+      cohortId: "not-a-uuid",
+      displayName: "Alice",
+    });
+
+    expect(result).toEqual({
+      ok: false,
+      error: { field: "cohortId", message: "클래스를 선택해 주세요." },
+    });
+    expect(updateMock).not.toHaveBeenCalled();
+  });
+
+  it("trims whitespace before persisting", async () => {
+    const { updateProfile } = await import("./actions");
+
+    const result = await updateProfile({ displayName: "  Alice  " });
 
     expect(result).toEqual({ ok: true });
     expect(updateMock).toHaveBeenCalledWith({ display_name: "Alice" });
   });
 
   it("rejects an empty display name without calling update", async () => {
-    const { updateDisplayName } = await import("./actions");
+    const { updateProfile } = await import("./actions");
 
-    const result = await updateDisplayName("");
+    const result = await updateProfile({ displayName: "" });
 
     expect(result).toEqual({
       ok: false,
@@ -73,9 +106,9 @@ describe("updateDisplayName", () => {
   });
 
   it("rejects whitespace-only display names with the same required message", async () => {
-    const { updateDisplayName } = await import("./actions");
+    const { updateProfile } = await import("./actions");
 
-    const result = await updateDisplayName("   ");
+    const result = await updateProfile({ displayName: "   " });
 
     expect(result).toEqual({
       ok: false,
@@ -85,9 +118,9 @@ describe("updateDisplayName", () => {
   });
 
   it("rejects display names longer than 12 characters with the policy message", async () => {
-    const { updateDisplayName } = await import("./actions");
+    const { updateProfile } = await import("./actions");
 
-    const result = await updateDisplayName("A".repeat(13));
+    const result = await updateProfile({ displayName: "A".repeat(13) });
 
     expect(result).toEqual({
       ok: false,
@@ -97,9 +130,9 @@ describe("updateDisplayName", () => {
   });
 
   it("rejects display names with a special character", async () => {
-    const { updateDisplayName } = await import("./actions");
+    const { updateProfile } = await import("./actions");
 
-    const result = await updateDisplayName("Alice!");
+    const result = await updateProfile({ displayName: "Alice!" });
 
     expect(result).toEqual({
       ok: false,
@@ -109,9 +142,9 @@ describe("updateDisplayName", () => {
   });
 
   it("accepts underscore in display name", async () => {
-    const { updateDisplayName } = await import("./actions");
+    const { updateProfile } = await import("./actions");
 
-    const result = await updateDisplayName("Car_crash");
+    const result = await updateProfile({ displayName: "Car_crash" });
 
     expect(result).toEqual({ ok: true });
     expect(updateMock).toHaveBeenCalledWith({ display_name: "Car_crash" });
@@ -122,9 +155,9 @@ describe("updateDisplayName", () => {
       data: null,
       error: null,
     });
-    const { updateDisplayName } = await import("./actions");
+    const { updateProfile } = await import("./actions");
 
-    const result = await updateDisplayName("Alice");
+    const result = await updateProfile({ displayName: "Alice" });
 
     expect(result.ok).toBe(false);
     expect(updateMock).not.toHaveBeenCalled();
@@ -138,9 +171,9 @@ describe("updateDisplayName", () => {
           'duplicate key value violates unique constraint "profiles_display_name_ci_unique"',
       },
     });
-    const { updateDisplayName } = await import("./actions");
+    const { updateProfile } = await import("./actions");
 
-    const result = await updateDisplayName("Bob");
+    const result = await updateProfile({ displayName: "Bob" });
 
     expect(result).toEqual({
       ok: false,
@@ -157,9 +190,9 @@ describe("updateDisplayName", () => {
     eqMock.mockResolvedValue({
       error: { code: "23505", message: rawMessage },
     });
-    const { updateDisplayName } = await import("./actions");
+    const { updateProfile } = await import("./actions");
 
-    const result = await updateDisplayName("Bob");
+    const result = await updateProfile({ displayName: "Bob" });
 
     expect(result).toEqual({
       ok: false,
@@ -171,9 +204,9 @@ describe("updateDisplayName", () => {
     // When the user saves their current display name, the unique index
     // sees no conflict (own row's own value) and the DB returns no error.
     eqMock.mockResolvedValue({ error: null });
-    const { updateDisplayName } = await import("./actions");
+    const { updateProfile } = await import("./actions");
 
-    const result = await updateDisplayName("Alice");
+    const result = await updateProfile({ displayName: "Alice" });
 
     expect(result).toEqual({ ok: true });
     expect(updateMock).toHaveBeenCalledWith({ display_name: "Alice" });
