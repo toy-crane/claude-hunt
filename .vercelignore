@@ -29,6 +29,11 @@
 /.next/
 /tsconfig.tsbuildinfo
 
+# Non-bun lockfiles — force Vercel to detect bun.lock and install with bun
+/package-lock.json
+/yarn.lock
+/pnpm-lock.yaml
+
 # Env files (Vercel uses its own dashboard-managed env vars)
 /.env
 /.env.*
