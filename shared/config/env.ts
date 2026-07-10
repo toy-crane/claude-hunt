@@ -10,6 +10,11 @@ export const env = createEnv({
   },
   server: {
     SUPABASE_SECRET_KEY: z.string().min(1),
+    // Local-only opt-in for /auth/dev-login. The route requires the exact
+    // string "true"; any other value keeps it 404. Deliberately a bare
+    // optional string (not an enum) so a stray value can never fail boot
+    // validation — the flag fails closed instead.
+    DEV_LOGIN_ENABLED: z.string().optional(),
   },
   runtimeEnv: {
     NEXT_PUBLIC_SUPABASE_URL: process.env.NEXT_PUBLIC_SUPABASE_URL,
@@ -17,5 +22,6 @@ export const env = createEnv({
       process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY,
     NEXT_PUBLIC_SENTRY_DSN: process.env.NEXT_PUBLIC_SENTRY_DSN,
     SUPABASE_SECRET_KEY: process.env.SUPABASE_SECRET_KEY,
+    DEV_LOGIN_ENABLED: process.env.DEV_LOGIN_ENABLED,
   },
 });
