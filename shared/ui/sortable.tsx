@@ -1,9 +1,12 @@
 "use client";
 
 import {
+  type CollisionDetection,
   DndContext,
+  type DragCancelEvent,
   type DragEndEvent,
   type DraggableSyntheticListeners,
+  type DragOverEvent,
   DragOverlay,
   type DragStartEvent,
   type DropAnimation,
@@ -69,7 +72,7 @@ const SortableInternalContext = createContext<{
   modifiers: undefined,
 });
 
-const animateLayoutChanges: AnimateLayoutChanges = (args) =>
+const defaultSortableAnimateLayoutChanges: AnimateLayoutChanges = (args) =>
   defaultAnimateLayoutChanges({ ...args, wasDragging: true });
 
 const dropAnimationConfig: DropAnimation = {
@@ -84,12 +87,20 @@ const dropAnimationConfig: DropAnimation = {
 
 // Multipurpose Sortable Component
 export interface SortableRootProps<T>
-  extends Omit<HTMLAttributes<HTMLDivElement>, "onDragStart" | "onDragEnd"> {
+  extends Omit<
+    HTMLAttributes<HTMLDivElement>,
+    "onDragStart" | "onDragEnd" | "onDragOver"
+  > {
   asChild?: boolean;
   children: ReactNode;
+  collisionDetection?: CollisionDetection;
+  /** `null` disables the drop-settle animation of the drag overlay. */
+  dropAnimation?: DropAnimation | null;
   getItemValue: (item: T) => string;
   modifiers?: Modifiers;
+  onDragCancel?: (event: DragCancelEvent) => void;
   onDragEnd?: (event: DragEndEvent) => void;
+  onDragOver?: (event: DragOverEvent) => void;
   onDragStart?: (event: DragStartEvent) => void;
   onMove?: (event: {
     event: DragEndEvent;
@@ -97,6 +108,12 @@ export interface SortableRootProps<T>
     overIndex: number;
   }) => void;
   onValueChange: (value: T[]) => void;
+  /**
+   * Renders the drag-overlay ghost for the active item. Without it the
+   * overlay falls back to cloning a direct child whose `value` matches —
+   * items nested deeper than one level are not found by that fallback.
+   */
+  renderOverlay?: (activeId: UniqueIdentifier) => ReactNode;
   strategy?: "horizontal" | "vertical" | "grid";
   value: T[];
 }
@@ -111,6 +128,11 @@ function Sortable<T>({
   strategy = "vertical",
   onDragStart,
   onDragEnd,
+  onDragOver,
+  onDragCancel,
+  collisionDetection,
+  dropAnimation,
+  renderOverlay,
   modifiers,
   children,
   ...props
@@ -175,9 +197,13 @@ function Sortable<T>({
     [value, getItemValue, onValueChange, onMove, onDragEnd]
   );
 
-  const handleDragCancel = useCallback(() => {
-    setActiveId(null);
-  }, []);
+  const handleDragCancel = useCallback(
+    (event: DragCancelEvent) => {
+      setActiveId(null);
+      onDragCancel?.(event);
+    },
+    [onDragCancel]
+  );
 
   const getStrategy = () => {
     switch (strategy) {
@@ -202,6 +228,9 @@ function Sortable<T>({
     if (!activeId) {
       return null;
     }
+    if (renderOverlay) {
+      return renderOverlay(activeId);
+    }
     let result: ReactNode = null;
     Children.forEach(children, (child) => {
       if (isValidElement(child) && (child.props as any).value === activeId) {
@@ -212,13 +241,14 @@ function Sortable<T>({
       }
     });
     return result;
-  }, [activeId, children]);
+  }, [activeId, children, renderOverlay]);
 
   const Comp = asChild ? Slot.Root : "div";
 
   return (
     <SortableInternalContext.Provider value={contextValue}>
       <DndContext
+        collisionDetection={collisionDetection}
         measuring={{
           droppable: {
             strategy: MeasuringStrategy.Always,
@@ -227,6 +257,7 @@ function Sortable<T>({
         modifiers={modifiers}
         onDragCancel={handleDragCancel}
         onDragEnd={handleDragEnd}
+        onDragOver={onDragOver}
         onDragStart={handleDragStart}
         sensors={sensors}
       >
@@ -244,7 +275,11 @@ function Sortable<T>({
           createPortal(
             <DragOverlay
               className={cn("z-50", activeId && "cursor-grabbing")}
-              dropAnimation={dropAnimationConfig}
+              dropAnimation={
+                dropAnimation === undefined
+                  ? dropAnimationConfig
+                  : dropAnimation
+              }
               modifiers={modifiers}
             >
               <IsOverlayContext.Provider value={true}>
@@ -259,6 +294,8 @@ function Sortable<T>({
 }
 
 export interface SortableItemProps extends HTMLAttributes<HTMLDivElement> {
+  /** Overrides when the post-drop layout (FLIP) animation runs. */
+  animateLayoutChanges?: AnimateLayoutChanges;
   asChild?: boolean;
   disabled?: boolean;
   value: string;
@@ -269,6 +306,7 @@ function SortableItem({
   className,
   asChild = false,
   disabled,
+  animateLayoutChanges,
   children,
   ...props
 }: SortableItemProps) {
@@ -284,7 +322,8 @@ function SortableItem({
   } = useSortable({
     id: value,
     disabled: disabled || isOverlay,
-    animateLayoutChanges,
+    animateLayoutChanges:
+      animateLayoutChanges ?? defaultSortableAnimateLayoutChanges,
   });
 
   if (isOverlay) {
@@ -414,4 +453,10 @@ function SortableOverlay({
   );
 }
 
-export { Sortable, SortableItem, SortableItemHandle, SortableOverlay };
+export {
+  defaultSortableAnimateLayoutChanges,
+  Sortable,
+  SortableItem,
+  SortableItemHandle,
+  SortableOverlay,
+};
