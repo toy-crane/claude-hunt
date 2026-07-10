@@ -10,6 +10,7 @@ export function createMockSupabaseClient(overrides?: {
   signInWithOAuth?: () => Promise<unknown>;
   signOut?: () => Promise<unknown>;
   exchangeCodeForSession?: (code: string) => Promise<unknown>;
+  verifyOtp?: () => Promise<unknown>;
 }) {
   return {
     auth: {
@@ -29,6 +30,12 @@ export function createMockSupabaseClient(overrides?: {
       exchangeCodeForSession:
         overrides?.exchangeCodeForSession ??
         vi.fn().mockResolvedValue({ error: null }),
+      verifyOtp:
+        overrides?.verifyOtp ??
+        vi.fn().mockResolvedValue({
+          data: { user: null, session: null },
+          error: null,
+        }),
     },
   };
 }
