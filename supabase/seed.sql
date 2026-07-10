@@ -17,11 +17,15 @@
 -- 1. Cohorts
 ------------------------------------------------------------------------------
 
+-- TOYCRANE is the operator-only cohort (mirrors production). It must NOT
+-- appear in any user-facing cohort list — fetchCohorts filters it out —
+-- and is seeded here so that hiding can be verified locally.
 insert into public.cohorts (name, label) values
   ('LGE-1',    'LG전자 1기'),
   ('LGE-2',    'LG전자 2기'),
   ('LGE-3',    'LG전자 3기'),
-  ('Inflearn', '인프런')
+  ('Inflearn', '인프런'),
+  ('TOYCRANE', 'toycrane')
 on conflict (name) do nothing;
 
 ------------------------------------------------------------------------------

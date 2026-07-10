@@ -6,7 +6,8 @@ vi.mock("next/cache", () => ({
 }));
 
 const order = vi.fn();
-const select = vi.fn(() => ({ order }));
+const not = vi.fn(() => ({ order }));
+const select = vi.fn(() => ({ not }));
 const from = vi.fn(() => ({ select }));
 
 vi.mock("@shared/api/supabase/anon-server", () => ({
@@ -21,6 +22,7 @@ const COHORT_B = { id: "c2", name: "B" };
 beforeEach(() => {
   from.mockClear();
   select.mockClear();
+  not.mockClear();
   order.mockReset();
 });
 
@@ -33,6 +35,14 @@ describe("fetchCohorts", () => {
     expect(from).toHaveBeenCalledWith("cohorts");
     expect(order).toHaveBeenCalledWith("name", { ascending: true });
     expect(rows).toEqual([COHORT_A, COHORT_B]);
+  });
+
+  it("excludes the operator-only TOYCRANE cohort from the query", async () => {
+    order.mockResolvedValue({ data: [COHORT_A], error: null });
+
+    await fetchCohorts();
+
+    expect(not).toHaveBeenCalledWith("name", "in", "(TOYCRANE)");
   });
 
   it("returns an empty array when there are no cohorts (null data)", async () => {
