@@ -178,6 +178,31 @@
   animation: none;
 }
 
+/* The snapshot overlay swallows pointer events for the whole transition,
+   locking the page for its duration. Let clicks fall through to the live
+   DOM so a running reorder never blocks the next interaction. */
+::view-transition {
+  pointer-events: none;
+}
+
+/* Reorder rows move without the UA's default old/new cross-fade: the two
+   snapshots differ only by rank digits, so fading them over each other
+   reads as ghosting. Hide the old snapshot and let the group's position
+   animation carry the motion — on-screen A→B movement, strong ease-in-out,
+   under 300ms. */
+::view-transition-group(.row-move) {
+  animation-duration: 250ms;
+  animation-timing-function: cubic-bezier(0.77, 0, 0.175, 1);
+}
+
+::view-transition-old(.row-move) {
+  display: none;
+}
+
+::view-transition-new(.row-move) {
+  animation: none;
+}
+
 @media (prefers-reduced-motion: reduce) {
   ::view-transition-old(*),
   ::view-transition-new(*),

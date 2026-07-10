@@ -165,6 +165,18 @@ describe("ProjectCard (terminal row) — desktop branch", () => {
     expect(thumb.className).toContain("transition-transform");
   });
 
+  it("paints the row on an opaque background so reorder snapshots don't show through each other", () => {
+    render(
+      <ProjectCard
+        project={buildProject()}
+        rank={2}
+        screenshotUrl="https://cdn.example.com/shot.png"
+      />
+    );
+    const row = screen.getByTestId("project-card");
+    expect(row.className).toContain("bg-background");
+  });
+
   it("renders the vote-button slot once, separate from the owner-actions region", () => {
     render(
       <ProjectCard

@@ -63,7 +63,7 @@ export function ProjectGrid({
             ? (cohortLabelsById?.[project.cohort_id] ?? null)
             : null;
           return (
-            <ViewTransition key={project.id}>
+            <ViewTransition key={project.id} update="row-move">
               <ProjectCard
                 cohortLabel={cohortLabel}
                 priority={rank <= 3}
