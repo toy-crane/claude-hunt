@@ -137,6 +137,21 @@ describe("dev-login route", () => {
     expect(generateLink).not.toHaveBeenCalled();
   });
 
+  it("returns 500 when the profiles lookup fails", async () => {
+    profileMaybeSingle.mockResolvedValue({
+      data: null,
+      error: { message: "boom" },
+    });
+
+    const { GET } = await import("./route");
+    const res = await GET(
+      new Request("http://app.test/auth/dev-login?email=alice@example.com")
+    );
+
+    expect(res.status).toBe(500);
+    expect(generateLink).not.toHaveBeenCalled();
+  });
+
   it("returns 400 when generateLink fails", async () => {
     generateLink.mockResolvedValue({
       data: { properties: null, user: null },

@@ -59,11 +59,14 @@ export async function GET(request: Request) {
   // must not mint a stray cohortless user. Lookup goes through profiles
   // because the bundled GoTrue's admin listUsers 500s on this stack (see
   // e2e/helpers/supabase-admin.ts).
-  const { data: profile } = await admin
+  const { data: profile, error: profileError } = await admin
     .from("profiles")
     .select("id")
     .eq("email", email)
     .maybeSingle();
+  if (profileError) {
+    return NextResponse.json({ error: profileError.message }, { status: 500 });
+  }
   if (!profile) {
     return NextResponse.json(
       { error: `no user with email ${email} — see supabase/seed.sql` },
