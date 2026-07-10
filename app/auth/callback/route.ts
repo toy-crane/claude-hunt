@@ -1,8 +1,10 @@
 import { createServerClient } from "@shared/api/supabase/server";
+import { getRequestOrigin } from "@shared/lib/request-origin";
 import { NextResponse } from "next/server";
 
 export async function GET(request: Request) {
-  const { searchParams, origin } = new URL(request.url);
+  const { searchParams } = new URL(request.url);
+  const origin = getRequestOrigin(request);
   const code = searchParams.get("code");
   let next = searchParams.get("next") ?? "/";
 

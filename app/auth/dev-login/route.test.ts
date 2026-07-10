@@ -205,6 +205,25 @@ describe("dev-login route", () => {
     expect(res.headers.get("location")).toBe("http://app.test/");
   });
 
+  it("redirects to the forwarded origin when behind a reverse proxy", async () => {
+    const { GET } = await import("./route");
+    const res = await GET(
+      new Request(
+        "https://localhost:4293/auth/dev-login?email=alice@example.com",
+        {
+          headers: {
+            "x-forwarded-host": "wt.claude-hunt.localhost",
+            "x-forwarded-proto": "https",
+          },
+        }
+      )
+    );
+
+    expect(res.headers.get("location")).toBe(
+      "https://wt.claude-hunt.localhost/"
+    );
+  });
+
   it("accepts the e2e test.local domain", async () => {
     const { GET } = await import("./route");
     const res = await GET(
