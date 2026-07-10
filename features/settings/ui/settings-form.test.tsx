@@ -48,6 +48,13 @@ const cohorts: Cohort[] = [
     updated_at: "2026-04-14T00:00:00Z",
   },
 ];
+const TOYCRANE_COHORT: Cohort = {
+  id: "d1b2c3d4-5678-4abc-9def-0123456789ab",
+  name: "TOYCRANE",
+  label: "toycrane",
+  created_at: "2026-07-06T00:00:00Z",
+  updated_at: "2026-07-06T00:00:00Z",
+};
 
 function renderForm(
   props?: Partial<{
@@ -97,11 +104,57 @@ describe("<SettingsForm />", () => {
     expect(trigger.textContent).toContain("LG전자 2기");
   });
 
-  it("shows the placeholder when the viewer's cohort is not in the list (hidden cohort)", () => {
+  it("shows the placeholder when the viewer's cohort id is not in the list at all", () => {
     renderForm({ initialCohortId: "c1b2c3d4-5678-4abc-9def-0123456789ab" });
 
     const trigger = screen.getByTestId("settings-cohort-trigger");
     expect(trigger.textContent).toContain("클래스를 선택하세요");
+  });
+
+  it("shows the current label when the viewer belongs to the operator-only cohort", () => {
+    renderForm({
+      cohorts: [...cohorts, TOYCRANE_COHORT],
+      initialCohortId: TOYCRANE_COHORT.id,
+    });
+
+    const trigger = screen.getByTestId("settings-cohort-trigger");
+    expect(trigger.textContent).toContain("toycrane");
+  });
+
+  it("offers the operator-only cohort only as a disabled option when it is the current cohort", async () => {
+    const user = userEvent.setup();
+    renderForm({
+      cohorts: [...cohorts, TOYCRANE_COHORT],
+      initialCohortId: TOYCRANE_COHORT.id,
+    });
+
+    await user.click(screen.getByTestId("settings-cohort-trigger"));
+
+    const toycraneOption = await screen.findByRole("option", {
+      name: "toycrane",
+    });
+    expect(toycraneOption).toHaveAttribute("data-disabled");
+    for (const name of ["LG전자 1기", "LG전자 2기"]) {
+      expect(screen.getByRole("option", { name })).not.toHaveAttribute(
+        "data-disabled"
+      );
+    }
+  });
+
+  it("does not offer the operator-only cohort as an option when the viewer is in a regular cohort", async () => {
+    const user = userEvent.setup();
+    renderForm({
+      cohorts: [...cohorts, TOYCRANE_COHORT],
+      initialCohortId: COHORT_1_ID,
+    });
+
+    await user.click(screen.getByTestId("settings-cohort-trigger"));
+
+    const options = await screen.findAllByRole("option");
+    expect(options.map((option) => option.textContent)).toEqual([
+      "LG전자 1기",
+      "LG전자 2기",
+    ]);
   });
 
   it("shows the placeholder when the viewer has no cohort", () => {

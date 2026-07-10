@@ -3,3 +3,4 @@ export type {
   CohortInsert,
   CohortUpdate,
 } from "./model/schema";
+export { isSelectableCohort } from "./model/selectable";
