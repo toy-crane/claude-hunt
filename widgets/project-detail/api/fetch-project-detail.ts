@@ -3,6 +3,7 @@ import { createAnonServerClient } from "@shared/api/supabase/anon-server";
 import { createServerClient } from "@shared/api/supabase/server";
 import { CACHE_TAGS } from "@shared/config/cache-tags";
 import { SCREENSHOT_BUCKET } from "@shared/config/storage";
+import { isUuid } from "@shared/lib/uuid";
 import { cacheLife, cacheTag } from "next/cache";
 import { cache } from "react";
 
@@ -51,7 +52,9 @@ export interface ProjectDetail extends ProjectCore {
  * and de-dupes `generateMetadata(id)` + `Page(id)` within one render. Uses
  * the anonymous client so the entry stays cookie-free.
  *
- * Returns `null` when no row matches the id.
+ * Returns `null` when no row matches the id, or when `id` is not a
+ * syntactically valid UUID — a malformed id (e.g. a trailing backslash
+ * from a mangled URL) is "not found", never a Postgres `22P02` cast error.
  */
 export async function fetchProjectCore(
   id: string
@@ -59,6 +62,10 @@ export async function fetchProjectCore(
   "use cache";
   cacheTag(CACHE_TAGS.PROJECTS);
   cacheLife("minutes");
+
+  if (!isUuid(id)) {
+    return null;
+  }
 
   const supabase = createAnonServerClient();
   const { data: row, error } = await supabase
