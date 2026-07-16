@@ -176,6 +176,13 @@
   animation: none;
 }
 
+/* The snapshot overlay swallows pointer events for the whole transition,
+   locking the page for its duration. Let clicks fall through to the live
+   DOM so a running slot morph never blocks the next interaction. */
+::view-transition {
+  pointer-events: none;
+}
+
 /* Shared-element morph for promoting a thumbnail to the primary project
    image (and demoting the previous primary into the thumbnail row). The
    `morph-slot` share class is applied to every slot's ViewTransition, so

@@ -419,4 +419,40 @@ describe("ProjectBoard", () => {
       expect.stringContaining("Newcomer"),
     ]);
   });
+
+  it("pins mid-session newcomers so they don't reshuffle against each other on a later revalidation", async () => {
+    const { ProjectBoard } = await import("./project-board");
+    const boardProps = {
+      cohorts,
+      initialCohortId: null,
+      isAuthenticated: true,
+      viewerUserId: null,
+    };
+    const { rerender } = renderWithSearchParams(
+      <ProjectBoard {...boardProps} projects={[projectA1]} />
+    );
+
+    // Two projects are submitted mid-session; N1 outranks N2 on arrival.
+    const n1 = buildProject({ id: "n1", title: "Newcomer One", vote_count: 5 });
+    const n2 = buildProject({ id: "n2", title: "Newcomer Two", vote_count: 3 });
+    rerender(
+      <ProjectBoard {...boardProps} projects={[n1, projectA1, n2]} />
+    );
+
+    // A later revalidation ranks N2 above N1 server-side. Both were already
+    // seen, so their pinned positions must hold — no live swap.
+    rerender(
+      <ProjectBoard
+        {...boardProps}
+        projects={[{ ...n2, vote_count: 9 }, n1, projectA1]}
+      />
+    );
+
+    const cards = screen.getAllByTestId("project-card");
+    expect(cards.map((c) => c.textContent)).toEqual([
+      expect.stringContaining("Alpha One"),
+      expect.stringContaining("Newcomer One"),
+      expect.stringContaining("Newcomer Two"),
+    ]);
+  });
 });

@@ -59,23 +59,24 @@ export function ProjectBoard({
   );
 
   // Server revalidations (e.g. after a vote) re-deliver `projects` sorted by
-  // the fresh vote counts. Pin every row back to the position it held on
-  // first render; rows unknown to the snapshot (submitted mid-session) sort
-  // after the pinned ones, keeping their incoming relative order.
-  const initialOrder = useRef<Map<string, number> | null>(null);
-  if (initialOrder.current === null) {
-    initialOrder.current = new Map(projects.map((p, i) => [p.id ?? "", i]));
+  // the fresh vote counts. Pin every row to the position it first appeared
+  // in: rows seen on first render keep their initial rank, and a project
+  // submitted mid-session is pinned at the end the moment it first arrives,
+  // so nothing reshuffles under the reader for the rest of the session.
+  const pinnedOrder = useRef<Map<string, number>>(new Map());
+  for (const project of projects) {
+    const id = project.id ?? "";
+    if (!pinnedOrder.current.has(id)) {
+      pinnedOrder.current.set(id, pinnedOrder.current.size);
+    }
   }
   const stableProjects = useMemo(() => {
-    const order = initialOrder.current;
-    if (!order) {
-      return projects;
-    }
+    const order = pinnedOrder.current;
     return [...projects].sort(
-      (a, b) =>
-        (order.get(a.id ?? "") ?? Number.MAX_SAFE_INTEGER) -
-        (order.get(b.id ?? "") ?? Number.MAX_SAFE_INTEGER)
+      (a, b) => (order.get(a.id ?? "") ?? 0) - (order.get(b.id ?? "") ?? 0)
     );
+    // biome-ignore lint/correctness/useExhaustiveDependencies: pinnedOrder is a
+    // stable ref updated in the render body above; re-sort keys off `projects`.
   }, [projects]);
 
   const filteredProjects = useMemo(
