@@ -21,6 +21,8 @@ const SUPABASE_STORAGE_URL_RE =
 const PROJECT_LIST_URL_RE = /\/rest\/v1\/projects_with_vote_count/;
 const ALL_COHORTS_RE = /모든 클래스/;
 const LGE_1_LABEL_RE = /LG전자 1기/;
+const INFLEARN_LABEL_RE = /인프런/;
+const SEARCH_CLASS_PLACEHOLDER = "클래스 검색…";
 const VOTE_BTN_RE = /추천/;
 const DIGITS_RE = /\d+/;
 
@@ -492,7 +494,17 @@ test("edit upload failure keeps the original screenshot on the card", async ({
   }
 });
 
-test("switching cohorts fires no project-list network requests after initial load", async ({
+/**
+ * Pick a class from the desktop toolbar's combobox. Below 720px the
+ * combobox is hidden and the chip rail takes over — see the mobile
+ * describe block at the bottom of this file.
+ */
+async function pickClass(page: Page, name: RegExp): Promise<void> {
+  await page.getByTestId("cohort-combobox-trigger").click();
+  await page.getByRole("option", { name }).click();
+}
+
+test("switching classes fires no project-list network requests after initial load", async ({
   page,
 }) => {
   const requestsAfterReady: string[] = [];
@@ -504,15 +516,35 @@ test("switching cohorts fires no project-list network requests after initial loa
   });
 
   await page.goto("/projects");
-  const chips = page.getByTestId("cohort-chips");
-  await expect(chips).toBeVisible();
+  const trigger = page.getByTestId("cohort-combobox-trigger");
+  await expect(trigger).toBeVisible();
   ready = true;
 
-  // Click the first non-"All" chip (index 0 is "모든 클래스"), then back to All.
-  await chips.getByRole("button").nth(1).click();
-  await chips.getByRole("button", { name: ALL_COHORTS_RE }).click();
+  await pickClass(page, LGE_1_LABEL_RE);
+  await expect(trigger).toHaveText(new RegExp(LGE_1_LABEL_RE.source));
+  await pickClass(page, ALL_COHORTS_RE);
+  await expect(trigger).toHaveText(ALL_COHORTS_RE);
 
   expect(requestsAfterReady).toEqual([]);
+});
+
+test("searching narrows the class list to the matching classes", async ({
+  page,
+}) => {
+  await page.goto("/projects");
+  await page.getByTestId("cohort-combobox-trigger").click();
+  await page.getByPlaceholder(SEARCH_CLASS_PLACEHOLDER).fill("인프런");
+
+  await expect(
+    page.getByRole("option", { name: INFLEARN_LABEL_RE })
+  ).toBeVisible();
+  await expect(page.getByRole("option", { name: LGE_1_LABEL_RE })).toHaveCount(
+    0
+  );
+  // "모든 클래스" stays reachable so the filter can always be cleared.
+  await expect(
+    page.getByRole("option", { name: ALL_COHORTS_RE })
+  ).toBeVisible();
 });
 
 test("deep-linked cohort URL renders the filtered grid on first paint", async ({
@@ -529,13 +561,18 @@ test("deep-linked cohort URL renders the filtered grid on first paint", async ({
   }
 
   await page.goto(`/projects?cohort=${cohort.id}`);
-  const chips = page.getByTestId("cohort-chips");
-  await expect(
-    chips.getByRole("button", { name: new RegExp(cohort.label), pressed: true })
-  ).toBeVisible();
+  await expect(page.getByTestId("cohort-combobox-trigger")).toHaveText(
+    new RegExp(cohort.label)
+  );
+  // Every rendered card belongs to the deep-linked class.
+  const cards = page.getByTestId("project-card");
+  await expect(cards.first()).toBeVisible();
+  for (const card of await cards.all()) {
+    await expect(card).toContainText(cohort.label);
+  }
 });
 
-test("voted project keeps its count and indicator across cohort filter toggles", async ({
+test("voted project keeps its count and indicator across class filter toggles", async ({
   page,
 }) => {
   const admin = createAdminClient();
@@ -543,7 +580,7 @@ test("voted project keeps its count and indicator across cohort filter toggles",
 
   try {
     // Vote on a seeded project (the student is in LGE-1, so Paint Studio
-    // — also LGE-1 — is reachable from the LG전자 1기 cohort filter).
+    // — also LGE-1 — is reachable from the LG전자 1기 class filter).
     // Owners can't vote on their own projects, so we deliberately pick
     // someone else's project to make the vote button available.
     student = await signInStudentWithCohort(page, admin);
@@ -558,9 +595,8 @@ test("voted project keeps its count and indicator across cohort filter toggles",
     await voteBtn.click();
     await expect(voteBtn).toHaveAttribute("aria-pressed", "true");
 
-    const chips = page.getByTestId("cohort-chips");
-    await chips.getByRole("button", { name: ALL_COHORTS_RE }).click();
-    await chips.getByRole("button", { name: LGE_1_LABEL_RE }).click();
+    await pickClass(page, ALL_COHORTS_RE);
+    await pickClass(page, LGE_1_LABEL_RE);
 
     const afterCard = page
       .getByTestId("project-card")
@@ -573,6 +609,51 @@ test("voted project keeps its count and indicator across cohort filter toggles",
   } finally {
     await student?.cleanup();
   }
+});
+
+test.describe("class filter on a phone", () => {
+  test.use({ viewport: { width: 375, height: 812 } });
+
+  test("filters from the chip rail instead of the combobox", async ({
+    page,
+  }) => {
+    await page.goto("/projects");
+    const chips = page.getByTestId("cohort-chips");
+    await expect(chips).toBeVisible();
+    await expect(page.getByTestId("cohort-combobox-trigger")).toBeHidden();
+
+    await chips.getByRole("button", { name: INFLEARN_LABEL_RE }).click();
+    await expect(
+      chips.getByRole("button", { name: INFLEARN_LABEL_RE, pressed: true })
+    ).toBeVisible();
+    await expect(page.getByTestId("prompt-line")).toContainText(
+      '--class="인프런"'
+    );
+  });
+
+  test("scrolls a deep-linked class into view when it sits off the rail", async ({
+    page,
+  }) => {
+    const admin = createAdminClient();
+    // TOYCRANE sorts last by name, so its chip starts beyond the right edge.
+    const { data: cohort } = await admin
+      .from("cohorts")
+      .select("id, label")
+      .eq("name", "TOYCRANE")
+      .single();
+    if (!cohort) {
+      throw new Error("TOYCRANE seed missing — run supabase db reset first");
+    }
+
+    await page.goto(`/projects?cohort=${cohort.id}`);
+    const selected = page
+      .getByTestId("cohort-chips")
+      .getByRole("button", { name: new RegExp(cohort.label), pressed: true });
+
+    await expect(selected).toBeInViewport();
+    // The rail scrolled itself; the page must not have scrolled with it.
+    expect(await page.evaluate(() => window.scrollY)).toBe(0);
+  });
 });
 
 test("signed-out visitor is redirected to /login from the header submit trigger", async ({
