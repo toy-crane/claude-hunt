@@ -167,6 +167,42 @@ describe("CohortChips", () => {
     expect(root.textContent?.toLowerCase()).not.toContain("cohort");
   });
 
+  it("scrolls the chips sideways instead of wrapping to a second row", () => {
+    render(
+      <CohortChips
+        allCount={11}
+        cohorts={cohorts}
+        counts={{ c1: 6, c2: 4, c3: 1 }}
+        onValueChange={() => {
+          /* noop */
+        }}
+        value={null}
+      />
+    );
+    const rail = screen.getByRole("button", { name: ALL_CLASSES })
+      .parentElement as HTMLElement;
+    expect(rail).toHaveClass("overflow-x-auto");
+    expect(rail).not.toHaveClass("flex-wrap");
+  });
+
+  it("hides the scroll-edge fade from assistive tech", () => {
+    render(
+      <CohortChips
+        allCount={11}
+        cohorts={cohorts}
+        counts={{ c1: 6, c2: 4, c3: 1 }}
+        onValueChange={() => {
+          /* noop */
+        }}
+        value={null}
+      />
+    );
+    const fade = screen
+      .getByTestId("cohort-chips")
+      .querySelector("[aria-hidden='true']");
+    expect(fade).toBeInTheDocument();
+  });
+
   it("uses the Korean term 클래스 in the aria-label for assistive tech", () => {
     render(
       <CohortChips
