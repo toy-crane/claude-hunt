@@ -2,7 +2,11 @@
 
 import type { Cohort } from "@entities/cohort";
 import type { ProjectWithVoteCount } from "@entities/vote";
-import { CohortChips, useCohortQuery } from "@features/cohort-filter";
+import {
+  CohortChips,
+  CohortCombobox,
+  useCohortQuery,
+} from "@features/cohort-filter";
 import { VoteButton } from "@features/toggle-vote";
 import type { ProjectGridRow } from "@widgets/project-grid";
 import { ProjectGrid, PromptLine } from "@widgets/project-grid";
@@ -121,9 +125,29 @@ export function ProjectBoard({
 
   return (
     <>
-      <PromptLine cohortLabel={cohortLabel} />
+      <PromptLine
+        className="mb-3.5 truncate text-[11px] min-[720px]:text-xs"
+        cohortLabel={cohortLabel}
+      />
+      {/* Desktop: count label + searchable combobox. The chip rail would wrap
+          to two or three rows once classes pile up, so it stays mobile-only. */}
+      <div className="mb-3 hidden items-center justify-between gap-3 min-[720px]:flex">
+        <span className="whitespace-nowrap text-[11px] text-muted-foreground">
+          {cohortId
+            ? `${filteredProjects.length}개 프로젝트`
+            : `전체 ${projects.length}개 프로젝트`}
+        </span>
+        <CohortCombobox
+          allCount={projects.length}
+          cohorts={cohorts}
+          counts={cohortCounts}
+          onValueChange={onCohortChange}
+          value={cohortId}
+        />
+      </div>
       <CohortChips
         allCount={projects.length}
+        className="mb-3 min-[720px]:hidden"
         cohorts={cohorts}
         counts={cohortCounts}
         onValueChange={onCohortChange}
