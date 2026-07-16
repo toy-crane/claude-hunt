@@ -59,7 +59,12 @@
       "linter": {
         "rules": {
           "a11y": {
-            "useSemanticElements": "off"
+            "useSemanticElements": "off",
+            // input-group's InputGroupAddon spreads caller props (incl.
+            // onClick) onto its wrapper <div>; the interactive control is the
+            // child the addon decorates, not the wrapper itself.
+            "noNoninteractiveElementInteractions": "off",
+            "useKeyWithClickEvents": "off"
           },
           "suspicious": {
             "noDoubleEquals": "off",
