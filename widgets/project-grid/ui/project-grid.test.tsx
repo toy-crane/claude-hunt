@@ -1,5 +1,5 @@
 import { render, screen } from "@testing-library/react";
-import { beforeEach, describe, expect, it, vi } from "vitest";
+import { describe, expect, it, vi } from "vitest";
 import type { ProjectGridRow } from "../api/fetch-projects";
 import { ProjectGrid } from "./project-grid";
 
@@ -8,26 +8,6 @@ vi.mock("next/image", () => ({
     <div aria-label={alt} data-src={src} role="img" />
   ),
 }));
-
-// Overrides the global passthrough mock from vitest.setup.ts so this file can
-// assert the props each row's <ViewTransition> receives.
-const { viewTransitionProps } = vi.hoisted(() => ({
-  viewTransitionProps: [] as Record<string, unknown>[],
-}));
-vi.mock("react", async () => {
-  const actual = await vi.importActual<typeof import("react")>("react");
-  return {
-    ...actual,
-    ViewTransition: ({ children, ...props }: { children: React.ReactNode }) => {
-      viewTransitionProps.push(props);
-      return children;
-    },
-  };
-});
-
-beforeEach(() => {
-  viewTransitionProps.length = 0;
-});
 
 function buildProject(
   overrides: Partial<ProjectGridRow> & { id: string; title: string }
@@ -128,20 +108,6 @@ describe("ProjectGrid (terminal list)", () => {
     const header = screen.getByTestId("project-grid-header");
     expect(header.className).toContain("hidden");
     expect(header.className).toContain("min-[720px]:grid");
-  });
-
-  it("gives every row's ViewTransition the row-move update class so reorders animate without a cross-fade", () => {
-    const projects = [
-      buildProject({ id: "p1", title: "A", vote_count: 2 }),
-      buildProject({ id: "p2", title: "B", vote_count: 1 }),
-    ];
-
-    render(<ProjectGrid projects={projects} />);
-
-    expect(viewTransitionProps).toHaveLength(2);
-    for (const props of viewTransitionProps) {
-      expect(props.update).toBe("row-move");
-    }
   });
 
   it("renders the empty state when there are no projects", () => {

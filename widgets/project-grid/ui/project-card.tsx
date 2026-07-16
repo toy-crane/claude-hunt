@@ -77,7 +77,7 @@ export function ProjectCard({
 
   return (
     <li
-      className="group/row relative bg-background font-mono transition-colors hover:bg-muted min-[720px]:col-span-full min-[720px]:-mx-5 min-[720px]:grid min-[720px]:grid-cols-subgrid min-[720px]:px-5"
+      className="group/row relative font-mono transition-colors hover:bg-muted min-[720px]:col-span-full min-[720px]:-mx-5 min-[720px]:grid min-[720px]:grid-cols-subgrid min-[720px]:px-5"
       data-testid="project-card"
     >
       {/* ─── Desktop row (≥ 720 px) ────────────────────────────── */}
