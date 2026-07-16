@@ -18,8 +18,15 @@ interface SupabaseRow {
   vote_count: number;
 }
 
+// A syntactically valid UUID that maps to `projectRow`.
+const VALID_ID = "74394177-3371-4cfe-8ba8-a4cefb884cd5";
+// A different valid UUID that matches no row.
+const MISSING_ID = "00000000-0000-4000-8000-000000000000";
+// The malformed id from the Sentry report: a trailing url-encoded backslash.
+const MALFORMED_ID = "74394177-3371-4cfe-8ba8-a4cefb884cd5%5C";
+
 const projectRow: SupabaseRow = {
-  id: "p1",
+  id: VALID_ID,
   user_id: "u1",
   cohort_id: "c1",
   cohort_label: "Cohort A",
@@ -97,13 +104,13 @@ describe("fetchProjectCore", () => {
   it("returns a viewer-agnostic core row with no viewer fields", async () => {
     projectMaybeSingle.mockResolvedValue({ data: projectRow, error: null });
 
-    const core = await fetchProjectCore("p1");
+    const core = await fetchProjectCore(VALID_ID);
 
     expect(core).not.toBeNull();
     if (!core) {
       return;
     }
-    expect(core.id).toBe("p1");
+    expect(core.id).toBe(VALID_ID);
     expect(core.vote_count).toBe(3);
     expect(core.primaryImageUrl).toBe(
       "https://cdn.example.com/screens/p1/cover.png"
@@ -112,9 +119,18 @@ describe("fetchProjectCore", () => {
     expect("viewer_has_voted" in core).toBe(false);
   });
 
-  it("returns null when no row matches", async () => {
+  it("returns null when a valid id matches no row", async () => {
     projectMaybeSingle.mockResolvedValue({ data: null, error: null });
-    expect(await fetchProjectCore("nope")).toBeNull();
+    expect(await fetchProjectCore(MISSING_ID)).toBeNull();
+  });
+
+  it("returns null for a malformed-uuid id without hitting the database", async () => {
+    const core = await fetchProjectCore(MALFORMED_ID);
+
+    expect(core).toBeNull();
+    // The guard must short-circuit before any query is issued, so the
+    // invalid uuid never reaches Postgres (error 22P02).
+    expect(supabase.from).not.toHaveBeenCalled();
   });
 
   it("propagates the Supabase error", async () => {
@@ -122,22 +138,22 @@ describe("fetchProjectCore", () => {
       data: null,
       error: new Error("db down"),
     });
-    await expect(fetchProjectCore("p1")).rejects.toThrow("db down");
+    await expect(fetchProjectCore(VALID_ID)).rejects.toThrow("db down");
   });
 });
 
 describe("fetchViewerVote", () => {
   it("returns true when a vote row exists", async () => {
     voteMaybeSingle.mockResolvedValue({
-      data: { project_id: "p1" },
+      data: { project_id: VALID_ID },
       error: null,
     });
-    expect(await fetchViewerVote("p1", "u1")).toBe(true);
+    expect(await fetchViewerVote(VALID_ID, "u1")).toBe(true);
   });
 
   it("returns false when no vote row matches", async () => {
     voteMaybeSingle.mockResolvedValue({ data: null, error: null });
-    expect(await fetchViewerVote("p1", "u1")).toBe(false);
+    expect(await fetchViewerVote(VALID_ID, "u1")).toBe(false);
   });
 });
 
@@ -145,14 +161,14 @@ describe("fetchProjectDetail wrapper", () => {
   it("merges core and viewer vote into a single shape", async () => {
     projectMaybeSingle.mockResolvedValue({ data: projectRow, error: null });
     voteMaybeSingle.mockResolvedValue({
-      data: { project_id: "p1" },
+      data: { project_id: VALID_ID },
       error: null,
     });
 
-    const detail = await fetchProjectDetail("p1", "u1");
+    const detail = await fetchProjectDetail(VALID_ID, "u1");
 
     expect(detail).not.toBeNull();
-    expect(detail?.id).toBe("p1");
+    expect(detail?.id).toBe(VALID_ID);
     expect(detail?.viewer_has_voted).toBe(true);
     expect(detail?.vote_count).toBe(3);
   });
@@ -160,7 +176,7 @@ describe("fetchProjectDetail wrapper", () => {
   it("skips the votes query entirely when no viewer is signed in", async () => {
     projectMaybeSingle.mockResolvedValue({ data: projectRow, error: null });
 
-    const detail = await fetchProjectDetail("p1", null);
+    const detail = await fetchProjectDetail(VALID_ID, null);
 
     expect(detail?.viewer_has_voted).toBe(false);
     // The `votes` table must NOT be queried when viewer is anonymous.
@@ -170,6 +186,6 @@ describe("fetchProjectDetail wrapper", () => {
   it("returns null when the project does not exist (regardless of viewer)", async () => {
     projectMaybeSingle.mockResolvedValue({ data: null, error: null });
     voteMaybeSingle.mockResolvedValue({ data: null, error: null });
-    expect(await fetchProjectDetail("nope", "u1")).toBeNull();
+    expect(await fetchProjectDetail(MISSING_ID, "u1")).toBeNull();
   });
 });

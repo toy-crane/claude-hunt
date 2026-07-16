@@ -1,5 +1,6 @@
 import type { ReactionEmoji } from "@entities/reaction";
 import { createServerClient } from "@shared/api/supabase/server";
+import { isUuid } from "@shared/lib/uuid";
 
 export interface CommentReactionSummary {
   count: number;
@@ -129,6 +130,12 @@ export async function fetchCommentThreads(
   projectId: string,
   viewerUserId: string | null
 ): Promise<CommentThread[]> {
+  // A malformed project id (not a valid UUID) matches no comments; short-circuit
+  // so it never reaches Postgres as a `22P02` uuid cast error.
+  if (!isUuid(projectId)) {
+    return [];
+  }
+
   const supabase = await createServerClient();
   const commentsResult = await supabase
     .from("comments")
