@@ -1,3 +1,18 @@
+> **Partly superseded — kept as the record of what shipped, not as current truth.**
+> Two things have moved since:
+> 1. **The board lives at `/projects`, not `/`.** `/` is now the monthly winner
+>    spotlight and carries no filter. Read every `/` below as `/projects`.
+> 2. **The class filter is a dropdown again, not chips** (`CohortSelect` in
+>    `features/cohort-filter`). Chips gave every class a permanent slot, and
+>    classes are an open-ended series — by the seventh they wrapped to three
+>    lines on mobile. Scenario 2's chip-specific criteria (ordering, inverted
+>    selected state, wrapping) no longer apply; its *behavioral* criteria (URL
+>    sync, prompt line, counts, no extra fetch) still hold and are now proved by
+>    `features/cohort-filter/ui/cohort-select.test.tsx`.
+>
+> Everything else here — the ranked row list, prompt line, rank dots,
+> thumbnails, vote button, mobile card layout — is still what's built.
+
 ## Overview
 
 Replace the landing page body (`/`) with a dense monospace "터미널 보드" — a ranked row list with a prompt line, class-filter chips, and hover-expanding thumbnails — while keeping the existing site header, footer, and every interaction rule already shipped (voting, class filtering, project submission, owner edit/delete).
