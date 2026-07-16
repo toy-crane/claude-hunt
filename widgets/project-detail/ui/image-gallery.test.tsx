@@ -140,6 +140,32 @@ describe("<ImageGallery />", () => {
     expect(activeSlide()).toHaveAttribute("data-src", "b.png");
   });
 
+  it("falls back to the first image when the gallery shrinks past the active index", () => {
+    const { rerender } = render(
+      <ImageGallery imageUrls={["a.png", "b.png", "c.png"]} title="X" />
+    );
+    fireEvent.click(screen.getByTestId("project-detail-gallery-next"));
+    fireEvent.click(screen.getByTestId("project-detail-gallery-next"));
+    expect(activeSlide()).toHaveAttribute("data-src", "c.png");
+
+    // The owner removed images; a revalidation re-renders this same mounted
+    // gallery, so activeIndex (2) outlives the array it indexes.
+    rerender(<ImageGallery imageUrls={["a.png"]} title="X" />);
+    expect(activeSlide()).toHaveAttribute("data-src", "a.png");
+  });
+
+  it("keeps navigating from the fallback after the gallery shrinks", () => {
+    const { rerender } = render(
+      <ImageGallery imageUrls={["a.png", "b.png", "c.png"]} title="X" />
+    );
+    fireEvent.click(screen.getByTestId("project-detail-gallery-next"));
+    fireEvent.click(screen.getByTestId("project-detail-gallery-next"));
+    rerender(<ImageGallery imageUrls={["a.png", "b.png"]} title="X" />);
+
+    fireEvent.click(screen.getByTestId("project-detail-gallery-next"));
+    expect(activeSlide()).toHaveAttribute("data-src", "b.png");
+  });
+
   it("jumps to a specific image when its thumbnail is clicked", () => {
     render(<ImageGallery imageUrls={["a.png", "b.png", "c.png"]} title="X" />);
     const thumbs = screen.getAllByTestId("project-detail-gallery-thumb");

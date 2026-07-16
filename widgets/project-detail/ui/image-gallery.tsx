@@ -28,13 +28,19 @@ export interface ImageGalleryProps {
 export function ImageGallery({ imageUrls, title }: ImageGalleryProps) {
   const [activeIndex, setActiveIndex] = useState(0);
   const total = imageUrls.length;
+  // A revalidation can hand a still-mounted gallery a shorter `imageUrls` (the
+  // owner removed images) without resetting state, leaving `activeIndex` past
+  // the end — and then no slide matches it and the box renders blank. Fall back
+  // to the first image, as the pre-cross-fade `imageUrls[activeIndex] ??
+  // imageUrls[0]` did.
+  const safeIndex = activeIndex < total ? activeIndex : 0;
 
   const goPrev = useCallback(() => {
-    setActiveIndex((i) => (i === 0 ? total - 1 : i - 1));
-  }, [total]);
+    setActiveIndex(safeIndex === 0 ? total - 1 : safeIndex - 1);
+  }, [safeIndex, total]);
   const goNext = useCallback(() => {
-    setActiveIndex((i) => (i === total - 1 ? 0 : i + 1));
-  }, [total]);
+    setActiveIndex(safeIndex === total - 1 ? 0 : safeIndex + 1);
+  }, [safeIndex, total]);
 
   if (total === 0) {
     return null;
@@ -44,7 +50,7 @@ export function ImageGallery({ imageUrls, title }: ImageGalleryProps) {
     <div className="flex flex-col gap-2" data-testid="project-detail-gallery">
       <div className="relative aspect-[16/10] w-full overflow-hidden rounded-md border bg-muted">
         {imageUrls.map((url, idx) => {
-          const active = idx === activeIndex;
+          const active = idx === safeIndex;
           return (
             <NextImage
               alt={`${title} 스크린샷 ${idx + 1}/${total}`}
@@ -94,10 +100,10 @@ export function ImageGallery({ imageUrls, title }: ImageGalleryProps) {
         >
           {imageUrls.map((url, idx) => (
             <button
-              aria-current={idx === activeIndex ? "true" : "false"}
+              aria-current={idx === safeIndex ? "true" : "false"}
               className={cn(
                 "relative aspect-square w-16 shrink-0 overflow-hidden rounded-md border transition-opacity duration-150 ease-out",
-                idx === activeIndex
+                idx === safeIndex
                   ? "border-transparent ring-2 ring-ring ring-offset-2 ring-offset-background"
                   : "border-border opacity-70 hover:opacity-100"
               )}
