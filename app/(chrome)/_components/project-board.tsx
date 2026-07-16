@@ -6,7 +6,7 @@ import { CohortChips, useCohortQuery } from "@features/cohort-filter";
 import { VoteButton } from "@features/toggle-vote";
 import type { ProjectGridRow } from "@widgets/project-grid";
 import { ProjectGrid, PromptLine } from "@widgets/project-grid";
-import { useCallback, useMemo, useState } from "react";
+import { useCallback, useMemo, useRef, useState } from "react";
 
 export interface ProjectBoardProps {
   cohorts: Cohort[];
@@ -25,6 +25,10 @@ export interface ProjectBoardProps {
  * Owns the cohort filter, prompt line, and project grid below the page
  * hero. All projects come pre-fetched; switching cohorts filters in memory
  * and the URL `?cohort=` param is the source of truth via nuqs.
+ *
+ * Row order is a load-time snapshot: voting updates counts in place and the
+ * new ranking applies on the next page load, so the list never reshuffles
+ * under the reader mid-session.
  */
 export function ProjectBoard({
   cohorts,
@@ -54,10 +58,32 @@ export function ProjectBoard({
     [cohorts, cohortId]
   );
 
+  // Server revalidations (e.g. after a vote) re-deliver `projects` sorted by
+  // the fresh vote counts. Pin every row back to the position it held on
+  // first render; rows unknown to the snapshot (submitted mid-session) sort
+  // after the pinned ones, keeping their incoming relative order.
+  const initialOrder = useRef<Map<string, number> | null>(null);
+  if (initialOrder.current === null) {
+    initialOrder.current = new Map(projects.map((p, i) => [p.id ?? "", i]));
+  }
+  const stableProjects = useMemo(() => {
+    const order = initialOrder.current;
+    if (!order) {
+      return projects;
+    }
+    return [...projects].sort(
+      (a, b) =>
+        (order.get(a.id ?? "") ?? Number.MAX_SAFE_INTEGER) -
+        (order.get(b.id ?? "") ?? Number.MAX_SAFE_INTEGER)
+    );
+  }, [projects]);
+
   const filteredProjects = useMemo(
     () =>
-      cohortId ? projects.filter((p) => p.cohort_id === cohortId) : projects,
-    [projects, cohortId]
+      cohortId
+        ? stableProjects.filter((p) => p.cohort_id === cohortId)
+        : stableProjects,
+    [stableProjects, cohortId]
   );
 
   const cohortCounts = useMemo(() => {

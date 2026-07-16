@@ -1,6 +1,6 @@
 import type { Cohort } from "@entities/cohort";
 import { renderWithSearchParams } from "@shared/lib/test-utils";
-import { act, screen } from "@testing-library/react";
+import { act, screen, within } from "@testing-library/react";
 import type { ProjectGridRow } from "@widgets/project-grid";
 import { vi } from "vitest";
 
@@ -345,6 +345,78 @@ describe("ProjectBoard", () => {
       expect.stringContaining("High"),
       expect.stringContaining("Mid"),
       expect.stringContaining("Low"),
+    ]);
+  });
+
+  it("keeps the first-render row order when a revalidation delivers a re-sorted list, while counts update in place", async () => {
+    const { ProjectBoard } = await import("./project-board");
+    const first = buildProject({ id: "p1", title: "First", vote_count: 5 });
+    const second = buildProject({ id: "p2", title: "Second", vote_count: 3 });
+    const third = buildProject({ id: "p3", title: "Third", vote_count: 1 });
+
+    const boardProps = {
+      cohorts,
+      initialCohortId: null,
+      isAuthenticated: true,
+      viewerUserId: null,
+    };
+    const { rerender } = renderWithSearchParams(
+      <ProjectBoard {...boardProps} projects={[first, second, third]} />
+    );
+
+    // A vote pushes Third to the top on the server; the revalidated payload
+    // arrives re-sorted with a fresh count.
+    rerender(
+      <ProjectBoard
+        {...boardProps}
+        projects={[
+          { ...third, vote_count: 9 },
+          first,
+          second,
+        ]}
+      />
+    );
+
+    const cards = screen.getAllByTestId("project-card");
+    expect(cards.map((c) => c.textContent)).toEqual([
+      expect.stringContaining("First"),
+      expect.stringContaining("Second"),
+      expect.stringContaining("Third"),
+    ]);
+    const thirdVote = within(cards[2]).getAllByTestId("vote-button-stub")[0];
+    expect(thirdVote).toHaveTextContent("9");
+  });
+
+  it("appends projects submitted after first render below the pinned rows", async () => {
+    const { ProjectBoard } = await import("./project-board");
+    const boardProps = {
+      cohorts,
+      initialCohortId: null,
+      isAuthenticated: true,
+      viewerUserId: null,
+    };
+    const { rerender } = renderWithSearchParams(
+      <ProjectBoard {...boardProps} projects={[projectA1, projectA2]} />
+    );
+
+    // A brand-new submission tops the server ranking mid-session.
+    const newcomer = buildProject({
+      id: "p-new",
+      title: "Newcomer",
+      vote_count: 99,
+    });
+    rerender(
+      <ProjectBoard
+        {...boardProps}
+        projects={[newcomer, projectA1, projectA2]}
+      />
+    );
+
+    const cards = screen.getAllByTestId("project-card");
+    expect(cards.map((c) => c.textContent)).toEqual([
+      expect.stringContaining("Alpha One"),
+      expect.stringContaining("Alpha Two"),
+      expect.stringContaining("Newcomer"),
     ]);
   });
 });

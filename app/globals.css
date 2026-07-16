@@ -166,40 +166,13 @@
   }
 }
 
-/* Scope view transitions to the list-reorder animation only. The project grid
-   wraps each card in <ViewTransition>, so a card slides to its new rank when a
-   vote reorders the list — that animation lives in each card's own group. The
-   whole-page cross-fade the root group runs on every navigation is an unwanted
-   side effect, so silence it: navigation becomes an instant cut while the card
-   moves still animate. */
+/* View transitions are used only for the image-slot promote morph below
+   (features/upload-project-images). The whole-page cross-fade the root
+   group would otherwise run on every transition is an unwanted side
+   effect, so silence it: only the named slot groups animate. */
 ::view-transition-group(root),
 ::view-transition-old(root),
 ::view-transition-new(root) {
-  animation: none;
-}
-
-/* The snapshot overlay swallows pointer events for the whole transition,
-   locking the page for its duration. Let clicks fall through to the live
-   DOM so a running reorder never blocks the next interaction. */
-::view-transition {
-  pointer-events: none;
-}
-
-/* Reorder rows move without the UA's default old/new cross-fade: the two
-   snapshots differ only by rank digits, so fading them over each other
-   reads as ghosting. Hide the old snapshot and let the group's position
-   animation carry the motion — on-screen A→B movement, strong ease-in-out,
-   under 300ms. */
-::view-transition-group(.row-move) {
-  animation-duration: 250ms;
-  animation-timing-function: cubic-bezier(0.77, 0, 0.175, 1);
-}
-
-::view-transition-old(.row-move) {
-  display: none;
-}
-
-::view-transition-new(.row-move) {
   animation: none;
 }
 

@@ -1,5 +1,4 @@
 import type { ProjectWithVoteCount } from "@entities/vote";
-import { ViewTransition } from "react";
 import type { ProjectGridRow } from "../api/fetch-projects";
 import { EmptyState } from "./empty-state";
 import { ProjectCard } from "./project-card";
@@ -63,18 +62,17 @@ export function ProjectGrid({
             ? (cohortLabelsById?.[project.cohort_id] ?? null)
             : null;
           return (
-            <ViewTransition key={project.id} update="row-move">
-              <ProjectCard
-                cohortLabel={cohortLabel}
-                priority={rank <= 3}
-                project={project}
-                rank={rank}
-                renderOwnerActions={renderOwnerActions}
-                renderVoteButton={renderVoteButton}
-                screenshotUrl={project.screenshotUrl}
-                viewerUserId={viewerUserId}
-              />
-            </ViewTransition>
+            <ProjectCard
+              cohortLabel={cohortLabel}
+              key={project.id}
+              priority={rank <= 3}
+              project={project}
+              rank={rank}
+              renderOwnerActions={renderOwnerActions}
+              renderVoteButton={renderVoteButton}
+              screenshotUrl={project.screenshotUrl}
+              viewerUserId={viewerUserId}
+            />
           );
         })}
       </ul>
