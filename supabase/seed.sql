@@ -21,12 +21,14 @@
 -- TOYCRANE is the operator-only cohort (mirrors production). It must NOT
 -- appear in any user-facing cohort list — fetchCohorts filters it out —
 -- and is seeded here so that hiding can be verified locally.
-insert into public.cohorts (name, label) values
-  ('LGE-1',    'LG전자 1기'),
-  ('LGE-2',    'LG전자 2기'),
-  ('LGE-3',    'LG전자 3기'),
-  ('Inflearn', '인프런'),
-  ('TOYCRANE', 'toycrane')
+-- `display_order` is the user-facing order (higher = newer). TOYCRANE keeps 0
+-- so it sorts last, mirroring the production backfill.
+insert into public.cohorts (name, label, display_order) values
+  ('LGE-1',    'LG전자 1기', 1),
+  ('LGE-2',    'LG전자 2기', 2),
+  ('LGE-3',    'LG전자 3기', 3),
+  ('Inflearn', '인프런',     4),
+  ('TOYCRANE', 'toycrane',  0)
 on conflict (name) do nothing;
 
 ------------------------------------------------------------------------------
