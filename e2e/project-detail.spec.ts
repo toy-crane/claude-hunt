@@ -11,9 +11,9 @@ const CONTINUE_BTN_RE = /계속/;
 const MAGIC_LINK_TEXT_RE = /매직 링크/;
 const COMMENT_PLACEHOLDER_RE = /댓글을 남겨 주세요/;
 const SUBMIT_COMMENT_BTN_RE = /^등록$/;
-const EDIT_MENU_RE = /^편집$/;
+const EDIT_MENU_RE = /^수정$/;
 const DELETE_MENU_RE = /^삭제$/;
-const CONFIRM_DELETE_BTN_RE = /^삭제$/;
+const CONFIRM_DELETE_BTN_RE = /^삭제하기$/;
 const SAVE_BTN_RE = /^저장$/;
 
 interface AuthedStudent {
@@ -144,7 +144,7 @@ test("authenticated student leaves, edits, reacts to, and deletes a comment", as
       timeout: 10_000,
     });
 
-    // Open kebab on our own comment, then click "편집". Scope to the
+    // Open kebab on our own comment, then click "수정". Scope to the
     // specific comment by its text so parallel tests on the same project
     // can't pick a stranger's comment.
     const ownComment = page
