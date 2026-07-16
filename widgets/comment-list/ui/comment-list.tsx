@@ -2,7 +2,15 @@
 
 import { CommentForm } from "@features/create-comment";
 import type { Viewer } from "@shared/api/supabase/viewer";
-import { useOptimistic } from "react";
+import { cn } from "@shared/lib/utils";
+import {
+  AnimatePresence,
+  motion,
+  type Transition,
+  useReducedMotion,
+  type Variants,
+} from "motion/react";
+import { type ReactNode, useOptimistic } from "react";
 import type { CommentRow, CommentThread } from "../api/fetch-comment-threads";
 import { CommentItem } from "./comment-item";
 
@@ -107,8 +115,77 @@ function buildOptimisticRow(
   };
 }
 
+/**
+ * Enter rises into place from 4px above (the row arrives from the form
+ * above it); exit collapses the row's height so siblings settle with it
+ * instead of jumping. divide-y's 1px border is not part of height, so
+ * it must collapse alongside.
+ */
+const rowVariants: Variants = {
+  initial: { opacity: 0, y: -4 },
+  animate: { opacity: 1, y: 0 },
+  exit: {
+    opacity: 0,
+    height: 0,
+    borderTopWidth: 0,
+    transition: { duration: 0.18, ease: "easeIn" },
+  },
+};
+
+const rowTransition: Transition = { duration: 0.22, ease: [0.4, 0, 0.2, 1] };
+
+interface RowPresenceProps {
+  children: ReactNode;
+  reduceMotion: boolean;
+}
+
+/**
+ * Presence boundary for animated rows. Reduced motion bypasses
+ * AnimatePresence entirely — a plain <li> child never signals exit
+ * completion to the presence context, so removal through it is not
+ * dependable.
+ */
+function RowPresence({ children, reduceMotion }: RowPresenceProps) {
+  if (reduceMotion) {
+    return <>{children}</>;
+  }
+  return <AnimatePresence initial={false}>{children}</AnimatePresence>;
+}
+
+interface RowProps {
+  children: ReactNode;
+  className?: string;
+  reduceMotion: boolean;
+  testId?: string;
+}
+
+/** List row: plain <li> under reduced motion, animated otherwise. */
+function Row({ children, className, reduceMotion, testId }: RowProps) {
+  if (reduceMotion) {
+    return (
+      <li className={className} data-testid={testId}>
+        {children}
+      </li>
+    );
+  }
+  return (
+    <motion.li
+      animate="animate"
+      className={cn(className, "overflow-hidden")}
+      data-testid={testId}
+      exit="exit"
+      initial="initial"
+      transition={rowTransition}
+      variants={rowVariants}
+    >
+      {children}
+    </motion.li>
+  );
+}
+
 export function CommentList({ threads, projectId, viewer }: CommentListProps) {
   const [optimisticThreads, dispatch] = useOptimistic(threads, applyAction);
+  const reduceMotion = Boolean(useReducedMotion());
   const isAuthenticated = viewer !== null;
   const viewerUserId = viewer?.id ?? null;
   const total = optimisticThreads.reduce(
@@ -174,44 +251,49 @@ export function CommentList({ threads, projectId, viewer }: CommentListProps) {
 
       {optimisticThreads.length > 0 && (
         <ul className="flex flex-col divide-y" data-testid="comment-list-items">
-          {optimisticThreads.map((thread) => (
-            <li
-              className="flex flex-col gap-1"
-              data-testid="comment-thread"
-              key={thread.comment.id}
-            >
-              <CommentItem
-                allowReply
-                comment={thread.comment}
-                isAuthenticated={isAuthenticated}
-                onOptimisticDelete={onDelete}
-                onOptimisticEdit={onEdit}
-                onOptimisticReply={onReplySubmit}
-                projectId={projectId}
-                viewerUserId={viewerUserId}
-              />
-              {thread.replies.length > 0 ? (
-                <ul
-                  className="ml-9 flex flex-col gap-1 border-border border-l-2 pl-3"
-                  data-testid="comment-reply-thread"
-                >
-                  {thread.replies.map((reply) => (
-                    <li key={reply.id}>
-                      <CommentItem
-                        allowReply={false}
-                        comment={reply}
-                        isAuthenticated={isAuthenticated}
-                        onOptimisticDelete={onDelete}
-                        onOptimisticEdit={onEdit}
-                        projectId={projectId}
-                        viewerUserId={viewerUserId}
-                      />
-                    </li>
-                  ))}
-                </ul>
-              ) : null}
-            </li>
-          ))}
+          <RowPresence reduceMotion={reduceMotion}>
+            {optimisticThreads.map((thread) => (
+              <Row
+                className="flex flex-col gap-1"
+                key={thread.comment.id}
+                reduceMotion={reduceMotion}
+                testId="comment-thread"
+              >
+                <CommentItem
+                  allowReply
+                  comment={thread.comment}
+                  isAuthenticated={isAuthenticated}
+                  onOptimisticDelete={onDelete}
+                  onOptimisticEdit={onEdit}
+                  onOptimisticReply={onReplySubmit}
+                  projectId={projectId}
+                  viewerUserId={viewerUserId}
+                />
+                {thread.replies.length > 0 ? (
+                  <ul
+                    className="ml-9 flex flex-col gap-1 border-border border-l-2 pl-3"
+                    data-testid="comment-reply-thread"
+                  >
+                    <RowPresence reduceMotion={reduceMotion}>
+                      {thread.replies.map((reply) => (
+                        <Row key={reply.id} reduceMotion={reduceMotion}>
+                          <CommentItem
+                            allowReply={false}
+                            comment={reply}
+                            isAuthenticated={isAuthenticated}
+                            onOptimisticDelete={onDelete}
+                            onOptimisticEdit={onEdit}
+                            projectId={projectId}
+                            viewerUserId={viewerUserId}
+                          />
+                        </Row>
+                      ))}
+                    </RowPresence>
+                  </ul>
+                ) : null}
+              </Row>
+            ))}
+          </RowPresence>
         </ul>
       )}
     </section>
