@@ -17,7 +17,7 @@ describe("PromptLine", () => {
     render(<PromptLine cohortLabel="LG전자 1기" />);
 
     expect(screen.getByTestId("prompt-line")).toHaveTextContent(
-      `$ claude-hunt ls --class="LG전자 1기" --sort=votes`
+      `$ claude-hunt ls --sort=votes --class="LG전자 1기"`
     );
   });
 
@@ -54,7 +54,7 @@ describe("PromptLine", () => {
 
     rerender(<PromptLine cohortLabel="인프런" />);
     expect(screen.getByTestId("prompt-line")).toHaveTextContent(
-      `$ claude-hunt ls --class="인프런" --sort=votes`
+      `$ claude-hunt ls --sort=votes --class="인프런"`
     );
   });
 });

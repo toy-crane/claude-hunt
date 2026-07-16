@@ -22,7 +22,7 @@ export function PromptLine({ cohortLabel, className }: PromptLineProps) {
       <span className={ACCENT} data-testid="prompt-line-dollar">
         $
       </span>{" "}
-      claude-hunt ls{classFlag} --sort=votes
+      claude-hunt ls --sort=votes{classFlag}
     </div>
   );
 }
