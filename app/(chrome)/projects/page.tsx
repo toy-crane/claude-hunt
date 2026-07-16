@@ -87,26 +87,14 @@ export async function BoardData({ searchParams }: PageProps) {
   );
 }
 
-const SKELETON_CHIPS = [
-  { className: "h-6 w-24", key: "chip-1" },
-  { className: "h-6 w-16", key: "chip-2" },
-  { className: "h-6 w-20", key: "chip-3" },
-  { className: "h-6 w-28", key: "chip-4" },
-  { className: "h-6 w-16", key: "chip-5" },
-  { className: "h-6 w-20", key: "chip-6" },
-];
-
 function ProjectBoardSkeleton() {
   return (
     <div className="flex flex-col gap-6" data-testid="project-board-skeleton">
       {/* PromptLine */}
       <Skeleton className="h-4 w-64 max-w-full" />
-      {/* CohortChips — dynamic count, common case ~6 */}
-      <div className="flex flex-wrap items-center gap-1.5">
-        {SKELETON_CHIPS.map((chip) => (
-          <Skeleton className={chip.className} key={chip.key} />
-        ))}
-      </div>
+      {/* CohortSelect — one trigger, so the placeholder matches it exactly
+          however many cohorts load. */}
+      <Skeleton className="h-9 w-full sm:w-56" />
       <ProjectGridSkeleton />
     </div>
   );

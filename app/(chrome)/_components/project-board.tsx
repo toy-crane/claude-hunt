@@ -2,7 +2,7 @@
 
 import type { Cohort } from "@entities/cohort";
 import type { ProjectWithVoteCount } from "@entities/vote";
-import { CohortChips, useCohortQuery } from "@features/cohort-filter";
+import { CohortSelect, useCohortQuery } from "@features/cohort-filter";
 import { VoteButton } from "@features/toggle-vote";
 import type { ProjectGridRow } from "@widgets/project-grid";
 import { ProjectGrid, PromptLine } from "@widgets/project-grid";
@@ -122,7 +122,7 @@ export function ProjectBoard({
   return (
     <>
       <PromptLine cohortLabel={cohortLabel} />
-      <CohortChips
+      <CohortSelect
         allCount={projects.length}
         cohorts={cohorts}
         counts={cohortCounts}
@@ -131,6 +131,7 @@ export function ProjectBoard({
       />
       <ProjectGrid
         cohortLabelsById={cohortLabelsById}
+        isFiltered={cohortId !== null}
         projects={filteredProjects}
         renderVoteButton={renderVoteButton}
         viewerUserId={viewerUserId}

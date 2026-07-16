@@ -1,4 +1,10 @@
-import { expect, test } from "@playwright/test";
+import { expect, type Page, test } from "@playwright/test";
+
+/** Picks a class in the board's cohort dropdown by its visible option label. */
+async function selectCohort(page: Page, name: RegExp) {
+  await page.getByTestId("cohort-select-trigger").click();
+  await page.getByRole("option", { name }).click();
+}
 
 const ALL_COHORTS_RE = /모든 클래스/;
 const LGE_1_RE = /LG전자 1기/;
@@ -62,8 +68,7 @@ test.describe("seed demo data — projects board renders seeded cards", () => {
       page,
     }) => {
       await page.goto("/projects");
-      const chips = page.getByTestId("cohort-chips");
-      await chips.getByRole("button", { name: cohort.re }).click();
+      await selectCohort(page, cohort.re);
 
       await expect(
         page
@@ -76,8 +81,7 @@ test.describe("seed demo data — projects board renders seeded cards", () => {
 
   test("cohort filter 'LGE-3' surfaces no seeded cards", async ({ page }) => {
     await page.goto("/projects");
-    const chips = page.getByTestId("cohort-chips");
-    await chips.getByRole("button", { name: LGE_3_RE }).click();
+    await selectCohort(page, LGE_3_RE);
 
     for (const { projectTitle } of SEEDED_COHORTS) {
       await expect(
@@ -93,9 +97,8 @@ test.describe("seed demo data — projects board renders seeded cards", () => {
     page,
   }) => {
     await page.goto("/projects");
-    const chips = page.getByTestId("cohort-chips");
 
-    await chips.getByRole("button", { name: LGE_1_RE }).click();
+    await selectCohort(page, LGE_1_RE);
     await expect(
       page
         .getByTestId("project-card")
@@ -103,7 +106,7 @@ test.describe("seed demo data — projects board renders seeded cards", () => {
         .first()
     ).toBeVisible();
 
-    await chips.getByRole("button", { name: ALL_COHORTS_RE }).click();
+    await selectCohort(page, ALL_COHORTS_RE);
     for (const { projectTitle } of SEEDED_COHORTS) {
       await expect(
         page

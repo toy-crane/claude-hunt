@@ -11,6 +11,12 @@ export interface ProjectGridProps {
    * the rank number alone on mobile.
    */
   cohortLabelsById?: Record<string, string>;
+  /**
+   * True when `projects` has been narrowed by the class filter. Only used to
+   * pick the empty-state copy — an empty *filter* result is a different
+   * message from an empty board.
+   */
+  isFiltered?: boolean;
   projects: ProjectGridRow[];
   /** Owner-only actions slot forwarded to each row. */
   renderOwnerActions?: (project: ProjectWithVoteCount) => React.ReactNode;
@@ -22,13 +28,14 @@ export interface ProjectGridProps {
 
 export function ProjectGrid({
   cohortLabelsById,
+  isFiltered = false,
   projects,
   viewerUserId,
   renderOwnerActions,
   renderVoteButton,
 }: ProjectGridProps) {
   if (projects.length === 0) {
-    return <EmptyState />;
+    return <EmptyState filtered={isFiltered} />;
   }
 
   return (

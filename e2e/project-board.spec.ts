@@ -24,6 +24,12 @@ const LGE_1_LABEL_RE = /LG전자 1기/;
 const VOTE_BTN_RE = /추천/;
 const DIGITS_RE = /\d+/;
 
+/** Picks a class in the board's cohort dropdown by its visible option label. */
+async function selectCohort(page: Page, name: RegExp) {
+  await page.getByTestId("cohort-select-trigger").click();
+  await page.getByRole("option", { name }).click();
+}
+
 const dirname = path.dirname(fileURLToPath(import.meta.url));
 const SCREENSHOT_FIXTURE = path.resolve(
   dirname,
@@ -504,13 +510,14 @@ test("switching cohorts fires no project-list network requests after initial loa
   });
 
   await page.goto("/projects");
-  const chips = page.getByTestId("cohort-chips");
-  await expect(chips).toBeVisible();
+  await expect(page.getByTestId("cohort-select-trigger")).toBeVisible();
   ready = true;
 
-  // Click the first non-"All" chip (index 0 is "모든 클래스"), then back to All.
-  await chips.getByRole("button").nth(1).click();
-  await chips.getByRole("button", { name: ALL_COHORTS_RE }).click();
+  // Filter to a class, then back to "모든 클래스". Both are in-memory —
+  // the whole list ships on first load and `shallow: true` keeps nuqs from
+  // round-tripping to the server, so neither switch may hit the network.
+  await selectCohort(page, LGE_1_LABEL_RE);
+  await selectCohort(page, ALL_COHORTS_RE);
 
   expect(requestsAfterReady).toEqual([]);
 });
@@ -529,10 +536,9 @@ test("deep-linked cohort URL renders the filtered grid on first paint", async ({
   }
 
   await page.goto(`/projects?cohort=${cohort.id}`);
-  const chips = page.getByTestId("cohort-chips");
-  await expect(
-    chips.getByRole("button", { name: new RegExp(cohort.label), pressed: true })
-  ).toBeVisible();
+  await expect(page.getByTestId("cohort-select-trigger")).toHaveText(
+    new RegExp(cohort.label)
+  );
 });
 
 test("voted project keeps its count and indicator across cohort filter toggles", async ({
@@ -558,9 +564,8 @@ test("voted project keeps its count and indicator across cohort filter toggles",
     await voteBtn.click();
     await expect(voteBtn).toHaveAttribute("aria-pressed", "true");
 
-    const chips = page.getByTestId("cohort-chips");
-    await chips.getByRole("button", { name: ALL_COHORTS_RE }).click();
-    await chips.getByRole("button", { name: LGE_1_LABEL_RE }).click();
+    await selectCohort(page, ALL_COHORTS_RE);
+    await selectCohort(page, LGE_1_LABEL_RE);
 
     const afterCard = page
       .getByTestId("project-card")

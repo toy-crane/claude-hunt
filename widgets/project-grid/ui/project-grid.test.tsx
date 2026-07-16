@@ -116,4 +116,10 @@ describe("ProjectGrid (terminal list)", () => {
     expect(screen.getByTestId("project-grid-empty")).toBeInTheDocument();
     expect(screen.queryByTestId("project-grid")).not.toBeInTheDocument();
   });
+
+  it("passes the filtered flag through so an empty filter result reads differently", () => {
+    render(<ProjectGrid isFiltered projects={[]} />);
+
+    expect(screen.getByText("다른 클래스를 골라보세요.")).toBeInTheDocument();
+  });
 });

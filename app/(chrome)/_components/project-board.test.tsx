@@ -5,9 +5,11 @@ import type { ProjectGridRow } from "@widgets/project-grid";
 import { vi } from "vitest";
 
 // Capture the onValueChange callback and props that ProjectBoard passes
-// to CohortChips so tests can drive filtering and assert forwarded props.
+// to CohortSelect so tests can drive filtering and assert forwarded props.
+// Stubbed so these tests stay about the board's filtering and ordering —
+// the control's own behavior is covered in cohort-select.test.tsx.
 let capturedOnValueChange: ((id: string | null) => void) | undefined;
-let capturedChipsProps:
+let capturedSelectProps:
   | {
       allCount: number;
       counts: Record<string, number>;
@@ -21,7 +23,7 @@ vi.mock("@features/cohort-filter", async () => {
   >("@features/cohort-filter");
   return {
     ...actual,
-    CohortChips: ({
+    CohortSelect: ({
       allCount,
       counts,
       onValueChange,
@@ -33,11 +35,11 @@ vi.mock("@features/cohort-filter", async () => {
       value: string | null;
     }) => {
       capturedOnValueChange = onValueChange;
-      capturedChipsProps = { allCount, counts, value };
+      capturedSelectProps = { allCount, counts, value };
       return (
         <div
           data-all-count={allCount}
-          data-testid="cohort-chips-stub"
+          data-testid="cohort-select-stub"
           data-value={value ?? "__all__"}
         />
       );
@@ -197,14 +199,14 @@ describe("ProjectBoard", () => {
     vi.restoreAllMocks();
   });
 
-  it("forwards allCount and per-cohort counts to CohortChips", async () => {
+  it("forwards allCount and per-cohort counts to CohortSelect", async () => {
     await renderBoard();
-    expect(capturedChipsProps?.allCount).toBe(3);
-    expect(capturedChipsProps?.counts).toEqual({
+    expect(capturedSelectProps?.allCount).toBe(3);
+    expect(capturedSelectProps?.counts).toEqual({
       "cohort-a": 2,
       "cohort-b": 1,
     });
-    expect(capturedChipsProps?.value).toBeNull();
+    expect(capturedSelectProps?.value).toBeNull();
   });
 
   it("shows all projects when no cohort is selected", async () => {
@@ -222,7 +224,7 @@ describe("ProjectBoard", () => {
 
   it("hydrates the selected cohort from the URL on initial render", async () => {
     await renderBoard({ initialCohortId: "cohort-a" });
-    expect(capturedChipsProps?.value).toBe("cohort-a");
+    expect(capturedSelectProps?.value).toBe("cohort-a");
     expect(screen.getAllByText("Alpha One").length).toBeGreaterThanOrEqual(1);
     expect(screen.getAllByText("Alpha Two").length).toBeGreaterThanOrEqual(1);
     expect(screen.queryByText("Beta One")).not.toBeInTheDocument();
@@ -244,7 +246,7 @@ describe("ProjectBoard", () => {
       />,
       ""
     );
-    expect(capturedChipsProps?.value).toBe("cohort-a");
+    expect(capturedSelectProps?.value).toBe("cohort-a");
     expect(screen.getAllByText("Alpha One").length).toBeGreaterThanOrEqual(1);
     expect(screen.queryByText("Beta One")).not.toBeInTheDocument();
   });

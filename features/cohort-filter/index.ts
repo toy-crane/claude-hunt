@@ -1,3 +1,3 @@
 export { useCohortQuery } from "./hooks/use-cohort-query";
-export type { CohortChipsProps } from "./ui/cohort-chips";
-export { CohortChips } from "./ui/cohort-chips";
+export type { CohortSelectProps } from "./ui/cohort-select";
+export { ALL_COHORTS_LABEL, CohortSelect } from "./ui/cohort-select";
