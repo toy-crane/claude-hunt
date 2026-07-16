@@ -103,6 +103,22 @@ describe("CohortChips", () => {
     expect(unselected.className).toContain("text-foreground");
   });
 
+  it("gives press feedback via the shared scale vocabulary", () => {
+    render(
+      <CohortChips
+        allCount={11}
+        cohorts={cohorts}
+        counts={{ c1: 6, c2: 4, c3: 1 }}
+        onValueChange={() => {
+          /* noop */
+        }}
+        value={null}
+      />
+    );
+    const chip = screen.getByRole("button", { name: ALL_CLASSES });
+    expect(chip.className).toContain("active:scale-[0.97]");
+  });
+
   it("fires onValueChange(null) when the 모든 클래스 chip is clicked", async () => {
     const onValueChange = vi.fn();
     const user = userEvent.setup();

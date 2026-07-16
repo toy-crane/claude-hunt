@@ -6,7 +6,7 @@ import { cn } from "@shared/lib/utils";
 export const ALL_COHORTS_CHIP_LABEL = "모든 클래스";
 
 const CHIP_BASE =
-  "inline-flex items-center gap-1.5 rounded-none border px-2.5 py-1 font-mono font-medium text-[11px] transition-colors outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background whitespace-nowrap";
+  "inline-flex items-center gap-1.5 rounded-none border px-2.5 py-1 font-mono font-medium text-[11px] transition-[color,background-color,border-color,scale] duration-150 ease-[cubic-bezier(0.23,1,0.32,1)] active:scale-[0.97] outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background whitespace-nowrap";
 const CHIP_IDLE = "border-border bg-background text-foreground hover:bg-muted";
 const CHIP_SELECTED =
   "border-foreground bg-foreground text-background hover:bg-foreground";

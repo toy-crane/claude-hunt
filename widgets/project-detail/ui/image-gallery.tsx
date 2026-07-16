@@ -19,44 +19,62 @@ export interface ImageGalleryProps {
  * than one image. Left/right arrows wrap around at the ends. Clicking
  * a thumbnail jumps directly to that image.
  *
- * Renders the next/image with priority on the visible image so the
- * detail page hits a fast LCP.
+ * Every slide stays mounted, stacked in the 16:10 box, and navigation
+ * cross-fades opacity instead of swapping `src` — images decode once,
+ * so switching never flashes the shimmer placeholder. The trade-off is
+ * that all gallery images (max 5) load on mount. Only the first image
+ * gets priority for LCP.
  */
 export function ImageGallery({ imageUrls, title }: ImageGalleryProps) {
   const [activeIndex, setActiveIndex] = useState(0);
   const total = imageUrls.length;
+  // A revalidation can hand a still-mounted gallery a shorter `imageUrls` (the
+  // owner removed images) without resetting state, leaving `activeIndex` past
+  // the end — and then no slide matches it and the box renders blank. Fall back
+  // to the first image, as the pre-cross-fade `imageUrls[activeIndex] ??
+  // imageUrls[0]` did.
+  const safeIndex = activeIndex < total ? activeIndex : 0;
 
   const goPrev = useCallback(() => {
-    setActiveIndex((i) => (i === 0 ? total - 1 : i - 1));
-  }, [total]);
+    setActiveIndex(safeIndex === 0 ? total - 1 : safeIndex - 1);
+  }, [safeIndex, total]);
   const goNext = useCallback(() => {
-    setActiveIndex((i) => (i === total - 1 ? 0 : i + 1));
-  }, [total]);
+    setActiveIndex(safeIndex === total - 1 ? 0 : safeIndex + 1);
+  }, [safeIndex, total]);
 
   if (total === 0) {
     return null;
   }
 
-  const currentUrl = imageUrls[activeIndex] ?? imageUrls[0] ?? "";
-
   return (
     <div className="flex flex-col gap-2" data-testid="project-detail-gallery">
       <div className="relative aspect-[16/10] w-full overflow-hidden rounded-md border bg-muted">
-        <NextImage
-          alt={`${title} 스크린샷 ${activeIndex + 1}/${total}`}
-          className="object-contain"
-          data-testid="project-detail-primary-image"
-          fill
-          placeholder={SHIMMER_DATA_URL}
-          priority={activeIndex === 0}
-          sizes="(max-width: 768px) 100vw, 768px"
-          src={currentUrl}
-        />
+        {imageUrls.map((url, idx) => {
+          const active = idx === safeIndex;
+          return (
+            <NextImage
+              alt={`${title} 스크린샷 ${idx + 1}/${total}`}
+              aria-hidden={active ? undefined : true}
+              className={cn(
+                "object-contain transition-opacity duration-200 ease-out",
+                active ? "opacity-100" : "pointer-events-none opacity-0"
+              )}
+              data-active={active ? "true" : "false"}
+              data-testid="project-detail-primary-image"
+              fill
+              key={url}
+              placeholder={SHIMMER_DATA_URL}
+              priority={idx === 0}
+              sizes="(max-width: 768px) 100vw, 768px"
+              src={url}
+            />
+          );
+        })}
         {total > 1 ? (
           <>
             <button
               aria-label="이전 이미지"
-              className="absolute top-1/2 left-2 inline-flex size-9 -translate-y-1/2 items-center justify-center rounded-full bg-background/80 text-foreground backdrop-blur hover:bg-background"
+              className="absolute top-1/2 left-2 inline-flex size-9 -translate-y-1/2 items-center justify-center rounded-full bg-background/80 text-foreground backdrop-blur transition-[background-color,scale] duration-150 ease-[cubic-bezier(0.23,1,0.32,1)] hover:bg-background active:scale-[0.97]"
               data-testid="project-detail-gallery-prev"
               onClick={goPrev}
               type="button"
@@ -65,7 +83,7 @@ export function ImageGallery({ imageUrls, title }: ImageGalleryProps) {
             </button>
             <button
               aria-label="다음 이미지"
-              className="absolute top-1/2 right-2 inline-flex size-9 -translate-y-1/2 items-center justify-center rounded-full bg-background/80 text-foreground backdrop-blur hover:bg-background"
+              className="absolute top-1/2 right-2 inline-flex size-9 -translate-y-1/2 items-center justify-center rounded-full bg-background/80 text-foreground backdrop-blur transition-[background-color,scale] duration-150 ease-[cubic-bezier(0.23,1,0.32,1)] hover:bg-background active:scale-[0.97]"
               data-testid="project-detail-gallery-next"
               onClick={goNext}
               type="button"
@@ -82,10 +100,10 @@ export function ImageGallery({ imageUrls, title }: ImageGalleryProps) {
         >
           {imageUrls.map((url, idx) => (
             <button
-              aria-current={idx === activeIndex ? "true" : "false"}
+              aria-current={idx === safeIndex ? "true" : "false"}
               className={cn(
-                "relative aspect-square w-16 shrink-0 overflow-hidden rounded-md border",
-                idx === activeIndex
+                "relative aspect-square w-16 shrink-0 overflow-hidden rounded-md border transition-opacity duration-150 ease-out",
+                idx === safeIndex
                   ? "border-transparent ring-2 ring-ring ring-offset-2 ring-offset-background"
                   : "border-border opacity-70 hover:opacity-100"
               )}

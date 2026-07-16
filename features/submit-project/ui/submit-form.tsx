@@ -10,6 +10,7 @@ import {
   validateProjectFields,
 } from "@entities/project";
 import { type ImageSlot, ImageSlots } from "@features/upload-project-images";
+import { setJustSubmitted } from "@shared/lib/just-submitted";
 import { uploadScreenshot } from "@shared/lib/screenshot-upload";
 import { blankToUndefined } from "@shared/lib/text";
 import { Button } from "@shared/ui/button";
@@ -131,6 +132,12 @@ export function SubmitForm({ backHref, cohortId: _cohortId }: SubmitFormProps) {
       // server action returned the id, so it cannot live in backHref).
       const successHref = backHref ?? `/projects/${result.projectId}`;
       const fallbackHref = backHref ?? "/";
+      if (!backHref && result.projectId) {
+        // One-shot flag the detail page consumes to play its arrival
+        // stagger — only when we actually navigate there, so the flag
+        // never lingers on the settings → submit flow.
+        setJustSubmitted(result.projectId);
+      }
       router.push(result.projectId ? successHref : fallbackHref);
     } finally {
       setSubmitting(false);

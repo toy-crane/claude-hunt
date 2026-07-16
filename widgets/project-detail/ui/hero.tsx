@@ -10,6 +10,7 @@ import { Badge } from "@shared/ui/badge";
 import { Button } from "@shared/ui/button";
 import Link from "next/link";
 import type { ProjectDetail } from "../api/fetch-project-detail";
+import { HeroEntrance } from "./hero-entrance";
 import { ImageGallery } from "./image-gallery";
 import { OwnerControls } from "./owner-controls";
 
@@ -36,7 +37,7 @@ export function Hero({ project, isAuthenticated, viewerUserId }: HeroProps) {
   const tagline = flattenToSingleLine(project.tagline);
 
   return (
-    <article className="flex flex-col gap-4">
+    <HeroEntrance className="flex flex-col gap-4" projectId={project.id}>
       <header className="flex items-start justify-between gap-3">
         <div className="flex min-w-0 flex-col gap-2">
           <h1 className="font-heading font-medium text-2xl">{project.title}</h1>
@@ -134,6 +135,6 @@ export function Hero({ project, isAuthenticated, viewerUserId }: HeroProps) {
           </Button>
         ) : null}
       </div>
-    </article>
+    </HeroEntrance>
   );
 }

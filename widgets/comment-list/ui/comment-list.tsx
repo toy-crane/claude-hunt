@@ -2,7 +2,15 @@
 
 import { CommentForm } from "@features/create-comment";
 import type { Viewer } from "@shared/api/supabase/viewer";
-import { useOptimistic } from "react";
+import { cn } from "@shared/lib/utils";
+import {
+  AnimatePresence,
+  motion,
+  type Transition,
+  useReducedMotion,
+  type Variants,
+} from "motion/react";
+import { type ReactNode, useOptimistic } from "react";
 import type { CommentRow, CommentThread } from "../api/fetch-comment-threads";
 import { CommentItem } from "./comment-item";
 
@@ -107,6 +115,69 @@ function buildOptimisticRow(
   };
 }
 
+/**
+ * Enter rises into place from 4px above (the row arrives from the form
+ * above it); exit collapses the row's height so siblings settle with it
+ * instead of jumping. divide-y's 1px border is not part of height, so
+ * it must collapse alongside.
+ */
+const rowVariants: Variants = {
+  initial: { opacity: 0, y: -4 },
+  animate: { opacity: 1, y: 0 },
+  exit: {
+    opacity: 0,
+    height: 0,
+    borderTopWidth: 0,
+    transition: { duration: 0.18, ease: "easeIn" },
+  },
+};
+
+/**
+ * Reduced motion keeps the fade and the height collapse — the collapse is what
+ * stops the surrounding rows teleporting — and drops only the vertical travel.
+ *
+ * `animate` must stay identical to rowVariants.animate. It is the state
+ * AnimatePresence mounts a row at, and useReducedMotion() reads null (→ false)
+ * on the server, so the server always renders the not-reduced branch. Any
+ * difference in the resting state would reach a reduced-motion browser as a
+ * hydration mismatch, which React reports but does not patch up.
+ */
+const reducedRowVariants: Variants = {
+  ...rowVariants,
+  initial: { opacity: 0, y: 0 },
+};
+
+const rowTransition: Transition = { duration: 0.22, ease: [0.4, 0, 0.2, 1] };
+
+interface RowProps {
+  children: ReactNode;
+  className?: string;
+  testId?: string;
+}
+
+/**
+ * Animated list row. Always a motion.li, never a plain <li>: switching the
+ * element type on a client-only preference would diverge from the server's
+ * markup, and a plain <li> cannot signal exit completion to AnimatePresence
+ * anyway. Reduced motion varies the variant values instead.
+ */
+function Row({ children, className, testId }: RowProps) {
+  const reduceMotion = useReducedMotion();
+  return (
+    <motion.li
+      animate="animate"
+      className={cn(className, "overflow-hidden")}
+      data-testid={testId}
+      exit="exit"
+      initial="initial"
+      transition={rowTransition}
+      variants={reduceMotion ? reducedRowVariants : rowVariants}
+    >
+      {children}
+    </motion.li>
+  );
+}
+
 export function CommentList({ threads, projectId, viewer }: CommentListProps) {
   const [optimisticThreads, dispatch] = useOptimistic(threads, applyAction);
   const isAuthenticated = viewer !== null;
@@ -172,13 +243,22 @@ export function CommentList({ threads, projectId, viewer }: CommentListProps) {
         projectId={projectId}
       />
 
-      {optimisticThreads.length > 0 && (
-        <ul className="flex flex-col divide-y" data-testid="comment-list-items">
+      {/* Both lists stay mounted even while empty. Gating a list on its own
+          length would unmount the AnimatePresence inside it on the very render
+          that empties it — taking the last row's exit with it — and would mount
+          a fresh one when the first row arrives, which `initial={false}` then
+          treats as already-present and never animates in. `empty:hidden` keeps
+          a childless list out of the layout instead. */}
+      <ul
+        className="flex flex-col divide-y empty:hidden"
+        data-testid="comment-list-items"
+      >
+        <AnimatePresence initial={false}>
           {optimisticThreads.map((thread) => (
-            <li
+            <Row
               className="flex flex-col gap-1"
-              data-testid="comment-thread"
               key={thread.comment.id}
+              testId="comment-thread"
             >
               <CommentItem
                 allowReply
@@ -190,13 +270,13 @@ export function CommentList({ threads, projectId, viewer }: CommentListProps) {
                 projectId={projectId}
                 viewerUserId={viewerUserId}
               />
-              {thread.replies.length > 0 ? (
-                <ul
-                  className="ml-9 flex flex-col gap-1 border-border border-l-2 pl-3"
-                  data-testid="comment-reply-thread"
-                >
+              <ul
+                className="ml-9 flex flex-col gap-1 border-border border-l-2 pl-3 empty:hidden"
+                data-testid="comment-reply-thread"
+              >
+                <AnimatePresence initial={false}>
                   {thread.replies.map((reply) => (
-                    <li key={reply.id}>
+                    <Row key={reply.id}>
                       <CommentItem
                         allowReply={false}
                         comment={reply}
@@ -206,14 +286,14 @@ export function CommentList({ threads, projectId, viewer }: CommentListProps) {
                         projectId={projectId}
                         viewerUserId={viewerUserId}
                       />
-                    </li>
+                    </Row>
                   ))}
-                </ul>
-              ) : null}
-            </li>
+                </AnimatePresence>
+              </ul>
+            </Row>
           ))}
-        </ul>
-      )}
+        </AnimatePresence>
+      </ul>
     </section>
   );
 }
