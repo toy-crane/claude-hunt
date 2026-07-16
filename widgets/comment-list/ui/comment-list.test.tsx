@@ -108,7 +108,36 @@ afterEach(() => {
 });
 
 describe("<CommentList />", () => {
-  it("renders every thread and reply as plain list items under reduced motion", () => {
+  it("renders rows identically whether or not motion is reduced", () => {
+    // useReducedMotion() reads null (→ not reduced) on the server, so the
+    // server always renders the not-reduced branch. If a reduced-motion
+    // client's first render disagreed on either of the attributes React
+    // hydrates, React would report a mismatch and leave the server's markup
+    // in place unpatched — including the row's opacity, which is how rows
+    // went permanently invisible for exactly the users who asked for less
+    // motion.
+    const rowAttributes = () =>
+      screen.getAllByTestId("comment-thread").map((row) => ({
+        className: row.className,
+        style: row.getAttribute("style"),
+      }));
+
+    motionState.reduce = false;
+    const notReduced = render(
+      <CommentList projectId="p1" threads={threads} viewer={viewer} />
+    );
+    const asServerRendered = rowAttributes();
+    notReduced.unmount();
+
+    motionState.reduce = true;
+    render(<CommentList projectId="p1" threads={threads} viewer={viewer} />);
+
+    // Guards against passing vacuously if rows ever stop carrying a resting style.
+    expect(asServerRendered[0]?.style).toContain("opacity: 1");
+    expect(rowAttributes()).toEqual(asServerRendered);
+  });
+
+  it("renders every thread and reply as a list item", () => {
     render(<CommentList projectId="p1" threads={threads} viewer={viewer} />);
 
     const rows = screen.getAllByTestId("comment-thread");
@@ -116,8 +145,31 @@ describe("<CommentList />", () => {
     for (const row of rows) {
       expect(row.tagName).toBe("LI");
     }
-    const replyList = screen.getByTestId("comment-reply-thread");
+    const replyList = within(rows[0] as HTMLElement).getByTestId(
+      "comment-reply-thread"
+    );
     expect(within(replyList).getByText("first reply")).toBeInTheDocument();
+  });
+
+  it("keeps the thread list mounted with no comments, so the first one can animate in", () => {
+    render(<CommentList projectId="p1" threads={[]} viewer={viewer} />);
+
+    // The list must outlive its rows: gating it on the row count would remount
+    // the AnimatePresence inside it across the 0↔1 boundary, skipping the first
+    // row's enter and the last row's exit.
+    expect(screen.getByTestId("comment-list-items")).toBeInTheDocument();
+    expect(screen.queryAllByTestId("comment-thread")).toHaveLength(0);
+  });
+
+  it("keeps a thread's reply list mounted when it has no replies", () => {
+    render(<CommentList projectId="p1" threads={threads} viewer={viewer} />);
+
+    // threads[1] has no replies; its list still has to be there for the first
+    // reply to animate in and the last one to animate out.
+    const rows = screen.getAllByTestId("comment-thread");
+    expect(
+      within(rows[1] as HTMLElement).getByTestId("comment-reply-thread")
+    ).toBeInTheDocument();
   });
 
   it("keeps the list DOM structure and testids when motion is enabled", () => {

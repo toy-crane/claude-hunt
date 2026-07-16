@@ -132,42 +132,37 @@ const rowVariants: Variants = {
   },
 };
 
-const rowTransition: Transition = { duration: 0.22, ease: [0.4, 0, 0.2, 1] };
-
-interface RowPresenceProps {
-  children: ReactNode;
-  reduceMotion: boolean;
-}
-
 /**
- * Presence boundary for animated rows. Reduced motion bypasses
- * AnimatePresence entirely — a plain <li> child never signals exit
- * completion to the presence context, so removal through it is not
- * dependable.
+ * Reduced motion keeps the fade and the height collapse — the collapse is what
+ * stops the surrounding rows teleporting — and drops only the vertical travel.
+ *
+ * `animate` must stay identical to rowVariants.animate. It is the state
+ * AnimatePresence mounts a row at, and useReducedMotion() reads null (→ false)
+ * on the server, so the server always renders the not-reduced branch. Any
+ * difference in the resting state would reach a reduced-motion browser as a
+ * hydration mismatch, which React reports but does not patch up.
  */
-function RowPresence({ children, reduceMotion }: RowPresenceProps) {
-  if (reduceMotion) {
-    return <>{children}</>;
-  }
-  return <AnimatePresence initial={false}>{children}</AnimatePresence>;
-}
+const reducedRowVariants: Variants = {
+  ...rowVariants,
+  initial: { opacity: 0, y: 0 },
+};
+
+const rowTransition: Transition = { duration: 0.22, ease: [0.4, 0, 0.2, 1] };
 
 interface RowProps {
   children: ReactNode;
   className?: string;
-  reduceMotion: boolean;
   testId?: string;
 }
 
-/** List row: plain <li> under reduced motion, animated otherwise. */
-function Row({ children, className, reduceMotion, testId }: RowProps) {
-  if (reduceMotion) {
-    return (
-      <li className={className} data-testid={testId}>
-        {children}
-      </li>
-    );
-  }
+/**
+ * Animated list row. Always a motion.li, never a plain <li>: switching the
+ * element type on a client-only preference would diverge from the server's
+ * markup, and a plain <li> cannot signal exit completion to AnimatePresence
+ * anyway. Reduced motion varies the variant values instead.
+ */
+function Row({ children, className, testId }: RowProps) {
+  const reduceMotion = useReducedMotion();
   return (
     <motion.li
       animate="animate"
@@ -176,7 +171,7 @@ function Row({ children, className, reduceMotion, testId }: RowProps) {
       exit="exit"
       initial="initial"
       transition={rowTransition}
-      variants={rowVariants}
+      variants={reduceMotion ? reducedRowVariants : rowVariants}
     >
       {children}
     </motion.li>
@@ -185,7 +180,6 @@ function Row({ children, className, reduceMotion, testId }: RowProps) {
 
 export function CommentList({ threads, projectId, viewer }: CommentListProps) {
   const [optimisticThreads, dispatch] = useOptimistic(threads, applyAction);
-  const reduceMotion = Boolean(useReducedMotion());
   const isAuthenticated = viewer !== null;
   const viewerUserId = viewer?.id ?? null;
   const total = optimisticThreads.reduce(
@@ -249,53 +243,57 @@ export function CommentList({ threads, projectId, viewer }: CommentListProps) {
         projectId={projectId}
       />
 
-      {optimisticThreads.length > 0 && (
-        <ul className="flex flex-col divide-y" data-testid="comment-list-items">
-          <RowPresence reduceMotion={reduceMotion}>
-            {optimisticThreads.map((thread) => (
-              <Row
-                className="flex flex-col gap-1"
-                key={thread.comment.id}
-                reduceMotion={reduceMotion}
-                testId="comment-thread"
+      {/* Both lists stay mounted even while empty. Gating a list on its own
+          length would unmount the AnimatePresence inside it on the very render
+          that empties it — taking the last row's exit with it — and would mount
+          a fresh one when the first row arrives, which `initial={false}` then
+          treats as already-present and never animates in. `empty:hidden` keeps
+          a childless list out of the layout instead. */}
+      <ul
+        className="flex flex-col divide-y empty:hidden"
+        data-testid="comment-list-items"
+      >
+        <AnimatePresence initial={false}>
+          {optimisticThreads.map((thread) => (
+            <Row
+              className="flex flex-col gap-1"
+              key={thread.comment.id}
+              testId="comment-thread"
+            >
+              <CommentItem
+                allowReply
+                comment={thread.comment}
+                isAuthenticated={isAuthenticated}
+                onOptimisticDelete={onDelete}
+                onOptimisticEdit={onEdit}
+                onOptimisticReply={onReplySubmit}
+                projectId={projectId}
+                viewerUserId={viewerUserId}
+              />
+              <ul
+                className="ml-9 flex flex-col gap-1 border-border border-l-2 pl-3 empty:hidden"
+                data-testid="comment-reply-thread"
               >
-                <CommentItem
-                  allowReply
-                  comment={thread.comment}
-                  isAuthenticated={isAuthenticated}
-                  onOptimisticDelete={onDelete}
-                  onOptimisticEdit={onEdit}
-                  onOptimisticReply={onReplySubmit}
-                  projectId={projectId}
-                  viewerUserId={viewerUserId}
-                />
-                {thread.replies.length > 0 ? (
-                  <ul
-                    className="ml-9 flex flex-col gap-1 border-border border-l-2 pl-3"
-                    data-testid="comment-reply-thread"
-                  >
-                    <RowPresence reduceMotion={reduceMotion}>
-                      {thread.replies.map((reply) => (
-                        <Row key={reply.id} reduceMotion={reduceMotion}>
-                          <CommentItem
-                            allowReply={false}
-                            comment={reply}
-                            isAuthenticated={isAuthenticated}
-                            onOptimisticDelete={onDelete}
-                            onOptimisticEdit={onEdit}
-                            projectId={projectId}
-                            viewerUserId={viewerUserId}
-                          />
-                        </Row>
-                      ))}
-                    </RowPresence>
-                  </ul>
-                ) : null}
-              </Row>
-            ))}
-          </RowPresence>
-        </ul>
-      )}
+                <AnimatePresence initial={false}>
+                  {thread.replies.map((reply) => (
+                    <Row key={reply.id}>
+                      <CommentItem
+                        allowReply={false}
+                        comment={reply}
+                        isAuthenticated={isAuthenticated}
+                        onOptimisticDelete={onDelete}
+                        onOptimisticEdit={onEdit}
+                        projectId={projectId}
+                        viewerUserId={viewerUserId}
+                      />
+                    </Row>
+                  ))}
+                </AnimatePresence>
+              </ul>
+            </Row>
+          ))}
+        </AnimatePresence>
+      </ul>
     </section>
   );
 }
