@@ -75,8 +75,6 @@ export function ProjectBoard({
     return [...projects].sort(
       (a, b) => (order.get(a.id ?? "") ?? 0) - (order.get(b.id ?? "") ?? 0)
     );
-    // biome-ignore lint/correctness/useExhaustiveDependencies: pinnedOrder is a
-    // stable ref updated in the render body above; re-sort keys off `projects`.
   }, [projects]);
 
   const filteredProjects = useMemo(

@@ -369,11 +369,7 @@ describe("ProjectBoard", () => {
     rerender(
       <ProjectBoard
         {...boardProps}
-        projects={[
-          { ...third, vote_count: 9 },
-          first,
-          second,
-        ]}
+        projects={[{ ...third, vote_count: 9 }, first, second]}
       />
     );
 
@@ -435,9 +431,7 @@ describe("ProjectBoard", () => {
     // Two projects are submitted mid-session; N1 outranks N2 on arrival.
     const n1 = buildProject({ id: "n1", title: "Newcomer One", vote_count: 5 });
     const n2 = buildProject({ id: "n2", title: "Newcomer Two", vote_count: 3 });
-    rerender(
-      <ProjectBoard {...boardProps} projects={[n1, projectA1, n2]} />
-    );
+    rerender(<ProjectBoard {...boardProps} projects={[n1, projectA1, n2]} />);
 
     // A later revalidation ranks N2 above N1 server-side. Both were already
     // seen, so their pinned positions must hold — no live swap.
