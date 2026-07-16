@@ -49,9 +49,15 @@ export default function Page({ searchParams }: PageProps) {
   // The heading is the static shell; the board (viewer votes + cohort list +
   // the project grid) reads the auth cookie and `searchParams`, so it streams
   // in behind a Suspense boundary once Cache Components is enabled.
+  //
+  // The board header is deliberately tight — heading, prompt line, filter and
+  // list read as one block — so spacing is per-element rather than a uniform
+  // `gap`, and ProjectBoardSkeleton below mirrors it.
   return (
-    <main className="mx-auto flex min-h-svh w-full max-w-6xl flex-col gap-6 bg-background p-6 text-foreground">
-      <h1 className="font-heading font-medium text-3xl">프로젝트 보드</h1>
+    <main className="mx-auto flex min-h-svh w-full max-w-6xl flex-col bg-background p-6 text-foreground">
+      <h1 className="mb-1.5 font-heading font-medium text-2xl">
+        프로젝트 보드
+      </h1>
       <Suspense fallback={<ProjectBoardSkeleton />}>
         <BoardData searchParams={searchParams} />
       </Suspense>
@@ -88,21 +94,26 @@ export async function BoardData({ searchParams }: PageProps) {
 }
 
 const SKELETON_CHIPS = [
-  { className: "h-6 w-24", key: "chip-1" },
-  { className: "h-6 w-16", key: "chip-2" },
-  { className: "h-6 w-20", key: "chip-3" },
-  { className: "h-6 w-28", key: "chip-4" },
-  { className: "h-6 w-16", key: "chip-5" },
-  { className: "h-6 w-20", key: "chip-6" },
+  { className: "h-6 w-24 flex-none", key: "chip-1" },
+  { className: "h-6 w-16 flex-none", key: "chip-2" },
+  { className: "h-6 w-20 flex-none", key: "chip-3" },
+  { className: "h-6 w-28 flex-none", key: "chip-4" },
+  { className: "h-6 w-16 flex-none", key: "chip-5" },
+  { className: "h-6 w-20 flex-none", key: "chip-6" },
 ];
 
 function ProjectBoardSkeleton() {
   return (
-    <div className="flex flex-col gap-6" data-testid="project-board-skeleton">
+    <div className="flex flex-col" data-testid="project-board-skeleton">
       {/* PromptLine */}
-      <Skeleton className="h-4 w-64 max-w-full" />
-      {/* CohortChips — dynamic count, common case ~6 */}
-      <div className="flex flex-wrap items-center gap-1.5">
+      <Skeleton className="mb-3.5 h-4 w-64 max-w-full" />
+      {/* Desktop toolbar — count label + combobox trigger */}
+      <div className="mb-3 hidden items-center justify-between gap-3 min-[720px]:flex">
+        <Skeleton className="h-4 w-28" />
+        <Skeleton className="h-6 w-36" />
+      </div>
+      {/* Mobile chip rail — dynamic count, common case ~6 */}
+      <div className="mb-3 flex items-center gap-1.5 overflow-hidden min-[720px]:hidden">
         {SKELETON_CHIPS.map((chip) => (
           <Skeleton className={chip.className} key={chip.key} />
         ))}

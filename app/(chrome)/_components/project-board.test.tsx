@@ -4,16 +4,18 @@ import { act, screen, within } from "@testing-library/react";
 import type { ProjectGridRow } from "@widgets/project-grid";
 import { vi } from "vitest";
 
-// Capture the onValueChange callback and props that ProjectBoard passes
-// to CohortChips so tests can drive filtering and assert forwarded props.
+// Capture the onValueChange callback and props that ProjectBoard passes to
+// the filter controls so tests can drive filtering and assert forwarded
+// props. Both controls are rendered (one per breakpoint) and share a
+// contract, so each records into its own slot.
 let capturedOnValueChange: ((id: string | null) => void) | undefined;
-let capturedChipsProps:
-  | {
-      allCount: number;
-      counts: Record<string, number>;
-      value: string | null;
-    }
-  | undefined;
+interface CapturedFilterProps {
+  allCount: number;
+  counts: Record<string, number>;
+  value: string | null;
+}
+let capturedChipsProps: CapturedFilterProps | undefined;
+let capturedComboboxProps: CapturedFilterProps | undefined;
 
 vi.mock("@features/cohort-filter", async () => {
   const actual = await vi.importActual<
@@ -38,6 +40,25 @@ vi.mock("@features/cohort-filter", async () => {
         <div
           data-all-count={allCount}
           data-testid="cohort-chips-stub"
+          data-value={value ?? "__all__"}
+        />
+      );
+    },
+    CohortCombobox: ({
+      allCount,
+      counts,
+      value,
+    }: {
+      allCount: number;
+      counts: Record<string, number>;
+      onValueChange: (id: string | null) => void;
+      value: string | null;
+    }) => {
+      capturedComboboxProps = { allCount, counts, value };
+      return (
+        <div
+          data-all-count={allCount}
+          data-testid="cohort-combobox-stub"
           data-value={value ?? "__all__"}
         />
       );
@@ -265,10 +286,36 @@ describe("ProjectBoard", () => {
     expect(screen.getAllByText("Beta One").length).toBeGreaterThanOrEqual(1);
   });
 
+  it("counts every project until a class is picked, then counts that class", async () => {
+    await renderBoard({ projects: [projectA1, projectA2, projectB1] });
+    expect(screen.getByText("전체 3개 프로젝트")).toBeVisible();
+
+    await act(async () => {
+      await capturedOnValueChange?.("cohort-b");
+    });
+    expect(screen.getByText("1개 프로젝트")).toBeVisible();
+
+    await act(async () => {
+      await capturedOnValueChange?.(null);
+    });
+    expect(screen.getByText("전체 3개 프로젝트")).toBeVisible();
+  });
+
+  it("gives the combobox and the chip rail the same filter state", async () => {
+    await renderBoard({ projects: [projectA1, projectA2, projectB1] });
+    expect(capturedComboboxProps).toEqual(capturedChipsProps);
+
+    await act(async () => {
+      await capturedOnValueChange?.("cohort-a");
+    });
+    expect(capturedComboboxProps?.value).toBe("cohort-a");
+    expect(capturedComboboxProps).toEqual(capturedChipsProps);
+  });
+
   it("renders the prompt line reflecting the current cohort label", async () => {
     await renderBoard({ initialCohortId: "cohort-a" });
     expect(screen.getByTestId("prompt-line")).toHaveTextContent(
-      `$ claude-hunt ls --class="LG전자 1기" --sort=votes`
+      `$ claude-hunt ls --sort=votes --class="LG전자 1기"`
     );
 
     await act(async () => {
@@ -282,7 +329,7 @@ describe("ProjectBoard", () => {
       await capturedOnValueChange?.("cohort-b");
     });
     expect(screen.getByTestId("prompt-line")).toHaveTextContent(
-      `$ claude-hunt ls --class="LG전자 2기" --sort=votes`
+      `$ claude-hunt ls --sort=votes --class="LG전자 2기"`
     );
   });
 
