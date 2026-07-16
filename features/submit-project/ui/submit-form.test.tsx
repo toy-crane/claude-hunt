@@ -91,6 +91,7 @@ describe("SubmitForm", () => {
     submitProject.mockReset();
     routerPush.mockReset();
     nextSlotId = 0;
+    window.sessionStorage.clear();
   });
 
   it("renders an enabled Submit button when cohortId is set", () => {
@@ -236,6 +237,49 @@ describe("SubmitForm", () => {
     await vi.waitFor(() => {
       expect(routerPush).toHaveBeenCalledWith("/projects/p1");
     });
+  });
+
+  it("marks the new project as just submitted so the detail page can celebrate", async () => {
+    uploadScreenshot.mockResolvedValue({ path: "user-1/a.webp" });
+    submitProject.mockResolvedValue({ ok: true, projectId: "p1" });
+
+    render(<SubmitForm cohortId="cohort-1" />);
+    addOneImage();
+    fireEvent.submit(fillTextFields());
+
+    await vi.waitFor(() => {
+      expect(routerPush).toHaveBeenCalledWith("/projects/p1");
+    });
+    expect(window.sessionStorage.getItem("ch:just-submitted:p1")).toBe("1");
+  });
+
+  it("does not set the just-submitted flag when redirecting back via backHref", async () => {
+    uploadScreenshot.mockResolvedValue({ path: "user-1/a.webp" });
+    submitProject.mockResolvedValue({ ok: true, projectId: "p1" });
+
+    render(<SubmitForm backHref="/settings" cohortId="cohort-1" />);
+    addOneImage();
+    fireEvent.submit(fillTextFields());
+
+    await vi.waitFor(() => {
+      expect(routerPush).toHaveBeenCalledWith("/settings");
+    });
+    expect(window.sessionStorage.getItem("ch:just-submitted:p1")).toBeNull();
+  });
+
+  it("does not set the just-submitted flag when submission fails", async () => {
+    uploadScreenshot.mockResolvedValue({ path: "user-1/a.webp" });
+    submitProject.mockResolvedValue({
+      ok: false,
+      error: "프로젝트를 제출하지 못했어요. 잠시 후 다시 시도해 주세요.",
+    });
+
+    render(<SubmitForm cohortId="cohort-1" />);
+    addOneImage();
+    fireEvent.submit(fillTextFields());
+
+    await screen.findByTestId("submit-form-submit-error");
+    expect(window.sessionStorage.getItem("ch:just-submitted:p1")).toBeNull();
   });
 
   it("does not redirect when the server action returns ok: false", async () => {
