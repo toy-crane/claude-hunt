@@ -18,15 +18,26 @@
 -- 1. Cohorts
 ------------------------------------------------------------------------------
 
--- TOYCRANE is the operator-only cohort (mirrors production). It must NOT
--- appear in any user-facing cohort list — fetchCohorts filters it out —
--- and is seeded here so that hiding can be verified locally.
-insert into public.cohorts (name, label) values
-  ('LGE-1',    'LG전자 1기'),
-  ('LGE-2',    'LG전자 2기'),
-  ('LGE-3',    'LG전자 3기'),
-  ('Inflearn', '인프런'),
-  ('TOYCRANE', 'toycrane')
+-- TOYCRANE is the operator-only cohort (mirrors production). `fetchCohorts`
+-- returns it — the board filter shows it so operator projects stay filterable,
+-- pinned last. What excludes it is `isSelectableCohort`, which drops it from
+-- the surfaces where a user picks a cohort (onboarding, settings).
+--
+-- `created_at` is spelled out rather than left to its `now()` default because
+-- it is the class filter's sort key (newest first). `now()` is the transaction
+-- timestamp, so every row seeded here — even across separate INSERT statements
+-- — would share one value and the classes would tie. Explicit values also make
+-- the local order deterministic, which the filter's tests rely on.
+--
+-- Inflearn and TOYCRANE are pinned to the ends by name (see entities/cohort),
+-- so their timestamps never affect the order. They are seeded as real dates
+-- anyway to keep the column honest.
+insert into public.cohorts (name, label, created_at) values
+  ('LGE-1',    'LG전자 1기', '2026-04-14 06:00:50+00'),
+  ('LGE-2',    'LG전자 2기', '2026-04-14 06:00:52+00'),
+  ('LGE-3',    'LG전자 3기', '2026-04-14 06:00:54+00'),
+  ('Inflearn', '인프런',     '2026-05-01 00:00:00+00'),
+  ('TOYCRANE', 'toycrane',  '2026-07-06 05:59:13+00')
 on conflict (name) do nothing;
 
 ------------------------------------------------------------------------------

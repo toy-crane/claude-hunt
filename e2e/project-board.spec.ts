@@ -635,7 +635,8 @@ test.describe("class filter on a phone", () => {
     page,
   }) => {
     const admin = createAdminClient();
-    // TOYCRANE sorts last by name, so its chip starts beyond the right edge.
+    // TOYCRANE is pinned last (entities/cohort/model/order.ts), so its chip
+    // always starts beyond the right edge however many classes exist.
     const { data: cohort } = await admin
       .from("cohorts")
       .select("id, label")
