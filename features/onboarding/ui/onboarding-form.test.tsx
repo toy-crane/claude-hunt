@@ -51,6 +51,7 @@ const cohorts: Cohort[] = [
     id: COHORT_A_ID,
     name: "LGE-1",
     label: "LG전자 1기",
+    display_order: 1,
     created_at: "2026-04-14T00:00:00Z",
     updated_at: "2026-04-14T00:00:00Z",
   },
@@ -58,6 +59,7 @@ const cohorts: Cohort[] = [
     id: COHORT_B_ID,
     name: "LGE-2",
     label: "LG전자 2기",
+    display_order: 2,
     created_at: "2026-04-14T00:00:00Z",
     updated_at: "2026-04-14T00:00:00Z",
   },
@@ -66,6 +68,7 @@ const TOYCRANE_COHORT: Cohort = {
   id: "c1b2c3d4-5678-4abc-9def-0123456789ab",
   name: "TOYCRANE",
   label: "toycrane",
+  display_order: 0,
   created_at: "2026-07-06T00:00:00Z",
   updated_at: "2026-07-06T00:00:00Z",
 };
