@@ -16,11 +16,11 @@ import { cacheLife, cacheTag } from "next/cache";
  * 사용자가 "새로 선택"하는 UI(온보딩·설정 드롭다운 옵션)만
  * `isSelectableCohort`(@entities/cohort)로 걸러서 렌더링한다.
  *
- * 정렬은 최신 클래스가 먼저다. 클래스가 열릴 때 행이 쓰이므로 `created_at`
- * 내림차순이 곧 최신순이고, `name`은 한 문장에서 여러 행이 들어가 시각이
- * 겹쳤을 때만 쓰인다. SQL이 순서를 잡아 캐시된 payload가 결정적으로
- * 유지되고, `sortCohortsForDisplay`가 그 위에 양 끝 고정(인프런·toycrane)을
- * 얹는다 — 이 규칙은 날짜로 표현할 수 없다.
+ * 정렬은 `sortCohortsForDisplay`가 전부 맡는다 — 최신 클래스가 먼저, 인프런과
+ * toycrane은 양 끝 고정. 쿼리에 `order by`를 두지 않는 건 그게 같은 규칙의
+ * 두 번째 사본이 되기 때문이다. `name`이 unique라 정렬 결과는 입력 순서와
+ * 무관하게 확정되므로 SQL 정렬은 결정성에 아무것도 보태지 못하고, 콜레이션
+ * 차이로 오히려 어긋날 수 있다.
  */
 export async function fetchCohorts(): Promise<Cohort[]> {
   "use cache";
@@ -28,11 +28,7 @@ export async function fetchCohorts(): Promise<Cohort[]> {
   cacheLife("minutes");
 
   const supabase = createAnonServerClient();
-  const { data, error } = await supabase
-    .from("cohorts")
-    .select("*")
-    .order("created_at", { ascending: false })
-    .order("name", { ascending: true });
+  const { data, error } = await supabase.from("cohorts").select("*");
   if (error) {
     throw error;
   }

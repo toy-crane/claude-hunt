@@ -7,15 +7,7 @@ vi.mock("next/cache", () => ({
 
 let response: { data: unknown; error: unknown } = { data: null, error: null };
 
-// `.order()` is chained twice, and the chain runs when awaited — mirroring
-// PostgREST, where every modifier returns the builder and awaiting it executes
-// the query. A mock that resolved on the first `.order()` would not survive the
-// second call, so each link is a real promise carrying the next `.order()`.
-function chain() {
-  return Object.assign(Promise.resolve(response), { order });
-}
-const order = vi.fn(() => chain());
-const select = vi.fn(() => chain());
+const select = vi.fn(() => Promise.resolve(response));
 const from = vi.fn(() => ({ select }));
 
 vi.mock("@shared/api/supabase/anon-server", () => ({
@@ -34,6 +26,11 @@ const COHORT_B = {
   name: "LGE-2",
   created_at: "2026-04-14T06:00:52Z",
 };
+const COHORT_INFLEARN = {
+  id: "c4",
+  name: "Inflearn",
+  created_at: "2020-01-01T00:00:00Z",
+};
 const COHORT_TOYCRANE = {
   id: "c3",
   name: "TOYCRANE",
@@ -43,21 +40,16 @@ const COHORT_TOYCRANE = {
 beforeEach(() => {
   from.mockClear();
   select.mockClear();
-  order.mockClear();
   response = { data: null, error: null };
 });
 
 describe("fetchCohorts", () => {
-  it("asks the database for the newest class first, breaking ties by name", async () => {
-    response = { data: [COHORT_B, COHORT_A], error: null };
+  it("orders the newest class first, whatever order the database returns", async () => {
+    response = { data: [COHORT_A, COHORT_B], error: null };
 
     const rows = await fetchCohorts();
 
     expect(from).toHaveBeenCalledWith("cohorts");
-    expect(order).toHaveBeenNthCalledWith(1, "created_at", {
-      ascending: false,
-    });
-    expect(order).toHaveBeenNthCalledWith(2, "name", { ascending: true });
     expect(rows).toEqual([COHORT_B, COHORT_A]);
   });
 
@@ -69,12 +61,20 @@ describe("fetchCohorts", () => {
     expect(rows).toContainEqual(COHORT_TOYCRANE);
   });
 
-  it("pins TOYCRANE last even though it is the newest row", async () => {
-    response = { data: [COHORT_TOYCRANE, COHORT_B, COHORT_A], error: null };
+  it("pins 인프런 first and toycrane last around the classes", async () => {
+    response = {
+      data: [COHORT_TOYCRANE, COHORT_A, COHORT_INFLEARN, COHORT_B],
+      error: null,
+    };
 
     const rows = await fetchCohorts();
 
-    expect(rows).toEqual([COHORT_B, COHORT_A, COHORT_TOYCRANE]);
+    expect(rows).toEqual([
+      COHORT_INFLEARN,
+      COHORT_B,
+      COHORT_A,
+      COHORT_TOYCRANE,
+    ]);
   });
 
   it("returns an empty array when there are no cohorts (null data)", async () => {
