@@ -1,4 +1,3 @@
-export { sortCohortsForDisplay } from "./model/order";
 export type {
   Cohort,
   CohortInsert,

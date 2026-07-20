@@ -37,7 +37,6 @@ export type Database = {
       cohorts: {
         Row: {
           created_at: string
-          display_order: number
           id: string
           label: string
           name: string
@@ -45,7 +44,6 @@ export type Database = {
         }
         Insert: {
           created_at?: string
-          display_order?: number
           id?: string
           label: string
           name: string
@@ -53,7 +51,6 @@ export type Database = {
         }
         Update: {
           created_at?: string
-          display_order?: number
           id?: string
           label?: string
           name?: string

@@ -18,15 +18,9 @@
 -- 1. Cohorts
 ------------------------------------------------------------------------------
 
--- TOYCRANE is the operator-only cohort (mirrors production). `fetchCohorts`
--- returns it — the board filter shows it so operator projects stay filterable,
--- pinned last. What excludes it is `isSelectableCohort`, which drops it from
--- the surfaces where a user picks a cohort (onboarding, settings).
---
--- `display_order` is deliberately omitted: identity assigns it in insert order,
--- so the rows below read newest-last and the filter renders them newest-first.
--- Inflearn and TOYCRANE are pinned to the ends by name regardless of value,
--- which is what makes the seed a useful fixture for both pins.
+-- TOYCRANE is the operator-only cohort (mirrors production). It must NOT
+-- appear in any user-facing cohort list — fetchCohorts filters it out —
+-- and is seeded here so that hiding can be verified locally.
 insert into public.cohorts (name, label) values
   ('LGE-1',    'LG전자 1기'),
   ('LGE-2',    'LG전자 2기'),
