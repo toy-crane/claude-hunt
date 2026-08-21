@@ -13,13 +13,14 @@
 # Local dev infra (Supabase CLI state, not runtime)
 /supabase/
 
-# Tests — not needed for production build
+# Test runners and reports — not needed for production build.
+# Keep vitest.setup.ts in the upload because tsconfig includes test files and
+# its jest-dom import provides the matcher types used while Next type-checks.
 /e2e/
 /playwright.config.ts
 /playwright-report/
 /test-results/
 /vitest.config.ts
-/vitest.setup.ts
 /proxy.test.ts
 
 # Tooling / lint / git hooks
