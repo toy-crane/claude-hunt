@@ -11,7 +11,7 @@ This skill covers the Vercel **project/deploy** surface — what files leave the
 
 - **`.vercelignore` is authoritative**: Vercel partially honors `.gitignore`, but an explicit `.vercelignore` is the contract. Anything not meant to reach Vercel must be listed.
 - **Region matches the database**: The Vercel function region and the Supabase project region should agree. Cross-region adds 100ms+ per query.
-- **Deploys are gated by `/ship`**: `vercel.json` sets `"deploymentEnabled": false`, so pushes to `main` never auto-deploy. The only supported path is the `/ship` skill.
+- **Deploys are gated by migration**: `vercel.json` disables Vercel's direct Git deployment for `main`. The default GitHub Actions workflow runs checks and migrations before calling the deploy hook; `/ship` is an emergency manual override.
 
 ## Core Config Files
 
@@ -20,7 +20,8 @@ This skill covers the Vercel **project/deploy** surface — what files leave the
 | `vercel.json` | ✅ | Project config: regions, deploy gating, schema, function overrides |
 | `.vercelignore` | ✅ | Deploy-time upload exclusions (applies to every `vercel deploy` / `vercel --prod`) |
 | `.vercel/project.json` | ❌ (gitignored) | Per-clone link between local dir and the Vercel project |
-| `.claude/skills/ship/config.json` | ✅ | Expected production project ID — `/ship` preconditions verify `.vercel/project.json` matches |
+| `.github/workflows/production.yml` | ✅ | Default production gate: checks → migrations → deploy hook |
+| `.claude/skills/ship/config.json` | ✅ | Emergency `/ship` target ID — preconditions verify `.vercel/project.json` matches |
 
 ## Workflows
 
@@ -32,7 +33,7 @@ This skill covers the Vercel **project/deploy** surface — what files leave the
 ## Strictly Prohibited
 
 - **Never commit `.vercel/project.json`** — it's gitignored for a reason (per-clone / per-worktree link state).
-- **Never set `"deploymentEnabled": true`** in `vercel.json` without also removing `/ship`. Mixing auto-deploy and `/ship` re-creates the "migration-not-run-before-deploy" race condition that prompted `/ship` in the first place (see `knowledge/2026-04-17-ship-skill-replaces-github-actions.md`).
+- **Never enable direct Git deployment for `main`** while `.github/workflows/production.yml` owns migration ordering. Direct deployment can race ahead of the production schema.
 - **Never bypass `.vercelignore` with `vercel --archive=tgz`** as a long-term workaround. The archive flag dodges the 15,000-file limit but still uploads the bloat — fix the exclusion list instead.
 - **Never add `.env` or `.env.*` to the repo** to work around the `.vercelignore` exclusion. Production env vars live in the Vercel dashboard.
 
@@ -42,5 +43,5 @@ This skill covers the Vercel **project/deploy** surface — what files leave the
 |---------|---------|
 | `vercel link` | (Re)link the current directory to a Vercel project — writes `.vercel/project.json` |
 | `vercel whoami` | Verify CLI is authenticated |
-| `vercel --prod` | Trigger a production deploy — invoked by `/ship`, do not run by hand |
+| `vercel --prod` | Emergency production deploy — invoked by `/ship`, do not run by hand |
 | `vercel env pull` | Pull production env vars into `.env.local` for local debug |

@@ -7,12 +7,15 @@ description: Detect repeated patterns during execution and propose Skill/Hook/Ru
 
 ## Step 1: Collect Repeated Patterns
 
-Read all `artifacts/*/decisions.md` files. Prioritize analysis of `fail`/`partial` results, and look for recurring decisions across multiple features.
+Read all current `docs/follow-ups/*.md` files, then inspect the Git history for
+the changes that introduced or repeatedly fixed those symptoms. Use
+`docs/decisions/README.md` only to load constraints relevant to a proposed
+harness change; decision contracts are not execution logs.
 
 Additionally, reference the following sources:
-- Repeated types of feedback from the Evaluator
+- Repeated test, review, or hook failures visible in commits
 - Cases that required manual intervention
-- The same mistakes repeated across multiple Tasks
+- The same mistakes fixed across multiple changes
 
 ## Step 2: Classify Promotion Targets
 

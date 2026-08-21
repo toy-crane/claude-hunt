@@ -1,12 +1,14 @@
 ---
 name: ship
-description: Deploy the current main branch to production — runs local safety checks, applies pending Supabase migrations against the production DB, then deploys via Vercel CLI. Synchronous end-to-end; any failure stops the pipeline and surfaces output in the terminal. Trigger on deploy requests like "ship", "ship it", "배포해", "배포해줘", "프로덕션 배포", "deploy to production", "ship to prod".
+description: Manually deploy the current main branch as an emergency override when the default GitHub Actions production workflow cannot be used. Runs local safety checks, applies pending Supabase migrations, then deploys through Vercel CLI. Trigger only on explicit manual or emergency deployment requests such as "/ship", "수동 배포", or "긴급 배포"; ordinary merges and pushes deploy through GitHub Actions.
 user-invocable: true
 ---
 
 # Ship to Production
 
-Local, synchronous production deploy pipeline. Replaces the GitHub Actions equivalent so failures surface in the terminal immediately instead of requiring a trip to the Actions tab.
+Emergency local, synchronous production deploy pipeline. The default path is
+`.github/workflows/production.yml`; use this override only when that workflow
+cannot be used or terminal-visible recovery is explicitly required.
 
 ## Prerequisites
 
@@ -91,6 +93,7 @@ Output a compact summary:
 
 ## Constraints
 
+- This is not the normal post-merge path; do not run it merely because `main` changed
 - Target environment is always **production** — there is no staging variant of this skill
 - Never skip or auto-fix failing preconditions (git state, project link mismatch)
 - Never proceed past a failing migration step

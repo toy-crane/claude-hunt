@@ -24,10 +24,10 @@ The following are provided via the prompt at invocation:
 
    | Viewport | Theme | Output |
    |----------|-------|--------|
-   | mobile (375x812) | light | `artifacts/<feature>/ui-review/<screen-id>/mobile-light.png` |
-   | mobile (375x812) | dark | `artifacts/<feature>/ui-review/<screen-id>/mobile-dark.png` |
-   | desktop (1280x900) | light | `artifacts/<feature>/ui-review/<screen-id>/desktop-light.png` |
-   | desktop (1280x900) | dark | `artifacts/<feature>/ui-review/<screen-id>/desktop-dark.png` |
+   | mobile (375x812) | light | `docs/specs/<feature>/evidence/ui-review/<screen-id>/mobile-light.png` |
+   | mobile (375x812) | dark | `docs/specs/<feature>/evidence/ui-review/<screen-id>/mobile-dark.png` |
+   | desktop (1280x900) | light | `docs/specs/<feature>/evidence/ui-review/<screen-id>/desktop-light.png` |
+   | desktop (1280x900) | dark | `docs/specs/<feature>/evidence/ui-review/<screen-id>/desktop-dark.png` |
 
    Dark mode capture: Set `prefers-color-scheme: dark` using Playwright's `colorScheme: 'dark'` option.
 

@@ -1,6 +1,6 @@
 ---
 name: wireframe-reviewer
-description: Verifies layout conformance between wireframe.html and the implementation result through screenshot comparison.
+description: Verifies layout conformance between a spec prototype and the implementation result through screenshot comparison.
 model: sonnet
 ---
 
@@ -8,9 +8,9 @@ model: sonnet
 
 ## Purpose
 
-An independent verifier that checks whether the layout intent captured in wireframe.html (component placement, information hierarchy, responsive structure) has been faithfully reflected in the implementation.
+An independent verifier that checks whether the layout intent captured in a spec's `prototype.html` (component placement, information hierarchy, responsive structure) has been faithfully reflected in the implementation.
 
-It reads wireframe.html as code to understand the intent, and captures the implementation result as Playwright screenshots for visual comparison.
+It reads `prototype.html` as code to understand the intent, and captures the implementation result as Playwright screenshots for visual comparison.
 
 ## Input
 
@@ -22,7 +22,7 @@ The following are provided via the prompt at invocation:
 
 ## Verification Procedure
 
-1. **Understand wireframe intent**: Read `artifacts/<feature>/wireframe.html` with Read. Analyze the following for each screen:
+1. **Understand prototype intent**: Read `docs/specs/<feature>/prototype.html` with Read. Analyze the following for each screen:
    - Component placement and order
    - Grid/Flex structure (identified from Tailwind utility classes)
    - Responsive breakpoints (`@md:` prefix)
@@ -33,7 +33,7 @@ The following are provided via the prompt at invocation:
    ```bash
    bun .claude/scripts/capture-screenshots.ts \
      --url <implUrl>/<page-path> \
-     --output artifacts/<feature>/screenshots/<screen-id> \
+     --output docs/specs/<feature>/evidence/screenshots/<screen-id> \
      --viewports mobile,desktop
    ```
 

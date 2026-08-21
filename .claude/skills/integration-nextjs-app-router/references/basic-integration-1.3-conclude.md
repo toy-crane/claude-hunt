@@ -9,7 +9,13 @@ Search for a file called `.posthog-events.json` and read it for available events
 
 Do not spawn subagents.
 
-Create the file posthog-setup-report.md. It should include a summary of the integration edits, a table with the event names, event descriptions, and files where events were added, along with a list of links for the dashboard and insights created. Follow this format:
+Do not create a root setup report. Return the integration summary, event table,
+and dashboard and insight links in the completion message. Durable project
+context belongs in the repository's existing knowledge surfaces: use
+`project-knowledge` only when the integration settles a reusable non-obvious
+decision or exposes an evidence-backed unresolved defect.
+
+Follow this completion format:
 
 <wizard-report>
 # PostHog post-wizard report
@@ -37,4 +43,4 @@ Upon completion, remove .posthog-events.json.
 Status to report in this phase:
 
 - Configured dashboard: [insert PostHog dashboard URL]
-- Created setup report: [insert full local file path]
+- Reported integration summary and dashboard links in the completion message

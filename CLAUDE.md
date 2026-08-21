@@ -22,6 +22,7 @@ Each skill owns its review boundary. Do not require optional prototype or task-s
 - Record settled implementation work in `docs/specs/<slug>/spec.md` through `shape-idea`; add task files through `split-into-tasks` only when the work has multiple independently deliverable outcomes.
 - Record evidence-backed temporary workarounds and out-of-scope defects in `docs/follow-ups/` through `project-knowledge`; resolve them through `resolve-follow-ups`.
 - Record reusable decisions in `docs/decisions/` and canonical project terms in root `GLOSSARY.md` through `project-knowledge`.
+- Before changing a settled project rule, use `docs/decisions/README.md` to load only the relevant decision contracts.
 
 ## Development Workflow
 
