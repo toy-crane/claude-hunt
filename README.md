@@ -1,6 +1,6 @@
 # Claude Hunt
 
-A Next.js app with shadcn/ui, powered by a Claude Code harness for TDD-driven development.
+Claude Code 수강생이 프로젝트를 공개하고 서로의 작업을 발견하고 응원하는 한국어 프로젝트 보드입니다. 제품의 현재 방향과 경계는 [`PRODUCT.md`](./PRODUCT.md)에 있습니다.
 
 Production: https://www.claude-hunt.com
 

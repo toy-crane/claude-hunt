@@ -8,7 +8,7 @@ export const alt = "claude-hunt — Claude Code 수강생들의 프로젝트";
 export const size = { width: 1200, height: 630 };
 export const contentType = "image/png";
 
-// Colors — mirror artifacts/improve-og-image/references/project/colors_and_type.css.
+// Self-contained OG palette. ImageResponse cannot consume the app's CSS variables.
 const TERRACOTTA = "#c15f3c";
 const BG_WHITE = "#ffffff";
 const BG_RIGHT = "#fafafa";

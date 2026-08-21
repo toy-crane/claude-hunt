@@ -9,7 +9,7 @@ Error: Invalid request: `files` should NOT have more than 15000 items, received 
 Try using `--archive=tgz` to limit the amount of files you upload.
 ```
 
-The first real `/ship` run hit this because the repo carries several large directories that Next.js never touches at build or runtime — notably `.claude/worktrees/` (dev state), `artifacts/`, `knowledge/`, `supabase/`, and test folders. Excluding them brought the upload well under the limit and made the fix durable across future worktree churn.
+The first real `/ship` run hit this because the repo carries several large directories that Next.js never touches at build or runtime—most notably `.claude/worktrees/` plus agent, project-context, Supabase, and test files. Excluding them brought the upload well under the limit and made the fix durable across future worktree churn.
 
 `--archive=tgz` is Vercel's suggested workaround but is not a fix — it just tarballs the same bloat. Use `.vercelignore` as the authoritative exclusion list.
 
@@ -24,11 +24,13 @@ When in doubt: remove the file from the upload and run `/ship`. If the build or 
 ```
 # Claude harness (worktrees are the main upload bloater)
 .claude/
+.agents/
 
 # Project meta / docs
-artifacts/
-knowledge/
+docs/
 CLAUDE.md
+GLOSSARY.md
+PRODUCT.md
 README.md
 skills-lock.json
 
@@ -52,6 +54,11 @@ lefthook.yml
 # Build caches
 .next/
 tsconfig.tsbuildinfo
+
+# Non-bun lockfiles — force Vercel to detect bun.lock and install with bun
+package-lock.json
+yarn.lock
+pnpm-lock.yaml
 
 # Env files (Vercel uses its own dashboard-managed env vars)
 .env
