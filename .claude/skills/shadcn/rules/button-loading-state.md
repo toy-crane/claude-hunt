@@ -99,8 +99,8 @@ the underlying request.
 ## Layout shift is accepted; opt-in per call site
 
 Adding the spinner grows the button by roughly 22px (spinner width + gap).
-This matches the default behavior of Linear, Stripe, Vercel, and shadcn's
-own examples. Do not introduce absolute positioning, invisible
+This matches the default behavior of Stripe, Vercel, and shadcn's own
+examples. Do not introduce absolute positioning, invisible
 placeholders, or width-reservation markup as a global pattern.
 
 If a specific button cannot tolerate the shift (tight toolbar slot,

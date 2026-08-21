@@ -15,16 +15,13 @@ Product context → Shape → Prototype (when needed) → Split (when needed) �
 
 Each skill owns its review boundary. Do not require optional prototype or task-splitting phases when their trigger does not apply.
 
-## Linear
+## Work Management
 
-- Linear is the single source of truth for user-requested and planned work in this repo. New bugs, features, refactors, chores, and docs work — including meta-tooling (skills, hooks, rules) — start as Linear issues in the Claude Hunt team (identifiers `CLA-N`).
-- Evidence-backed temporary workarounds and out-of-scope defects discovered while executing other work go to `docs/follow-ups/` through `project-knowledge`; `resolve-follow-ups` handles that bounded backlog. Do not duplicate one item in Linear and `docs/follow-ups/`. Route work that needs new intended behavior or product judgment to Linear instead.
-- The issue loop is three skills, and humans only merge:
-  - `capture-issue` creates issues — the only intake gate. Do not call `save_issue` directly for new issues.
-  - `triage` classifies issues along 3 axes (decision/verification/impact) and leaves an agent brief on `ai-ready` issues.
-  - `dispatch-issue` works `ai-ready` issues in per-issue worktrees through to a PR. Failed dispatches get the `dispatch-failed` label.
-- `agent-loop` orchestrates the cycle on a schedule: applies human feedback from Slack threads, runs triage and dispatch, and posts a digest to #agent-hunt as the bot `Maestro`. Humans reply with 🚀·👎·comments in threads; the next run applies them. Bot, channel, triggers, and digest format live in the skill directory.
-- Single sources under `docs/agents/`: label scheme and the 3-axis gate in `triage-labels.md`; Linear tool rules, team UUID, state transitions, and branch naming in `issue-tracker.md`.
+- Keep durable work state in the repository. Do not create or mirror a backlog in an external issue tracker.
+- Record app-wide product direction in root `PRODUCT.md` through `define-product`.
+- Record settled implementation work in `docs/specs/<slug>/spec.md` through `shape-idea`; add task files through `split-into-tasks` only when the work has multiple independently deliverable outcomes.
+- Record evidence-backed temporary workarounds and out-of-scope defects in `docs/follow-ups/` through `project-knowledge`; resolve them through `resolve-follow-ups`.
+- Record reusable decisions in `docs/decisions/` and canonical project terms in root `GLOSSARY.md` through `project-knowledge`.
 
 ## Development Workflow
 
