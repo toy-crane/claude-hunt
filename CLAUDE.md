@@ -2,27 +2,23 @@
 
 - Production URL: `https://www.claude-hunt.com`
 
-## Workflow Phases
+## Product Workflow
 
-Define → Sketch → Plan → Build
+Product context → Shape → Prototype (when needed) → Split (when needed) → Implement
 
-### Spec-Driven Development
+- Use `/define-product` only for app-wide product direction and durable product boundaries.
+- Use `/shape-idea` to settle one work unit and write its implementation-ready spec.
+- Use `/build-prototype` when a complete screen-based surface needs visual review before implementation.
+- Use `/split-into-tasks` only when a settled spec has multiple independently deliverable outcomes.
+- Use `/implement` to complete a selected `docs/specs/<slug>/` handoff.
+- Skip shaping for single-line fixes, unambiguous changes, or meta-tooling such as skills, rules, hooks, and repository configuration.
 
-- Use for product features that are ambiguous, multi-file, or take over 30 minutes.
-- Skip for single-line fixes, unambiguous changes, or meta-tooling (skills, rules, hooks, repo config).
-
-| Phase | Skill / Command |
-|-------|----------------|
-| Specify | `/write-spec` skill |
-| Sketch | `/sketch-wireframe` skill |
-| Plan | `/draft-plan` skill |
-| Build | `/execute-plan` skill |
-
-Each phase has a human review gate. Do not advance until the current phase is validated.
+Each skill owns its review boundary. Do not require optional prototype or task-splitting phases when their trigger does not apply.
 
 ## Linear
 
-- Linear is the single source of truth for every new requirement in this repo. All new bugs, features, refactors, chores, and docs work — including meta-tooling (skills, hooks, rules) — start as Linear issues in the Claude Hunt team (identifiers `CLA-N`).
+- Linear is the single source of truth for user-requested and planned work in this repo. New bugs, features, refactors, chores, and docs work — including meta-tooling (skills, hooks, rules) — start as Linear issues in the Claude Hunt team (identifiers `CLA-N`).
+- Evidence-backed temporary workarounds and out-of-scope defects discovered while executing other work go to `docs/follow-ups/` through `project-knowledge`; `resolve-follow-ups` handles that bounded backlog. Do not duplicate one item in Linear and `docs/follow-ups/`. Route work that needs new intended behavior or product judgment to Linear instead.
 - The issue loop is three skills, and humans only merge:
   - `capture-issue` creates issues — the only intake gate. Do not call `save_issue` directly for new issues.
   - `triage` classifies issues along 3 axes (decision/verification/impact) and leaves an agent brief on `ai-ready` issues.
