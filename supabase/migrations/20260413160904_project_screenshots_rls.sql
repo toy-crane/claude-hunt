@@ -1,5 +1,5 @@
 -- RLS policies on storage.objects for the `project-screenshots` bucket.
--- Declared via manual migration (per .claude/rules/supabase-migration.md:
+-- Declared via manual migration (per docs/decisions/supabase-schema-workflow.md:
 -- "RLS on storage.objects → manual migration"; supabase db diff cannot
 -- capture policies in the `storage` schema).
 --

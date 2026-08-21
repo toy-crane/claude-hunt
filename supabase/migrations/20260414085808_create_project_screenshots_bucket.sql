@@ -3,7 +3,7 @@
 -- WHY THIS IS A MANUAL MIGRATION (not a schema diff):
 --   Storage buckets are DML (INSERT into storage.buckets), which `supabase db diff`
 --   cannot capture. This follows the Manual Migration Path in
---   .claude/rules/supabase-migration.md.
+--   docs/decisions/supabase-schema-workflow.md.
 --
 -- RELATIONSHIP TO config.toml:
 --   supabase/config.toml declares [storage.buckets."project-screenshots"] for
