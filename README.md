@@ -31,13 +31,13 @@ Components are placed in `components/ui/`. Do not modify `components/ui/*` direc
 
 ## Development Workflow
 
-This project uses a spec-driven TDD workflow:
+This project uses a product-context and spec-driven TDD workflow:
 
-1. **Write requirements** — `/write-requirements`
-2. **Write spec** — `/write-spec` generates `spec.md` (a single WHAT-only specification)
-3. **Sketch wireframe** — `/sketch-wireframe` creates an HTML wireframe
-4. **Draft plan** — `/draft-plan` produces a TDD task list
-5. **Execute plan** — `/execute-plan` orchestrates Builders and Reviewers
+1. **Define product** — `/define-product` maintains app-wide direction when it changes
+2. **Shape work** — `/shape-idea` settles one work unit and writes its spec
+3. **Prototype when needed** — `/build-prototype` makes a complete UI surface reviewable
+4. **Split when needed** — `/split-into-tasks` separates independently deliverable outcomes
+5. **Implement** — `/implement` completes and verifies the selected spec
 
 ## Harness
 
@@ -45,8 +45,8 @@ The `.claude/` directory contains the automation harness:
 
 - **Hooks** — auto-lint on file save, secret detection before commits, test gate on stop, worktree isolation
 - **Rules** — shadcn component guard
-- **Agents** — builder, reviewers (design, react, plan, wireframe, UI quality), code simplifier, skill researcher
-- **Skills** — 37 skills covering Next.js best practices, React patterns, spec writing, wireframing, and more
+- **Agents** — specialist reviewers and helpers for code, design, React, security, migrations, testing, and UI quality
+- **Skills** — project-local and linked vendor skills for product shaping, implementation, Git operations, and the application stack
 
 ### Prerequisites
 

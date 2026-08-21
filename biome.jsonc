@@ -8,9 +8,10 @@
   ],
   "files": {
     // Skill templates, agent definitions, and harness assets live under
-    // .claude/. They're not production code and often contain inline
-    // scripts written for readability rather than lint-cleanliness.
-    "includes": ["!.claude", "!artifacts"]
+    // .claude/. Canonical .agents/skills content is managed by skills.sh.
+    // Neither is production code, and upstream assets should stay byte-for-byte
+    // compatible with their ownership hashes instead of being reformatted here.
+    "includes": ["!.claude", "!.agents/skills", "!artifacts"]
   },
   "linter": {
     "rules": {

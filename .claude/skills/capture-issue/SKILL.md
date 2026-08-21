@@ -1,12 +1,14 @@
 ---
 name: capture-issue
-description: Use when the user wants to capture a new issue idea to Linear for later refinement. Triggers on "capture", "capture issue", "log to linear", "track this", "캡쳐", "이슈 캡쳐", "이슈 만들어", "이슈 추가", "Linear에 올려". This is the single entry point for all new bugs, features, refactors, chores, and docs work in the claude-hunt repo — including meta-tooling like skills, hooks, and rules. Do not invoke save_issue directly for new issues; this skill enforces team and label defaults.
+description: Use when the user wants to capture user-requested or planned work in Linear for later refinement. Triggers on "capture", "capture issue", "log to linear", "track this", "캡쳐", "이슈 캡쳐", "이슈 만들어", "이슈 추가", "Linear에 올려". This is the single entry point for new planned bugs, features, refactors, chores, and docs work in the claude-hunt repo, including meta-tooling. Do not use for an evidence-backed temporary workaround or out-of-scope defect discovered while executing other work; project-knowledge records those in docs/follow-ups. Do not invoke save_issue directly for new issues.
 user-invocable: true
 ---
 
 # Capture issue to Linear
 
-The single ingestion gate for new requirements in this repo. Move fast: don't propose follow-ups, don't summarize, don't ask anything optional. The only acceptable prompt is the one in Step 3 (refine-readiness).
+The single Linear ingestion gate for user-requested and planned work in this repo. Move fast: don't propose follow-ups, don't summarize, don't ask anything optional. The only acceptable prompt is the one in Step 3 (refine-readiness).
+
+Do not duplicate an item already owned by `docs/follow-ups/`. Incidental evidence-backed workarounds and out-of-scope defects stay with `project-knowledge` and `resolve-follow-ups`; work that requires new intended behavior or product judgment belongs here instead.
 
 ## Locked parameters — never deviate
 
