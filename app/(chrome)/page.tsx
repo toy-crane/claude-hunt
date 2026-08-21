@@ -13,6 +13,10 @@ import type { Metadata } from "next";
 import { connection } from "next/server";
 import { Suspense } from "react";
 
+// TODO: Cache Components adoption. Refactor this route so this opt-out can be removed.
+// See: https://nextjs.org/docs/app/guides/migrating-to-cache-components
+export const instant = false;
+
 const HOME_TITLE = "이달의 프로젝트 — 클로드 헌트";
 const HOME_DESCRIPTION =
   "이번 달 1위 프로젝트와 함께 사랑받은 인기 프로젝트들을 만나보세요.";
