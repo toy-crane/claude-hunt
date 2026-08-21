@@ -53,9 +53,7 @@
       "formatter": { "enabled": false }
     },
     {
-      // shadcn/ui generated components must not be modified
-      // (see .claude/rules/shadcn-guard.md). Relax rules that trigger
-      // on shadcn's upstream style.
+      // Keep upstream-compatible lint exceptions for shadcn/ui primitives.
       "includes": ["components/ui/**", "shared/ui/**"],
       "linter": {
         "rules": {
