@@ -64,7 +64,7 @@ Claude Hunt를 Next.js 16.3.2로 올리고, Codex와 Claude Code가 같은 프�
 - `.claude/hooks/`의 모든 hook과 `.claude/settings.json`의 hook 등록을 제거한다.
 - `.claude/rules/`의 모든 rule을 제거한다. 계속 필요한 Supabase 규칙은 Project Knowledge 결정 계약에만 남긴다.
 - 삭제한 스킬을 보조하던 `.claude/references/`의 일반 체크리스트를 제거한다.
-- 제거된 파일을 가리키는 주석, 설정과 잠금 정보를 함께 정리한다.
+- 제거된 파일을 가리키는 활성 주석, 설정과 잠금 정보를 함께 정리한다. 이미 적용된 migration 파일은 불변 기록이므로 과거 주석을 수정하지 않는다.
 
 ## 수용 기준
 
@@ -77,7 +77,7 @@ Claude Hunt를 Next.js 16.3.2로 올리고, Codex와 Claude Code가 같은 프�
 - 공식 `next-dev-loop`의 출처가 `vercel/next.js`로 기록된다.
 - 공식 `supabase`와 `supabase-postgres-best-practices`의 출처가 `supabase/agent-skills`로 기록된다.
 - 세 공식 스킬을 Codex와 Claude Code 양쪽에서 같은 내용으로 발견할 수 있다.
-- `.claude/agents/`, `.claude/hooks/`, `.claude/rules/`, `.claude/references/`와 그 설정 참조가 남지 않는다.
+- `.claude/agents/`, `.claude/hooks/`, `.claude/rules/`, `.claude/references/`와 그 활성 설정 참조가 남지 않는다. 이미 적용된 migration의 역사적 주석은 제외한다.
 - `docs/decisions/README.md`에서 Supabase schema 또는 migration 변경 시 새 결정 계약을 찾을 수 있다.
 - Supabase workflow 결정 계약은 선언형 원본, 생성 초안 검토, forward-only migration, 권한 검토, 전체 재생, pgTAP과 타입 생성을 포함한다.
 - Turbopack 개발 서버에서 `next-dev-loop`가 컴파일 진단, 경로 조회, 브라우저와 React 상태를 확인한다.

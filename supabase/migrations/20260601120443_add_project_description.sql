@@ -8,7 +8,7 @@ alter table "public"."projects" validate constraint "projects_description_check"
 
 -- security_invoker = false + the anon/authenticated grant are restored by hand:
 -- migra drops the view to reorder columns, which loses both, and it does not
--- re-emit grants/view options (see docs/decisions/supabase-schema-workflow.md).
+-- re-emit grants/view options (see .claude/rules/supabase-migration.md).
 create or replace view "public"."projects_with_vote_count" with (security_invoker = false) as  SELECT p.id,
     p.user_id,
     p.cohort_id,

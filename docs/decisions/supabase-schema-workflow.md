@@ -9,7 +9,7 @@
 - Review each generated migration against the declared final state before committing it. Treat destructive statements, managed- or cross-schema changes, extension changes, authorization changes, and view or function recreation as high risk unless the change is explicit and supported by project evidence.
 - DML, backfills, Storage bucket rows, cross-schema policies, and other behavior that the current declarative diff cannot express may be added manually to the generated migration or to a separate versioned migration. A project-owned Storage bucket remains declared in `supabase/config.toml` for local environments and in an idempotent upsert migration for non-local environments.
 - RLS and SQL privileges are separate controls. For each exposed table, view, and callable function, verify grants to `anon`, `authenticated`, `service_role`, and `PUBLIC`; for RLS, verify roles, commands, `USING`, `WITH CHECK`, and negative cross-user cases.
-- Never edit a migration already applied to a shared or remote environment. Add a forward migration instead. Do not put arbitrary `BEGIN` or `COMMIT` statements inside ordinary migrations.
+- Never edit a migration already applied to a shared or remote environment, including comments that reference retired guidance. Treat those references as historical context and add a forward migration for executable changes. Do not put arbitrary `BEGIN` or `COMMIT` statements inside ordinary migrations.
 - Verify the full history with `supabase db reset`, run `bun run test:db`, and regenerate `shared/api/supabase/types.ts` with `bun run gen:types`. Commit the declarative schema, migration, database tests, and generated types as one logical change.
 
 ## Boundaries
