@@ -85,6 +85,12 @@
       "skillPath": "skills/git/merge/SKILL.md",
       "computedHash": "a50bb9ea05c7c4d7b8ea1da8a57993a536d3a1c952e8693e822a177968ca83b4"
     },
+    "next-dev-loop": {
+      "source": "vercel/next.js",
+      "sourceType": "github",
+      "skillPath": "skills/next-dev-loop/SKILL.md",
+      "computedHash": "d2a697a0a0429cad0bb7264644115457f588d4ed1007eeb0bb7f965b1185fa6e"
+    },
     "pr": {
       "source": "toy-crane/skills",
       "sourceType": "github",
@@ -145,10 +151,17 @@
       "skillPath": "skills/workflow/split-into-tasks/SKILL.md",
       "computedHash": "801dc12c1c9ffd9ef2a64ab7cd1e767215cf034c36d6284ff0fdee82a55c93de"
     },
+    "supabase": {
+      "source": "supabase/agent-skills",
+      "sourceType": "github",
+      "skillPath": "skills/supabase/SKILL.md",
+      "computedHash": "583344c20e90f3654dbb0632f088d89fd9f1dde8ac85e8a644dd12eee59b1380"
+    },
     "supabase-postgres-best-practices": {
       "source": "supabase/agent-skills",
       "sourceType": "github",
-      "computedHash": "9c87c315aed143ee3b34bec8117100f5035e0df09e6b23e1ecc772cff434c9ad"
+      "skillPath": "skills/supabase-postgres-best-practices/SKILL.md",
+      "computedHash": "e14e276241805c97dbcfe40dcbea1a3035269cc7293cac4b1832dda41a835e60"
     },
     "tdd": {
       "source": "toy-crane/skills",
