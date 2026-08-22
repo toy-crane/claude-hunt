@@ -82,6 +82,9 @@ Claude Hunt의 공개 표면을 AI 에이전트가 JavaScript 실행 없이 읽�
 - 최소 오류 상황: 형식이 잘못된 프로젝트 id(404 — 존재하지 않음과 동일 취급,
   프로젝트 상세 페이지의 기존 규칙과 일치), 없는 프로젝트 id(404), 알 수 없는 쿼리
   파라미터 값(400), 알 수 없는 `/api/*` 경로(404).
+- 기존 테스트 전용 경로도 예외가 아니다: 프로덕션의 `/api/draft`는 현재 text/plain
+  404를 반환하는데, 이를 알 수 없는 `/api/*` 경로와 구별 불가능한 같은 404 JSON
+  오류 형식으로 바꾼다. 비프로덕션에서의 draft mode 활성화 동작은 그대로 둔다.
 
 ### 5. 마크다운 콘텐츠 협상 (acceptmarkdown.com 준수)
 
@@ -137,7 +140,9 @@ Claude Hunt의 공개 표면을 AI 에이전트가 JavaScript 실행 없이 읽�
 4. 프로젝트 목록 API → `200` JSON, 추천 수 내림차순·동률 최신순. 클래스 안정
    이름으로 필터하면 해당 클래스만 온다. 없는 id·잘못된 형식의 id 단건 조회 →
    `404` JSON 오류(코드·메시지·힌트). 알 수 없는 필터 값 → `400` JSON 오류. 없는
-   `/api/*` 경로 → `404` JSON 오류. 어떤 API 오류도 HTML이 아니다.
+   `/api/*` 경로 → `404` JSON 오류. 프로덕션 `curl -s /api/draft` → `404` +
+   `application/json` + 같은 오류 스키마(text/plain 아님). 어떤 API 오류도 HTML이나
+   플레인 텍스트가 아니다.
 5. 협상 대상 5종 URL 각각에 대해:
    - `-H "Accept: text/markdown"` → `200`,
      `Content-Type: text/markdown; charset=utf-8`, `Vary`에 `Accept` 포함, 본문은
