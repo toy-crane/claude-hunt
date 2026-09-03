@@ -1,5 +1,7 @@
 import { NuqsProvider } from "@core/providers/nuqs-provider";
+import { fetchEmailMarketingConsentState } from "@entities/email-marketing-consent/server";
 import { fetchCohorts } from "@features/cohort-filter/server";
+import { EmailMarketingNotice } from "@features/email-marketing-consent";
 import { fetchViewer } from "@shared/api/supabase/viewer";
 import { Skeleton } from "@shared/ui/skeleton";
 import { ProjectGridSkeleton } from "@widgets/project-grid";
@@ -77,9 +79,16 @@ export async function BoardData({ searchParams }: PageProps) {
   const { cohort } = await projectsSearchParamsCache.parse(searchParams);
 
   const [viewer, cohorts] = await Promise.all([fetchViewer(), fetchCohorts()]);
-  const projects = await fetchProjects({
-    viewerUserId: viewer?.id ?? null,
-  });
+  const [projects, emailMarketingConsent] = await Promise.all([
+    fetchProjects({ viewerUserId: viewer?.id ?? null }),
+    viewer ? fetchEmailMarketingConsentState(viewer.id) : Promise.resolve(null),
+  ]);
+  const showEmailMarketingNotice = Boolean(
+    viewer &&
+      emailMarketingConsent &&
+      !emailMarketingConsent.hasDecision &&
+      !emailMarketingConsent.noticeDismissed
+  );
 
   // nuqs adapter lives here (not the root layout) so its `useSearchParams`
   // read stays inside this page's Suspense boundary instead of forcing the
@@ -93,6 +102,7 @@ export async function BoardData({ searchParams }: PageProps) {
         projects={projects}
         viewerUserId={viewer?.id ?? null}
       />
+      {showEmailMarketingNotice ? <EmailMarketingNotice /> : null}
     </NuqsProvider>
   );
 }

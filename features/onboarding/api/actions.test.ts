@@ -1,3 +1,4 @@
+import { EMAIL_MARKETING_CONSENT_VERSION } from "@entities/email-marketing-consent";
 import {
   DISPLAY_NAME_POLICY_MESSAGE,
   DISPLAY_NAME_REQUIRED_MESSAGE,
@@ -15,10 +16,10 @@ vi.mock("next/cache", () => ({
 }));
 
 const getClaims = vi.fn();
-const from = vi.fn();
+const rpc = vi.fn();
 const mockClient = {
   auth: { getClaims },
-  from,
+  rpc,
 };
 
 vi.mock("@shared/api/supabase/server", () => ({
@@ -32,27 +33,20 @@ const validInput = {
   cohortId: COHORT_UUID,
 };
 
-function stubProfileUpsert(options: {
-  upsertError?: { code?: string; message: string };
+function stubCompleteOnboarding(options: {
+  rpcError?: { code?: string; message: string };
 }) {
-  const upsert = vi.fn().mockResolvedValue({
+  rpc.mockResolvedValue({
     data: null,
-    error: options.upsertError ?? null,
+    error: options.rpcError ?? null,
   });
-  from.mockImplementation((table: string) => {
-    if (table === "profiles") {
-      return { upsert };
-    }
-    throw new Error(`Unexpected table ${table}`);
-  });
-  return { upsert };
 }
 
 beforeEach(() => {
   revalidatePathMock.mockClear();
   updateTagMock.mockClear();
   getClaims.mockReset();
-  from.mockReset();
+  rpc.mockReset();
 });
 
 describe("completeOnboarding server action", () => {
@@ -67,11 +61,11 @@ describe("completeOnboarding server action", () => {
 
   it("does not touch the database when the caller is signed out", async () => {
     getClaims.mockResolvedValue({ data: null, error: null });
-    const { upsert } = stubProfileUpsert({});
+    stubCompleteOnboarding({});
 
     await completeOnboarding(validInput);
 
-    expect(upsert).not.toHaveBeenCalled();
+    expect(rpc).not.toHaveBeenCalled();
   });
 
   it("rejects empty display name without touching the db", async () => {
@@ -120,7 +114,7 @@ describe("completeOnboarding server action", () => {
       data: { claims: { sub: "u1", email: "u1@example.com" } },
       error: null,
     });
-    stubProfileUpsert({});
+    stubCompleteOnboarding({});
 
     const result = await completeOnboarding({
       ...validInput,
@@ -140,12 +134,12 @@ describe("completeOnboarding server action", () => {
     expect(result.error).toBe("클래스를 선택해 주세요.");
   });
 
-  it("upserts the caller's own profile with trimmed display name and cohort id", async () => {
+  it("atomically saves the profile and unchecked marketing choice", async () => {
     getClaims.mockResolvedValue({
       data: { claims: { sub: "u1", email: "u1@example.com" } },
       error: null,
     });
-    const { upsert } = stubProfileUpsert({});
+    stubCompleteOnboarding({});
 
     const result = await completeOnboarding({
       displayName: "  Alice  ",
@@ -153,16 +147,34 @@ describe("completeOnboarding server action", () => {
     });
 
     expect(result.ok).toBe(true);
-    expect(upsert).toHaveBeenCalledTimes(1);
-    expect(upsert).toHaveBeenCalledWith(
-      {
-        id: "u1",
-        email: "u1@example.com",
-        display_name: "Alice",
-        cohort_id: COHORT_UUID,
-      },
-      { onConflict: "id" }
-    );
+    expect(rpc).toHaveBeenCalledTimes(1);
+    expect(rpc).toHaveBeenCalledWith("complete_onboarding", {
+      p_cohort_id: COHORT_UUID,
+      p_consent_version: EMAIL_MARKETING_CONSENT_VERSION,
+      p_display_name: "Alice",
+      p_marketing_opted_in: false,
+    });
+  });
+
+  it("saves checked marketing consent with the current copy version", async () => {
+    getClaims.mockResolvedValue({
+      data: { claims: { sub: "u1", email: "u1@example.com" } },
+      error: null,
+    });
+    stubCompleteOnboarding({});
+
+    const result = await completeOnboarding({
+      ...validInput,
+      marketingOptedIn: true,
+    });
+
+    expect(result.ok).toBe(true);
+    expect(rpc).toHaveBeenCalledWith("complete_onboarding", {
+      p_cohort_id: COHORT_UUID,
+      p_consent_version: EMAIL_MARKETING_CONSENT_VERSION,
+      p_display_name: "Alice",
+      p_marketing_opted_in: true,
+    });
   });
 
   it("surfaces a Supabase upsert error back to the caller", async () => {
@@ -170,7 +182,7 @@ describe("completeOnboarding server action", () => {
       data: { claims: { sub: "u1", email: "u1@example.com" } },
       error: null,
     });
-    stubProfileUpsert({ upsertError: { message: "permission denied" } });
+    stubCompleteOnboarding({ rpcError: { message: "permission denied" } });
 
     const result = await completeOnboarding(validInput);
 
@@ -183,8 +195,8 @@ describe("completeOnboarding server action", () => {
       data: { claims: { sub: "u1", email: "u1@example.com" } },
       error: null,
     });
-    stubProfileUpsert({
-      upsertError: {
+    stubCompleteOnboarding({
+      rpcError: {
         code: "23505",
         message:
           'duplicate key value violates unique constraint "profiles_display_name_ci_unique"',
@@ -204,8 +216,8 @@ describe("completeOnboarding server action", () => {
     });
     const rawMessage =
       'duplicate key value violates unique constraint "some_other_unique"';
-    stubProfileUpsert({
-      upsertError: { code: "23505", message: rawMessage },
+    stubCompleteOnboarding({
+      rpcError: { code: "23505", message: rawMessage },
     });
 
     const result = await completeOnboarding(validInput);

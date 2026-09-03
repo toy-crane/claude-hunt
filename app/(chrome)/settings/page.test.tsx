@@ -40,6 +40,7 @@ vi.mock("sonner", () => ({
 const fetchViewerMock = vi.fn();
 const fetchCohortsMock = vi.fn();
 const fetchMyProjectsMock = vi.fn();
+const fetchEmailMarketingConsentStateMock = vi.fn();
 
 vi.mock("@shared/api/supabase/viewer", () => ({
   fetchViewer: (...args: unknown[]) => fetchViewerMock(...args),
@@ -53,6 +54,20 @@ vi.mock("@features/my-projects", () => ({
   fetchMyProjects: (...args: unknown[]) => fetchMyProjectsMock(...args),
   MyProjectsList: ({ projects }: { projects: { id: string }[] }) => (
     <div data-count={projects.length} data-testid="my-projects-list-stub" />
+  ),
+}));
+
+vi.mock("@entities/email-marketing-consent/server", () => ({
+  fetchEmailMarketingConsentState: (...args: unknown[]) =>
+    fetchEmailMarketingConsentStateMock(...args),
+}));
+
+vi.mock("@features/email-marketing-consent", () => ({
+  EmailNewsSettings: ({ initialOptedIn }: { initialOptedIn: boolean }) => (
+    <div
+      data-initial-opted-in={String(initialOptedIn)}
+      data-testid="email-news-settings-stub"
+    />
   ),
 }));
 
@@ -114,6 +129,12 @@ describe("settings page", () => {
     fetchCohortsMock.mockResolvedValue([]);
     fetchMyProjectsMock.mockReset();
     fetchMyProjectsMock.mockResolvedValue([]);
+    fetchEmailMarketingConsentStateMock.mockReset();
+    fetchEmailMarketingConsentStateMock.mockResolvedValue({
+      hasDecision: false,
+      isOptedIn: false,
+      noticeDismissed: false,
+    });
     redirectMock.mockClear();
   });
 
@@ -162,9 +183,34 @@ describe("settings page", () => {
       .map((h) => h.textContent?.replace(/\s+/g, " ").trim());
     expect(sectionHeadings).toEqual([
       "프로필 정보",
+      "이메일 소식",
       "내 프로젝트 · 0",
       "위험 영역",
     ]);
+  });
+
+  it("renders the saved email news preference after profile information", async () => {
+    fetchViewerMock.mockResolvedValue({
+      id: "user-1",
+      email: "alice@example.com",
+      displayName: "Alice",
+      avatarUrl: null,
+      cohortId: null,
+    });
+    fetchEmailMarketingConsentStateMock.mockResolvedValue({
+      hasDecision: true,
+      isOptedIn: true,
+      noticeDismissed: false,
+    });
+
+    const Page = (await import("./page")).default;
+    render(await Page());
+
+    expect(fetchEmailMarketingConsentStateMock).toHaveBeenCalledWith("user-1");
+    expect(screen.getByTestId("email-news-settings-stub")).toHaveAttribute(
+      "data-initial-opted-in",
+      "true"
+    );
   });
 
   it("renders the 새 프로젝트 CTA with ?from=settings so the submit flow returns here on save/cancel", async () => {

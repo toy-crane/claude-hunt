@@ -105,14 +105,56 @@ describe("OnboardingForm", () => {
     expect(screen.getByTestId("onboarding-sign-out")).toBeEnabled();
   });
 
-  it("renders the claude-hunt Logo and not the legacy 'Claude Hunt' text", () => {
-    const { container } = render(
-      <OnboardingForm cohorts={cohorts} initialNext="/" />
+  it("offers email marketing consent as an unchecked optional choice with details", async () => {
+    render(<OnboardingForm cohorts={cohorts} initialNext="/" />);
+
+    const checkbox = screen.getByRole("checkbox", {
+      name: "마케팅 정보 수신에 동의합니다. (선택)",
+    });
+    expect(checkbox).not.toBeChecked();
+    expect(
+      screen.getByText(
+        "클로드를 더 잘 활용하는 데 도움이 되는 뉴스레터와 새로운 강의·이벤트 소식을 이메일로 보내드려요."
+      )
+    ).toBeInTheDocument();
+
+    await userEvent.click(screen.getByRole("button", { name: "자세히 보기" }));
+
+    expect(
+      screen.getByText("클로드 신규 기능 및 활용 콘텐츠, 강의·이벤트 안내")
+    ).toBeVisible();
+    expect(screen.getByText("동의 철회 또는 회원 탈퇴 시까지")).toBeVisible();
+    expect(screen.getByText("설정 또는 이메일의 수신거부 링크")).toBeVisible();
+  });
+
+  it("submits the checked marketing consent with the profile", async () => {
+    completeOnboardingMock.mockResolvedValue({ ok: true });
+    render(<OnboardingForm cohorts={cohorts} initialNext="/" />);
+
+    typeDisplayName("Alice");
+    await pickCohort("LG전자 1기");
+    await userEvent.click(
+      screen.getByRole("checkbox", {
+        name: "마케팅 정보 수신에 동의합니다. (선택)",
+      })
     );
+    await submit();
+
+    await vi.waitFor(() => {
+      expect(completeOnboardingMock).toHaveBeenCalledWith({
+        displayName: "Alice",
+        cohortId: COHORT_A_ID,
+        marketingOptedIn: true,
+      });
+    });
+  });
+
+  it("renders the claude-hunt Logo and not the legacy 'Claude Hunt' text", () => {
+    render(<OnboardingForm cohorts={cohorts} initialNext="/" />);
     expect(
       screen.getByRole("link", { name: "claude-hunt 홈" })
     ).toBeInTheDocument();
-    expect(container.textContent).not.toContain("Claude Hunt");
+    expect(screen.queryByText("Claude Hunt")).not.toBeInTheDocument();
   });
 
   it("renders exactly one h1 with 'Set up your profile' as the page heading", () => {
@@ -252,6 +294,7 @@ describe("OnboardingForm", () => {
       expect(completeOnboardingMock).toHaveBeenCalledWith({
         displayName: "Car_crash",
         cohortId: COHORT_A_ID,
+        marketingOptedIn: false,
       });
     });
   });
@@ -319,6 +362,7 @@ describe("OnboardingForm", () => {
       expect(completeOnboardingMock).toHaveBeenCalledWith({
         displayName: "Alice",
         cohortId: COHORT_A_ID,
+        marketingOptedIn: false,
       });
     });
     await vi.waitFor(() => {
