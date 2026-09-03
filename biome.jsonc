@@ -11,7 +11,13 @@
     // .claude/. Canonical .agents/skills content is managed by skills.sh.
     // Neither is production code, and upstream assets should stay byte-for-byte
     // compatible with their ownership hashes instead of being reformatted here.
-    "includes": ["!.claude", "!.agents/skills", "!artifacts"]
+    // Approved prototypes are self-contained review artifacts rather than app code.
+    "includes": [
+      "!.claude",
+      "!.agents/skills",
+      "!artifacts",
+      "!docs/specs/**/prototype.html"
+    ]
   },
   "linter": {
     "rules": {
