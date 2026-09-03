@@ -17,6 +17,7 @@ import { Card, CardContent } from "@shared/ui/card";
 import type { Metadata } from "next";
 import Link from "next/link";
 import { redirect } from "next/navigation";
+import { connection } from "next/server";
 
 // TODO: Cache Components adoption. Refactor this route so this opt-out can be removed.
 // See: https://nextjs.org/docs/app/guides/migrating-to-cache-components
@@ -48,6 +49,10 @@ function renderProjectRowActions(project: MyProjectRow) {
 }
 
 export default async function SettingsPage() {
+  // Supabase can read the request clock while recovering an expired session.
+  // Keep that work out of the prerendered shell.
+  await connection();
+
   const viewer = await fetchViewer();
   if (!viewer) {
     redirect("/login?next=/settings");

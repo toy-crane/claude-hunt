@@ -33,6 +33,12 @@ vi.mock("next/navigation", () => ({
   useRouter: () => ({ refresh: vi.fn(), replace: vi.fn() }),
 }));
 
+const connectionMock = vi.fn().mockResolvedValue(undefined);
+
+vi.mock("next/server", () => ({
+  connection: connectionMock,
+}));
+
 vi.mock("sonner", () => ({
   toast: { success: vi.fn() },
 }));
@@ -135,6 +141,7 @@ describe("settings page", () => {
       isOptedIn: false,
       noticeDismissed: false,
     });
+    connectionMock.mockClear();
     redirectMock.mockClear();
   });
 
@@ -144,6 +151,7 @@ describe("settings page", () => {
     const Page = (await import("./page")).default;
 
     await expect(Page()).rejects.toThrow("redirect:/login?next=/settings");
+    expect(connectionMock).toHaveBeenCalledOnce();
     expect(redirectMock).toHaveBeenCalledWith("/login?next=/settings");
   });
 
