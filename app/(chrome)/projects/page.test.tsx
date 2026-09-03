@@ -5,6 +5,11 @@ const fetchViewerMock = vi.fn();
 const fetchCohortsMock = vi.fn();
 const fetchProjectsMock = vi.fn();
 const fetchEmailMarketingConsentStateMock = vi.fn();
+const captureExceptionMock = vi.fn();
+
+vi.mock("@sentry/nextjs", () => ({
+  captureException: (...args: unknown[]) => captureExceptionMock(...args),
+}));
 
 vi.mock("@shared/api/supabase/viewer", () => ({
   fetchViewer: (...args: unknown[]) => fetchViewerMock(...args),
@@ -59,6 +64,7 @@ describe("/projects page", () => {
       isOptedIn: false,
       noticeDismissed: false,
     });
+    captureExceptionMock.mockReset();
   });
 
   it("renders the project board for signed-out visitors", async () => {
@@ -101,6 +107,19 @@ describe("/projects page", () => {
     expect(
       screen.queryByTestId("email-marketing-notice")
     ).not.toBeInTheDocument();
+  });
+
+  it("keeps the project board available when the optional consent lookup fails", async () => {
+    const lookupError = new Error("schema cache unavailable");
+    fetchViewerMock.mockResolvedValue(SIGNED_IN_VIEWER);
+    fetchEmailMarketingConsentStateMock.mockRejectedValue(lookupError);
+
+    const { BoardData } = await import("./page");
+    render(await BoardData({ searchParams: Promise.resolve({}) }));
+
+    expect(screen.getByTestId("project-board-stub")).toBeInTheDocument();
+    expect(screen.queryByTestId("email-marketing-notice")).toBeNull();
+    expect(captureExceptionMock).toHaveBeenCalledWith(lookupError);
   });
 
   it.each([
