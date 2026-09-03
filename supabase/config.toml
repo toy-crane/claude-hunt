@@ -58,6 +58,7 @@ enabled = true
 schema_paths = [
   "./schemas/cohorts.sql",
   "./schemas/profiles.sql",
+  "./schemas/email_marketing_consents.sql",
   "./schemas/projects.sql",
   "./schemas/votes.sql",
   "./schemas/projects_with_vote_count.sql",
