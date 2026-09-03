@@ -6,7 +6,7 @@ async function renderPage() {
   render(<Page />);
 }
 
-const EFFECTIVE_DATE_TEXT = /시행일:\s*2026년\s*6월\s*1일/;
+const EFFECTIVE_DATE_TEXT = /시행일:\s*2026년\s*9월\s*3일/;
 const DPO_EMAIL_TEXT = /toycrane@odd-corp\.com/;
 const META_DESCRIPTION_KEYWORD = /개인정보/;
 
@@ -54,13 +54,14 @@ const SECTION_3_PHRASE = /지체 없이/;
 const SECTION_4_THIRD_PARTY = /제3자에게 제공하지 않/;
 const SECTION_12_7_DAY = /7일/;
 const SECTION_12_30_DAY = /30일/;
-const SECTION_12_DATE = /2026-06-01/;
+const SECTION_12_DATE = /2026-09-03/;
 const DPO_NAME = /김한울/;
 
 const HEADING_2 = /^2\./;
 const HEADING_3 = /^3\./;
 const HEADING_4 = /^4\./;
 const HEADING_5 = /^5\./;
+const HEADING_6 = /^6\./;
 const HEADING_9 = /^9\./;
 const HEADING_10 = /^10\./;
 const HEADING_11 = /^11\./;
@@ -93,7 +94,7 @@ describe("privacy page (/privacy)", () => {
     expect(metadata.description).toMatch(META_DESCRIPTION_KEYWORD);
   });
 
-  it("shows the effective date 2026년 6월 1일", async () => {
+  it("shows the effective date 2026년 9월 3일", async () => {
     await renderPage();
     expect(screen.getByText(EFFECTIVE_DATE_TEXT)).toBeInTheDocument();
   });
@@ -153,6 +154,31 @@ describe("privacy page (/privacy)", () => {
       return;
     }
     expect(within(clause).getByText(SECTION_4_THIRD_PARTY)).toBeInTheDocument();
+  });
+
+  it("discloses the email marketing purpose, item, retention, and withdrawal path", async () => {
+    await renderPage();
+
+    const article = screen.getByRole("article");
+    expect(
+      within(article).getByText(
+        "클로드 신규 기능 및 활용 콘텐츠, 강의·이벤트 안내"
+      )
+    ).toBeInTheDocument();
+    expect(within(article).getByText("이메일 주소")).toBeInTheDocument();
+    expect(
+      within(article).getByText("동의 철회 또는 회원 탈퇴 시까지")
+    ).toBeInTheDocument();
+
+    const rightsSection = screen
+      .getByRole("heading", { name: HEADING_6, level: 2 })
+      .closest("section");
+    expect(rightsSection).not.toBeNull();
+    if (rightsSection) {
+      expect(
+        within(rightsSection).getByText("설정 또는 이메일의 수신거부 링크")
+      ).toBeInTheDocument();
+    }
   });
 
   it("section 5 lists all four processors", async () => {

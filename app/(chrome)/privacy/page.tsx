@@ -105,7 +105,7 @@ export default function PrivacyPage() {
     <main className="mx-auto flex min-h-svh w-full max-w-3xl flex-col gap-8 p-6">
       <header className="flex flex-col gap-2">
         <h1 className="font-heading font-medium text-2xl">개인정보 처리방침</h1>
-        <p className="text-muted-foreground text-sm">시행일: 2026년 6월 1일</p>
+        <p className="text-muted-foreground text-sm">시행일: 2026년 9월 3일</p>
       </header>
 
       <nav aria-label="목차" className="rounded-md border p-4">
@@ -137,7 +137,11 @@ export default function PrivacyPage() {
             <li>회원 식별 및 인증</li>
             <li>프로젝트 게시 및 추천 집계</li>
             <li>서비스 품질 개선 및 문의 응대</li>
+            <li>클로드 신규 기능 및 활용 콘텐츠, 강의·이벤트 안내</li>
           </ul>
+          <p className="text-muted-foreground">
+            마케팅 정보는 수신에 동의한 회원에게만 안내합니다.
+          </p>
         </section>
 
         <section aria-labelledby="p-2" className="flex flex-col gap-2">
@@ -153,6 +157,15 @@ export default function PrivacyPage() {
               </li>
             ))}
           </ul>
+          <p className="font-medium">마케팅 정보 수신 동의 시</p>
+          <ul className="list-disc pl-5">
+            <li>
+              <span className="font-medium">이메일 주소</span> —{" "}
+              <span className="text-muted-foreground">
+                뉴스레터와 강의·이벤트 안내 발송
+              </span>
+            </li>
+          </ul>
         </section>
 
         <section aria-labelledby="p-3" className="flex flex-col gap-2">
@@ -163,6 +176,10 @@ export default function PrivacyPage() {
             회원 탈퇴 시 저장된 개인정보를 <strong>지체 없이</strong>{" "}
             파기합니다. 다만 관계 법령에 따른 보존 의무가 있는 경우에 한해 해당
             기간 동안 보관한 후 파기합니다.
+          </p>
+          <p>
+            마케팅 정보 수신을 위해 처리하는 이메일 주소의 보유 기간은{" "}
+            <strong>동의 철회 또는 회원 탈퇴 시까지</strong>입니다.
           </p>
         </section>
 
@@ -214,6 +231,10 @@ export default function PrivacyPage() {
           <ul className="list-disc pl-5">
             <li>개인정보 열람 및 정정 — 설정 페이지</li>
             <li>개인정보 삭제(회원 탈퇴) — 설정 페이지의 "계정 삭제"</li>
+            <li>
+              마케팅 정보 수신 동의 철회 —{" "}
+              <span>설정 또는 이메일의 수신거부 링크</span>
+            </li>
             <li>처리 정지 요구 — 아래 개인정보 보호책임자 이메일로 문의</li>
           </ul>
         </section>
@@ -316,7 +337,7 @@ export default function PrivacyPage() {
             <strong>30일</strong> 전부터 공지합니다.
           </p>
           <p className="text-muted-foreground">
-            본 개인정보 처리방침의 시행일: 2026-06-01
+            본 개인정보 처리방침의 시행일: 2026-09-03
           </p>
         </section>
       </article>
@@ -345,7 +366,7 @@ export default function PrivacyPage() {
           이메일: toycrane@odd-corp.com
         </span>
         <span className="mt-1 text-muted-foreground text-xs">
-          시행일: 2026-06-01
+          시행일: 2026-09-03
         </span>
       </aside>
     </main>
