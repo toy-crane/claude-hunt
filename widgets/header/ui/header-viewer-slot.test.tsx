@@ -19,6 +19,12 @@ vi.mock("next/link", () => ({
   ),
 }));
 
+const connectionMock = vi.fn().mockResolvedValue(undefined);
+
+vi.mock("next/server", () => ({
+  connection: connectionMock,
+}));
+
 const fetchViewerMock = vi.fn();
 vi.mock("@shared/api/supabase/viewer", () => ({
   fetchViewer: (...args: unknown[]) => fetchViewerMock(...args),
@@ -46,6 +52,7 @@ vi.mock("next-themes", () => ({
 describe("<HeaderViewerSlot />", () => {
   beforeEach(() => {
     fetchViewerMock.mockReset();
+    connectionMock.mockClear();
   });
 
   it("renders a Log in button navigating to /login when signed out", async () => {
@@ -54,6 +61,7 @@ describe("<HeaderViewerSlot />", () => {
     const { HeaderViewerSlot } = await import("./header-viewer-slot");
     render(await HeaderViewerSlot());
 
+    expect(connectionMock).toHaveBeenCalledOnce();
     const login = screen.getByRole("link", { name: LOGIN_LABEL });
     expect(login).toHaveAttribute("href", "/login");
   });

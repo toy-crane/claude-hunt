@@ -3,6 +3,7 @@ import { fetchViewer } from "@shared/api/supabase/viewer";
 import { Button } from "@shared/ui/button";
 import { Skeleton } from "@shared/ui/skeleton";
 import Link from "next/link";
+import { connection } from "next/server";
 
 import { HeaderMenu } from "./header-menu";
 
@@ -14,6 +15,10 @@ import { HeaderMenu } from "./header-menu";
  * Cache Components is enabled.
  */
 export async function HeaderViewerSlot() {
+  // Supabase session recovery reads the request clock. This slot already sits
+  // behind Suspense, so mark the viewer lookup as request-time work explicitly.
+  await connection();
+
   const viewer = await fetchViewer();
 
   return (
