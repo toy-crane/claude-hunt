@@ -1,5 +1,6 @@
 "use server";
 
+import { EMAIL_MARKETING_CONSENT_VERSION } from "@entities/email-marketing-consent";
 import {
   DISPLAY_NAME_TAKEN_MESSAGE,
   isDisplayNameUniqueViolation,
@@ -37,17 +38,14 @@ export async function completeOnboarding(
   if (!auth.ok) {
     return auth;
   }
-  const { supabase, userId, email } = auth;
+  const { supabase } = auth;
 
-  const { error: upsertError } = await supabase.from("profiles").upsert(
-    {
-      id: userId,
-      email,
-      display_name: input.displayName,
-      cohort_id: input.cohortId,
-    },
-    { onConflict: "id" }
-  );
+  const { error: upsertError } = await supabase.rpc("complete_onboarding", {
+    p_cohort_id: input.cohortId,
+    p_consent_version: EMAIL_MARKETING_CONSENT_VERSION,
+    p_display_name: input.displayName,
+    p_marketing_opted_in: input.marketingOptedIn,
+  });
 
   if (upsertError) {
     if (isDisplayNameUniqueViolation(upsertError)) {

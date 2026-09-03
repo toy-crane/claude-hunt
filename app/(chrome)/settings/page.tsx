@@ -1,5 +1,7 @@
+import { fetchEmailMarketingConsentState } from "@entities/email-marketing-consent/server";
 import { fetchCohorts } from "@features/cohort-filter/server";
 import { DeleteButton } from "@features/delete-project";
+import { EmailNewsSettings } from "@features/email-marketing-consent";
 import {
   fetchMyProjects,
   type MyProjectRow,
@@ -53,9 +55,10 @@ export default async function SettingsPage() {
   // fetchCohorts is viewer-agnostic and fetchMyProjects only needs
   // viewer.id, so they run in parallel — same waterfall reduction
   // pattern as the previous fetchViewer/fetchCohorts pairing.
-  const [cohorts, myProjects] = await Promise.all([
+  const [cohorts, myProjects, emailMarketingConsent] = await Promise.all([
     fetchCohorts(),
     fetchMyProjects(viewer.id),
+    fetchEmailMarketingConsentState(viewer.id),
   ]);
 
   return (
@@ -79,6 +82,26 @@ export default async function SettingsPage() {
               email={viewer.email}
               initialCohortId={viewer.cohortId}
               initialDisplayName={viewer.displayName ?? ""}
+            />
+          </CardContent>
+        </Card>
+      </section>
+
+      <section
+        aria-labelledby="settings-email-news-heading"
+        className="flex flex-col gap-3"
+        id="email-news"
+      >
+        <h2
+          className="px-1 font-medium text-muted-foreground text-xs"
+          id="settings-email-news-heading"
+        >
+          이메일 소식
+        </h2>
+        <Card>
+          <CardContent>
+            <EmailNewsSettings
+              initialOptedIn={emailMarketingConsent.isOptedIn}
             />
           </CardContent>
         </Card>

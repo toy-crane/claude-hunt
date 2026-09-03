@@ -4,6 +4,7 @@ import { beforeEach, describe, expect, it, vi } from "vitest";
 const fetchViewerMock = vi.fn();
 const fetchCohortsMock = vi.fn();
 const fetchProjectsMock = vi.fn();
+const fetchEmailMarketingConsentStateMock = vi.fn();
 
 vi.mock("@shared/api/supabase/viewer", () => ({
   fetchViewer: (...args: unknown[]) => fetchViewerMock(...args),
@@ -21,6 +22,15 @@ vi.mock("@features/cohort-filter/server", async () => {
 
 vi.mock("@widgets/project-grid/server", () => ({
   fetchProjects: (...args: unknown[]) => fetchProjectsMock(...args),
+}));
+
+vi.mock("@entities/email-marketing-consent/server", () => ({
+  fetchEmailMarketingConsentState: (...args: unknown[]) =>
+    fetchEmailMarketingConsentStateMock(...args),
+}));
+
+vi.mock("@features/email-marketing-consent", () => ({
+  EmailMarketingNotice: () => <aside data-testid="email-marketing-notice" />,
 }));
 
 vi.mock("../_components/project-board", () => ({
@@ -44,6 +54,11 @@ describe("/projects page", () => {
     fetchViewerMock.mockReset();
     fetchCohortsMock.mockReset().mockResolvedValue([]);
     fetchProjectsMock.mockReset().mockResolvedValue([]);
+    fetchEmailMarketingConsentStateMock.mockReset().mockResolvedValue({
+      hasDecision: false,
+      isOptedIn: false,
+      noticeDismissed: false,
+    });
   });
 
   it("renders the project board for signed-out visitors", async () => {
@@ -64,6 +79,49 @@ describe("/projects page", () => {
     render(jsx);
 
     expect(screen.getByTestId("project-board-stub")).toBeInTheDocument();
+  });
+
+  it("shows the one-time prompt only to signed-in members without a decision", async () => {
+    fetchViewerMock.mockResolvedValue(SIGNED_IN_VIEWER);
+
+    const { BoardData } = await import("./page");
+    render(await BoardData({ searchParams: Promise.resolve({}) }));
+
+    expect(fetchEmailMarketingConsentStateMock).toHaveBeenCalledWith("user-1");
+    expect(screen.getByTestId("email-marketing-notice")).toBeInTheDocument();
+  });
+
+  it("does not query or show the prompt for signed-out visitors", async () => {
+    fetchViewerMock.mockResolvedValue(null);
+
+    const { BoardData } = await import("./page");
+    render(await BoardData({ searchParams: Promise.resolve({}) }));
+
+    expect(fetchEmailMarketingConsentStateMock).not.toHaveBeenCalled();
+    expect(
+      screen.queryByTestId("email-marketing-notice")
+    ).not.toBeInTheDocument();
+  });
+
+  it.each([
+    {
+      label: "already decided",
+      state: { hasDecision: true, isOptedIn: false, noticeDismissed: false },
+    },
+    {
+      label: "already dismissed",
+      state: { hasDecision: false, isOptedIn: false, noticeDismissed: true },
+    },
+  ])("does not show the prompt when $label", async ({ state }) => {
+    fetchViewerMock.mockResolvedValue(SIGNED_IN_VIEWER);
+    fetchEmailMarketingConsentStateMock.mockResolvedValue(state);
+
+    const { BoardData } = await import("./page");
+    render(await BoardData({ searchParams: Promise.resolve({}) }));
+
+    expect(
+      screen.queryByTestId("email-marketing-notice")
+    ).not.toBeInTheDocument();
   });
 
   it("uses 프로젝트 보드 as the page heading", async () => {

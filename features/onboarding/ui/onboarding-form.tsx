@@ -2,6 +2,10 @@
 
 import { type Cohort, isSelectableCohort } from "@entities/cohort";
 import {
+  EMAIL_NEWS_DESCRIPTION,
+  EmailMarketingConsentDetails,
+} from "@entities/email-marketing-consent";
+import {
   DISPLAY_NAME_REQUIRED_MESSAGE,
   displayNameSchema,
 } from "@entities/profile";
@@ -10,6 +14,7 @@ import { getZodErrorMessage } from "@shared/lib/validation";
 import { Alert, AlertDescription, AlertTitle } from "@shared/ui/alert";
 import { AuthLayout } from "@shared/ui/auth-layout";
 import { Button } from "@shared/ui/button";
+import { Checkbox } from "@shared/ui/checkbox";
 import { Field, FieldError, FieldGroup, FieldLabel } from "@shared/ui/field";
 import { Input } from "@shared/ui/input";
 import {
@@ -38,9 +43,11 @@ const COHORT_UNSELECTED = "";
 export function OnboardingForm({ cohorts, initialNext }: OnboardingFormProps) {
   const displayNameId = useId();
   const cohortId = useId();
+  const marketingConsentId = useId();
   const router = useRouter();
   const [displayName, setDisplayName] = useState("");
   const [selectedCohortId, setSelectedCohortId] = useState(COHORT_UNSELECTED);
+  const [marketingOptedIn, setMarketingOptedIn] = useState(false);
   const [displayNameError, setDisplayNameError] = useState<string | null>(null);
   const [cohortError, setCohortError] = useState<string | null>(null);
   const [submitError, setSubmitError] = useState<string | null>(null);
@@ -50,7 +57,11 @@ export function OnboardingForm({ cohorts, initialNext }: OnboardingFormProps) {
   const selectableCohorts = cohorts.filter(isSelectableCohort);
   const noCohorts = selectableCohorts.length === 0;
 
-  function validate(): { displayName: string; cohortId: string } | null {
+  function validate(): {
+    displayName: string;
+    cohortId: string;
+    marketingOptedIn: boolean;
+  } | null {
     const parsed = displayNameSchema.safeParse(displayName);
     const cohortValid = selectedCohortId !== COHORT_UNSELECTED;
 
@@ -64,7 +75,11 @@ export function OnboardingForm({ cohorts, initialNext }: OnboardingFormProps) {
     if (!(parsed.success && cohortValid)) {
       return null;
     }
-    return { displayName: parsed.data, cohortId: selectedCohortId };
+    return {
+      displayName: parsed.data,
+      cohortId: selectedCohortId,
+      marketingOptedIn,
+    };
   }
 
   function handleSubmit(event: React.FormEvent<HTMLFormElement>) {
@@ -190,6 +205,31 @@ export function OnboardingForm({ cohorts, initialNext }: OnboardingFormProps) {
             </Field>
           )}
         </FieldGroup>
+
+        <div className="rounded-md border p-4">
+          <div className="flex items-start gap-3">
+            <Checkbox
+              checked={marketingOptedIn}
+              disabled={isPending || isSigningOut}
+              id={marketingConsentId}
+              onCheckedChange={(checked) =>
+                setMarketingOptedIn(checked === true)
+              }
+            />
+            <div className="grid min-w-0 gap-1">
+              <label
+                className="cursor-pointer font-medium text-sm leading-snug"
+                htmlFor={marketingConsentId}
+              >
+                마케팅 정보 수신에 동의합니다. (선택)
+              </label>
+              <p className="text-muted-foreground text-xs leading-relaxed">
+                {EMAIL_NEWS_DESCRIPTION}
+              </p>
+              <EmailMarketingConsentDetails label="자세히 보기" />
+            </div>
+          </div>
+        </div>
 
         {submitError ? (
           <FieldError data-testid="onboarding-submit-error">

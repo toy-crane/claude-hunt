@@ -10,6 +10,7 @@ import { z } from "zod";
 export const onboardingInputSchema = z.object({
   displayName: displayNameSchema,
   cohortId: z.string().uuid("클래스를 선택해 주세요."),
+  marketingOptedIn: z.boolean().default(false),
 });
 
-export type OnboardingInput = z.infer<typeof onboardingInputSchema>;
+export type OnboardingInput = z.input<typeof onboardingInputSchema>;
