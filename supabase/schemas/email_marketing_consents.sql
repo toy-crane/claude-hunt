@@ -21,24 +21,13 @@ create table public.email_marketing_consents (
 alter table public.email_marketing_consents enable row level security;
 
 revoke all on table public.email_marketing_consents from PUBLIC, anon, authenticated, service_role;
-grant select, insert, update on table public.email_marketing_consents to authenticated;
+grant select on table public.email_marketing_consents to authenticated;
 grant select, insert, update, delete on table public.email_marketing_consents to service_role;
 
 create policy "Users can view their own email marketing consent"
   on public.email_marketing_consents for select
   to authenticated
   using ((select auth.uid()) = user_id);
-
-create policy "Users can insert their own email marketing consent"
-  on public.email_marketing_consents for insert
-  to authenticated
-  with check ((select auth.uid()) = user_id);
-
-create policy "Users can update their own email marketing consent"
-  on public.email_marketing_consents for update
-  to authenticated
-  using ((select auth.uid()) = user_id)
-  with check ((select auth.uid()) = user_id);
 
 create trigger handle_updated_at
   before update on public.email_marketing_consents
@@ -53,7 +42,7 @@ create or replace function public.complete_onboarding(
 )
 returns void
 language plpgsql
-security invoker
+security definer
 set search_path = ''
 as $$
 declare
@@ -102,7 +91,7 @@ create or replace function public.set_email_marketing_consent(
 )
 returns void
 language plpgsql
-security invoker
+security definer
 set search_path = ''
 as $$
 declare
@@ -150,7 +139,7 @@ $$;
 create or replace function public.dismiss_email_marketing_notice()
 returns void
 language plpgsql
-security invoker
+security definer
 set search_path = ''
 as $$
 declare
@@ -184,8 +173,8 @@ revoke execute on function public.dismiss_email_marketing_notice()
   from PUBLIC, anon;
 
 grant execute on function public.complete_onboarding(text, uuid, boolean, text)
-  to authenticated, service_role;
+  to authenticated;
 grant execute on function public.set_email_marketing_consent(boolean, text)
-  to authenticated, service_role;
+  to authenticated;
 grant execute on function public.dismiss_email_marketing_notice()
-  to authenticated, service_role;
+  to authenticated;

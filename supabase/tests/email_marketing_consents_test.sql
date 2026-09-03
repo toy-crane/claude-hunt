@@ -74,45 +74,46 @@ VALUES
     '00000000-0000-0000-0000-000000000000', now(), now()
   );
 
--- Seed another user's consent as the table owner so RLS visibility can be tested.
+-- Seed consent rows as the table owner so read RLS and direct-write denial can be tested.
 INSERT INTO public.email_marketing_consents (
   user_id, is_opted_in, decided_at
 )
-VALUES (
-  '00000000-0000-0000-0000-000000000072', false, now()
-);
+VALUES
+  ('00000000-0000-0000-0000-000000000071', false, now()),
+  ('00000000-0000-0000-0000-000000000072', false, now());
 
 SET local role authenticated;
 SET local request.jwt.claims TO
   '{"sub":"00000000-0000-0000-0000-000000000071","email":"marketing-owner@example.com"}';
 
--- 17-20. Authenticated members can reach only their own row.
-SELECT lives_ok(
-  $$INSERT INTO public.email_marketing_consents (user_id, is_opted_in, decided_at)
-    VALUES ('00000000-0000-0000-0000-000000000071', false, now())$$,
-  'Authenticated member can insert their own consent state'
-);
+-- 17-20. Members can read their row but audit fields change only through RPCs.
 SELECT results_eq(
   $$SELECT count(*)::int FROM public.email_marketing_consents$$,
   ARRAY[1],
   'Authenticated member can select only their own consent state'
 );
-SELECT results_eq(
-  $$WITH changed AS (
-      UPDATE public.email_marketing_consents
-      SET is_opted_in = true
-      WHERE user_id = '00000000-0000-0000-0000-000000000072'
-      RETURNING user_id
-    ) SELECT count(*)::int FROM changed$$,
-  ARRAY[0],
-  'Authenticated member cannot update another member consent state'
+SELECT throws_ok(
+  $$UPDATE public.email_marketing_consents
+    SET consented_at = now(), consent_version = 'fabricated'
+    WHERE user_id = '00000000-0000-0000-0000-000000000071'$$,
+  '42501',
+  NULL,
+  'Authenticated member cannot directly fabricate their consent audit fields'
+);
+SELECT throws_ok(
+  $$UPDATE public.email_marketing_consents
+    SET is_opted_in = true
+    WHERE user_id = '00000000-0000-0000-0000-000000000072'$$,
+  '42501',
+  NULL,
+  'Authenticated member cannot directly update another consent state'
 );
 SELECT throws_ok(
   $$INSERT INTO public.email_marketing_consents (user_id, is_opted_in)
-    VALUES ('00000000-0000-0000-0000-000000000072', false)$$,
+    VALUES ('00000000-0000-0000-0000-000000000071', false)$$,
   '42501',
   NULL,
-  'Authenticated member cannot insert another member consent state'
+  'Authenticated member cannot directly replace the controlled RPC write path'
 );
 
 -- 21. Signed-out visitors cannot read this private state.
