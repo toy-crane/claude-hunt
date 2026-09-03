@@ -159,6 +159,50 @@ export type Database = {
           },
         ]
       }
+      email_marketing_consents: {
+        Row: {
+          consent_version: string | null
+          consented_at: string | null
+          created_at: string
+          decided_at: string | null
+          is_opted_in: boolean
+          notice_dismissed_at: string | null
+          updated_at: string
+          user_id: string
+          withdrawn_at: string | null
+        }
+        Insert: {
+          consent_version?: string | null
+          consented_at?: string | null
+          created_at?: string
+          decided_at?: string | null
+          is_opted_in?: boolean
+          notice_dismissed_at?: string | null
+          updated_at?: string
+          user_id: string
+          withdrawn_at?: string | null
+        }
+        Update: {
+          consent_version?: string | null
+          consented_at?: string | null
+          created_at?: string
+          decided_at?: string | null
+          is_opted_in?: boolean
+          notice_dismissed_at?: string | null
+          updated_at?: string
+          user_id?: string
+          withdrawn_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "email_marketing_consents_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: true
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       profiles: {
         Row: {
           avatar_url: string | null
@@ -377,7 +421,20 @@ export type Database = {
       }
     }
     Functions: {
-      [_ in never]: never
+      complete_onboarding: {
+        Args: {
+          p_cohort_id: string
+          p_consent_version: string
+          p_display_name: string
+          p_marketing_opted_in: boolean
+        }
+        Returns: undefined
+      }
+      dismiss_email_marketing_notice: { Args: never; Returns: undefined }
+      set_email_marketing_consent: {
+        Args: { p_consent_version: string; p_opted_in: boolean }
+        Returns: undefined
+      }
     }
     Enums: {
       [_ in never]: never
