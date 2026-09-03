@@ -1,0 +1,614 @@
+<!--
+  prototype shell: the review chrome every prototype starts from.
+
+  Keep this comment in the prototype you grow from here: it is the contract,
+  and later turns work from that file rather than from this one.
+
+  Contract (extend product screens; keep the review shell):
+  - Product:  .sh-stage contains only end-user product UI. Keep review notes,
+               rationale, instructions, and approval controls in conversation.
+  - Screens:  <section data-screen="slug" data-title="Label"> inside .sh-stage.
+               The selector, arrow keys, and #hash routing build themselves.
+               Use one option per product destination or distinct surface,
+               named by its product role. Keep baselines, variants, comparison
+               labels, steps, indexes, and progress out of names and states.
+               Links may use href="#slug".
+  - States:   "Default" is automatic. A screen declares only representative
+               presets in data-states="Empty,Error". Use natural, screen-specific
+               names. Reserve presets for important multi-step results, forced
+               data or errors, or materially different structure; keep one-click
+               and transient states as interactions. Use data-when="Empty" on
+               preset-only elements. Call prototypeShell.setState("Name") on
+               entry and setState("Default") on exit, including when repeated
+               actions cross a preset condition.
+  - Viewport: "vp (m)" cycles full / 390 / 768. The 390 preset is a
+               fixed-height, internally scrolling phone frame. Start a
+               mobile-first prototype by adding class="sh-vp-390" to <body>
+               (or a bootstrap classList.add before the chrome script runs).
+  - Pinning:  keep in-frame bars (tab bars, CTAs) inside the phone with
+               position: sticky; position: fixed pins to the browser window.
+  - Tokens:   replace the project-tokens block with project tokens copied
+               verbatim. Map differing names to --background, --foreground, and
+               --font afterwards; replace network fonts with a system stack and
+               note that substitution. Without a design system, keep this
+               palette as the finished style.
+  - Placeholders: .wf-pic stands in for pictures the prototype has no real
+               files for. Use real text everywhere text belongs.
+
+  - Chrome:   Keep exactly the screen selector, selected-screen state selector,
+               and viewport cycle. Chrome that needs explaining has failed.
+
+  Self-contained by design: no build, no framework, no network.
+-->
+<meta charset="utf-8">
+<title>Claude Hunt — 마케팅 수신 동의 프로토타입</title>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<link rel="icon" href="data:,">
+<style>
+  /* ── project tokens: copied from app/globals.css ── */
+  :root {
+    --background: oklch(1 0 0);
+    --foreground: oklch(0.145 0 0);
+    --card: oklch(1 0 0);
+    --card-foreground: oklch(0.145 0 0);
+    --popover: oklch(1 0 0);
+    --popover-foreground: oklch(0.145 0 0);
+    --primary: oklch(0.205 0 0);
+    --primary-foreground: oklch(0.985 0 0);
+    --secondary: oklch(0.97 0 0);
+    --secondary-foreground: oklch(0.205 0 0);
+    --muted: oklch(0.97 0 0);
+    --muted-foreground: oklch(0.556 0 0);
+    --accent: oklch(0.97 0 0);
+    --accent-foreground: oklch(0.205 0 0);
+    --destructive: oklch(0.577 0.245 27.325);
+    --border: oklch(0.922 0 0);
+    --border-soft: oklch(0.95 0 0);
+    --input: oklch(0.922 0 0);
+    --ring: oklch(0.708 0 0);
+    --radius: 0;
+    --accent-terracotta: #c15f3c;
+    --font: Inter, Pretendard, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+    --font-mono: "SFMono-Regular", Consolas, "Liberation Mono", monospace;
+    --shadow-xs: 0 1px 2px rgb(0 0 0 / 0.04);
+  }
+
+  /* ── review chrome (sh-*): keep ── */
+  * { box-sizing: border-box }
+  body {
+    margin: 0; padding: 0 0 40px;
+    background: var(--background); color: var(--foreground);
+    font-family: var(--font);
+  }
+  .sh-bar {
+    position: sticky; top: 0; z-index: 999;
+    display: flex; gap: 10px; align-items: center; flex-wrap: wrap;
+    padding: 8px 12px; background: #191a1c; color: #d7d7d7;
+    font: 12px/1.5 ui-monospace, SFMono-Regular, Menlo, monospace;
+  }
+  .sh-bar b, .sh-control-label { color: #8a8f98; font-weight: 500 }
+  .sh-control { display: inline-flex; gap: 5px; align-items: center }
+  .sh-bar button {
+    border: 1px solid #3a3d42; background: none; color: inherit;
+    font: inherit; padding: 2px 9px; border-radius: 99px; cursor: pointer;
+  }
+  .sh-bar select {
+    width: 170px; border: 1px solid #3a3d42; background: #232428; color: inherit;
+    font: inherit; padding: 3px 28px 3px 9px; border-radius: 7px; cursor: pointer;
+    color-scheme: dark;
+  }
+  #sh-screen { width: 190px }
+  .sh-bar button.on { background: #d7d7d7; color: #191a1c; border-color: #d7d7d7 }
+  .sh-spacer { flex: 1 }
+  .sh-stage { max-width: 960px; margin: 0 auto; padding: 12px 16px 0 }
+  [hidden] { display: none !important }
+
+  .sh-vp-390 .sh-stage {
+    max-width: 390px; background: var(--background);
+    border: 10px solid #191a1c; border-radius: 28px;
+    padding: 0; height: min(844px, calc(100dvh - 52px));
+    overflow-y: auto; margin-top: 12px;
+  }
+  .sh-vp-768 .sh-stage {
+    max-width: 768px; border: 1px solid #c4c4c4; border-radius: 12px;
+    padding: 0; margin-top: 12px; overflow: hidden;
+  }
+
+  /* ── product styles ── */
+  button, input, select, summary { font: inherit }
+  button, summary, label, select { -webkit-tap-highlight-color: transparent }
+  button:focus-visible, input:focus-visible, select:focus-visible, summary:focus-visible {
+    outline: 3px solid color-mix(in oklch, var(--ring), transparent 50%);
+    outline-offset: 1px;
+  }
+  a { color: inherit }
+  .product-screen { min-height: 100%; background: var(--background) }
+  .muted { color: var(--muted-foreground) }
+  .mono { font-family: var(--font-mono) }
+
+  .logo {
+    display: inline-flex; align-items: baseline; gap: 2px;
+    color: var(--foreground); text-decoration: none; font-family: var(--font-mono);
+    font-weight: 650; letter-spacing: -0.04em;
+  }
+  .logo-mark { color: var(--accent-terracotta) }
+  .logo-cursor { color: var(--accent-terracotta); animation: blink 1s steps(1) infinite }
+  @keyframes blink { 50% { opacity: 0 } }
+
+  .auth-screen {
+    display: grid; min-height: 820px; place-items: center;
+    padding: 64px 20px; background: #fafafa;
+  }
+  .auth-shell { width: min(100%, 384px) }
+  .auth-shell .logo { font-size: 30px }
+  .auth-heading { margin: 32px 0 0; font-size: 24px; line-height: 1.2; letter-spacing: -0.035em }
+  .auth-description { margin: 5px 0 0; color: var(--muted-foreground); font-size: 14px; line-height: 1.55 }
+  .auth-form { display: flex; flex-direction: column; gap: 24px; margin-top: 32px }
+  .field-group { display: grid; gap: 20px }
+  .field { display: grid; gap: 8px }
+  .field-label { font-size: 14px; font-weight: 600 }
+  .input, .select {
+    width: 100%; height: 36px; border: 1px solid var(--input); border-radius: var(--radius);
+    background: var(--background); color: var(--foreground); padding: 4px 10px;
+    box-shadow: var(--shadow-xs); font-size: 14px;
+  }
+  .input:disabled { background: var(--muted); color: var(--muted-foreground) }
+
+  .button {
+    display: inline-flex; min-height: 36px; align-items: center; justify-content: center;
+    gap: 6px; border: 1px solid transparent; border-radius: var(--radius);
+    padding: 7px 12px; background: var(--primary); color: var(--primary-foreground);
+    font-size: 14px; font-weight: 600; cursor: pointer; transition: 140ms ease;
+  }
+  .button:hover { opacity: .82 }
+  .button:active { transform: translateY(1px) }
+  .button-outline { border-color: var(--border); background: var(--background); color: var(--foreground); box-shadow: var(--shadow-xs) }
+  .button-ghost { background: transparent; color: var(--muted-foreground) }
+  .button-link { min-height: 28px; padding: 3px 0; background: transparent; color: var(--foreground); text-decoration: underline; text-underline-offset: 3px }
+  .button-wide { width: 100% }
+  .button-small { min-height: 32px; padding: 5px 10px; font-size: 13px }
+
+  .consent-field {
+    border-top: 1px solid var(--border-soft); padding-top: 18px;
+  }
+  .consent-choice { display: grid; grid-template-columns: 18px 1fr; gap: 10px; align-items: start; cursor: pointer }
+  .consent-choice input {
+    width: 16px; height: 16px; margin: 2px 0 0; accent-color: var(--primary); cursor: pointer;
+  }
+  .consent-title { display: block; font-size: 13px; font-weight: 600; line-height: 1.55 }
+  .consent-copy { display: block; margin-top: 3px; color: var(--muted-foreground); font-size: 12px; line-height: 1.55 }
+  .consent-details { margin: 8px 0 0 28px; font-size: 12px }
+  .consent-details summary { width: fit-content; color: var(--muted-foreground); cursor: pointer; text-decoration: underline; text-underline-offset: 3px; list-style: none }
+  .consent-details summary::-webkit-details-marker { display: none }
+  .consent-details[open] summary { color: var(--foreground) }
+  .disclosure {
+    display: grid; grid-template-columns: 70px 1fr; gap: 7px 12px;
+    margin-top: 10px; border: 1px solid var(--border); background: var(--muted); padding: 12px; line-height: 1.5;
+  }
+  .disclosure dt { color: var(--muted-foreground) }
+  .disclosure dd { margin: 0 }
+  .divider { display: grid; grid-template-columns: 1fr auto 1fr; gap: 12px; align-items: center; color: var(--muted-foreground); font-size: 12px }
+  .divider::before, .divider::after { content: ""; height: 1px; background: var(--border) }
+
+  .site-header { position: sticky; top: 0; z-index: 30; border-bottom: 1px solid var(--border); background: color-mix(in oklch, var(--background), transparent 4%) }
+  .header-row { display: flex; min-height: 57px; align-items: center; justify-content: space-between; gap: 16px; padding: 11px 24px }
+  .header-left, .header-actions, .nav { display: flex; align-items: center }
+  .header-left { gap: 24px }
+  .header-actions { gap: 9px }
+  .header-avatar { display: grid; width: 32px; height: 32px; place-items: center; border: 1px solid var(--border); border-radius: 50%; background: var(--muted); font-size: 13px; font-weight: 650 }
+  .nav { gap: 4px }
+  .nav a { border-bottom: 1px solid transparent; padding: 7px 10px; color: var(--muted-foreground); text-decoration: none; font-size: 12px }
+  .nav a.active { border-color: var(--foreground); color: var(--foreground); font-weight: 600 }
+  .mobile-nav { display: none; border-top: 1px solid var(--border) }
+  .mobile-nav a { flex: 1; justify-content: center; text-align: center; font-size: 14px }
+
+  .page { width: min(100%, 720px); margin: 0 auto; padding: 36px 24px 64px }
+  .page-wide { width: min(100%, 1056px) }
+  .page-title { margin: 0 0 30px; font-size: 24px; font-weight: 600; letter-spacing: -0.035em }
+  .section { display: grid; gap: 12px; margin-top: 32px }
+  .section:first-of-type { margin-top: 0 }
+  .section-label { margin: 0; padding: 0 4px; color: var(--muted-foreground); font-size: 12px; font-weight: 600 }
+  .card { border: 1px solid var(--border); background: var(--card); color: var(--card-foreground); box-shadow: var(--shadow-xs) }
+  .card-content { padding: 24px }
+  .profile-form { display: grid; gap: 24px }
+  .form-actions { display: flex; justify-content: flex-end }
+
+  .news-card { transition: 240ms ease }
+  .news-card.attention { box-shadow: 0 0 0 3px color-mix(in oklch, var(--accent-terracotta), transparent 70%) }
+  .news-row { display: grid; grid-template-columns: 1fr auto; gap: 18px; align-items: start }
+  .news-title { margin: 0; font-size: 14px; font-weight: 650 }
+  .news-description { margin: 5px 0 0; color: var(--muted-foreground); font-size: 13px; line-height: 1.55 }
+  .news-meta { margin: 7px 0 0; color: var(--muted-foreground); font-size: 12px; line-height: 1.5 }
+  .switch {
+    position: relative; width: 40px; height: 22px; flex: 0 0 auto; border: 0; border-radius: 999px;
+    background: var(--border); padding: 0; cursor: pointer; transition: 160ms ease;
+  }
+  .switch::after {
+    content: ""; position: absolute; top: 3px; left: 3px; width: 16px; height: 16px;
+    border-radius: 50%; background: white; box-shadow: 0 1px 2px rgb(0 0 0 / .22); transition: 160ms ease;
+  }
+  .switch.on { background: var(--primary) }
+  .switch.on::after { transform: translateX(18px) }
+  .plain-details { margin-top: 16px; font-size: 12px }
+  .plain-details summary { width: fit-content; color: var(--muted-foreground); cursor: pointer; text-decoration: underline; text-underline-offset: 3px; list-style: none }
+  .plain-details summary::-webkit-details-marker { display: none }
+
+  .project-list { display: grid; gap: 10px }
+  .project-row { display: grid; grid-template-columns: 54px 1fr auto; gap: 13px; align-items: center; border-top: 1px solid var(--border-soft); padding: 12px 0 }
+  .project-row:first-child { border-top: 0; padding-top: 0 }
+  .project-row:last-child { padding-bottom: 0 }
+  .project-thumb { width: 54px; height: 42px; background: linear-gradient(135deg, #e1e1e1, #f4f4f4); border: 1px solid var(--border-soft) }
+  .project-row h3 { margin: 0; font-size: 13px }
+  .project-row p { margin: 3px 0 0; color: var(--muted-foreground); font-size: 11px }
+  .project-actions { display: flex; gap: 6px }
+  .icon-button { display: grid; width: 32px; height: 32px; place-items: center; border: 1px solid var(--border); background: var(--background); cursor: pointer }
+
+  .board-heading { display: flex; align-items: end; justify-content: space-between; gap: 24px; margin-bottom: 24px }
+  .board-heading h1 { margin: 0; font-size: 25px; letter-spacing: -0.04em }
+  .board-heading p { margin: 5px 0 0; color: var(--muted-foreground); font-size: 13px }
+  .filter-row { display: flex; flex-wrap: wrap; gap: 7px; margin-bottom: 18px }
+  .chip { border: 1px solid var(--border); background: var(--background); padding: 6px 10px; color: var(--muted-foreground); font-size: 12px; cursor: pointer }
+  .chip.active { border-color: var(--foreground); background: var(--foreground); color: var(--background) }
+  .project-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 14px }
+  .project-card { overflow: hidden; border: 1px solid var(--border); background: var(--card) }
+  .project-art { aspect-ratio: 4 / 3; border-bottom: 1px solid var(--border); background: linear-gradient(145deg, #ececec, #d7d7d7) }
+  .project-card:nth-child(2) .project-art { background: linear-gradient(145deg, #f1e8e2, #d5c0b5) }
+  .project-card:nth-child(3) .project-art { background: linear-gradient(145deg, #dfebea, #afc7c3) }
+  .project-copy { padding: 14px }
+  .project-copy h2 { margin: 0; font-size: 14px }
+  .project-copy p { min-height: 36px; margin: 5px 0 12px; color: var(--muted-foreground); font-size: 12px; line-height: 1.5 }
+  .project-foot { display: flex; justify-content: space-between; color: var(--muted-foreground); font-size: 11px }
+
+  .member-notice-wrap { position: sticky; bottom: 16px; z-index: 20; display: flex; justify-content: flex-end; pointer-events: none; margin-top: 20px }
+  .member-notice { width: min(100%, 400px); border: 1px solid var(--foreground); background: var(--background); box-shadow: 0 12px 32px rgb(0 0 0 / .14); padding: 18px; pointer-events: auto }
+  .member-notice h2 { margin: 0; font-size: 15px }
+  .member-notice p { margin: 6px 0 16px; color: var(--muted-foreground); font-size: 13px; line-height: 1.5 }
+  .notice-actions { display: flex; justify-content: flex-end; gap: 8px }
+
+  .toast {
+    position: sticky; z-index: 50; bottom: 14px; width: fit-content; max-width: calc(100% - 28px);
+    margin: -49px 14px 14px auto; border: 1px solid var(--foreground); background: var(--foreground);
+    color: var(--background); padding: 10px 13px; box-shadow: 0 8px 24px rgb(0 0 0 / .18);
+    font-size: 12px; line-height: 1.4; opacity: 0; transform: translateY(8px); pointer-events: none;
+    transition: 180ms ease;
+  }
+  .toast.show { opacity: 1; transform: translateY(0) }
+
+  @media (max-width: 767px) {
+    .header-row { min-height: 55px; padding: 10px 18px }
+    .header-left .nav { display: none }
+    .mobile-nav { display: flex }
+    .page { padding: 28px 18px 52px }
+    .page-title { margin-bottom: 24px }
+    .card-content { padding: 20px }
+    .project-grid { grid-template-columns: 1fr }
+    .project-card:nth-child(n+3) { display: none }
+    .member-notice-wrap { bottom: 10px }
+    .member-notice { width: 100% }
+    .auth-screen { min-height: 790px; padding: 42px 20px }
+  }
+  /* The review shell's 390 preset simulates a narrow viewport inside a wide
+     browser, so mirror the same responsive rules on its body class. */
+  .sh-vp-390 .header-row { min-height: 55px; padding: 10px 18px }
+  .sh-vp-390 .header-left .nav { display: none }
+  .sh-vp-390 .mobile-nav { display: flex }
+  .sh-vp-390 .page { padding: 28px 18px 52px }
+  .sh-vp-390 .page-title { margin-bottom: 24px }
+  .sh-vp-390 .card-content { padding: 20px }
+  .sh-vp-390 .project-grid { grid-template-columns: 1fr }
+  .sh-vp-390 .project-card:nth-child(n+3) { display: none }
+  .sh-vp-390 .member-notice-wrap { bottom: 10px }
+  .sh-vp-390 .member-notice { width: 100% }
+  .sh-vp-390 .auth-screen { min-height: 790px; padding: 42px 20px }
+</style>
+
+<body class="sh-vp-390">
+<header class="sh-bar">
+  <b>proto</b>
+  <label class="sh-control"><span class="sh-control-label">screen</span><select id="sh-screen"></select></label>
+  <span class="sh-spacer"></span>
+  <label class="sh-control"><span class="sh-control-label">state</span><select id="sh-state"></select></label>
+  <button id="sh-vp">vp: full (m)</button>
+</header>
+
+<main class="sh-stage">
+  <section class="product-screen auth-screen" data-screen="onboarding" data-title="프로필 설정">
+    <div class="auth-shell" data-component="AuthLayout">
+      <a class="logo" href="#onboarding" aria-label="claude-hunt 홈" data-component="Logo">
+        <span class="logo-mark">&gt;</span><span>claude-hunt</span><span class="logo-cursor">_</span>
+      </a>
+      <h1 class="auth-heading">프로필 설정</h1>
+      <p class="auth-description">클래스를 선택하고 닉네임을 설정하면 프로젝트를 제출할 수 있어요.</p>
+
+      <form class="auth-form" id="onboarding-form" aria-label="프로필 설정">
+        <div class="field-group" data-component="FieldGroup">
+          <label class="field" data-component="Field">
+            <span class="field-label">닉네임</span>
+            <input class="input" data-component="Input" name="displayName" value="서윤" autocomplete="off">
+          </label>
+          <label class="field" data-component="Field">
+            <span class="field-label">클래스</span>
+            <select class="select" data-component="Select" name="class">
+              <option>LG전자 4기</option>
+              <option>인프런</option>
+              <option>LG전자 3기</option>
+            </select>
+          </label>
+        </div>
+
+        <div class="consent-field" data-component="new:ConsentField">
+          <label class="consent-choice">
+            <input id="onboarding-consent" type="checkbox">
+            <span>
+              <span class="consent-title">마케팅 정보 수신에 동의합니다. (선택)</span>
+              <span class="consent-copy">클로드를 더 잘 활용하는 데 도움이 되는 뉴스레터와 새로운 강의·이벤트 소식을 이메일로 보내드려요.</span>
+            </span>
+          </label>
+          <details class="consent-details" data-component="Disclosure">
+            <summary>자세히 보기</summary>
+            <dl class="disclosure">
+              <dt>이용 목적</dt><dd>클로드 신규 기능 및 활용 콘텐츠, 강의·이벤트 안내</dd>
+              <dt>수집·이용 항목</dt><dd>이메일 주소</dd>
+              <dt>보유 기간</dt><dd>동의 철회 또는 회원 탈퇴 시까지</dd>
+              <dt>동의 거부</dt><dd>동의하지 않아도 Claude Hunt를 이용할 수 있습니다.</dd>
+              <dt>철회 방법</dt><dd>설정 또는 이메일의 수신거부 링크</dd>
+            </dl>
+          </details>
+        </div>
+
+        <button class="button button-wide" data-component="Button" type="submit">계속하기</button>
+        <div class="divider" data-component="Separator">또는</div>
+        <button class="button button-outline button-wide" data-component="Button" type="button">로그아웃</button>
+      </form>
+    </div>
+    <div class="toast" id="onboarding-toast" role="status"></div>
+  </section>
+
+  <section class="product-screen" data-screen="settings" data-title="설정">
+    <header class="site-header" data-component="Header">
+      <div class="header-row">
+        <div class="header-left">
+          <a class="logo" href="#board" data-component="Logo"><span class="logo-mark">&gt;</span><span>claude-hunt</span><span class="logo-mark">_</span></a>
+          <nav class="nav" aria-label="주요 내비게이션">
+            <a href="#board">홈</a><a href="#board">프로젝트 <span class="mono muted">147</span></a><a href="#">강의자료</a>
+          </nav>
+        </div>
+        <div class="header-actions">
+          <button class="button button-small" data-component="Button">프로젝트 제출</button>
+          <div class="header-avatar" data-component="Avatar" aria-label="서윤 계정">서</div>
+        </div>
+      </div>
+      <nav class="nav mobile-nav" aria-label="주요 내비게이션">
+        <a href="#board">홈</a><a href="#board">프로젝트 <span class="mono muted">147</span></a><a href="#">강의자료</a>
+      </nav>
+    </header>
+
+    <main class="page">
+      <h1 class="page-title">설정</h1>
+
+      <section class="section" aria-labelledby="profile-heading">
+        <h2 class="section-label" id="profile-heading">프로필 정보</h2>
+        <div class="card" data-component="Card">
+          <div class="card-content">
+            <form class="profile-form">
+              <label class="field"><span class="field-label">이메일</span><input class="input" disabled value="seoyun@example.com"></label>
+              <label class="field"><span class="field-label">클래스</span><select class="select"><option>LG전자 4기</option><option>인프런</option></select></label>
+              <label class="field"><span class="field-label">닉네임</span><input class="input" value="서윤"></label>
+              <div class="form-actions"><button class="button" data-component="Button" type="button" id="profile-save">저장</button></div>
+            </form>
+          </div>
+        </div>
+      </section>
+
+      <section class="section" id="news-section" aria-labelledby="news-heading">
+        <h2 class="section-label" id="news-heading">이메일 소식</h2>
+        <div class="card news-card" data-component="Card" id="news-card">
+          <div class="card-content">
+            <div class="news-row">
+              <div>
+                <h3 class="news-title">클로드 소식 받기</h3>
+                <p class="news-description">클로드를 더 잘 활용하는 데 도움이 되는 뉴스레터와 새로운 강의·이벤트 소식을 보내드려요.</p>
+                <p class="news-meta">이메일 · 동의 철회 또는 회원 탈퇴 시까지</p>
+              </div>
+              <button class="switch" data-component="new:Switch" id="news-switch" type="button" role="switch" aria-checked="false" aria-label="클로드 소식 이메일 수신"></button>
+            </div>
+            <details class="plain-details" data-component="Disclosure">
+              <summary>마케팅 정보 수신 동의</summary>
+              <dl class="disclosure">
+                <dt>이용 목적</dt><dd>클로드 신규 기능 및 활용 콘텐츠, 강의·이벤트 안내</dd>
+                <dt>수집·이용 항목</dt><dd>이메일 주소</dd>
+                <dt>보유 기간</dt><dd>동의 철회 또는 회원 탈퇴 시까지</dd>
+                <dt>동의 거부</dt><dd>동의하지 않아도 Claude Hunt를 이용할 수 있습니다.</dd>
+              </dl>
+            </details>
+          </div>
+        </div>
+      </section>
+
+      <section class="section" aria-labelledby="projects-heading">
+        <h2 class="section-label" id="projects-heading">내 프로젝트 <span class="mono">· 2</span></h2>
+        <div class="card" data-component="Card">
+          <div class="card-content project-list">
+            <article class="project-row">
+              <div class="project-thumb"></div><div><h3>회의록 도우미</h3><p>LG전자 4기 · 추천 28</p></div>
+              <div class="project-actions"><button class="icon-button" aria-label="수정">✎</button><button class="icon-button" aria-label="삭제">×</button></div>
+            </article>
+            <article class="project-row">
+              <div class="project-thumb"></div><div><h3>집중 시간 기록기</h3><p>LG전자 4기 · 추천 7</p></div>
+              <div class="project-actions"><button class="icon-button" aria-label="수정">✎</button><button class="icon-button" aria-label="삭제">×</button></div>
+            </article>
+          </div>
+        </div>
+      </section>
+
+      <section class="section" aria-labelledby="danger-heading">
+        <h2 class="section-label" id="danger-heading">위험 영역</h2>
+        <div class="card"><div class="card-content news-row"><div><h3 class="news-title">계정 삭제</h3><p class="news-description">프로필, 프로젝트, 추천 기록을 영구 삭제해요. 되돌릴 수 없어요.</p></div><button class="button button-outline button-small">계정 삭제</button></div></div>
+      </section>
+    </main>
+    <div class="toast" id="settings-toast" role="status"></div>
+  </section>
+
+  <section class="product-screen" data-screen="board" data-title="프로젝트 보드" data-states="안내 숨김">
+    <header class="site-header" data-component="Header">
+      <div class="header-row">
+        <div class="header-left">
+          <a class="logo" href="#board" data-component="Logo"><span class="logo-mark">&gt;</span><span>claude-hunt</span><span class="logo-mark">_</span></a>
+          <nav class="nav" aria-label="주요 내비게이션"><a href="#board">홈</a><a class="active" href="#board">프로젝트 <span class="mono muted">147</span></a><a href="#">강의자료</a></nav>
+        </div>
+        <div class="header-actions"><button class="button button-small">프로젝트 제출</button><div class="header-avatar" aria-label="서윤 계정">서</div></div>
+      </div>
+      <nav class="nav mobile-nav" aria-label="주요 내비게이션"><a href="#board">홈</a><a class="active" href="#board">프로젝트 <span class="mono muted">147</span></a><a href="#">강의자료</a></nav>
+    </header>
+
+    <main class="page page-wide">
+      <div class="board-heading"><div><h1>프로젝트 보드</h1><p>수강생들이 만든 프로젝트를 둘러보고 응원해 보세요.</p></div></div>
+      <div class="filter-row" aria-label="클래스 필터"><button class="chip active">전체</button><button class="chip">LG전자 4기</button><button class="chip">LG전자 3기</button><button class="chip">인프런</button></div>
+      <div class="project-grid">
+        <article class="project-card"><div class="project-art"></div><div class="project-copy"><h2>우리 동네 산책 지도</h2><p>매일 걷기 좋은 길을 기록하고 함께 나누는 작은 지도</p><div class="project-foot"><span>민준 · 인프런</span><span>▲ 42</span></div></div></article>
+        <article class="project-card"><div class="project-art"></div><div class="project-copy"><h2>퇴근 메뉴 룰렛</h2><p>결정하기 어려운 저녁 메뉴를 가볍게 골라주는 도구</p><div class="project-foot"><span>하늘 · LG전자 4기</span><span>▲ 31</span></div></div></article>
+        <article class="project-card"><div class="project-art"></div><div class="project-copy"><h2>집중 시간 기록기</h2><p>작업 흐름을 끊지 않고 오늘의 집중 시간을 남겨요</p><div class="project-foot"><span>서윤 · LG전자 4기</span><span>▲ 7</span></div></div></article>
+      </div>
+
+      <div class="member-notice-wrap" data-when="Default">
+        <aside class="member-notice" data-component="new:MarketingConsentNotice" aria-labelledby="member-notice-title">
+          <h2 id="member-notice-title">클로드 소식도 받아보세요</h2>
+          <p>클로드를 더 잘 활용하는 데 도움이 되는 뉴스레터와 새로운 강의·이벤트 소식을 이메일로 보내드려요.</p>
+          <div class="notice-actions"><button class="button button-ghost button-small" id="notice-later">나중에</button><button class="button button-small" id="notice-open-settings">설정에서 선택</button></div>
+        </aside>
+      </div>
+    </main>
+  </section>
+</main>
+
+<script>
+  const stage = document.querySelector('.sh-stage');
+  const screens = [...stage.querySelectorAll('[data-screen]')];
+  const screenSelect = document.getElementById('sh-screen');
+  const stateSelect = document.getElementById('sh-state');
+  const vpBtn = document.getElementById('sh-vp');
+  let current = null;
+  let currentStates = [];
+
+  screens.forEach(s => {
+    const option = document.createElement('option');
+    option.textContent = s.dataset.title || s.dataset.screen;
+    option.value = s.dataset.screen;
+    screenSelect.append(option);
+  });
+  screenSelect.onchange = () => show(screenSelect.value);
+
+  function show(slug) {
+    current = screens.find(s => s.dataset.screen === slug) || screens[0];
+    screens.forEach(s => s.hidden = s !== current);
+    stage.scrollTop = 0;
+    screenSelect.value = current.dataset.screen;
+    history.replaceState(null, '', '#' + current.dataset.screen);
+    buildStates();
+  }
+
+  function buildStates() {
+    const declared = (current.dataset.states || '').split(',').map(x => x.trim()).filter(Boolean);
+    currentStates = ['Default', ...declared.filter(name => name !== 'Default')];
+    stateSelect.innerHTML = '';
+    currentStates.forEach(name => {
+      const option = document.createElement('option');
+      option.textContent = name;
+      option.value = name;
+      stateSelect.append(option);
+    });
+    applyState('Default');
+  }
+
+  function applyState(name) {
+    const active = currentStates.includes(name) ? name : 'Default';
+    current.querySelectorAll('[data-when]').forEach(el => {
+      el.hidden = !el.dataset.when.split(',').map(x => x.trim()).includes(active);
+    });
+    stateSelect.value = active;
+  }
+  stateSelect.onchange = () => applyState(stateSelect.value);
+
+  window.prototypeShell = {
+    showScreen: show,
+    setState: applyState,
+    getScreen: () => current?.dataset.screen,
+    getState: () => stateSelect.value
+  };
+
+  const VPS = ['full', '390', '768'];
+  let vp = VPS.find(v => document.body.classList.contains('sh-vp-' + v)) || 'full';
+  function applyVp() {
+    VPS.forEach(v => document.body.classList.toggle('sh-vp-' + v, v === vp && v !== 'full'));
+    vpBtn.textContent = 'vp: ' + vp + ' (m)';
+    vpBtn.classList.toggle('on', vp !== 'full');
+  }
+  vpBtn.onclick = () => { vp = VPS[(VPS.indexOf(vp) + 1) % VPS.length]; applyVp(); };
+  applyVp();
+
+  addEventListener('keydown', e => {
+    if (/INPUT|TEXTAREA|SELECT/.test(e.target.tagName)) return;
+    const i = screens.indexOf(current);
+    if (e.key === 'ArrowRight') show(screens[(i + 1) % screens.length].dataset.screen);
+    if (e.key === 'ArrowLeft') show(screens[(i - 1 + screens.length) % screens.length].dataset.screen);
+    if (e.key === 'm') vpBtn.click();
+  });
+
+  addEventListener('hashchange', () => show(location.hash.slice(1)));
+  show(location.hash.slice(1));
+</script>
+
+<script>
+  let toastTimer;
+  function showToast(id, message) {
+    clearTimeout(toastTimer);
+    const toast = document.getElementById(id);
+    toast.textContent = message;
+    toast.classList.add('show');
+    toastTimer = setTimeout(() => toast.classList.remove('show'), 2600);
+  }
+
+  document.getElementById('onboarding-form').addEventListener('submit', event => {
+    event.preventDefault();
+    const optedIn = document.getElementById('onboarding-consent').checked;
+    showToast('onboarding-toast', optedIn
+      ? '프로필을 저장했어요. 이메일 소식도 보내드릴게요.'
+      : '프로필을 저장했어요. 이메일 소식은 설정에서 신청할 수 있어요.');
+  });
+
+  document.getElementById('profile-save').addEventListener('click', () => {
+    showToast('settings-toast', '프로필을 저장했어요.');
+  });
+
+  const newsSwitch = document.getElementById('news-switch');
+  newsSwitch.addEventListener('click', () => {
+    const next = newsSwitch.getAttribute('aria-checked') !== 'true';
+    newsSwitch.setAttribute('aria-checked', String(next));
+    newsSwitch.classList.toggle('on', next);
+    showToast('settings-toast', next
+      ? '이메일 소식을 보내드릴게요.'
+      : '이메일 소식을 보내지 않을게요.');
+  });
+
+  document.getElementById('notice-later').addEventListener('click', () => {
+    prototypeShell.setState('안내 숨김');
+  });
+
+  document.getElementById('notice-open-settings').addEventListener('click', () => {
+    prototypeShell.showScreen('settings');
+    const card = document.getElementById('news-card');
+    setTimeout(() => {
+      card.scrollIntoView({ behavior: 'smooth', block: 'center' });
+      card.classList.add('attention');
+      setTimeout(() => card.classList.remove('attention'), 1300);
+    }, 40);
+  });
+
+  document.querySelectorAll('.chip').forEach(chip => {
+    chip.addEventListener('click', () => {
+      document.querySelectorAll('.chip').forEach(other => other.classList.remove('active'));
+      chip.classList.add('active');
+    });
+  });
+</script>
+</body>
