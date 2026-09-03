@@ -33,8 +33,8 @@ describe("EmailNewsSettings", () => {
       )
     ).toBeInTheDocument();
     expect(
-      screen.getByText("이메일 · 동의 철회 또는 회원 탈퇴 시까지")
-    ).toBeInTheDocument();
+      screen.queryByText("이메일 · 동의 철회 또는 회원 탈퇴 시까지")
+    ).not.toBeInTheDocument();
     expect(
       screen.getByRole("switch", { name: "클로드 소식 받기" })
     ).not.toBeChecked();

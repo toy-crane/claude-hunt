@@ -45,9 +45,6 @@ export function EmailNewsSettings({ initialOptedIn }: EmailNewsSettingsProps) {
           <p className="text-muted-foreground text-xs leading-relaxed">
             {EMAIL_NEWS_SETTINGS_DESCRIPTION}
           </p>
-          <p className="text-muted-foreground text-xs">
-            이메일 · 동의 철회 또는 회원 탈퇴 시까지
-          </p>
         </div>
         <Switch
           aria-label="클로드 소식 받기"
