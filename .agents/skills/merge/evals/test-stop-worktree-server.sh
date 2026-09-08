@@ -103,13 +103,6 @@ lsof() {
   esac
 }
 
-readlink() {
-  if [ "${1:-}" = "/proc/${task_mock_noinspect_pid:-}/cwd" ]; then
-    return 1
-  fi
-  command readlink "$@"
-}
-
 kill() {
   if [ "${1:-}" = '-TERM' ] \
     && [ "${3:-}" = "${task_mock_kill_failure_pid:-}" ] \
@@ -118,7 +111,7 @@ kill() {
   fi
   builtin kill "$@"
 }
-export -f git portless lsof readlink kill
+export -f git portless lsof kill
 
 task_mock_git_dir='.git'
 task_mock_common_dir='.git'

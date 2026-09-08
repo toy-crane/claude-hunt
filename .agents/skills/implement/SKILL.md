@@ -1,6 +1,6 @@
 ---
 name: implement
-description: Implement or resume settled work from a selected spec folder. Use when the user provides a `docs/specs/SLUG/` folder and wants its settled spec or approved tasks completed in the current checkout with verification, one triaged pass of the current harness's automated code-review process, and a runnable product handoff when the repository exposes one through a local server.
+description: Implement or resume settled work from a selected spec folder. Use when the user provides a `docs/specs/SLUG/` folder and wants its settled spec or approved tasks completed in the current checkout with verification, one completed and triaged automated code review, and a runnable product handoff when the repository exposes one through a local server.
 ---
 
 # Implement
@@ -37,10 +37,25 @@ file.
 Use the `tdd` skill at a pre-agreed public seam when available. Otherwise retain
 the same observable seam and implement one red-to-green behavior at a time.
 
-Use an available runtime-verification skill matching each affected surface, or
-verify through the repository's supported runtime. Keep the outcome incomplete
-when its changed behavior cannot be verified in the running product; builds,
-type checks, and tests do not replace runtime evidence.
+Derive the runtime evidence the active outcome owes from its acceptance
+criteria, affected surfaces, claimed platforms, and any claim about a deeper
+layer such as networking, native integration, component behavior, or
+performance. Use an available specialized runtime-verification skill matching
+each affected surface; it owns its framework-specific observation loop.
+
+When none is available, investigate the repository and current environment and
+construct the strongest usable runtime path yourself. Consult current
+authoritative guidance when a framework or tool's behavior matters. Do not ask
+the user to approve this ordinary technical choice merely because a skill is
+missing.
+
+After a meaningful behavior change, exercise the smallest complete affected
+flow in the running product. Establish that the current change is loaded, no
+relevant runtime error occurs during reproduction, and the exact observable
+result passes. Inspect a deeper layer only when the outcome claims it. If the
+available in-scope paths cannot expose the changed behavior, record the exact
+failed gate and prerequisite and keep the outcome incomplete; builds, type
+checks, tests, screenshots, and code inspection do not replace runtime evidence.
 
 Complete the outcome and its acceptance criteria with focused verification.
 Before marking it complete or starting dependent work, reconcile the observed
@@ -84,30 +99,77 @@ through `project-knowledge` at discovery time. If unavailable, write the
 symptom, observed evidence, suspected cause, what was tried, and proposed next
 step to `docs/follow-ups/<slug>.md`.
 
-## Review the whole diff once, then triage
+## Re-verify the product before review and after repairs
 
-After every outcome passes reconciliation and the complete verification, run
-the harness's automated code review once over the whole diff against the spec
-and its acceptance criteria. Retry a model-invocable reviewer that only an
-earlier session rejected. Choose the depth this change warrants from the modes
-you can invoke yourself, weighing what it touches against what verification
+After all outcomes pass focused verification and reconciliation, rerun the
+complete deterministic verification, then re-exercise the changed flow and a
+representative journey derived from the root `PRODUCT.md` core loop in the
+running product. Every platform named in the result owes its own runtime
+evidence; never infer one platform from another.
+
+When `PRODUCT.md` or its core loop is absent, re-verify the changed flow and
+report the missing regression coverage without inventing a journey or editing
+the file. When the core loop admits materially different journeys, preserve the
+current evidence and return that product interpretation for clarification; it
+is distinct from approval of the verification method.
+
+## Complete one review of the whole diff, then triage
+
+After every outcome passes reconciliation and the complete verification, obtain
+one completed automated code review of the whole implementation diff against
+the spec and its acceptance criteria. Count a pass only when the reviewer
+finishes inspecting the intended scope and returns findings or an explicit
+no-findings result. An invocation, partial output, or silent exit is not that
+result. Skip a required review only when the user explicitly waives it, and
+record the waiver's scope.
+
+Use a reviewer the current harness lets you invoke. A prior session's user-only
+restriction does not establish current availability; check it again. Choose
+the depth this change warrants from the modes you can invoke yourself, weighing
+what it touches against what verification
 already settles, and name it, since a harness given no mode may reuse an
 earlier one. A deeper mode reserved for the user is something to offer, not to
 select. Take the harness's standard mode when nothing argues either way:
 `code-review medium` in Claude Code, while Codex has no dial. Wherever the
 reviewer accepts context, give it the spec's approved scope, off-limits areas,
 and remaining risks, so it does not re-argue settled trade-offs. Check the
-findings against the diff you meant to review: paths the change does not
-contain mean the reviewer read another target, so that pass is not spent —
-retarget it and run it once.
+reviewer's reported scope against the diff you meant to review. Findings about
+another target require retargeting, not repairs; that pass is not spent.
+
+For a review backed by a model service, identify the actual service and the
+diff, spec, and related source context it will receive. Carry applicable user
+authorization into the execution request and reuse it without asking again.
+Read-only describes file access, not whether context leaves the machine. If
+the service or source scope exceeds that authorization, request only the
+missing authority; a skill instruction is not itself a grant of permission.
+
+Recover command, compatibility, environment, and transient failures within the
+authorized scope and retry. Failed or mistargeted attempts do not consume the
+pass. Distinguish an explicit policy denial from those execution errors:
+preserve its rationale, pursue only a materially safer permitted alternative,
+or request the specific authority needed before retrying. Do not route the
+same denied action through another tool or service to bypass the denial.
+For a model-invocable reviewer blocked by missing user permission, establish the
+actual service and source scope, then ask for that permission. A confirmed
+manual command is not a substitute for resolving the missing authority.
+
+When review cannot finish because of permissions, a user-only or absent
+reviewer, or an unresolved execution failure, keep overall completion pending.
+Preserve verified outcomes, provide their evidence and runnable handoff, and
+name the exact blocker and next required action. Offer a user command only
+when the active harness confirms it. For a declared intermediate checkpoint,
+dependent work also waits for its review or explicit waiver.
 
 Repair a finding only when it breaks an approved acceptance criterion, or is a
 defect or regression you confirm by reproducing it on a path ordinary use
 reaches; a reviewer's assertion is not that confirmation. Rerun the affected
-verification, and send no scope through the reviewer twice, repairs included.
-Each scope gets one pass: a declared checkpoint's cumulative scope, then the
-whole diff. Point anyone asking for another look at a confirmed user command
-instead of invoking the reviewer again.
+verification. When the repair changes executable product behavior, it
+invalidates the earlier final runtime evidence: re-run the changed-flow and
+core-loop gate above on every claimed platform after the repair passes. Send no
+scope through the reviewer twice, repairs included. Each scope gets one pass: a
+declared checkpoint's cumulative scope, then the whole diff. Point anyone asking
+for another look at a confirmed user command instead of invoking the reviewer
+again.
 
 Record every other finding rather than repairing it: an evidenced defect or open
 workaround through `project-knowledge`, or as `docs/follow-ups/<slug>.md` when
@@ -117,12 +179,12 @@ the handoff; and a material consequence the spec leaves open, such as a security
 trade-off or a pathological-input failure, as a decision the user owns, with
 `human-review` offered for judging it.
 
-The review is evidence in the handoff, not a completion condition. Completion
-needs the acceptance criteria, reconciliation, and verification to pass, and the
-must-fix findings repaired and reverified. Report what the pass produced, what
-it changed, and what it left open. When the reviewer is user-only, rejected,
-errors, times out, or does not exist, say so and still report the verified work
-as complete, offering only a command the active session confirms.
+Completion needs the acceptance criteria, reconciliation, and verification to
+pass on the executable revision being handed off, each required review to have
+completed or been explicitly waived by the user, and the must-fix findings
+repaired and reverified. A completed review may leave recorded findings; zero
+findings is not the gate. Report the reviewed scope, result or explicit waiver,
+what changed, and what remains open.
 
 ## Hand off the runnable product
 
