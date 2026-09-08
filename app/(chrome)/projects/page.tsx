@@ -62,9 +62,7 @@ export default function Page({ searchParams }: PageProps) {
   // `gap`, and ProjectBoardSkeleton below mirrors it.
   return (
     <main className="mx-auto flex min-h-svh w-full max-w-6xl flex-col bg-background p-6 text-foreground">
-      <h1 className="mb-1.5 font-heading font-medium text-2xl">
-        프로젝트 보드
-      </h1>
+      <h1 className="mb-1.5 font-semibold text-2xl">프로젝트 보드</h1>
       <Suspense fallback={<ProjectBoardSkeleton />}>
         <BoardData searchParams={searchParams} />
       </Suspense>

@@ -25,7 +25,7 @@ export default async function Page({ searchParams }: PageProps) {
   return (
     <main className="mx-auto flex min-h-svh w-full max-w-2xl flex-col gap-6 bg-background px-6 pt-6 pb-24 text-foreground">
       <header className="flex flex-col gap-1">
-        <h1 className="font-heading font-medium text-2xl">프로젝트 제출</h1>
+        <h1 className="font-semibold text-2xl">프로젝트 제출</h1>
         <p className="text-muted-foreground text-sm">
           제출하면 상세 페이지가 만들어지고 보드에 노출돼요.
         </p>

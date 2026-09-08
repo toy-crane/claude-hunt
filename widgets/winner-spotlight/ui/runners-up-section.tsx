@@ -16,7 +16,7 @@ export function RunnersUpSection({ runnersUp }: RunnersUpSectionProps) {
   return (
     <section className="flex flex-col gap-4">
       <div className="flex items-baseline justify-between gap-4">
-        <h3 className="m-0 font-heading font-medium text-base tracking-tight">
+        <h3 className="m-0 font-medium text-base tracking-tight">
           함께 사랑받은 프로젝트
         </h3>
         <span className="font-mono text-[11px] text-muted-foreground">

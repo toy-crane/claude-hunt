@@ -47,7 +47,7 @@ export function RunnerUpCard({ project, rank }: RunnerUpCardProps) {
         </div>
       </div>
       <div className="flex flex-1 flex-col gap-2 p-4">
-        <h4 className="m-0 font-heading font-medium text-sm leading-snug">
+        <h4 className="m-0 font-medium text-sm leading-snug">
           <Link
             className="text-inherit no-underline after:absolute after:inset-0 hover:underline"
             href={href}

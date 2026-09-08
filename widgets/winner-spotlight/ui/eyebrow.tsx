@@ -12,7 +12,7 @@ export function Eyebrow({ monthSlug, monthLabel }: EyebrowProps) {
         <span className="text-[var(--accent-terracotta)]">&gt;</span>
         <span>claude-hunt show --top --month={monthSlug}</span>
       </div>
-      <h1 className="m-0 font-heading font-medium text-3xl tracking-tight">
+      <h1 className="m-0 font-semibold text-3xl tracking-tight">
         이달의 클로드 헌트
       </h1>
       <p className="m-0 text-muted-foreground text-sm">

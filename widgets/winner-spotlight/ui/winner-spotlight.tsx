@@ -59,7 +59,7 @@ export function WinnerSpotlight({ winner }: WinnerSpotlightProps) {
               )}
               {submittedAt ? <> · {submittedAt}</> : null}
             </span>
-            <h2 className="m-0 font-heading font-medium text-2xl leading-tight tracking-tight">
+            <h2 className="m-0 font-semibold text-2xl leading-tight tracking-tight">
               <Link
                 className="after:absolute after:inset-0 hover:underline"
                 href={href}
@@ -72,7 +72,7 @@ export function WinnerSpotlight({ winner }: WinnerSpotlightProps) {
             {winner.tagline}
           </p>
           <div className="inline-flex items-center gap-2 text-xs">
-            <span className="inline-flex h-5 w-5 items-center justify-center rounded-full bg-muted font-heading font-medium text-[10px]">
+            <span className="inline-flex h-5 w-5 items-center justify-center rounded-full bg-muted font-medium text-[10px]">
               {authorInitial}
             </span>
             <span className="font-medium">{author}</span>

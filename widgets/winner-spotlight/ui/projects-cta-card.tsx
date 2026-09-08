@@ -15,7 +15,7 @@ export function ProjectsCtaCard({ projectCount }: ProjectsCtaCardProps) {
         <span className="font-mono text-[11px] text-muted-foreground">
           $ cd /projects
         </span>
-        <span className="font-heading font-medium text-[15px]">
+        <span className="font-medium text-[15px]">
           전체 {projectCount}개 프로젝트 둘러보기
         </span>
         <span className="text-muted-foreground text-xs">

@@ -40,7 +40,7 @@ export function Hero({ project, isAuthenticated, viewerUserId }: HeroProps) {
     <HeroEntrance className="flex flex-col gap-4" projectId={project.id}>
       <header className="flex items-start justify-between gap-3">
         <div className="flex min-w-0 flex-col gap-2">
-          <h1 className="font-heading font-medium text-2xl">{project.title}</h1>
+          <h1 className="font-semibold text-2xl">{project.title}</h1>
           <p
             className="text-base leading-relaxed"
             data-testid="project-detail-tagline"
