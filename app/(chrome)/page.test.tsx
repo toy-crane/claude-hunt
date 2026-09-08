@@ -121,7 +121,16 @@ describe("home page (/)", () => {
     expect(
       screen.getByRole("heading", { name: "비행기 게임", level: 2 })
     ).toBeInTheDocument();
-    expect(screen.getByText("RANK 01 · 이달의 프로젝트")).toBeInTheDocument();
+    // The rank is a system string set in mono, the label beside it is not,
+    // so the badge text spans two elements.
+    expect(
+      screen.getByText(
+        (_, element) =>
+          element?.textContent?.replace(/\s+/g, " ").trim() ===
+          "RANK 01 · 이달의 프로젝트",
+        { selector: "span" }
+      )
+    ).toBeInTheDocument();
   });
 
   it("renders runner-up cards for rows 2..4", async () => {

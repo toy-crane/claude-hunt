@@ -19,8 +19,11 @@ export function RunnersUpSection({ runnersUp }: RunnersUpSectionProps) {
         <h3 className="m-0 font-medium text-base tracking-tight">
           함께 사랑받은 프로젝트
         </h3>
-        <span className="font-mono text-[11px] text-muted-foreground">
-          02 — {String(lastRank).padStart(2, "0")} / 이달의 인기
+        <span className="text-[11px] text-muted-foreground">
+          <span className="font-mono tabular-nums">
+            02 — {String(lastRank).padStart(2, "0")} /
+          </span>{" "}
+          이달의 인기
         </span>
       </div>
 

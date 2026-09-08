@@ -13,7 +13,7 @@ export function MyProjectsListSkeleton() {
     <div className="flex flex-col gap-3">
       <div className="overflow-hidden bg-card ring-1 ring-foreground/10">
         {/* Header — desktop only, static labels (no data) */}
-        <div className="hidden grid-cols-[1fr_56px_72px_72px] items-center gap-2.5 border-border border-b bg-muted px-3 py-2 font-mono text-[11px] text-muted-foreground min-[720px]:grid">
+        <div className="hidden grid-cols-[1fr_56px_72px_72px] items-center gap-2.5 border-border border-b bg-muted px-3 py-2 text-[11px] text-muted-foreground min-[720px]:grid">
           <span>제목</span>
           <span className="text-right">추천</span>
           <span>제출일</span>

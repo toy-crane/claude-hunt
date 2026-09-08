@@ -43,7 +43,7 @@ export function MyProjectsList({
         data-testid="my-projects-table"
       >
         {/* Header — desktop only */}
-        <div className="hidden grid-cols-[1fr_56px_72px_72px] items-center gap-2.5 border-border border-b bg-muted px-3 py-2 font-mono text-[11px] text-muted-foreground min-[720px]:grid">
+        <div className="hidden grid-cols-[1fr_56px_72px_72px] items-center gap-2.5 border-border border-b bg-muted px-3 py-2 text-[11px] text-muted-foreground min-[720px]:grid">
           <span>제목</span>
           <span className="text-right">추천</span>
           <span>제출일</span>
@@ -59,12 +59,14 @@ export function MyProjectsList({
         ))}
       </div>
 
-      <p className="px-1 font-mono text-[11px] text-muted-foreground">
-        <span className="font-semibold text-[var(--accent-terracotta)]">
+      <p className="px-1 text-[11px] text-muted-foreground tabular-nums">
+        <span className="font-mono font-semibold text-[var(--accent-terracotta)]">
           {">"}
         </span>{" "}
         총 {projects.length}개의 프로젝트
-        <span className="font-semibold text-[var(--accent-terracotta)]">_</span>
+        <span className="font-mono font-semibold text-[var(--accent-terracotta)]">
+          _
+        </span>
       </p>
     </div>
   );

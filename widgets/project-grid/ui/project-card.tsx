@@ -77,7 +77,7 @@ export function ProjectCard({
 
   return (
     <li
-      className="group/row relative font-mono transition-colors hover:bg-muted min-[720px]:col-span-full min-[720px]:-mx-5 min-[720px]:grid min-[720px]:grid-cols-subgrid min-[720px]:px-5"
+      className="group/row relative transition-colors hover:bg-muted min-[720px]:col-span-full min-[720px]:-mx-5 min-[720px]:grid min-[720px]:grid-cols-subgrid min-[720px]:px-5"
       data-testid="project-card"
     >
       {/* ─── Desktop row (≥ 720 px) ────────────────────────────── */}
@@ -89,7 +89,7 @@ export function ProjectCard({
           <RankSlot rank={rank} />
           <span
             className={cn(
-              "font-semibold text-xs tabular-nums",
+              "font-mono font-semibold text-xs tabular-nums",
               !hasRankDot && "text-muted-foreground"
             )}
           >
@@ -174,13 +174,13 @@ export function ProjectCard({
       >
         {/* Meta line: rank · cohort */}
         <div
-          className="flex items-center gap-2 font-mono text-[11px] tabular-nums"
+          className="flex items-center gap-2 text-[11px]"
           data-testid="project-card-mobile-meta"
         >
           <RankDot rank={rank} />
           <span
             className={cn(
-              "font-semibold",
+              "font-mono font-semibold tabular-nums",
               !hasRankDot && "text-muted-foreground"
             )}
           >

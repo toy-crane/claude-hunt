@@ -13,7 +13,6 @@ export interface PromptLineProps {
 }
 
 export function PromptLine({ cohortLabel, className }: PromptLineProps) {
-  const classFlag = cohortLabel === null ? "" : ` --class="${cohortLabel}"`;
   return (
     <div
       className={cn("font-mono text-muted-foreground text-xs", className)}
@@ -22,7 +21,16 @@ export function PromptLine({ cohortLabel, className }: PromptLineProps) {
       <span className={ACCENT} data-testid="prompt-line-dollar">
         $
       </span>{" "}
-      claude-hunt ls --sort=votes{classFlag}
+      claude-hunt ls --sort=votes
+      {cohortLabel === null ? null : (
+        <>
+          {' --class="'}
+          {/* Class labels are Korean, and a monospace blank pushes Korean
+              words apart. Only the flag around the label stays mono. */}
+          <span className="font-sans">{cohortLabel}</span>
+          {'"'}
+        </>
+      )}
     </div>
   );
 }
