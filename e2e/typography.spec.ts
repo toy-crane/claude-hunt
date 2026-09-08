@@ -29,13 +29,18 @@ const MAX_FONT_FILE_BYTES = 1_000_000;
 /** Home is the page the spec puts a first-load budget on. */
 const HOME_FONT_BUDGET_BYTES = 600_000;
 /**
- * Cumulative layout shift must not regress. Measured on the pre-Pretendard
- * build, every surface sat at 0.0000; 0.1 is the Web Vitals "good" bound and
- * leaves room for dev-server noise without hiding a real regression.
+ * Cumulative layout shift must not regress when the sliced webfont swaps in.
+ * 0.1 is the Web Vitals "good" bound. Read through a buffered observer:
+ * `performance.getEntriesByType("layout-shift")` returns nothing in Chromium,
+ * so reading it there would make this check pass unconditionally.
  */
 const MAX_CLS = 0.1;
+/** How long to let the buffered layout-shift observer replay and settle. */
+const CLS_SAMPLE_MS = 400;
 
 const COHORT_CHIP_RE = /LG전자/;
+const SETTINGS_URL_RE = /\/settings$/;
+const NEW_PROJECT_URL_RE = /\/projects\/new$/;
 
 const WEIGHT_HERO = "600";
 const WEIGHT_ROW = "500";
@@ -57,6 +62,7 @@ interface SurfaceReport {
   declaredFamilies: string[];
   fonts: FontRequest[];
   hangulInMono: HangulInMono[];
+  origin: string;
 }
 
 function watchFontRequests(page: Page): FontRequest[] {
@@ -79,13 +85,15 @@ function watchFontRequests(page: Page): FontRequest[] {
   return fonts;
 }
 
-async function readSurface(page: Page): Promise<Omit<SurfaceReport, "fonts">> {
+async function readSurface(
+  page: Page
+): Promise<Omit<SurfaceReport, "fonts" | "origin">> {
   // Let webfonts swap in and any late layout settle before sampling.
   await page.evaluate(() => document.fonts.ready);
   await page.waitForTimeout(600);
 
   return page.evaluate(
-    (sources: { hangul: string; mono: string }) => {
+    async (sources: { hangul: string; mono: string; sampleMs: number }) => {
       const hangul = new RegExp(sources.hangul);
       const mono = new RegExp(sources.mono, "i");
       const hangulInMono: HangulInMono[] = [];
@@ -116,16 +124,27 @@ async function readSurface(page: Page): Promise<Omit<SurfaceReport, "fonts">> {
         node = walker.nextNode();
       }
 
-      const cls = performance
-        .getEntriesByType("layout-shift")
-        .filter(
-          (entry) =>
-            !(entry as unknown as { hadRecentInput: boolean }).hadRecentInput
-        )
-        .reduce(
-          (sum, entry) => sum + (entry as unknown as { value: number }).value,
-          0
-        );
+      const cls = await new Promise<number>((resolve) => {
+        let sum = 0;
+        const observer = new PerformanceObserver((list) => {
+          for (const entry of list.getEntries()) {
+            const shift = entry as unknown as {
+              hadRecentInput: boolean;
+              value: number;
+            };
+            if (!shift.hadRecentInput) {
+              sum += shift.value;
+            }
+          }
+        });
+        // `buffered` replays every shift recorded since navigation, so the
+        // observer may be registered here rather than before `goto`.
+        observer.observe({ buffered: true, type: "layout-shift" });
+        setTimeout(() => {
+          observer.disconnect();
+          resolve(sum);
+        }, sources.sampleMs);
+      });
 
       const declaredFamilies = new Set<string>();
       for (const face of document.fonts) {
@@ -134,7 +153,11 @@ async function readSurface(page: Page): Promise<Omit<SurfaceReport, "fonts">> {
 
       return { cls, declaredFamilies: [...declaredFamilies], hangulInMono };
     },
-    { hangul: HANGUL_RE.source, mono: MONO_FAMILY_RE.source }
+    {
+      hangul: HANGUL_RE.source,
+      mono: MONO_FAMILY_RE.source,
+      sampleMs: CLS_SAMPLE_MS,
+    }
   );
 }
 
@@ -142,7 +165,9 @@ async function loadSurface(page: Page, path: string): Promise<SurfaceReport> {
   const fonts = watchFontRequests(page);
   await page.goto(path, { waitUntil: "networkidle" });
   const rest = await readSurface(page);
-  return { ...rest, fonts };
+  // The origin the page actually loaded from, so the first-party check keeps
+  // working when the suite runs against a host other than localhost:3000.
+  return { ...rest, fonts, origin: new URL(page.url()).origin };
 }
 
 function describeHangulInMono(found: HangulInMono[]): string {
@@ -208,7 +233,7 @@ for (const surface of SURFACES) {
     );
 
     const external = fonts.filter(
-      (font) => !font.url.startsWith("http://localhost:3000")
+      (font) => !font.url.startsWith(report.origin)
     );
     expect(external.map((font) => font.url)).toEqual([]);
 
@@ -243,14 +268,23 @@ for (const surface of SURFACES) {
  * signed-in surfaces carry the my-projects table and the submit form. None
  * of them is reachable from the anonymous sweep above.
  */
-const AUTHED_SURFACES: Array<{ name: string; path: string }> = [
+const AUTHED_SURFACES: Array<{
+  heading: string;
+  name: string;
+  path: string;
+  urlRe: RegExp;
+}> = [
   {
+    heading: "설정",
     name: "설정",
     path: "/auth/dev-login?email=alice@example.com&next=/settings",
+    urlRe: SETTINGS_URL_RE,
   },
   {
+    heading: "프로젝트 제출",
     name: "프로젝트 제출",
     path: "/auth/dev-login?email=alice@example.com&next=/projects/new",
+    urlRe: NEW_PROJECT_URL_RE,
   },
 ];
 
@@ -259,6 +293,12 @@ for (const surface of AUTHED_SURFACES) {
     page,
   }) => {
     const report = await loadSurface(page, surface.path);
+    // Without this the test would also pass on the 404 dev-login returns when
+    // DEV_LOGIN_ENABLED is unset, scanning a page that has none of this UI.
+    await expect(page).toHaveURL(surface.urlRe);
+    await expect(
+      page.getByRole("heading", { level: 1, name: surface.heading })
+    ).toBeVisible();
     expect(
       report.hangulInMono,
       `한글이 모노로 렌더링된 요소:\n${describeHangulInMono(report.hangulInMono)}`
