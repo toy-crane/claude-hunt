@@ -147,7 +147,7 @@ export function ProjectCard({
 
         <div className="flex min-w-0 flex-col gap-0.5">
           <Link
-            className="truncate font-heading font-medium text-sm leading-tight after:absolute after:inset-0 hover:underline"
+            className="truncate font-medium text-sm leading-tight after:absolute after:inset-0 hover:underline"
             href={detailHref}
           >
             {project.title}
@@ -224,7 +224,7 @@ export function ProjectCard({
         {/* Title + tagline */}
         <div className="flex flex-col gap-1">
           <Link
-            className="font-heading font-medium text-base leading-snug after:absolute after:inset-0 hover:underline"
+            className="font-medium text-base leading-snug after:absolute after:inset-0 hover:underline"
             data-testid="project-card-mobile-title"
             href={detailHref}
           >

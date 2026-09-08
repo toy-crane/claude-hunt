@@ -68,7 +68,7 @@ export default async function SettingsPage() {
 
   return (
     <main className="mx-auto flex min-h-svh w-full max-w-2xl flex-col gap-8 p-6">
-      <h1 className="font-heading font-medium text-2xl">설정</h1>
+      <h1 className="font-semibold text-2xl">설정</h1>
 
       <section
         aria-labelledby="settings-profile-heading"

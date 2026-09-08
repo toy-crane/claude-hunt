@@ -609,7 +609,7 @@ describe("ProjectCard — mobile stacked card (< 720 px)", () => {
     );
     const title = screen.getByTestId("project-card-mobile-title");
     expect(title.textContent).toBe("Mobile App");
-    expect(title.className).toContain("font-heading");
+    expect(title.className).toContain("font-medium");
     expect(title.className).toContain("text-base");
 
     const tagline = screen.getByTestId("project-card-mobile-tagline");

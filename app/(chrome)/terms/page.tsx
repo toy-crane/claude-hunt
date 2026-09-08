@@ -49,7 +49,7 @@ export default function TermsPage() {
   return (
     <main className="mx-auto flex min-h-svh w-full max-w-3xl flex-col gap-8 p-6">
       <header className="flex flex-col gap-2">
-        <h1 className="font-heading font-medium text-2xl">서비스 이용약관</h1>
+        <h1 className="font-semibold text-2xl">서비스 이용약관</h1>
         <p className="text-muted-foreground text-sm">시행일: 2026년 6월 1일</p>
       </header>
 

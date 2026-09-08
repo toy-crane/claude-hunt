@@ -232,7 +232,7 @@ export function CommentList({ threads, projectId, viewer }: CommentListProps) {
   return (
     <section className="flex flex-col gap-4" data-testid="comment-list">
       <div className="flex items-center justify-between">
-        <h2 className="font-heading font-medium text-base">
+        <h2 className="font-medium text-base">
           댓글 <span className="text-muted-foreground">{total}</span>
         </h2>
       </div>
