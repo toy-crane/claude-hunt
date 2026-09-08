@@ -14,7 +14,7 @@ import { useState } from "react";
 import { ALL_COHORTS_LABEL } from "../labels";
 
 const TRIGGER_CLASS =
-  "inline-flex items-center gap-1 rounded-none border border-border bg-background px-2.5 py-[5px] font-mono font-medium text-[11px] text-foreground transition-colors duration-150 hover:bg-muted active:translate-y-px outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background whitespace-nowrap";
+  "inline-flex items-center gap-1 rounded-none border border-border bg-background px-2.5 py-[5px] font-medium text-[11px] text-foreground tabular-nums transition-colors duration-150 hover:bg-muted active:translate-y-px outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background whitespace-nowrap";
 
 export interface CohortComboboxProps {
   /** The "모든 클래스" option's count (total project count). */

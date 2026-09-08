@@ -37,16 +37,21 @@ export function WinnerSpotlight({ winner }: WinnerSpotlightProps) {
           sizes="(max-width: 768px) 100vw, 60vw"
           src={screenshot}
         />
-        <div className="absolute top-4 left-4 inline-flex items-center gap-2 rounded bg-foreground px-2.5 py-1.5 font-mono font-semibold text-[11px] text-background tracking-wide">
+        <div className="absolute top-4 left-4 inline-flex items-center gap-2 rounded bg-foreground px-2.5 py-1.5 font-semibold text-[11px] text-background">
           <span className="h-1.5 w-1.5 rounded-full bg-[var(--term-rank-1)]" />
-          <span>RANK 01 · 이달의 프로젝트</span>
+          <span>
+            <span className="font-mono tabular-nums tracking-wide">
+              RANK 01
+            </span>{" "}
+            · 이달의 프로젝트
+          </span>
         </div>
       </Link>
 
       <div className="flex flex-col justify-between gap-5 p-5 md:p-8">
         <div className="flex flex-col gap-4">
           <div className="flex flex-col gap-1.5">
-            <span className="font-mono text-[10px] text-muted-foreground tracking-wider">
+            <span className="text-[10px] text-muted-foreground tracking-wider">
               {cohortHref ? (
                 <Link
                   className="relative z-[1] hover:text-foreground hover:underline"
@@ -88,7 +93,7 @@ export function WinnerSpotlight({ winner }: WinnerSpotlightProps) {
             </span>
           </div>
           <Link
-            className="relative z-[1] inline-flex flex-1 items-center justify-between rounded-md bg-muted px-3.5 py-2.5 font-mono text-foreground text-xs no-underline"
+            className="relative z-[1] inline-flex flex-1 items-center justify-between rounded-md bg-muted px-3.5 py-2.5 text-foreground text-xs no-underline"
             href={href}
           >
             <span>프로젝트 자세히 보기</span>

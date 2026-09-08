@@ -22,7 +22,7 @@ export function ProjectsCtaCard({ projectCount }: ProjectsCtaCardProps) {
           클래스별 필터 · 정렬 · 직접 추천하기
         </span>
       </div>
-      <span className="inline-flex items-center gap-2 font-mono text-foreground text-xs">
+      <span className="inline-flex items-center gap-2 text-foreground text-xs">
         프로젝트 보드 <RiArrowRightLine aria-hidden="true" size={16} />
       </span>
     </Link>

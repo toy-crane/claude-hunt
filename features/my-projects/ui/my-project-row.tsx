@@ -26,9 +26,7 @@ export function MyProjectRow({ project, actions }: MyProjectRowProps) {
     >
       {/* Title + tagline (desktop) / Title + meta (mobile) */}
       <div className="flex min-w-0 flex-col gap-0.5">
-        <span className="truncate font-medium font-mono text-[13px]">
-          {title}
-        </span>
+        <span className="truncate font-medium text-[13px]">{title}</span>
         <p className="hidden truncate text-[11px] text-muted-foreground leading-tight min-[720px]:block">
           {project.tagline}
         </p>
