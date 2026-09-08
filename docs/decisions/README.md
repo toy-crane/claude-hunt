@@ -7,3 +7,4 @@
 - [project-discussion](project-discussion.md) — Read when changing comments, replies, reactions, moderation, or notifications.
 - [production-delivery](production-delivery.md) — Read when changing main-branch deployment, migration ordering, Vercel deploy triggers, or the emergency ship path.
 - [supabase-schema-workflow](supabase-schema-workflow.md) — Read when changing Supabase schemas, migrations, Storage SQL, database privileges, RLS, database tests, or generated types.
+- [typography](typography.md) — Read when changing fonts, font roles, heading weights, or where monospace text may appear.
