@@ -1,7 +1,11 @@
 import { SITE_URL } from "@shared/config/site";
 import type { Metadata } from "next";
-import { Geist_Mono, Inter, JetBrains_Mono } from "next/font/google";
+import { Geist_Mono } from "next/font/google";
 
+// Pretendard is self-hosted through the package's dynamic-subset stylesheet:
+// 92 unicode-range slices, so a page downloads only the Hangul it renders
+// instead of the ~2 MB full face. See docs/decisions/typography.md.
+import "pretendard/dist/web/variable/pretendardvariable-dynamic-subset.css";
 import "./globals.css";
 import { ThemeProvider } from "@core/providers/theme-provider";
 import { cn } from "@shared/lib/utils";
@@ -12,11 +16,6 @@ import { SpeedInsights } from "@vercel/speed-insights/next";
 // TODO: Cache Components adoption. Refactor this route so this opt-out can be removed.
 // See: https://nextjs.org/docs/app/guides/migrating-to-cache-components
 export const instant = false;
-
-const fontHeading = JetBrains_Mono({
-  subsets: ["latin"],
-  variable: "--font-heading",
-});
 
 const TAGLINE = "Claude Code 수강생들의 프로젝트";
 const META_DESCRIPTION =
@@ -87,8 +86,6 @@ export const metadata: Metadata = {
   },
 };
 
-const inter = Inter({ subsets: ["latin"], variable: "--font-sans" });
-
 const fontMono = Geist_Mono({
   subsets: ["latin"],
   variable: "--font-mono",
@@ -101,13 +98,7 @@ export default function RootLayout({
 }>) {
   return (
     <html
-      className={cn(
-        "antialiased",
-        fontMono.variable,
-        "font-sans",
-        inter.variable,
-        fontHeading.variable
-      )}
+      className={cn("antialiased", fontMono.variable, "font-sans")}
       lang="ko"
       suppressHydrationWarning
     >
