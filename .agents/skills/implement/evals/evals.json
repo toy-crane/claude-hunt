@@ -17,14 +17,14 @@
     {
       "id": 2,
       "prompt": "/implement docs/specs/todo-platform/를 끝까지 구현해줘. 폴더 안에 승인된 Task 01부터 04까지 있고 Task 03에만 Review checkpoint가 선언돼 있어.",
-      "expected_output": "The response implements the approved tasks sequentially in dependency order, records completed status and verification evidence, runs the declared Task 03 checkpoint as one bounded review pass, and finishes with complete verification and one final review pass.",
+      "expected_output": "The response implements approved tasks sequentially, preserves the declared Task 03 review checkpoint, completes deterministic verification and the whole-diff review, then verifies the final runtime after any repairs.",
       "files": [],
       "expectations": [
         "It selects the approved task files as the active implementation handoff.",
         "It completes the tasks sequentially in dependency order.",
         "It marks finished task files completed and records their verification evidence.",
         "Task 03 is the sole intermediate review checkpoint it runs, as one pass over the declared cumulative scope rather than a repeated round.",
-        "It runs complete integrated verification before the single final review pass."
+        "It runs complete integrated deterministic verification before the single whole-diff review, with final runtime verification after review and any must-fix repairs."
       ]
     },
     {
@@ -69,10 +69,10 @@
     {
       "id": 6,
       "prompt": "/implement docs/specs/checkout/를 구현해줘. 승인된 spec에 Checkout API가 public test seam으로 합의돼 있어.",
-      "expected_output": "The response implements the approved spec through the tdd skill at the pre-agreed Checkout API seam, then completes verification and one final automated review pass.",
+      "expected_output": "The response implements the approved spec through the tdd skill at the pre-agreed Checkout API seam, completes deterministic verification and one whole-diff automated review, then verifies the final runtime after any repairs.",
       "files": [],
       "expectations": [
-        "It uses the tdd skill because the behavior has a pre-agreed public seam.",
+        "It uses the tdd skill because the behavior can be verified through a public seam.",
         "It uses the approved Checkout API seam without inventing an implementation-only test boundary.",
         "It still completes the required verification and one automated review pass.",
         "It does not open a review round after each refactor."
@@ -335,7 +335,7 @@
       "expectations": [
         "It repairs the acceptance-criterion break and the reproducible sorting defect and reruns only the verification those repairs affect.",
         "It notes the SSRF finding as a trade-off the spec already disposed of rather than repairing it or reopening the decision.",
-        "It records the unrelated-file defect as a follow-up through project-knowledge, or writes docs/follow-ups/<slug>.md when that skill is absent, instead of fixing it in this run.",
+        "It records the unrelated-file defect as a follow-up through project-knowledge instead of fixing it in this run.",
         "It keeps the naming-style note and the unreproduced race-condition suspicion in the handoff without repairing them.",
         "It does not invoke the automated reviewer again after the repairs.",
         "It reports completion and records the review mode, what was repaired, and what was recorded."
@@ -344,13 +344,12 @@
     {
       "id": 28,
       "prompt": "/implement docs/specs/importer/의 구현과 검증은 끝났어. 자동 리뷰가 병적으로 중첩된 입력 파일에서 파서가 몇 분씩 멈춘다고 지적했어. spec은 이 입력 종류를 다루지 않고, 일반 사용 경로에서는 재현되지 않아. 마무리해줘.",
-      "expected_output": "The response treats the pathological-input failure as a material consequence the spec leaves open: it records the evidence, names the risk decision for the user, offers human-review for that judgment, and reports the verified work as complete without opening another repair round.",
+      "expected_output": "The response treats the pathological-input failure as a material consequence the spec leaves open: it records the evidence, names the risk decision for the user, and reports the verified work as complete without opening another repair round.",
       "files": [],
       "expectations": [
         "It does not treat the finding as a must-fix because it neither breaks an approved acceptance criterion nor reproduces on an ordinary-use path.",
         "It records the evidenced failure durably rather than only mentioning it in the closing message.",
         "It names the risk acceptance as a decision the user owns.",
-        "It offers human-review for that judgment instead of invoking it automatically.",
         "It does not run repair-and-review rounds against the pathological input.",
         "It reports the verified implementation as complete."
       ]
@@ -420,13 +419,14 @@
     {
       "id": 34,
       "prompt": "/implement docs/specs/reminder-toggle/를 끝내줘. Expo 화면 변경이고 expo-dev-loop와 expo-smoke-test가 둘 다 설치되어 있어. PRODUCT.md의 core loop는 리마인더를 추가하고 오늘 목록에서 확인하는 것이야. 결과는 iOS와 Android 둘 다 지원한다고 전달해야 해.",
-      "expected_output": "The response uses expo-dev-loop for focused verification while editing, then uses expo-smoke-test before completion to re-drive the changed toggle flow and the PRODUCT.md core loop on iOS and Android, with separate runtime evidence for each platform.",
+      "expected_output": "The response uses expo-dev-loop for focused verification while editing, runs complete deterministic checks and one whole-diff review, then uses expo-smoke-test after triage and any must-fix repairs to verify the changed toggle and PRODUCT.md core loop on both platforms.",
       "files": [],
       "expectations": [
         "It uses expo-dev-loop for the focused inner loop rather than postponing all runtime checks until the end.",
         "It uses expo-smoke-test for the final changed-flow and core-loop regression rather than treating the focused pass as delivery evidence.",
         "It drives both the changed flow and the PRODUCT.md core loop on each platform.",
-        "It requires separate iOS and Android evidence and does not infer platform parity from one target."
+        "It requires separate iOS and Android evidence and does not infer platform parity from one target.",
+        "It schedules the final expo-smoke-test after the whole-diff review and any must-fix repairs, while preserving focused runtime evidence before review."
       ]
     },
     {
@@ -524,7 +524,8 @@
         "It respects the explicit waiver for this final review.",
         "It records the waiver scope rather than fabricating a review result.",
         "It completes only if the remaining acceptance criteria and verification pass.",
-        "It does not treat this waiver as authorization to skip reviews of unrelated scopes or future work."
+        "It does not treat this waiver as authorization to skip reviews of unrelated scopes or future work.",
+        "The explicit review waiver still leads to final changed-flow and core-loop runtime verification before completion."
       ]
     },
     {
@@ -584,6 +585,164 @@
         "Keep overall completion pending and preserve verified outcomes.",
         "Ask for permission naming OpenAI and the three source categories.",
         "Do not substitute the available manual command or bypass the denial."
+      ]
+    },
+    {
+      "id": 48,
+      "prompt": "/implement docs/specs/mobile-library/를 구현해줘. spec.md는 승인된 prototype.html과 세 개의 관련 결정 문서를 링크하고, 프로토타입에는 상세 표지와 카드 안의 `계속 읽기`를 포함한 화면별 상태가 남아 있어. iOS와 Android 모두 완료 범위야.",
+      "expected_output": "Before implementation, the response loads the selected folder as one handoff bundle, including the spec, active tasks, explicitly linked decisions, and approved prototype. It verifies each affected screen and state against the prototype on both claimed platforms and gives the same handoff sources to the whole-diff reviewer.",
+      "files": [],
+      "expectations": [
+        "It identifies and reads spec.md, every active task, and all explicitly linked decision contracts, and it renders or otherwise inspects the approved prototype before deriving the implementation approach or editing source.",
+        "It treats the prototype as the concrete visual and state reference without allowing it to silently replace an explicit product contract.",
+        "It compares the actual detail cover, the containment of `계속 읽기` inside its card, and every applicable screen state rather than checking only that those elements exist or that navigation succeeds.",
+        "It obtains separate actual-screen evidence from iOS and Android at the same applicable prototype screens and states before claiming both platforms.",
+        "It preserves each platform's intended layout and native conventions instead of requiring pixel-identical iOS and Android rendering.",
+        "It supplies the whole-diff reviewer with the spec, active task contract, linked decisions, and approved prototype or their repository paths.",
+        "It does not report completion while a required handoff source remains uninspected or an applicable acceptance or prototype criterion remains uncompared."
+      ]
+    },
+    {
+      "id": 49,
+      "prompt": "/implement docs/specs/account-recovery/를 구현해줘. spec.md는 복구 완료 화면에 이메일 주소를 표시하지 않는다고 명시하지만, 링크된 승인 prototype.html은 같은 화면에 이메일 주소를 표시해. 어느 쪽을 따를지는 따로 정하지 않았어.",
+      "expected_output": "The response loads both required handoff sources, records the exact screen-state conflict, and keeps the affected outcome and dependents blocked for a shaping decision instead of choosing either source or reopening the product decision itself.",
+      "files": [],
+      "expectations": [
+        "It recognizes the explicit spec and approved prototype as complementary handoff sources that disagree at one exact screen and state.",
+        "It does not silently prioritize the prototype or discard its visual criterion because spec.md is the product-contract anchor.",
+        "It preserves the current artifacts and evidence and reports the exact conflicting email-address treatment.",
+        "It keeps the affected outcome and dependent work blocked until the product conflict is settled through shaping."
+      ]
+    },
+    {
+      "id": 50,
+      "prompt": "/implement docs/specs/export-cli/를 구현해줘. spec.md와 활성 task는 출력 형식 결정 문서만 링크하고, 승인된 프로토타입이나 화면·상태 자료는 없어.",
+      "expected_output": "The response loads the non-visual handoff bundle and completes CLI behavior, runtime verification, acceptance reconciliation, and whole-diff review without inventing prototype or screen comparison work.",
+      "files": [],
+      "expectations": [
+        "It reads the spec, active task, and explicitly linked output-format decision as the required handoff.",
+        "It derives CLI runtime evidence from the command behavior and acceptance criteria.",
+        "It does not add a visual prototype, screenshot, viewport, or platform-screen comparison gate when the handoff contains no approved visual reference.",
+        "It still enforces every applicable acceptance criterion and the normal whole-diff review gate."
+      ]
+    },
+    {
+      "id": 51,
+      "prompt": "/implement docs/specs/csv-export/ 구현해줘.",
+      "expected_output": "The response compares the spec with the current repository before changing source, finds that the approved comma-separated constraint and the report.csv filename contradict the shipped tab-separated serializer, stops that outcome before any source change, and names the stale point with its route.",
+      "files": [
+        "evals/fixtures/stale-spec/package.json",
+        "evals/fixtures/stale-spec/README.md",
+        "evals/fixtures/stale-spec/src/rows.js",
+        "evals/fixtures/stale-spec/docs/specs/csv-export/spec.md"
+      ],
+      "expectations": [
+        "It compares the spec's settled constraints and acceptance criteria with the current code before changing any source file.",
+        "It identifies the conflict between the spec's comma-separated constraint and the shipped tab delimiter in src/rows.js, including the report.csv filename criterion.",
+        "It stops that outcome before writing any source change rather than implementing against either side.",
+        "It names the exact stale point and its evidence instead of reporting a vague mismatch.",
+        "It routes the stale point to babysit-specs for this spec folder alone rather than presenting the decision or revising the spec itself.",
+        "It does not silently rewrite the spec to match the code, nor change the shipped delimiter to match the spec."
+      ]
+    },
+    {
+      "id": 52,
+      "prompt": "/implement docs/specs/reminder-toggle/를 마무리해줘. 구현, 집중 자동 검사, iOS 집중 검증, 승인 자료 대조는 끝났어. 전체 자동 검사, 로컬 전체 리뷰, 최종 iOS·Android 핵심 흐름 검증은 아직이야. 리뷰 도구는 정상 사용 가능하고 결과는 지적 없음이야.",
+      "expected_output": "Complete full deterministic checks, finish the whole-diff review, then verify the final changed flow and core loop on both platforms before completion.",
+      "files": [],
+      "expectations": [
+        "It retains the focused verification evidence and completes full deterministic checks before review.",
+        "Its first final core-loop verification follows the completed review rather than preceding it.",
+        "It completes only with separate current-revision runtime evidence for both platforms."
+      ]
+    },
+    {
+      "id": 53,
+      "prompt": "/implement docs/specs/reminder-save/를 마무리해줘. 구현과 집중 검증·대조는 끝났고, 전체 자동 검사와 리뷰와 최종 양 플랫폼 검증이 남았어. 리뷰에서 일반 사용 경로의 저장 결함 한 건이 재현됐고 수정이 필요해.",
+      "expected_output": "Complete deterministic checks and the whole-diff review, repair the reproduced defect and rerun affected verification, then perform final runtime verification of the repaired revision without a second review.",
+      "files": [],
+      "expectations": [
+        "It does not perform a final core-loop pass before the pending review and repair.",
+        "It verifies affected behavior after repair before the final runtime gate.",
+        "It verifies the repaired revision on every claimed platform and invokes no second review."
+      ]
+    },
+    {
+      "id": 54,
+      "prompt": "/implement docs/specs/reminder-toggle/의 로컬 전체 리뷰는 이번에 명시적으로 면제할게. 구현과 집중 검증·대조는 끝났고 전체 자동 검사와 최종 양 플랫폼 검증은 아직이야. iOS와 Android 지원은 그대로 확인해줘.",
+      "expected_output": "Record the explicit review waiver, complete required deterministic verification, then verify the final changed flow and core loop on both platforms.",
+      "files": [],
+      "expectations": [
+        "It performs no automated review invocation.",
+        "It preserves full deterministic and final runtime verification despite the waiver.",
+        "It does not treat focused evidence or the waiver as final completion evidence."
+      ]
+    },
+    {
+      "id": 55,
+      "prompt": "/implement docs/specs/reminder-save/를 마무리해줘. 전체 자동 검사와 전체 리뷰 1회가 끝났고 지적도 처리했어. 그 뒤 최종 양 플랫폼 검증에서 일반 경로의 저장 문제가 재현됐어. iOS와 Android 모두 이번 전달 범위야.",
+      "expected_output": "Repair the final-runtime defect, rerun affected verification, repeat the final runtime gate on the repaired revision and complete without repeating the spent review.",
+      "files": [],
+      "expectations": [
+        "It keeps completion pending until the final-runtime defect is repaired and reverified.",
+        "It repeats the final changed-flow and core-loop verification on every claimed platform using the repaired revision.",
+        "It invokes no second whole-diff review over the already-reviewed scope."
+      ]
+    },
+    {
+      "id": 56,
+      "prompt": "/implement docs/specs/reminder-toggle/를 마무리해줘. 구현과 집중 검증·대조와 전체 자동 검사는 통과했어. 그런데 필수 전체 리뷰 서비스가 현재 사용할 수 없고 가능한 복구 경로도 실패했어. 면제는 하지 않았어. 최종 핵심 흐름 검증은 아직이야.",
+      "expected_output": "Preserve focused evidence and runnable handoff while reporting review pending and its precise prerequisite; do not claim completion or imply a waiver.",
+      "files": [],
+      "expectations": [
+        "It does not mark the implementation complete with its required review blocked.",
+        "It reports the exact review blocker and available focused evidence.",
+        "It does not launch final runtime verification as a substitute for completing or explicitly waiving the pending review."
+      ]
+    },
+    {
+      "id": 57,
+      "prompt": "/implement docs/specs/report-export/를 마무리해줘. CLI 제품이며 시각 자료나 플랫폼 화면 기준은 없어. 구현과 집중 명령 검증·대조는 끝났고 전체 자동 검사·로컬 전체 리뷰·최종 명령 흐름 검증이 남았어. PRODUCT.md의 핵심 흐름은 입력을 읽어 보고서를 저장하는 것이야.",
+      "expected_output": "Apply the same deterministic-check, review-and-repair, final-runtime order to the CLI surface without adding Expo, visual or device requirements.",
+      "files": [],
+      "expectations": [
+        "It completes deterministic checks and review before final command-flow and core-loop verification.",
+        "It uses command runtime evidence rather than adding device, screenshot or Expo gates.",
+        "It preserves the whole-diff review and the current executable revision completion requirements."
+      ]
+    },
+    {
+      "id": 58,
+      "prompt": "/implement docs/specs/password-reset-email/ 구현해줘. 이 환경에는 Resend 계정 로그인이나 API 키가 없어.",
+      "expected_output": "The response reads the spec's setup section before any source change, does what it can, reports every remaining setup item at once with its done condition, and stops without changing source.",
+      "files": [
+        "evals/fixtures/setup-pending/package.json",
+        "evals/fixtures/setup-pending/README.md",
+        "evals/fixtures/setup-pending/src/reset.js",
+        "evals/fixtures/setup-pending/docs/specs/password-reset-email/spec.md"
+      ],
+      "expectations": [
+        "It reads the `## Setup before implementation` section before changing any source file.",
+        "It reports both Resend items together in one message rather than discovering them one at a time.",
+        "Each reported item names what is left for the user and the done condition from the spec.",
+        "It changes no source file and writes no stub or mock mail sender while setup remains.",
+        "It does not ask for or print a secret value in chat."
+      ]
+    },
+    {
+      "id": 59,
+      "prompt": "/implement docs/specs/password-reset-email/ 셋팅 다 했어. 이어서 구현해줘. (확인해 보니 Resend 콘솔의 acme.test 도메인은 아직 Pending 상태로 보여.)",
+      "expected_output": "The response rechecks every done condition before starting, finds the domain condition still failing, and keeps source untouched while naming that one remaining item.",
+      "files": [
+        "evals/fixtures/setup-pending/package.json",
+        "evals/fixtures/setup-pending/README.md",
+        "evals/fixtures/setup-pending/src/reset.js",
+        "evals/fixtures/setup-pending/docs/specs/password-reset-email/spec.md"
+      ],
+      "expectations": [
+        "It rechecks the done conditions instead of trusting the user's statement alone.",
+        "It names the domain verification as still unfinished with its done condition.",
+        "It does not start source changes while a condition fails."
       ]
     }
   ]

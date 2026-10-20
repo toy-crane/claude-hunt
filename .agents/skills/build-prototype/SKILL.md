@@ -1,12 +1,29 @@
 ---
 name: build-prototype
-description: Build a self-contained dummy-data HTML prototype covering every screen and relevant state of a web, mobile-web, or native-app surface. Use when the user wants to review and settle a complete screen-based product or feature before implementation, especially when prose or isolated variants cannot resolve cross-screen structure. Do not use for production implementation or CLI, terminal, or voice interfaces.
+description: Build a complete dummy-data HTML prototype or a temporary comparison of up to three alternatives for a specific user situation. Use to settle a screen-based product before implementation or resolve a visual or interaction decision during shaping or prototype review. Do not use for production implementation or CLI, terminal, or voice interfaces.
 ---
 
 # Build Prototype
 
 Build a disposable but finished-looking model of the whole surface so the user
 can settle structure, relationships, and behavior before implementation.
+
+Separate the product layer from the decision layer: `prototype.html` holds the
+canonical product screens and flows; a temporary `compare.html` resolves the
+user's current question in its specific situation. Scope the comparison by what
+the decision needs, whether a component, a screen, or a short flow.
+
+When it is unclear where the user needs to open the preview, ask once whether
+they will review it only on the computer running the work or also on another
+device. Use a nonblocking question when the host supports one; otherwise finish
+the access-independent build before asking. Do not infer the review device from
+the execution host or treat no answer as a choice. Select the execution and
+hosting method from the available environment; do not prescribe a particular
+platform.
+
+For a local comparison request, go directly to **Compare one decision** and
+limit building and verification to that decision. The whole-surface inventory,
+review, and preservation gates apply to the prototype, not to this intermediate.
 
 ## Set the effort
 
@@ -21,18 +38,14 @@ share an address the user can open. Hold this gate fixed at `standard`.
 
 - `standard` uses the base gate as its complete result.
 - `high` passes the same base gate, then adds close visual matching to an
-  inspectable current product or reference. Broaden the search for mismatches,
-  independently reproduce each material candidate, correct verified mismatches,
-  and recheck affected screens until none remain. When the host supports
-  subagents, delegate the audit to one fresh reviewer subagent at high model
+  inspectable current product or reference through **Review and converge**.
+  When the host supports subagents, delegate the audit to one fresh reviewer
+  subagent at high model
   effort and give it the reference and candidate artifact without the builder's
   findings. Otherwise separate the build and verification passes and report
   that reviewer independence or model effort was unavailable. If no reference
   can be inspected, report that visual equivalence is unverified and use the
   extra pass only to strengthen layout robustness.
-
-The selected effort changes additional reference verification, not prototype
-completeness, interaction correctness, browser coverage, or visual finish.
 
 ## Ground the prototype
 
@@ -66,9 +79,12 @@ forced data or errors, and structures that are not trivial to reach. Synchronize
 the selector when interactions enter or leave a declared preset.
 
 Copy project tokens verbatim into `:root`, or extract the existing design
-language when no token file exists. Style every screen through those tokens and
-mark elements with the design system's component names in `data-component`;
-use `new:Name` only when no component exists.
+language when no token file exists. When the project ships a dark palette, copy
+it under `.sh-theme-dark` so the shell's theme switch appears; a project without
+one leaves the prototype with no theme control rather than an invented dark
+mode. Style every screen through those tokens and mark elements with the design
+system's component names in `data-component`; use `new:Name` only when no
+component exists.
 
 Use realistic dummy content with real-length names, plausible copy, awkward
 numbers, and only relevant edge conditions. Never use lorem ipsum. Keep out real
@@ -96,16 +112,37 @@ layout and interaction recovery with realistic long or awkward content. Give
 each material mismatch candidate its exact coordinate, observed evidence, and
 reproduction path. Have the fresh reviewer subagent reproduce candidates when
 one is available, discard those that do not reproduce, and correct the verified
-set.
+set until no reproduced material mismatches remain.
 After a correction, re-render its coordinate and the other screens or states
 that share the changed token, component, or shell behavior. Report the audited
 coverage and any unverified coordinates or fidelity claims in the conversation.
 
-For an unresolved detail, render two or three variants that differ only on that
-question. Hold content, data, surrounding layout, behavior, and every confirmed
-element fixed. Keep these disposable comparisons outside the product screen and
-state selectors. Let the user choose, fold the winner into the canonical file,
-and discard the other variants.
+## Compare one decision
+
+For one unresolved visual or interaction decision, copy
+[templates/comparison-shell.html](./templates/comparison-shell.html) into a
+temporary `compare.html`. Name the concrete user situation and render up to
+three alternatives with just enough context to judge it. A fragment may be
+sufficient; a flow may need several related views. This scope is independent of
+the prototype's screen inventory. Build comparisons when a decision arises,
+not once per product screen, and keep unrelated product work in the prototype.
+
+Preserve the template's styling and contract comment, which owns the comparison
+controls and keeps product navigation inside its alternative. Hold content,
+data, surrounding layout, behavior, and confirmed elements fixed except for the
+governing choice. The reviewer sees one alternative at a time and switches
+between them, so verify each alternative at the same state and viewport
+coordinate rather than only the one the comparison opens on. Render and verify
+only the interactions, states, and sizes needed to judge it, then share the
+runnable comparison and ask for the choice.
+
+Once the user chooses, apply that result to the affected product UI and flow in
+the same `prototype.html` and verify the affected behavior there. Delete the
+temporary comparison after integration, then resume the prototype review or
+shaping session. Create a fresh comparison for the next decision; do not collect
+past comparisons or promote `compare.html` into the final deliverable. If the
+prototype has not been built yet, record the choice and discard the comparison
+without building the whole product just to demonstrate integration.
 
 ## Preserve the approved result
 
@@ -115,18 +152,23 @@ cheap agent-chosen defaults as overridable assumptions. Ask about or explicitly
 defer consequential behavior not settled by the approved surface, and record
 its impact as a remaining risk without reopening unrelated screen review.
 
-When every consequential implementation-relevant product decision is settled
-or explicitly deferred and every cheap agent-chosen default is labeled as an
-overridable assumption, reuse an identified work-unit folder or derive a
-kebab-case slug. Record confirmed behavior alongside those explicitly labeled
+When every consequential implementation-relevant product decision is settled or
+explicitly deferred and every cheap agent-chosen default is labeled as an
+overridable assumption, reuse an identified work-unit folder or derive a kebab-
+case slug. Record confirmed behavior alongside those explicitly labeled
 assumptions and deferrals in `docs/specs/<slug>/spec.md`, creating or updating
-the same stable product contract used by shaping. Record or preserve its
-user-visible outcomes, approved scope, observable acceptance criteria, settled
+the same stable product contract used by shaping. Record or preserve its user-
+visible outcomes, approved scope, observable acceptance criteria, settled
 constraints and rationale, assumptions, off-limits areas and why, deferrals,
-and risks. Omit predicted files, functions, code structure, technical layers,
-and implementation steps. Save and link the approved surface as
-`docs/specs/<slug>/prototype.html`. Never infer navigation, order, or behavior
-from source order or visual proximity.
+risks, and setup before implementation. Under a `## Setup before
+implementation` heading, list each piece of work outside the repository that
+implementation needs, such as a vendor account, an issued key, or a console or
+DNS setting, on one line: what is needed, the outcome it serves, and a done
+condition observable without the work the spec delivers. Write `None.` when
+nothing is needed, and never write a secret value. Omit predicted files,
+functions, code structure, technical layers, and implementation steps. Save and
+link the approved surface as `docs/specs/<slug>/prototype.html`. Never infer
+navigation, order, or behavior from source order or visual proximity.
 
 Promote only user-confirmed, reusable, non-obvious trade-offs from the spec into
 a project decision contract.
