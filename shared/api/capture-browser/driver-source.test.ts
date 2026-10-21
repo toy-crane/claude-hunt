@@ -20,10 +20,12 @@ const DRIVER_PORT = 17_777;
 const MD5_HEX = /^[0-9a-f]{32}$/;
 const DRIVER_TOKEN = "test-token";
 
-// This suite launches a real Chromium. The Vitest tier is jsdom-only per
-// AGENTS.md, and CI installs no Playwright browsers, so run it only where a
-// browser is installed (any machine that has run `bunx playwright install`).
-const HAS_BROWSER = existsSync(chromium.executablePath());
+// This suite launches a real headless Chromium. CI installs Playwright's
+// headless shell before the unit tests and must always run it, so a missing
+// browser there fails loudly; locally it is skipped until
+// `bunx playwright install chromium` has been run.
+const RUN_DRIVER_SUITE =
+  Boolean(process.env.CI) || existsSync(chromium.executablePath());
 
 const PAGES: Record<string, string> = {
   "/": `<html><body style="margin:0">
@@ -73,7 +75,7 @@ async function waitForDriver() {
   throw new Error(`driver did not start\n${driverStderr.slice(-2000)}`);
 }
 
-describe.skipIf(!HAS_BROWSER)("capture driver", () => {
+describe.skipIf(!RUN_DRIVER_SUITE)("capture driver", () => {
   beforeAll(async () => {
     away = createServer((_req, res) => res.end("<h1>away</h1>"));
     const awayPort = await listen(away);
