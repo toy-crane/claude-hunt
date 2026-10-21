@@ -126,6 +126,20 @@ Preconditions and limits:
 
 The raw `Database` type lives at `shared/api/supabase/types.ts`. Domain code must import narrowed types from `@entities/<slice>`, never the raw file.
 
+<!-- BEGIN:add-stack-context:vercel-sandbox -->
+## Vercel Sandbox
+
+- Before work that creates, drives, or configures a Vercel Sandbox (`@vercel/sandbox`, the `sandbox` CLI), load the `sandbox` skill and retrieve the current official docs at `https://vercel.com/docs/sandbox` (SDK reference, authentication, pricing and limits pages linked from it).
+- Reconcile what the docs say with the `@vercel/sandbox` version installed in `package.json`; the SDK changed shape between majors (v2 uses named, persistent sandboxes), so do not rely on recalled APIs.
+<!-- END:add-stack-context:vercel-sandbox -->
+
+<!-- BEGIN:add-stack-context:claude-api -->
+## Claude API
+
+- Before work that calls Claude (`@anthropic-ai/sdk`, model ids such as `claude-haiku-5-5`), load the `claude-api` skill (bundled with Claude Code; installed for Codex under `.agents/skills/claude-api`) and retrieve the current official docs index at `https://platform.claude.com/llms.txt`.
+- Reconcile model ids, pricing, and request parameters with the docs and the `@anthropic-ai/sdk` version installed in `package.json`; never answer model or pricing questions from memory.
+<!-- END:add-stack-context:claude-api -->
+
 <!-- BEGIN:nextjs-agent-rules -->
 
 # This is NOT the Next.js you know
