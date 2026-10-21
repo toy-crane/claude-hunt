@@ -11,6 +11,7 @@ import { createServer, type Server } from "node:http";
 import type { AddressInfo } from "node:net";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
+import { chromium } from "playwright";
 import { afterAll, beforeAll, describe, expect, it } from "vitest";
 import { CAPTURE_DRIVER_SOURCE } from "./driver-source";
 
@@ -18,6 +19,11 @@ const PROJECT_ROOT = join(import.meta.dirname, "../../..");
 const DRIVER_PORT = 17_777;
 const MD5_HEX = /^[0-9a-f]{32}$/;
 const DRIVER_TOKEN = "test-token";
+
+// This suite launches a real Chromium. The Vitest tier is jsdom-only per
+// AGENTS.md, and CI installs no Playwright browsers, so run it only where a
+// browser is installed (any machine that has run `bunx playwright install`).
+const HAS_BROWSER = existsSync(chromium.executablePath());
 
 const PAGES: Record<string, string> = {
   "/": `<html><body style="margin:0">
@@ -33,6 +39,7 @@ let away: Server;
 let siteUrl: string;
 let driver: ChildProcess;
 let workDir: string;
+let driverStderr = "";
 
 function listen(server: Server): Promise<string> {
   return new Promise((resolve) => {
@@ -63,54 +70,57 @@ async function waitForDriver() {
     }
     await new Promise((r) => setTimeout(r, 100));
   }
-  throw new Error("driver did not start");
+  throw new Error(`driver did not start\n${driverStderr.slice(-2000)}`);
 }
 
-beforeAll(async () => {
-  away = createServer((_req, res) => res.end("<h1>away</h1>"));
-  const awayPort = await listen(away);
-  site = createServer((req, res) => {
-    const page = PAGES[req.url ?? ""];
-    if (!page) {
-      res.statusCode = 404;
-      res.end("missing");
-      return;
-    }
-    res.setHeader("content-type", "text/html; charset=utf-8");
-    res.end(page.replace("__AWAY__", `http://localhost:${awayPort}/`));
+describe.skipIf(!HAS_BROWSER)("capture driver", () => {
+  beforeAll(async () => {
+    away = createServer((_req, res) => res.end("<h1>away</h1>"));
+    const awayPort = await listen(away);
+    site = createServer((req, res) => {
+      const page = PAGES[req.url ?? ""];
+      if (!page) {
+        res.statusCode = 404;
+        res.end("missing");
+        return;
+      }
+      res.setHeader("content-type", "text/html; charset=utf-8");
+      res.end(page.replace("__AWAY__", `http://localhost:${awayPort}/`));
+    });
+    siteUrl = `http://127.0.0.1:${await listen(site)}`;
+
+    workDir = mkdtempSync(join(tmpdir(), "capture-driver-"));
+    const script = join(workDir, "driver.mjs");
+    writeFileSync(script, CAPTURE_DRIVER_SOURCE);
+    // Let the script resolve `playwright` from this project's install, the
+    // way the sandbox resolves it from its own.
+    symlinkSync(
+      join(PROJECT_ROOT, "node_modules"),
+      join(workDir, "node_modules")
+    );
+    driver = spawn(process.execPath, [script], {
+      env: {
+        ...process.env,
+        DRIVER_PORT: String(DRIVER_PORT),
+        DRIVER_TOKEN,
+        VIEW_PATH: join(workDir, "view.jpg"),
+        CAPTURE_PATH: join(workDir, "capture.jpg"),
+      },
+      stdio: ["ignore", "ignore", "pipe"],
+    });
+    driver.stderr?.on("data", (chunk) => {
+      driverStderr += String(chunk);
+    });
+    await waitForDriver();
+  }, 60_000);
+
+  afterAll(() => {
+    driver?.kill("SIGKILL");
+    site?.close();
+    away?.close();
+    rmSync(workDir, { recursive: true, force: true });
   });
-  siteUrl = `http://127.0.0.1:${await listen(site)}`;
 
-  workDir = mkdtempSync(join(tmpdir(), "capture-driver-"));
-  const script = join(workDir, "driver.mjs");
-  writeFileSync(script, CAPTURE_DRIVER_SOURCE);
-  // Let the script resolve `playwright` from this project's install, the
-  // way the sandbox resolves it from its own.
-  symlinkSync(
-    join(PROJECT_ROOT, "node_modules"),
-    join(workDir, "node_modules")
-  );
-  driver = spawn(process.execPath, [script], {
-    env: {
-      ...process.env,
-      DRIVER_PORT: String(DRIVER_PORT),
-      DRIVER_TOKEN,
-      VIEW_PATH: join(workDir, "view.jpg"),
-      CAPTURE_PATH: join(workDir, "capture.jpg"),
-    },
-    stdio: "ignore",
-  });
-  await waitForDriver();
-}, 60_000);
-
-afterAll(() => {
-  driver?.kill("SIGKILL");
-  site?.close();
-  away?.close();
-  rmSync(workDir, { recursive: true, force: true });
-});
-
-describe("capture driver", () => {
   it("opens a reachable page and writes a view for the model", async () => {
     const result = await call("/open", { url: `${siteUrl}/` });
     expect(result).toMatchObject({ ok: true });
