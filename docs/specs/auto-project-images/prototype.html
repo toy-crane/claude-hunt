@@ -1,0 +1,603 @@
+<!--
+  prototype shell: the review chrome every prototype starts from.
+
+  Keep this comment in the prototype you grow from here: it is the contract,
+  and later turns work from that file rather than from this one.
+
+  Contract (extend product screens; keep the review shell):
+  - Product:  .sh-stage contains only end-user product UI. Keep review notes,
+               rationale, instructions, and approval controls in conversation.
+  - Screens:  <section data-screen="slug" data-title="Label"> inside .sh-stage.
+               The selector, arrow keys, and #hash routing build themselves.
+               Use one option per product destination or distinct surface,
+               named by its product role. Keep baselines, variants, comparison
+               labels, steps, indexes, and progress out of names and states.
+               Links may use href="#slug".
+  - States:   "Default" is automatic. A screen declares only representative
+               presets in data-states="Empty,Error". Use natural, screen-specific
+               names. Reserve presets for important multi-step results, forced
+               data or errors, or materially different structure; keep one-click
+               and transient states as interactions. Use data-when="Empty" on
+               preset-only elements. Call prototypeShell.setState("Name") on
+               entry and setState("Default") on exit, including when repeated
+               actions cross a preset condition.
+  - Viewport: "vp (m)" cycles full / 390 / 768. The 390 preset is a
+               fixed-height, internally scrolling phone frame. Start a
+               mobile-first prototype by adding class="sh-vp-390" to <body>
+               (or a bootstrap classList.add before the chrome script runs).
+  - Pinning:  keep in-frame bars (tab bars, CTAs) inside the phone with
+               position: sticky; position: fixed pins to the browser window.
+  - Tokens:   replace the project-tokens block with project tokens copied
+               verbatim. Map differing names to --background, --foreground, and
+               --font afterwards; replace network fonts with a system stack and
+               note that substitution. Without a design system, keep this
+               palette as the finished style.
+  - Placeholders: .wf-pic stands in for pictures the prototype has no real
+               files for. Use real text everywhere text belongs.
+
+  - Chrome:   Keep exactly the screen selector, selected-screen state selector,
+               and viewport cycle. Chrome that needs explaining has failed.
+
+  Self-contained by design: no build, no framework, no network.
+-->
+<meta charset="utf-8">
+<title>자동 대표 이미지 — 프로토타입</title>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<style>
+  /* ── project tokens: app/globals.css :root, copied verbatim (light) ── */
+  :root {
+    --font-sans:
+      "Pretendard Variable", -apple-system, BlinkMacSystemFont, system-ui,
+      "Apple SD Gothic Neo", "Malgun Gothic", "Noto Sans KR", "Helvetica Neue",
+      Arial, sans-serif;
+    --background: oklch(1 0 0);
+    --foreground: oklch(0.145 0 0);
+    --card: oklch(1 0 0);
+    --card-foreground: oklch(0.145 0 0);
+    --primary: oklch(0.205 0 0);
+    --primary-foreground: oklch(0.985 0 0);
+    --secondary: oklch(0.97 0 0);
+    --muted: oklch(0.97 0 0);
+    --muted-foreground: oklch(0.556 0 0);
+    --accent: oklch(0.97 0 0);
+    --destructive: oklch(0.577 0.245 27.325);
+    --border: oklch(0.922 0 0);
+    --border-soft: oklch(0.95 0 0);
+    --input: oklch(0.922 0 0);
+    --ring: oklch(0.708 0 0);
+    --radius: 0;
+    --accent-terracotta: #c15f3c;
+    /* shell mapping (Pretendard webfont → system Korean sans fallback) */
+    --surface: var(--card);
+    --muted-text: var(--muted-foreground);
+    --line: var(--border);
+    --font: var(--font-sans);
+  }
+
+  /* ── review chrome (sh-*): keep; extend product styles elsewhere ── */
+  * { box-sizing: border-box }
+  body {
+    margin: 0; padding: 0 0 40px;
+    background: var(--background, #f6f6f6); color: var(--foreground, #3a3a3a);
+    font-family: var(--font, system-ui, sans-serif);
+  }
+  .sh-bar {
+    position: sticky; top: 0; z-index: 999;
+    display: flex; gap: 10px; align-items: center; flex-wrap: wrap;
+    padding: 8px 12px; background: #191a1c; color: #d7d7d7;
+    font: 12px/1.5 ui-monospace, SFMono-Regular, Menlo, monospace;
+  }
+  .sh-bar b, .sh-control-label { color: #8a8f98; font-weight: 500 }
+  .sh-control { display: inline-flex; gap: 5px; align-items: center }
+  .sh-bar button {
+    border: 1px solid #3a3d42; background: none; color: inherit;
+    font: inherit; padding: 2px 9px; border-radius: 99px; cursor: pointer;
+  }
+  .sh-bar select {
+    width: 170px; border: 1px solid #3a3d42; background: #232428; color: inherit;
+    font: inherit; padding: 3px 28px 3px 9px; border-radius: 7px; cursor: pointer;
+    color-scheme: dark;
+  }
+  #sh-screen { width: 190px }
+  .sh-bar button.on { background: #d7d7d7; color: #191a1c; border-color: #d7d7d7 }
+  .sh-spacer { flex: 1 }
+  .sh-stage { max-width: 960px; margin: 0 auto; padding: 12px 16px 0 }
+  [hidden] { display: none !important }
+
+  /* viewport presets */
+  .sh-vp-390 .sh-stage {
+    max-width: 390px; background: var(--background, #f6f6f6);
+    border: 10px solid #191a1c; border-radius: 28px;
+    padding: 16px 12px; height: min(844px, calc(100dvh - 52px));
+    overflow-y: auto; margin-top: 12px;
+  }
+  .sh-vp-768 .sh-stage {
+    max-width: 768px; border: 1px solid #c4c4c4; border-radius: 12px;
+    padding: 16px; margin-top: 12px;
+  }
+
+  /* placeholders */
+  .wf-pic  { border-radius: 4px; background:
+             repeating-linear-gradient(45deg, #e9e9e9, #e9e9e9 6px, #f2f2f2 6px, #f2f2f2 12px) }
+
+  /* ── product styles ── */
+  .app-header { display: flex; align-items: center; gap: 16px; padding: 10px 0 14px; border-bottom: 1px solid var(--border); margin-bottom: 8px; font-size: 13px }
+  .app-header .logo { font-family: ui-monospace, Menlo, monospace; font-weight: 600 }
+  .app-header .logo span { color: var(--accent-terracotta) }
+  .app-header nav { display: flex; gap: 14px; color: var(--muted-foreground) }
+  .app-header nav .on { color: var(--foreground); font-weight: 500 }
+  .app-header .grow { flex: 1 }
+  .sh-vp-390 .app-header nav { display: none }
+
+  .page { max-width: 672px; margin: 0 auto; padding: 24px 8px 64px; display: flex; flex-direction: column; gap: 24px }
+  .sh-vp-390 .page { padding: 12px 4px 48px }
+  h1 { font-size: 24px; font-weight: 600; margin: 0 }
+  .lede { margin: 4px 0 0; color: var(--muted-foreground); font-size: 14px }
+  form { display: flex; flex-direction: column; gap: 24px }
+  .field { display: flex; flex-direction: column; gap: 8px }
+  .label { font-size: 14px; font-weight: 500 }
+  .req { color: var(--destructive); margin-left: 2px }
+  .opt { color: var(--muted-foreground); font-weight: 400; font-size: 13px; margin-left: 4px }
+  .input, .textarea { width: 100%; border: 1px solid var(--input); background: transparent; padding: 8px 10px; font: inherit; font-size: 14px; color: var(--foreground); border-radius: var(--radius) }
+  .input:disabled, .textarea:disabled { opacity: .5 }
+  .textarea { min-height: 112px; resize: vertical }
+  .field[data-invalid] .input { border-color: var(--destructive); box-shadow: 0 0 0 3px color-mix(in oklch, var(--destructive) 20%, transparent) }
+  .field-error { color: var(--destructive); font-size: 13px; margin: 0 }
+
+  .slots { display: flex; flex-direction: column; gap: 12px }
+  .slot-primary { position: relative; aspect-ratio: 16/10; width: 100%; border: 1px solid var(--border); background: var(--muted); overflow: hidden }
+  .slot-empty { border: 1px dashed var(--border); background: color-mix(in oklch, var(--muted) 40%, transparent); color: var(--muted-foreground); display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 8px; cursor: pointer; font: inherit }
+  .slot-empty:hover { background: color-mix(in oklch, var(--muted) 60%, transparent) }
+  .slot-empty:disabled { cursor: default; opacity: .6 }
+  .slot-empty .t1 { font-size: 14px; font-weight: 500 }
+  .slot-empty .t2 { font-size: 12px }
+  .thumbs { display: grid; grid-template-columns: repeat(4, 1fr); gap: 8px }
+  .thumb { position: relative; aspect-ratio: 1; border: 1px solid var(--border); background: var(--muted); overflow: hidden }
+  .thumb.slot-empty { aspect-ratio: 1 }
+  .badge-primary { position: absolute; left: 8px; bottom: 8px; background: var(--primary); color: var(--primary-foreground); font-size: 12px; font-weight: 500; padding: 2px 6px }
+  .x { position: absolute; top: 8px; right: 8px; width: 28px; height: 28px; display: inline-flex; align-items: center; justify-content: center; border: 0; background: color-mix(in oklch, var(--background) 80%, transparent); color: var(--foreground); cursor: pointer }
+  .thumb .x { top: 4px; right: 4px; width: 20px; height: 20px }
+  .count { text-align: right; color: var(--muted-foreground); font-size: 12px; font-variant-numeric: tabular-nums; margin: 0 }
+  .shot { width: 100%; height: 100%; display: block; object-fit: cover }
+
+  .actions { display: flex; justify-content: flex-end; gap: 8px }
+  .btn { display: inline-flex; align-items: center; gap: 8px; height: 40px; padding: 0 16px; border: 1px solid transparent; font: inherit; font-size: 14px; font-weight: 500; cursor: pointer; border-radius: var(--radius); text-decoration: none; white-space: nowrap }
+  .btn-primary { background: var(--primary); color: var(--primary-foreground) }
+  .btn-primary:disabled { opacity: .7; cursor: default }
+  .btn-outline { background: var(--background); color: var(--foreground); border-color: var(--border) }
+  .btn-sm { height: 32px; padding: 0 12px; font-size: 13px }
+  .btn-icon { width: 36px; padding: 0; justify-content: center }
+  .spinner { width: 14px; height: 14px; border: 2px solid currentColor; border-right-color: transparent; border-radius: 50%; animation: spin .8s linear infinite; flex: none }
+  .spinner.sm { width: 12px; height: 12px; border-width: 1.5px }
+  @keyframes spin { to { transform: rotate(360deg) } }
+  @media (prefers-reduced-motion: reduce) { .spinner { animation-duration: 2.4s } }
+
+  .toast { position: sticky; bottom: 12px; margin-left: auto; width: max-content; max-width: 100%; background: var(--background); border: 1px solid var(--border); padding: 10px 14px; font-size: 14px; box-shadow: 0 6px 20px oklch(0 0 0 / .08); display: flex; gap: 8px; align-items: center }
+
+  /* detail */
+  .d-head { display: flex; justify-content: space-between; gap: 12px; align-items: flex-start }
+  .d-head p { margin: 8px 0 0; font-size: 16px; line-height: 1.6 }
+  .d-side { display: flex; gap: 8px; flex: none }
+  .vote { display: inline-flex; align-items: center; gap: 6px; height: 36px; padding: 0 12px; border: 1px solid var(--border); font-size: 13px; font-weight: 500; background: var(--background) }
+  .meta { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; color: var(--muted-foreground); font-size: 14px }
+  .chip { display: inline-flex; gap: 4px; align-items: center; border: 1px solid var(--border); padding: 1px 8px; font-size: 12px; color: var(--foreground) }
+  .meta .who { color: var(--foreground) }
+  .gallery { display: flex; flex-direction: column; gap: 8px }
+  .stage-img { position: relative; aspect-ratio: 16/10; border: 1px solid var(--border); background: var(--muted); overflow: hidden }
+  .nav-btn { position: absolute; top: 50%; transform: translateY(-50%); width: 36px; height: 36px; border-radius: 50%; border: 0; background: color-mix(in oklch, var(--background) 80%, transparent); display: inline-flex; align-items: center; justify-content: center; cursor: pointer }
+  .nav-btn.l { left: 8px } .nav-btn.r { right: 8px }
+  .strip { display: flex; gap: 8px; padding: 4px; overflow-x: auto }
+  .strip button { flex: none; width: 96px; aspect-ratio: 16/10; border: 1px solid var(--border); padding: 0; background: var(--muted); cursor: pointer; overflow: hidden; opacity: .6 }
+  .strip button.on { opacity: 1; outline: 2px solid var(--foreground); outline-offset: 1px }
+  .desc { font-size: 16px; line-height: 1.7; margin: 0; white-space: pre-line }
+  .visit { display: flex; justify-content: flex-end }
+  .comments { border-top: 1px solid var(--border); padding-top: 16px; font-size: 14px; color: var(--muted-foreground) }
+  .comments b { color: var(--foreground); font-weight: 600 }
+</style>
+
+<header class="sh-bar">
+  <b>proto</b>
+  <label class="sh-control"><span class="sh-control-label">screen</span><select id="sh-screen"></select></label>
+  <span class="sh-spacer"></span>
+  <label class="sh-control"><span class="sh-control-label">state</span><select id="sh-state"></select></label>
+  <button id="sh-vp">vp: full (m)</button>
+</header>
+
+<main class="sh-stage">
+
+  <!-- ───────────── 프로젝트 제출 ───────────── -->
+  <section data-screen="submit" data-title="프로젝트 제출" data-states="대표 이미지 만드는 중,URL을 열 수 없음">
+    <div class="app-header" data-component="Header">
+      <span class="logo">&gt;claude-hunt<span>_</span></span>
+      <nav><span>홈</span><span class="on">프로젝트</span><span>강의자료</span></nav>
+      <span class="grow"></span>
+      <span class="btn btn-outline btn-sm">지우</span>
+    </div>
+    <div class="page">
+      <header>
+        <h1>프로젝트 제출</h1>
+        <p class="lede">제출하면 상세 페이지가 만들어지고 보드에 노출돼요.</p>
+      </header>
+      <form id="submit-form" aria-label="프로젝트 제출" data-component="SubmitForm" novalidate>
+        <div class="field" data-component="Field">
+          <label class="label" for="f-title">제목<span class="req">*</span></label>
+          <input class="input" id="f-title" data-lock value="점심 룰렛" maxlength="80">
+        </div>
+        <div class="field" data-component="Field">
+          <label class="label" for="f-tag">한 줄 소개<span class="req">*</span></label>
+          <input class="input" id="f-tag" data-lock value="팀원 수와 예산만 넣으면 오늘 점심 메뉴를 골라 주는 룰렛" maxlength="60">
+        </div>
+        <div class="field" data-component="Field">
+          <label class="label" for="f-desc">프로젝트 설명</label>
+          <textarea class="textarea" id="f-desc" data-lock placeholder="프로젝트를 자세히 소개해 주세요 (선택)">매일 반복되는 "뭐 먹지?" 고민을 끝내려고 만들었어요. 사내 식당 주변 반경 500m 식당 32곳을 넣어 두었고, 최근 3일 안에 먹은 메뉴는 자동으로 빠져요.</textarea>
+        </div>
+        <div class="field" id="url-field" data-component="Field">
+          <label class="label" for="f-url">프로젝트 URL<span class="req">*</span></label>
+          <input class="input" id="f-url" data-lock type="url" value="https://lunch-roulette-kr.vercel.app">
+          <p class="field-error" data-when="URL을 열 수 없음">프로젝트 URL을 열 수 없어요. 주소가 맞는지, 로그인 없이 열리는지 확인해 주세요.</p>
+        </div>
+        <div class="field" data-component="Field">
+          <label class="label" for="f-gh">GitHub 저장소</label>
+          <input class="input" id="f-gh" data-lock type="url" placeholder="https://github.com/owner/repo">
+        </div>
+        <div class="field" data-component="Field">
+          <span class="label">스크린샷<span class="opt">(선택)</span></span>
+          <div data-component="ImageSlots" id="submit-slots"></div>
+        </div>
+        <div class="actions">
+          <a class="btn btn-outline" href="#submit">취소</a>
+          <button class="btn btn-primary" id="submit-btn" type="submit" data-component="Button"><span id="submit-label">프로젝트 제출</span></button>
+        </div>
+      </form>
+    </div>
+  </section>
+
+  <!-- ───────────── 프로젝트 상세 ───────────── -->
+  <section data-screen="detail" data-title="프로젝트 상세" data-states="채우기 완료">
+    <div class="app-header" data-component="Header">
+      <span class="logo">&gt;claude-hunt<span>_</span></span>
+      <nav><span>홈</span><span class="on">프로젝트</span><span>강의자료</span></nav>
+      <span class="grow"></span>
+      <span class="btn btn-outline btn-sm" id="detail-who">지우</span>
+    </div>
+    <div class="page">
+      <div class="d-head" data-component="Hero">
+        <div>
+          <h1>점심 룰렛</h1>
+          <p>팀원 수와 예산만 넣으면 오늘 점심 메뉴를 골라 주는 룰렛</p>
+        </div>
+        <div class="d-side">
+          <span class="vote" data-component="VoteButton">▲ 0</span>
+          <span class="owner-only" data-component="OwnerControls" style="display:flex;gap:6px">
+            <a class="btn btn-outline btn-icon" href="#edit" aria-label="편집">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 20h4L19 9l-4-4L4 16v4z"/></svg>
+            </a>
+            <span class="btn btn-outline btn-icon" aria-label="삭제">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 7h16M9 7V4h6v3M6 7l1 13h10l1-13"/></svg>
+            </span>
+          </span>
+        </div>
+      </div>
+      <div class="meta">
+        <span class="chip">LG전자 10기</span><span>·</span><span class="who">지우</span><span>·</span><span>10월 21일</span>
+      </div>
+      <div class="gallery" data-component="ImageGallery">
+        <div class="stage-img" id="g-stage"></div>
+        <div class="strip" id="g-strip"></div>
+      </div>
+      <p class="desc">매일 반복되는 "뭐 먹지?" 고민을 끝내려고 만들었어요. 사내 식당 주변 반경 500m 식당 32곳을 넣어 두었고, 최근 3일 안에 먹은 메뉴는 자동으로 빠져요.</p>
+      <div class="visit"><span class="btn btn-primary">프로젝트 방문하기 ↗</span></div>
+      <div class="comments"><b>댓글 0</b><br>첫 댓글을 남겨 보세요.</div>
+      <div class="toast" id="d-toast" hidden>✓ 프로젝트를 제출했어요.</div>
+    </div>
+  </section>
+
+  <!-- ───────────── 프로젝트 편집 ───────────── -->
+  <section data-screen="edit" data-title="프로젝트 편집" data-states="이미지를 모두 지움">
+    <div class="app-header" data-component="Header">
+      <span class="logo">&gt;claude-hunt<span>_</span></span>
+      <nav><span>홈</span><span class="on">프로젝트</span><span>강의자료</span></nav>
+      <span class="grow"></span>
+      <span class="btn btn-outline btn-sm">지우</span>
+    </div>
+    <div class="page">
+      <header>
+        <h1>프로젝트 편집</h1>
+        <p class="lede">저장하면 상세 페이지와 보드에 바로 반영돼요.</p>
+      </header>
+      <form id="edit-form" aria-label="프로젝트 편집" data-component="EditForm" novalidate>
+        <div class="field" data-component="Field">
+          <label class="label" for="e-title">제목<span class="req">*</span></label>
+          <input class="input" id="e-title" data-elock value="점심 룰렛">
+        </div>
+        <div class="field" data-component="Field">
+          <label class="label" for="e-url">프로젝트 URL<span class="req">*</span></label>
+          <input class="input" id="e-url" data-elock type="url" value="https://lunch-roulette-kr.vercel.app">
+        </div>
+        <div class="field" data-component="Field">
+          <span class="label">스크린샷<span class="opt">(선택)</span></span>
+          <div data-component="ImageSlots" id="edit-slots"></div>
+        </div>
+        <div class="actions">
+          <a class="btn btn-outline" href="#detail">취소</a>
+          <button class="btn btn-primary" id="edit-btn" type="submit"><span id="edit-label">저장</span></button>
+        </div>
+      </form>
+    </div>
+  </section>
+</main>
+
+<script>
+  const stage = document.querySelector('.sh-stage');
+  const screens = [...stage.querySelectorAll('[data-screen]')];
+  const screenSelect = document.getElementById('sh-screen');
+  const stateSelect = document.getElementById('sh-state');
+  const vpBtn = document.getElementById('sh-vp');
+  let current = null;
+  let currentStates = [];
+
+  screens.forEach(s => {
+    const option = document.createElement('option');
+    option.textContent = s.dataset.title || s.dataset.screen;
+    option.value = s.dataset.screen;
+    screenSelect.append(option);
+  });
+  screenSelect.onchange = () => show(screenSelect.value);
+
+  function show(slug) {
+    current = screens.find(s => s.dataset.screen === slug) || screens[0];
+    screens.forEach(s => s.hidden = s !== current);
+    screenSelect.value = current.dataset.screen;
+    history.replaceState(null, '', '#' + current.dataset.screen);
+    buildStates();
+  }
+
+  function buildStates() {
+    const declared = (current.dataset.states || '').split(',').map(x => x.trim()).filter(Boolean);
+    currentStates = ['Default', ...declared.filter(name => name !== 'Default')];
+    stateSelect.innerHTML = '';
+    currentStates.forEach(name => {
+      const option = document.createElement('option');
+      option.textContent = name;
+      option.value = name;
+      stateSelect.append(option);
+    });
+    applyState('Default');
+  }
+
+  function applyState(name) {
+    const active = currentStates.includes(name) ? name : 'Default';
+    current.querySelectorAll('[data-when]').forEach(el => {
+      el.hidden = !el.dataset.when.split(',').map(x => x.trim()).includes(active);
+    });
+    stateSelect.value = active;
+    window.dispatchEvent(new CustomEvent('proto:state', { detail: { screen: current.dataset.screen, state: active } }));
+  }
+  stateSelect.onchange = () => applyState(stateSelect.value);
+
+  window.prototypeShell = {
+    showScreen: show,
+    setState: applyState,
+    getScreen: () => current?.dataset.screen,
+    getState: () => stateSelect.value
+  };
+
+  const VPS = ['full', '390', '768'];
+  let vp = VPS.find(v => document.body.classList.contains('sh-vp-' + v)) || 'full';
+  function applyVp() {
+    VPS.forEach(v => document.body.classList.toggle('sh-vp-' + v, v === vp && v !== 'full'));
+    vpBtn.textContent = 'vp: ' + vp + ' (m)';
+    vpBtn.classList.toggle('on', vp !== 'full');
+  }
+  vpBtn.onclick = () => { vp = VPS[(VPS.indexOf(vp) + 1) % VPS.length]; applyVp(); };
+  applyVp();
+
+  addEventListener('keydown', e => {
+    if (/INPUT|TEXTAREA|SELECT/.test(e.target.tagName)) return;
+    const i = screens.indexOf(current);
+    if (e.key === 'ArrowRight') show(screens[(i + 1) % screens.length].dataset.screen);
+    if (e.key === 'ArrowLeft') show(screens[(i - 1 + screens.length) % screens.length].dataset.screen);
+    if (e.key === 'm') vpBtn.click();
+  });
+
+  addEventListener('hashchange', () => show(location.hash.slice(1)));
+</script>
+
+<script>
+  /* ── product behavior (dummy data only) ── */
+  const MAX = 5;
+  const ICON_X = '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 6l12 12M18 6L6 18"/></svg>';
+  const ICON_UP = '<svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M7 18a5 5 0 1 1 .9-9.9A6 6 0 0 1 19 10a4 4 0 0 1-1 7.9M12 12v8M9 15l3-3 3 3"/></svg>';
+  const ICON_PLUS = '<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 5v14M5 12h14"/></svg>';
+
+  /* Mock screens of the dummy project, drawn instead of real screenshots. */
+  function screenSvg(kind) {
+    const bg = '#fff7ed', ink = '#3b2a1a', acc = '#ea580c';
+    const wheel = (rot, label) => {
+      const cols = ['#fdba74','#fed7aa','#fb923c','#ffedd5','#f97316','#fde68a'];
+      let s = '';
+      for (let i = 0; i < 6; i++) {
+        const a0 = (i * 60 + rot) * Math.PI / 180, a1 = ((i + 1) * 60 + rot) * Math.PI / 180;
+        s += `<path d="M640 430 L${640 + 220 * Math.cos(a0)} ${430 + 220 * Math.sin(a0)} A220 220 0 0 1 ${640 + 220 * Math.cos(a1)} ${430 + 220 * Math.sin(a1)} Z" fill="${cols[i]}" stroke="#fff" stroke-width="4"/>`;
+      }
+      return s + `<circle cx="640" cy="430" r="34" fill="${ink}"/><path d="M640 190 l-18 -34 h36z" fill="${ink}"/>` + (label ? `<text x="640" y="740" text-anchor="middle" font-size="34" fill="${ink}" font-family="sans-serif">${label}</text>` : '');
+    };
+    const head = `<rect width="1280" height="800" fill="${bg}"/><text x="80" y="92" font-size="44" font-weight="700" fill="${ink}" font-family="sans-serif">🍱 점심 룰렛</text><text x="1200" y="92" text-anchor="end" font-size="26" fill="#9a6b4b" font-family="sans-serif">LG트윈타워 반경 500m · 식당 32곳</text>`;
+    const body = {
+      first: wheel(0, '') + `<rect x="520" y="690" width="240" height="72" fill="${acc}"/><text x="640" y="738" text-anchor="middle" font-size="32" fill="#fff" font-family="sans-serif">돌리기</text><text x="80" y="260" font-size="26" fill="#9a6b4b" font-family="sans-serif">인원 4명</text><text x="80" y="310" font-size="26" fill="#9a6b4b" font-family="sans-serif">1인 예산 12,000원</text>`,
+      spin: wheel(37, '룰렛이 돌아가는 중…'),
+      result: `<rect x="290" y="180" width="700" height="460" fill="#fff" stroke="#fed7aa" stroke-width="4"/><text x="640" y="280" text-anchor="middle" font-size="34" fill="#9a6b4b" font-family="sans-serif">오늘 점심은</text><text x="640" y="400" text-anchor="middle" font-size="84" font-weight="700" fill="${ink}" font-family="sans-serif">김치찌개 🍲</text><text x="640" y="480" text-anchor="middle" font-size="30" fill="#9a6b4b" font-family="sans-serif">한옥집 · 도보 6분 · 9,000원</text><rect x="430" y="540" width="200" height="60" fill="${acc}"/><text x="530" y="580" text-anchor="middle" font-size="26" fill="#fff" font-family="sans-serif">길찾기</text><rect x="650" y="540" width="200" height="60" fill="#fff" stroke="${acc}" stroke-width="3"/><text x="750" y="580" text-anchor="middle" font-size="26" fill="${acc}" font-family="sans-serif">다시 돌리기</text>`,
+      menu: [['김치찌개','9,000'],['쌀국수','11,000'],['돈까스','10,500'],['샐러드','12,000'],['제육볶음','9,500']].map(([n,p],i)=>`<rect x="80" y="${170+i*112}" width="1120" height="92" fill="#fff" stroke="#fed7aa" stroke-width="3"/><text x="120" y="${228+i*112}" font-size="32" fill="${ink}" font-family="sans-serif">${n}</text><text x="1060" y="${228+i*112}" text-anchor="end" font-size="28" fill="#9a6b4b" font-family="sans-serif">${p}원</text><rect x="1100" y="${196+i*112}" width="64" height="40" rx="20" fill="${i===3?'#e5e7eb':acc}"/>`).join(''),
+      history: `<text x="80" y="200" font-size="30" fill="${ink}" font-family="sans-serif">최근 7일 점심 기록</text>` + ['월 김치찌개','화 쌀국수','수 돈까스','목 제육볶음','금 ?'].map((d,i)=>`<rect x="${80+i*228}" y="250" width="208" height="300" fill="${i===4?'#ffedd5':'#fff'}" stroke="#fed7aa" stroke-width="3"/><text x="${184+i*228}" y="330" text-anchor="middle" font-size="30" fill="#9a6b4b" font-family="sans-serif">${d.split(' ')[0]}</text><text x="${184+i*228}" y="430" text-anchor="middle" font-size="30" fill="${ink}" font-family="sans-serif">${d.split(' ')[1]}</text>`).join('')
+    }[kind];
+    return 'data:image/svg+xml;utf8,' + encodeURIComponent(`<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1280 800">${head}${body}</svg>`);
+  }
+  const SHOTS = { first: screenSvg('first'), spin: screenSvg('spin'), result: screenSvg('result'), menu: screenSvg('menu'), history: screenSvg('history') };
+  const UPLOAD = 'data:image/svg+xml;utf8,' + encodeURIComponent('<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1280 800"><rect width="1280" height="800" fill="#eef2ff"/><text x="640" y="380" text-anchor="middle" font-size="52" font-family="sans-serif" fill="#3730a3">직접 올린 스크린샷</text><text x="640" y="450" text-anchor="middle" font-size="30" fill="#6366f1" font-family="sans-serif">lunch-roulette-main.png</text></svg>');
+
+  /* ImageSlots: 16:10 primary + 4 square thumbs, same structure as the product. */
+  function renderSlots(el, images, { disabled = false, onAdd, onRemove }) {
+    const primary = images[0];
+    const thumbs = images.slice(1);
+    let html = '<div class="slots">';
+    html += primary
+      ? `<div class="slot-primary"><img class="shot" src="${primary}" alt="대표 이미지"><span class="badge-primary">대표</span><button type="button" class="x" data-rm="0" aria-label="대표 이미지 제거" ${disabled ? 'disabled' : ''}>${ICON_X}</button></div>`
+      : `<button type="button" class="slot-primary slot-empty" data-add ${disabled ? 'disabled' : ''}>${ICON_UP}<span class="t1">이미지를 끌어다 놓거나 클릭해서 추가</span><span class="t2">최대 ${MAX}장</span></button>`;
+    html += '<div class="thumbs">';
+    thumbs.forEach((src, i) => { html += `<div class="thumb"><img class="shot" src="${src}" alt="썸네일"><button type="button" class="x" data-rm="${i + 1}" aria-label="썸네일 이미지 제거" ${disabled ? 'disabled' : ''}>${ICON_X}</button></div>`; });
+    if (primary && images.length < MAX) html += `<button type="button" class="thumb slot-empty" data-add aria-label="이미지 추가" ${disabled ? 'disabled' : ''}>${ICON_PLUS}</button>`;
+    html += '</div>';
+    if (images.length) html += `<p class="count">${images.length} / ${MAX}</p>`;
+    html += '</div>';
+    el.innerHTML = html;
+    el.querySelectorAll('[data-add]').forEach(b => b.onclick = onAdd);
+    el.querySelectorAll('[data-rm]').forEach(b => b.onclick = () => onRemove(Number(b.dataset.rm)));
+  }
+
+  /* ── 제출 ── */
+  const submitSlots = document.getElementById('submit-slots');
+    const submitBtn = document.getElementById('submit-btn');
+  const submitLabel = document.getElementById('submit-label');
+  const urlField = document.getElementById('url-field');
+  let submitImages = [];
+  let submitting = false;
+
+  function drawSubmit() {
+    renderSlots(submitSlots, submitImages, {
+      disabled: submitting,
+      onAdd: () => { if (submitImages.length < MAX) { submitImages.push(UPLOAD); drawSubmit(); } },
+      onRemove: i => { submitImages.splice(i, 1); drawSubmit(); }
+    });
+    submitBtn.disabled = submitting;
+    submitLabel.textContent = submitting && submitImages.length === 0 ? '대표 이미지를 만드는 중…' : '프로젝트 제출';
+    submitBtn.querySelector('.spinner')?.remove();
+    if (submitting) submitBtn.insertAdjacentHTML('afterbegin', '<span class="spinner"></span>');
+    document.querySelectorAll('[data-lock]').forEach(i => i.disabled = submitting);
+    if (prototypeShell.getState() === 'URL을 열 수 없음') urlField.setAttribute('data-invalid', ''); else urlField.removeAttribute('data-invalid');
+  }
+
+  let submitTimer;
+  document.getElementById('submit-form').onsubmit = e => {
+    e.preventDefault();
+    if (submitting) return;
+    if (submitImages.length > 0) { goDetail(submitImages.slice(), false); return; }
+    submitting = true;
+    prototypeShell.setState('대표 이미지 만드는 중');
+    drawSubmit();
+    submitTimer = setTimeout(() => {
+      submitting = false;
+      prototypeShell.setState('Default');
+      goDetail([SHOTS.first], true);
+    }, 2600);
+  };
+
+  /* ── 상세 ── */
+  const gStage = document.getElementById('g-stage');
+  const gStrip = document.getElementById('g-strip');
+  const dToast = document.getElementById('d-toast');
+  const FULL = [SHOTS.first, SHOTS.spin, SHOTS.result, SHOTS.menu, SHOTS.history];
+  let gImages = [SHOTS.first], gActive = 0, gFillingOn = true, gViewer = false, fillTimer;
+
+  function drawGallery() {
+    const n = gImages.length;
+    gStage.innerHTML = `<img class="shot" src="${gImages[gActive]}" alt="프로젝트 이미지 ${gActive + 1}">` +
+      (n > 1 ? `<button class="nav-btn l" aria-label="이전 이미지">‹</button><button class="nav-btn r" aria-label="다음 이미지">›</button>` : '');
+    const l = gStage.querySelector('.l'), r = gStage.querySelector('.r');
+    if (l) l.onclick = () => { gActive = (gActive - 1 + n) % n; drawGallery(); };
+    if (r) r.onclick = () => { gActive = (gActive + 1) % n; drawGallery(); };
+    let strip = '';
+    if (n > 1) gImages.forEach((src, i) => strip += `<button class="${i === gActive ? 'on' : ''}" data-i="${i}" aria-label="이미지 ${i + 1}"><img class="shot" src="${src}" alt=""></button>`);
+    gStrip.innerHTML = strip;
+    gStrip.hidden = !strip;
+    gStrip.querySelectorAll('[data-i]').forEach(b => b.onclick = () => { gActive = Number(b.dataset.i); drawGallery(); });
+    document.querySelectorAll('#detail .owner-only').forEach(el => { el.style.display = gViewer ? 'none' : 'flex'; });
+    document.getElementById('detail-who').textContent = gViewer ? '로그인' : '지우';
+  }
+
+  function startFill() {
+    clearInterval(fillTimer);
+    fillTimer = setInterval(() => {
+      gImages.push(FULL[gImages.length]);
+      if (gImages.length >= MAX) {
+        gFillingOn = false; clearInterval(fillTimer);
+        if (prototypeShell.getScreen() === 'detail' && prototypeShell.getState() === 'Default') { prototypeShell.setState('채우기 완료'); return; }
+      }
+      drawGallery();
+    }, 1800);
+  }
+
+  let arrival = null;
+  function goDetail(images, auto) {
+    arrival = { images, auto };
+    prototypeShell.showScreen('detail');
+  }
+  function applyArrival({ images, auto }) {
+    gImages = images; gActive = 0; gViewer = false;
+    gFillingOn = auto;
+    dToast.hidden = false;
+    setTimeout(() => dToast.hidden = true, 2600);
+    if (auto) startFill(); else clearInterval(fillTimer);
+  }
+
+  /* ── 편집 ── */
+  const editSlots = document.getElementById('edit-slots');
+  const editBtn = document.getElementById('edit-btn');
+  const editLabel = document.getElementById('edit-label');
+  let editImages = FULL.slice(0, 3), editing = false;
+
+  function drawEdit() {
+    renderSlots(editSlots, editImages, {
+      disabled: editing,
+      onAdd: () => { if (editImages.length < MAX) { editImages.push(UPLOAD); drawEdit(); syncEditState(); } },
+      onRemove: i => { editImages.splice(i, 1); drawEdit(); syncEditState(); }
+    });
+    editBtn.disabled = editing;
+    editLabel.textContent = editing ? (editImages.length === 0 ? '대표 이미지를 만드는 중…' : '저장 중…') : '저장';
+    editBtn.querySelector('.spinner')?.remove();
+    if (editing) editBtn.insertAdjacentHTML('afterbegin', '<span class="spinner"></span>');
+    document.querySelectorAll('[data-elock]').forEach(i => i.disabled = editing);
+  }
+  function syncEditState() {
+    const want = editImages.length === 0 ? '이미지를 모두 지움' : 'Default';
+    if (prototypeShell.getState() !== want) prototypeShell.setState(want);
+  }
+  document.getElementById('edit-form').onsubmit = e => {
+    e.preventDefault();
+    if (editing) return;
+    editing = true; drawEdit();
+    setTimeout(() => {
+      editing = false;
+      const auto = editImages.length === 0;
+      const imgs = auto ? [SHOTS.first] : editImages.slice();
+      editImages = FULL.slice(0, 3);
+      goDetail(imgs, auto);
+      drawEdit();
+    }, editImages.length === 0 ? 2600 : 700);
+  };
+
+  /* State presets drive the same product state the interactions reach. */
+  window.addEventListener('proto:state', ({ detail: { screen, state } }) => {
+    if (screen === 'submit') {
+      clearTimeout(submitTimer);
+      submitting = state === '대표 이미지 만드는 중';
+      if (state !== 'Default') submitImages = [];
+      drawSubmit();
+    }
+    if (screen === 'detail') {
+      dToast.hidden = true;
+      if (arrival && state === 'Default') { applyArrival(arrival); arrival = null; }
+      else if (state === '채우기 완료') { clearInterval(fillTimer); gImages = FULL.slice(); gFillingOn = false; gViewer = false; }
+      else if (!gFillingOn || gViewer || gImages.length >= MAX) { gImages = [SHOTS.first]; gFillingOn = true; gViewer = false; startFill(); }
+      gActive = 0;
+      drawGallery();
+    }
+    if (screen === 'edit') {
+      if (state === '이미지를 모두 지움') editImages = [];
+      else if (editImages.length === 0) editImages = FULL.slice(0, 3);
+      drawEdit();
+    }
+  });
+
+  drawSubmit(); drawEdit(); drawGallery();
+  show(location.hash.slice(1));
+</script>
