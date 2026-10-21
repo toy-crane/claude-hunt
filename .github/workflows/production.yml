@@ -20,6 +20,9 @@ jobs:
       - uses: oven-sh/setup-bun@v2
       - run: bun install --frozen-lockfile
       - run: bun run typecheck
+      # The capture-driver test launches a real headless Chromium. Install only
+      # Playwright's headless shell to keep the deploy gate short.
+      - run: bunx playwright install --with-deps --only-shell chromium
       - run: bun run test:unit
 
   migrate:
