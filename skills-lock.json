@@ -37,6 +37,12 @@
       "skillPath": "skills/git/clean-branches/SKILL.md",
       "computedHash": "5e07291d2427eccee1627306b96b434550c3dde72f7e9585849c3aeba5035ee0"
     },
+    "claude-api": {
+      "source": "anthropics/skills",
+      "sourceType": "github",
+      "skillPath": "skills/claude-api/SKILL.md",
+      "computedHash": "b0d8cf8ac6b744f9e8feb3aa0f5c8e2c621952974cd114bea4dbd009c57b2cf3"
+    },
     "commit": {
       "source": "toy-crane/skills",
       "sourceType": "github",
@@ -150,6 +156,12 @@
       "sourceType": "github",
       "skillPath": "skills/workflow/review-sessions/SKILL.md",
       "computedHash": "6488a1fe8ff343bff8872cd8873bf4a28556433abeb9ab8a84de9c81ef396f73"
+    },
+    "sandbox": {
+      "source": "vercel/sandbox",
+      "sourceType": "github",
+      "skillPath": "skills/sandbox/SKILL.md",
+      "computedHash": "0c05d745689e8d58ebc17c1303cdda23fe9f6a9f59dc615b496db16551f27590"
     },
     "seo-audit": {
       "source": "coreyhaines31/marketingskills",
