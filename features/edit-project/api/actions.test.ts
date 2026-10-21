@@ -23,7 +23,26 @@ vi.mock("@shared/api/supabase/server", () => ({
   createServerClient: vi.fn().mockResolvedValue(mockClient),
 }));
 
+const captureProjectFirstScreen = vi.fn();
+const startProjectHighlights = vi.fn();
+const discardCapturedImage = vi.fn();
+vi.mock("@entities/project/server", () => ({
+  captureProjectFirstScreen,
+  startProjectHighlights,
+  discardCapturedImage,
+}));
+
+const scheduled: Array<() => unknown> = [];
+vi.mock("next/server", () => ({
+  after: (task: () => unknown) => {
+    scheduled.push(task);
+  },
+}));
+
 const { editProject } = await import("./actions");
+
+const URL_UNREACHABLE =
+  "프로젝트 URL을 열 수 없어요. 주소가 맞는지, 로그인 없이 열리는지 확인해 주세요.";
 
 const validInput = {
   projectId: "11111111-1111-1111-1111-111111111111",
@@ -34,6 +53,10 @@ const validInput = {
 };
 
 beforeEach(() => {
+  captureProjectFirstScreen.mockReset();
+  startProjectHighlights.mockReset();
+  discardCapturedImage.mockReset();
+  scheduled.length = 0;
   revalidatePathMock.mockClear();
   updateTagMock.mockClear();
   storageFrom.mockClear();
@@ -251,5 +274,110 @@ describe("editProject server action", () => {
     expect(result.ok).toBe(true);
     expect(storageRemove).toHaveBeenCalledTimes(1);
     expect(updateTagMock).toHaveBeenCalledWith("projects");
+  });
+
+  it("recaptures the first screen and keeps filling highlights when every image was removed", async () => {
+    getClaims.mockResolvedValue({
+      data: { claims: { sub: "u1" } },
+      error: null,
+    });
+    const { update } = stubFrom({
+      currentImagePaths: ["u1/old-shot.webp"],
+      updateRows: [{ id: validInput.projectId }],
+    });
+    const session = { close: vi.fn() };
+    captureProjectFirstScreen.mockResolvedValue({
+      ok: true,
+      path: "u1/first.jpg",
+      session,
+    });
+
+    const result = await editProject({ ...validInput, imagePaths: [] });
+
+    expect(result.ok).toBe(true);
+    expect(captureProjectFirstScreen).toHaveBeenCalledWith({
+      projectUrl: "https://edited.example.com",
+      userId: "u1",
+    });
+    expect(update).toHaveBeenCalledWith(
+      expect.objectContaining({ images: [{ path: "u1/first.jpg" }] })
+    );
+    expect(scheduled).toHaveLength(1);
+    await scheduled[0]?.();
+    expect(startProjectHighlights).toHaveBeenCalledWith({
+      session,
+      projectId: validInput.projectId,
+      userId: "u1",
+      project: { title: "Edited Title", tagline: "Edited tagline" },
+      images: [{ path: "u1/first.jpg" }],
+    });
+  });
+
+  it("saves nothing and points at the URL when the project cannot be opened", async () => {
+    getClaims.mockResolvedValue({
+      data: { claims: { sub: "u1" } },
+      error: null,
+    });
+    const { update } = stubFrom({
+      currentImagePaths: ["u1/old-shot.webp"],
+      updateRows: [{ id: validInput.projectId }],
+    });
+    captureProjectFirstScreen.mockResolvedValue({
+      ok: false,
+      reason: "unreachable",
+    });
+
+    const result = await editProject({ ...validInput, imagePaths: [] });
+
+    expect(result).toEqual({
+      ok: false,
+      field: "projectUrl",
+      error: URL_UNREACHABLE,
+    });
+    expect(update).not.toHaveBeenCalled();
+    expect(storageRemove).not.toHaveBeenCalled();
+  });
+
+  it("does not recapture when images remain, even if the URL changed", async () => {
+    getClaims.mockResolvedValue({
+      data: { claims: { sub: "u1" } },
+      error: null,
+    });
+    stubFrom({
+      currentImagePaths: ["u1/old-shot.webp"],
+      updateRows: [{ id: validInput.projectId }],
+    });
+
+    await editProject({
+      ...validInput,
+      projectUrl: "https://moved.example.com",
+    });
+
+    expect(captureProjectFirstScreen).not.toHaveBeenCalled();
+    expect(scheduled).toHaveLength(0);
+  });
+
+  it("drops the captured first screen when the save is refused", async () => {
+    getClaims.mockResolvedValue({
+      data: { claims: { sub: "u1" } },
+      error: null,
+    });
+    stubFrom({ currentImagePaths: ["u1/old-shot.webp"], updateRows: [] });
+    const session = { close: vi.fn() };
+    captureProjectFirstScreen.mockResolvedValue({
+      ok: true,
+      path: "u1/first.jpg",
+      session,
+    });
+
+    const result = await editProject({ ...validInput, imagePaths: [] });
+
+    expect(result.ok).toBe(false);
+    expect(discardCapturedImage).toHaveBeenCalledWith("u1/first.jpg");
+    expect(session.close).not.toHaveBeenCalled();
+    expect(scheduled).toHaveLength(1);
+    await scheduled[0]?.();
+    expect(session.close).toHaveBeenCalled();
+    expect(startProjectHighlights).not.toHaveBeenCalled();
   });
 });

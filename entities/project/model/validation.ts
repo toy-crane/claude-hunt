@@ -12,8 +12,9 @@ import {
 /**
  * Validation rules shared by submit and edit. The submit/edit schemas
  * extend this so messages and limits stay in lock-step. Image paths
- * are validated as a non-empty array up to MAX_PROJECT_IMAGES;
- * uploads happen client-side first.
+ * are validated as an array up to MAX_PROJECT_IMAGES; uploads happen
+ * client-side first. An empty array is valid: the server then captures the
+ * project URL's first screen as the primary image.
  */
 export const projectFieldsSchema = z.object({
   title: z
@@ -64,7 +65,6 @@ export const projectFieldsSchema = z.object({
     .optional(),
   imagePaths: z
     .array(z.string().trim().min(1))
-    .min(1, "스크린샷을 1장 이상 첨부해 주세요.")
     .max(
       MAX_PROJECT_IMAGES,
       `최대 ${MAX_PROJECT_IMAGES}장까지 업로드할 수 있어요.`

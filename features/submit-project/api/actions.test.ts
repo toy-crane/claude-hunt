@@ -21,6 +21,24 @@ vi.mock("@shared/api/supabase/server", () => ({
   createServerClient: vi.fn().mockResolvedValue(mockClient),
 }));
 
+// Automatic images reach the capture sandbox and the model; both are external
+// systems, faked here at the project entity's server entry.
+const captureProjectFirstScreen = vi.fn();
+const startProjectHighlights = vi.fn();
+const discardCapturedImage = vi.fn();
+vi.mock("@entities/project/server", () => ({
+  captureProjectFirstScreen,
+  startProjectHighlights,
+  discardCapturedImage,
+}));
+
+const scheduled: Array<() => unknown> = [];
+vi.mock("next/server", () => ({
+  after: (task: () => unknown) => {
+    scheduled.push(task);
+  },
+}));
+
 const { submitProject } = await import("./actions");
 
 const validInput = {
@@ -30,7 +48,18 @@ const validInput = {
   imagePaths: ["user-1/shot.png"],
 };
 
+const URL_UNREACHABLE =
+  "프로젝트 URL을 열 수 없어요. 주소가 맞는지, 로그인 없이 열리는지 확인해 주세요.";
+
+function fakeSession() {
+  return { close: vi.fn(), firstScreen: { hash: "h", image: Buffer.from("") } };
+}
+
 beforeEach(() => {
+  captureProjectFirstScreen.mockReset();
+  startProjectHighlights.mockReset();
+  discardCapturedImage.mockReset();
+  scheduled.length = 0;
   revalidatePathMock.mockClear();
   updateTagMock.mockClear();
   getClaims.mockReset();
@@ -184,5 +213,125 @@ describe("submitProject server action", () => {
 
     expect(result.ok).toBe(false);
     expect(result.error).toBe("duplicate");
+  });
+
+  it("publishes with the project's first screen when no images were uploaded", async () => {
+    getClaims.mockResolvedValue({
+      data: { claims: { sub: "u1" } },
+      error: null,
+    });
+    const { insertQuery } = stubProfileThenInsert({
+      cohortId: "cohort-1",
+      insertedId: "proj-1",
+    });
+    const session = fakeSession();
+    captureProjectFirstScreen.mockResolvedValue({
+      ok: true,
+      path: "u1/first.jpg",
+      session,
+    });
+
+    const result = await submitProject({ ...validInput, imagePaths: [] });
+
+    expect(result).toEqual({ ok: true, projectId: "proj-1" });
+    expect(captureProjectFirstScreen).toHaveBeenCalledWith({
+      projectUrl: "https://myapp.com",
+      userId: "u1",
+    });
+    expect(insertQuery.insert).toHaveBeenCalledWith(
+      expect.objectContaining({ images: [{ path: "u1/first.jpg" }] })
+    );
+  });
+
+  it("keeps filling highlights after the response once the project is published", async () => {
+    getClaims.mockResolvedValue({
+      data: { claims: { sub: "u1" } },
+      error: null,
+    });
+    stubProfileThenInsert({ cohortId: "cohort-1", insertedId: "proj-1" });
+    const session = fakeSession();
+    captureProjectFirstScreen.mockResolvedValue({
+      ok: true,
+      path: "u1/first.jpg",
+      session,
+    });
+
+    await submitProject({ ...validInput, imagePaths: [] });
+
+    expect(startProjectHighlights).not.toHaveBeenCalled();
+    expect(scheduled).toHaveLength(1);
+    await scheduled[0]?.();
+    expect(startProjectHighlights).toHaveBeenCalledWith({
+      session,
+      projectId: "proj-1",
+      userId: "u1",
+      project: { title: "My App", tagline: "A cool tool" },
+      images: [{ path: "u1/first.jpg" }],
+    });
+  });
+
+  it("creates nothing and points at the URL when the project cannot be opened", async () => {
+    getClaims.mockResolvedValue({
+      data: { claims: { sub: "u1" } },
+      error: null,
+    });
+    const { insertQuery } = stubProfileThenInsert({
+      cohortId: "cohort-1",
+      insertedId: "proj-1",
+    });
+    captureProjectFirstScreen.mockResolvedValue({
+      ok: false,
+      reason: "unreachable",
+    });
+
+    const result = await submitProject({ ...validInput, imagePaths: [] });
+
+    expect(result).toEqual({
+      ok: false,
+      field: "projectUrl",
+      error: URL_UNREACHABLE,
+    });
+    expect(insertQuery.insert).not.toHaveBeenCalled();
+    expect(scheduled).toHaveLength(0);
+  });
+
+  it("never captures when the owner uploaded images", async () => {
+    getClaims.mockResolvedValue({
+      data: { claims: { sub: "u1" } },
+      error: null,
+    });
+    stubProfileThenInsert({ cohortId: "cohort-1", insertedId: "proj-1" });
+
+    await submitProject(validInput);
+
+    expect(captureProjectFirstScreen).not.toHaveBeenCalled();
+    expect(scheduled).toHaveLength(0);
+  });
+
+  it("drops the captured first screen when the project cannot be saved", async () => {
+    getClaims.mockResolvedValue({
+      data: { claims: { sub: "u1" } },
+      error: null,
+    });
+    stubProfileThenInsert({
+      cohortId: "cohort-1",
+      insertError: { message: "duplicate" },
+    });
+    const session = fakeSession();
+    captureProjectFirstScreen.mockResolvedValue({
+      ok: true,
+      path: "u1/first.jpg",
+      session,
+    });
+
+    const result = await submitProject({ ...validInput, imagePaths: [] });
+
+    expect(result.ok).toBe(false);
+    expect(discardCapturedImage).toHaveBeenCalledWith("u1/first.jpg");
+    expect(session.close).not.toHaveBeenCalled();
+    expect(scheduled).toHaveLength(1);
+    await scheduled[0]?.();
+    expect(session.close).toHaveBeenCalled();
+    expect(startProjectHighlights).not.toHaveBeenCalled();
   });
 });

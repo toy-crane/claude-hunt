@@ -88,6 +88,9 @@ export function EditForm({ backHref, initial }: EditFormProps) {
   const [errors, setErrors] = useState<ProjectFieldErrors>({});
   const [submitError, setSubmitError] = useState<string | null>(null);
   const [submitting, setSubmitting] = useState(false);
+  // True while a save with every image removed waits for the server to
+  // capture the project's first screen as the representative image.
+  const [makingImage, setMakingImage] = useState(false);
 
   // Clear a field's error as soon as the user edits it, so a corrected
   // field stops showing a stale message before the next submit.
@@ -146,6 +149,7 @@ export function EditForm({ backHref, initial }: EditFormProps) {
     }
 
     setSubmitting(true);
+    setMakingImage(slots.length === 0);
     try {
       // Upload only the new slots; existing slots keep their path.
       const uploadResults: { error?: string; path?: string }[] =
@@ -180,6 +184,10 @@ export function EditForm({ backHref, initial }: EditFormProps) {
         imagePaths,
       });
       if (!result.ok) {
+        if (result.field === "projectUrl" && result.error) {
+          setErrors({ projectUrl: result.error });
+          return;
+        }
         setSubmitError(
           result.error ?? "저장하지 못했어요. 잠시 후 다시 시도해 주세요."
         );
@@ -190,11 +198,13 @@ export function EditForm({ backHref, initial }: EditFormProps) {
         project_id: initial.projectId,
         has_github_url: Boolean(values.githubUrl),
         image_count: imagePaths.length,
+        auto_captured: imagePaths.length === 0,
       });
       router.push(resolvedBackHref);
       router.refresh();
     } finally {
       setSubmitting(false);
+      setMakingImage(false);
     }
   }
 
@@ -304,7 +314,10 @@ export function EditForm({ backHref, initial }: EditFormProps) {
         </Field>
 
         <Field data-invalid={errors.imagePaths ? true : undefined}>
-          <FieldLabel>스크린샷</FieldLabel>
+          <FieldLabel>
+            스크린샷{" "}
+            <span className="font-normal text-muted-foreground">(선택)</span>
+          </FieldLabel>
           <ImageSlots
             disabled={submitting}
             onChange={handleImagesChange}
@@ -332,7 +345,7 @@ export function EditForm({ backHref, initial }: EditFormProps) {
         </Button>
         <Button className="flex-1" disabled={submitting} type="submit">
           {submitting ? <Spinner data-icon="inline-start" /> : null}
-          저장
+          {makingImage ? "대표 이미지를 만드는 중…" : "저장"}
         </Button>
       </div>
     </form>

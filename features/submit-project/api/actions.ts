@@ -1,13 +1,23 @@
 "use server";
 
+import { PROJECT_URL_UNREACHABLE_MESSAGE } from "@entities/project";
+import {
+  captureProjectFirstScreen,
+  discardCapturedImage,
+  startProjectHighlights,
+} from "@entities/project/server";
+import type { CaptureSession } from "@shared/api/capture-browser/session";
 import { requireAuth } from "@shared/api/supabase/require-auth";
 import { CACHE_TAGS } from "@shared/config/cache-tags";
 import { getZodErrorMessage } from "@shared/lib/validation";
 import { revalidatePath, updateTag } from "next/cache";
+import { after } from "next/server";
 import { type SubmitProjectInput, submitProjectInputSchema } from "./schema";
 
 export interface SubmitProjectResult {
   error?: string;
+  /** Set when the error belongs next to one form field. */
+  field?: "projectUrl";
   ok: boolean;
   projectId?: string;
 }
@@ -48,6 +58,27 @@ export async function submitProject(
     };
   }
 
+  // No uploaded images: the project's first screen becomes the primary
+  // image, and publishing waits for it (project-publishing decision).
+  let imagePaths = input.imagePaths;
+  let session: CaptureSession | null = null;
+  if (imagePaths.length === 0) {
+    const captured = await captureProjectFirstScreen({
+      projectUrl: input.projectUrl,
+      userId,
+    });
+    if (!captured.ok) {
+      return {
+        ok: false,
+        field: "projectUrl",
+        error: PROJECT_URL_UNREACHABLE_MESSAGE,
+      };
+    }
+    imagePaths = [captured.path];
+    session = captured.session;
+  }
+  const images = imagePaths.map((path) => ({ path }));
+
   const { data: inserted, error: insertError } = await supabase
     .from("projects")
     .insert({
@@ -58,18 +89,37 @@ export async function submitProject(
       description: input.description ?? null,
       project_url: input.projectUrl,
       github_url: input.githubUrl ?? null,
-      images: input.imagePaths.map((path) => ({ path })),
+      images,
     })
     .select("id")
     .single();
 
   if (insertError || !inserted) {
+    if (session) {
+      await discardCapturedImage(imagePaths[0] as string);
+      // Shutting the sandbox down takes ~25s; do it after the response.
+      const unused = session;
+      after(() => unused.close());
+    }
     return {
       ok: false,
       error:
         insertError?.message ??
         "프로젝트를 제출하지 못했어요. 잠시 후 다시 시도해 주세요.",
     };
+  }
+
+  if (session) {
+    const liveSession = session;
+    after(() =>
+      startProjectHighlights({
+        session: liveSession,
+        projectId: inserted.id,
+        userId,
+        project: { title: input.title, tagline: input.tagline },
+        images,
+      })
+    );
   }
 
   updateTag(CACHE_TAGS.PROJECTS);

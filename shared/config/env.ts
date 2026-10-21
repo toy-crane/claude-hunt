@@ -15,6 +15,11 @@ export const env = createEnv({
     // optional string (not an enum) so a stray value can never fail boot
     // validation — the flag fails closed instead.
     DEV_LOGIN_ENABLED: z.string().optional(),
+    // Automatic project images. Both optional so the app boots without them:
+    // without the snapshot an image-less submission reports the URL as not
+    // capturable; without the key the highlight agent is skipped.
+    CAPTURE_SANDBOX_SNAPSHOT_ID: z.string().min(1).optional(),
+    ANTHROPIC_API_KEY: z.string().min(1).optional(),
   },
   runtimeEnv: {
     NEXT_PUBLIC_SUPABASE_URL: process.env.NEXT_PUBLIC_SUPABASE_URL,
@@ -23,5 +28,7 @@ export const env = createEnv({
     NEXT_PUBLIC_SENTRY_DSN: process.env.NEXT_PUBLIC_SENTRY_DSN,
     SUPABASE_SECRET_KEY: process.env.SUPABASE_SECRET_KEY,
     DEV_LOGIN_ENABLED: process.env.DEV_LOGIN_ENABLED,
+    CAPTURE_SANDBOX_SNAPSHOT_ID: process.env.CAPTURE_SANDBOX_SNAPSHOT_ID,
+    ANTHROPIC_API_KEY: process.env.ANTHROPIC_API_KEY,
   },
 });

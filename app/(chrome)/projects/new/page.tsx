@@ -10,6 +10,11 @@ export const instant = false;
 
 export const metadata: Metadata = NOINDEX_METADATA;
 
+// Server Actions on this page may capture the project's first screen and then
+// keep a highlight run going after the response (`after()`), which needs up
+// to about four minutes in total.
+export const maxDuration = 300;
+
 interface PageProps {
   searchParams: Promise<{ from?: string }>;
 }

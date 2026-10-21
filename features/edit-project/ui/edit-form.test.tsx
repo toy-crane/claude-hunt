@@ -50,6 +50,8 @@ vi.mock("@features/upload-project-images", () => ({
 const { EditForm } = await import("./edit-form");
 
 const SAVE_LABEL = /저장/;
+const SCREENSHOT_LABEL = /^스크린샷/;
+const MAKING_IMAGE_LABEL = /대표 이미지를 만드는 중…/;
 const LABEL_DESCRIPTION = /프로젝트 설명/;
 
 const initial = {
@@ -145,5 +147,53 @@ describe("<EditForm />", () => {
 
     fireEvent.change(title, { target: { value: "New title" } });
     expect(screen.queryByTestId("edit-form-error-title")).toBeNull();
+  });
+
+  it("waits for a representative image when saved with every image removed", async () => {
+    editProject.mockImplementation(() => new Promise(() => undefined));
+
+    render(
+      <EditForm initial={{ ...initial, imagePaths: [], imageUrls: [] }} />
+    );
+    const form = screen
+      .getByRole("button", { name: SAVE_LABEL })
+      .closest("form") as HTMLFormElement;
+    fireEvent.submit(form);
+
+    const button = await screen.findByRole("button", {
+      name: MAKING_IMAGE_LABEL,
+    });
+    expect(button).toBeDisabled();
+    expect(editProject).toHaveBeenCalledWith(
+      expect.objectContaining({ imagePaths: [] })
+    );
+  });
+
+  it("shows why the project URL could not be opened under that field", async () => {
+    const message =
+      "프로젝트 URL을 열 수 없어요. 주소가 맞는지, 로그인 없이 열리는지 확인해 주세요.";
+    editProject.mockResolvedValue({
+      ok: false,
+      field: "projectUrl",
+      error: message,
+    });
+
+    render(
+      <EditForm initial={{ ...initial, imagePaths: [], imageUrls: [] }} />
+    );
+    const form = screen
+      .getByRole("button", { name: SAVE_LABEL })
+      .closest("form") as HTMLFormElement;
+    fireEvent.submit(form);
+
+    expect(
+      await screen.findByTestId("edit-form-error-projectUrl")
+    ).toHaveTextContent(message);
+  });
+
+  it("marks screenshots as optional", () => {
+    render(<EditForm initial={initial} />);
+    const label = screen.getByText(SCREENSHOT_LABEL);
+    expect(label.textContent).toContain("(선택)");
   });
 });
