@@ -4,6 +4,7 @@ export {
   MAX_PROJECT_IMAGES,
   MAX_TAGLINE_LENGTH,
   MAX_TITLE_LENGTH,
+  PROJECT_URL_UNREACHABLE_MESSAGE,
 } from "./model/constants";
 export type {
   Project,

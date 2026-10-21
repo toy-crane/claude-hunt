@@ -70,6 +70,7 @@ const LABEL_DESCRIPTION = /프로젝트 설명/;
 const LABEL_URL = /프로젝트 URL/;
 const LABEL_GITHUB = /GitHub/;
 const SUBMIT_LABEL = /프로젝트 제출/;
+const MAKING_IMAGE_LABEL = /대표 이미지를 만드는 중…/;
 
 function fillTextFields() {
   const title = screen.getByLabelText(LABEL_TITLE) as HTMLInputElement;
@@ -126,16 +127,70 @@ describe("SubmitForm", () => {
     });
   });
 
-  it("rejects submit when no images are attached", async () => {
+  it("submits without images and waits for the representative image to be made", async () => {
+    let finish: (value: unknown) => void = () => undefined;
+    submitProject.mockReturnValue(
+      new Promise((resolve) => {
+        finish = resolve;
+      })
+    );
+
     render(<SubmitForm cohortId="cohort-1" />);
     const form = fillTextFields();
     fireEvent.submit(form);
 
-    expect(
-      await screen.findByTestId("submit-form-error-imagePaths")
-    ).toHaveTextContent("스크린샷을 1장 이상");
+    const button = await screen.findByRole("button", {
+      name: MAKING_IMAGE_LABEL,
+    });
+    expect(button).toBeDisabled();
     expect(uploadScreenshot).not.toHaveBeenCalled();
-    expect(submitProject).not.toHaveBeenCalled();
+    expect(submitProject).toHaveBeenCalledWith(
+      expect.objectContaining({ imagePaths: [] })
+    );
+    finish({ ok: true, projectId: "p1" });
+    await vi.waitFor(() =>
+      expect(routerPush).toHaveBeenCalledWith("/projects/p1")
+    );
+  });
+
+  it("keeps the usual submit label while uploading the owner's images", async () => {
+    uploadScreenshot.mockResolvedValue({ path: "user-1/a.webp" });
+    submitProject.mockReturnValue(new Promise(() => undefined));
+
+    render(<SubmitForm cohortId="cohort-1" />);
+    addOneImage();
+    fireEvent.submit(fillTextFields());
+
+    expect(
+      await screen.findByRole("button", { name: SUBMIT_LABEL })
+    ).toBeDisabled();
+    expect(screen.queryByText("대표 이미지를 만드는 중…")).toBeNull();
+  });
+
+  it("shows why the project URL could not be opened under that field", async () => {
+    const message =
+      "프로젝트 URL을 열 수 없어요. 주소가 맞는지, 로그인 없이 열리는지 확인해 주세요.";
+    submitProject.mockResolvedValue({
+      ok: false,
+      field: "projectUrl",
+      error: message,
+    });
+
+    render(<SubmitForm cohortId="cohort-1" />);
+    fireEvent.submit(fillTextFields());
+
+    expect(
+      await screen.findByTestId("submit-form-error-projectUrl")
+    ).toHaveTextContent(message);
+    expect(screen.queryByTestId("submit-form-submit-error")).toBeNull();
+    expect((screen.getByLabelText(LABEL_TITLE) as HTMLInputElement).value).toBe(
+      "My App"
+    );
+  });
+
+  it("marks screenshots as optional", () => {
+    render(<SubmitForm cohortId="cohort-1" />);
+    expect(screen.getByText("(선택)")).toBeInTheDocument();
   });
 
   it("shows an inline error under every invalid field when the form is empty", async () => {
@@ -152,9 +207,7 @@ describe("SubmitForm", () => {
     expect(
       screen.getByTestId("submit-form-error-projectUrl")
     ).toHaveTextContent("URL");
-    expect(
-      screen.getByTestId("submit-form-error-imagePaths")
-    ).toHaveTextContent("스크린샷을 1장 이상");
+    expect(screen.queryByTestId("submit-form-error-imagePaths")).toBeNull();
     expect(uploadScreenshot).not.toHaveBeenCalled();
     expect(submitProject).not.toHaveBeenCalled();
   });

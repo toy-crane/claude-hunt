@@ -18,6 +18,11 @@ export const MAX_DESCRIPTION_LENGTH = 1000;
 // Expand phase; the DB CHECK lands in the follow-up Contract scope.
 export const MAX_PROJECT_IMAGES = 5;
 
+// Shown on the project URL field when an image-less submission or save
+// cannot open the URL to capture its first screen.
+export const PROJECT_URL_UNREACHABLE_MESSAGE =
+  "프로젝트 URL을 열 수 없어요. 주소가 맞는지, 로그인 없이 열리는지 확인해 주세요.";
+
 // Restricts github_url to https://github.com/<owner>/<repo>(/) shape.
 // Mirrors the CHECK constraint on projects.github_url.
 export const GITHUB_URL_PATTERN =

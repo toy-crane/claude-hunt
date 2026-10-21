@@ -64,6 +64,9 @@ export function SubmitForm({ backHref, cohortId: _cohortId }: SubmitFormProps) {
   const [errors, setErrors] = useState<ProjectFieldErrors>({});
   const [submitError, setSubmitError] = useState<string | null>(null);
   const [submitting, setSubmitting] = useState(false);
+  // True while an image-less submission waits for the server to capture the
+  // project's first screen as the representative image.
+  const [makingImage, setMakingImage] = useState(false);
 
   // Clear a field's error as soon as the user edits it, so a corrected
   // field stops showing a stale message before the next submit.
@@ -86,6 +89,7 @@ export function SubmitForm({ backHref, cohortId: _cohortId }: SubmitFormProps) {
     }
 
     setSubmitting(true);
+    setMakingImage(images.length === 0);
     try {
       // Upload every image in parallel; abort the whole submit on
       // the first failure so the user can fix and retry.
@@ -112,6 +116,10 @@ export function SubmitForm({ backHref, cohortId: _cohortId }: SubmitFormProps) {
         imagePaths,
       });
       if (!result.ok) {
+        if (result.field === "projectUrl" && result.error) {
+          setErrors({ projectUrl: result.error });
+          return;
+        }
         setSubmitError(
           result.error ??
             "프로젝트를 제출하지 못했어요. 잠시 후 다시 시도해 주세요."
@@ -125,6 +133,7 @@ export function SubmitForm({ backHref, cohortId: _cohortId }: SubmitFormProps) {
         project_id: result.projectId,
         has_github_url: Boolean(values.githubUrl),
         image_count: imagePaths.length,
+        auto_captured: imagePaths.length === 0,
       });
       // When the user came from a specific entry point (e.g. /settings),
       // honor it for both success and fallback paths. Otherwise default
@@ -141,6 +150,7 @@ export function SubmitForm({ backHref, cohortId: _cohortId }: SubmitFormProps) {
       router.push(result.projectId ? successHref : fallbackHref);
     } finally {
       setSubmitting(false);
+      setMakingImage(false);
     }
   }
 
@@ -252,7 +262,8 @@ export function SubmitForm({ backHref, cohortId: _cohortId }: SubmitFormProps) {
 
         <Field data-invalid={errors.imagePaths ? true : undefined}>
           <FieldLabel>
-            스크린샷 <RequiredMark />
+            스크린샷{" "}
+            <span className="font-normal text-muted-foreground">(선택)</span>
           </FieldLabel>
           <ImageSlots
             disabled={submitting}
@@ -284,7 +295,7 @@ export function SubmitForm({ backHref, cohortId: _cohortId }: SubmitFormProps) {
         </Button>
         <Button disabled={submitting} size="lg" type="submit">
           {submitting ? <Spinner data-icon="inline-start" /> : null}
-          프로젝트 제출
+          {makingImage ? "대표 이미지를 만드는 중…" : "프로젝트 제출"}
         </Button>
       </div>
     </form>

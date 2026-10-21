@@ -1,16 +1,63 @@
 "use server";
 
-import type { ProjectImage } from "@entities/project";
+import {
+  PROJECT_URL_UNREACHABLE_MESSAGE,
+  type ProjectImage,
+} from "@entities/project";
+import {
+  captureProjectFirstScreen,
+  discardCapturedImage,
+  startProjectHighlights,
+} from "@entities/project/server";
+import type { CaptureSession } from "@shared/api/capture-browser/session";
 import { requireAuth } from "@shared/api/supabase/require-auth";
 import { CACHE_TAGS } from "@shared/config/cache-tags";
 import { SCREENSHOT_BUCKET } from "@shared/config/storage";
 import { getZodErrorMessage } from "@shared/lib/validation";
 import { revalidatePath, updateTag } from "next/cache";
+import { after } from "next/server";
 import { type EditProjectInput, editProjectInputSchema } from "./schema";
 
 export interface EditProjectResult {
   error?: string;
+  /** Set when the error belongs next to one form field. */
+  field?: "projectUrl";
   ok: boolean;
+}
+
+function imagePathsOf(images: unknown): Set<string> {
+  const paths = new Set<string>();
+  if (Array.isArray(images)) {
+    for (const img of images as ProjectImage[]) {
+      if (img && typeof img.path === "string") {
+        paths.add(img.path);
+      }
+    }
+  }
+  return paths;
+}
+
+type ResolvedImages =
+  | { ok: true; imagePaths: string[]; session: CaptureSession | null }
+  | { ok: false };
+
+/**
+ * Saving with no images recaptures the project's first screen as the
+ * primary image, and the save waits for it (project-publishing decision).
+ */
+async function resolveImagePaths(
+  imagePaths: string[],
+  projectUrl: string,
+  userId: string
+): Promise<ResolvedImages> {
+  if (imagePaths.length > 0) {
+    return { ok: true, imagePaths, session: null };
+  }
+  const captured = await captureProjectFirstScreen({ projectUrl, userId });
+  if (!captured.ok) {
+    return { ok: false };
+  }
+  return { ok: true, imagePaths: [captured.path], session: captured.session };
 }
 
 /**
@@ -34,7 +81,7 @@ export async function editProject(
   if (!auth.ok) {
     return auth;
   }
-  const { supabase } = auth;
+  const { supabase, userId } = auth;
 
   // Read the current images so we can diff and remove orphans.
   const { data: current } = await supabase
@@ -42,16 +89,23 @@ export async function editProject(
     .select("images")
     .eq("id", input.projectId)
     .maybeSingle();
-  const previousPaths = new Set<string>();
-  if (Array.isArray(current?.images)) {
-    for (const img of current.images as unknown as ProjectImage[]) {
-      if (img && typeof img.path === "string") {
-        previousPaths.add(img.path);
-      }
-    }
-  }
+  const previousPaths = imagePathsOf(current?.images);
 
-  const nextPaths = new Set(input.imagePaths);
+  const resolved = await resolveImagePaths(
+    input.imagePaths,
+    input.projectUrl,
+    userId
+  );
+  if (!resolved.ok) {
+    return {
+      ok: false,
+      field: "projectUrl",
+      error: PROJECT_URL_UNREACHABLE_MESSAGE,
+    };
+  }
+  const { imagePaths, session } = resolved;
+  const images = imagePaths.map((path) => ({ path }));
+  const nextPaths = new Set(imagePaths);
 
   const { data, error } = await supabase
     .from("projects")
@@ -61,11 +115,17 @@ export async function editProject(
       description: input.description ?? null,
       project_url: input.projectUrl,
       github_url: input.githubUrl ?? null,
-      images: input.imagePaths.map((path) => ({ path })),
+      images,
     })
     .eq("id", input.projectId)
     .select("id");
 
+  if ((error || !data || data.length === 0) && session) {
+    await discardCapturedImage(imagePaths[0] as string);
+    // Shutting the sandbox down takes ~25s; do it after the response.
+    const unused = session;
+    after(() => unused.close());
+  }
   if (error) {
     return { ok: false, error: error.message };
   }
@@ -82,6 +142,19 @@ export async function editProject(
   const orphans = [...previousPaths].filter((p) => !nextPaths.has(p));
   if (orphans.length > 0) {
     await supabase.storage.from(SCREENSHOT_BUCKET).remove(orphans);
+  }
+
+  if (session) {
+    const liveSession = session;
+    after(() =>
+      startProjectHighlights({
+        session: liveSession,
+        projectId: input.projectId,
+        userId,
+        project: { title: input.title, tagline: input.tagline },
+        images,
+      })
+    );
   }
 
   updateTag(CACHE_TAGS.PROJECTS);

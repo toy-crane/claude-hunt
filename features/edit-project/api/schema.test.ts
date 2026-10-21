@@ -61,12 +61,12 @@ describe("editProjectInputSchema", () => {
     expect(result.success).toBe(false);
   });
 
-  it("rejects an empty imagePaths array", () => {
+  it("accepts an empty imagePaths array so the first screen can be captured", () => {
     const result = editProjectInputSchema.safeParse({
       ...validInput,
       imagePaths: [],
     });
-    expect(result.success).toBe(false);
+    expect(result.success).toBe(true);
   });
 
   it("accepts the projectFieldsSchema githubUrl when it matches the github.com pattern", () => {
