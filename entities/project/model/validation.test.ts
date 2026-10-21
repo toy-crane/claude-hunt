@@ -89,3 +89,23 @@ describe("projectFieldsSchema · tagline (single line)", () => {
     expect(result.success).toBe(false);
   });
 });
+
+describe("projectFieldsSchema · projectUrl", () => {
+  it("accepts an https address", () => {
+    expect(projectFieldsSchema.safeParse(base).success).toBe(true);
+  });
+
+  it.each([
+    "file:///etc/passwd",
+    "ftp://example.com/app",
+    "javascript:alert(1)",
+  ])("rejects a non-web address (%s) before anything opens it", (url) => {
+    const result = projectFieldsSchema.safeParse({ ...base, projectUrl: url });
+    expect(result.success).toBe(false);
+  });
+
+  it("accepts an images-free project so its first screen can be captured", () => {
+    const result = projectFieldsSchema.safeParse({ ...base, imagePaths: [] });
+    expect(result.success).toBe(true);
+  });
+});

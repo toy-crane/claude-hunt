@@ -17,6 +17,7 @@ import { CAPTURE_DRIVER_SOURCE } from "./driver-source";
 const PROJECT_ROOT = join(import.meta.dirname, "../../..");
 const DRIVER_PORT = 17_777;
 const MD5_HEX = /^[0-9a-f]{32}$/;
+const DRIVER_TOKEN = "test-token";
 
 const PAGES: Record<string, string> = {
   "/": `<html><body style="margin:0">
@@ -41,9 +42,10 @@ function listen(server: Server): Promise<string> {
   });
 }
 
-async function call(path: string, body?: unknown) {
+async function call(path: string, body?: unknown, token = DRIVER_TOKEN) {
   const res = await fetch(`http://127.0.0.1:${DRIVER_PORT}${path}`, {
     method: body === undefined ? "GET" : "POST",
+    headers: token ? { "x-driver-token": token } : {},
     body: body === undefined ? undefined : JSON.stringify(body),
   });
   return res.json();
@@ -92,6 +94,7 @@ beforeAll(async () => {
     env: {
       ...process.env,
       DRIVER_PORT: String(DRIVER_PORT),
+      DRIVER_TOKEN,
       VIEW_PATH: join(workDir, "view.jpg"),
       CAPTURE_PATH: join(workDir, "capture.jpg"),
     },
@@ -149,5 +152,11 @@ describe("capture driver", () => {
     expect(result.ok).toBe(true);
     expect(result.hash).toMatch(MD5_HEX);
     expect(existsSync(join(workDir, "capture.jpg"))).toBe(true);
+  });
+
+  it("ignores commands that do not carry the session token", async () => {
+    // e.g. the captured page itself posting to the driver from inside the sandbox
+    const result = await call("/open", { url: "http://127.0.0.1:9/" }, "");
+    expect(result).toEqual({ ok: false, reason: "forbidden" });
   });
 });

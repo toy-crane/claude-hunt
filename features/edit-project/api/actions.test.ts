@@ -68,6 +68,7 @@ beforeEach(() => {
 
 function stubFrom(options: {
   currentImagePaths?: string[];
+  ownerId?: string;
   updateRows?: Array<{ id: string }>;
   updateError?: { message: string };
 }) {
@@ -77,6 +78,7 @@ function stubFrom(options: {
         ? null
         : {
             images: options.currentImagePaths.map((path) => ({ path })),
+            user_id: options.ownerId ?? "u1",
           },
     error: null,
   });
@@ -379,5 +381,24 @@ describe("editProject server action", () => {
     await scheduled[0]?.();
     expect(session.close).toHaveBeenCalled();
     expect(startProjectHighlights).not.toHaveBeenCalled();
+  });
+
+  it("does not open the project URL for someone else's project", async () => {
+    getClaims.mockResolvedValue({
+      data: { claims: { sub: "u1" } },
+      error: null,
+    });
+    const { update } = stubFrom({
+      currentImagePaths: ["u2/shot.webp"],
+      ownerId: "u2",
+      updateRows: [],
+    });
+
+    const result = await editProject({ ...validInput, imagePaths: [] });
+
+    expect(result.ok).toBe(false);
+    expect(result.error).toMatch(PERMISSION_ERROR_REGEX);
+    expect(captureProjectFirstScreen).not.toHaveBeenCalled();
+    expect(update).not.toHaveBeenCalled();
   });
 });
