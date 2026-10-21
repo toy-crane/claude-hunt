@@ -9,6 +9,8 @@ import {
   MAX_TITLE_LENGTH,
 } from "./constants";
 
+const WEB_URL_PATTERN = /^https?:\/\//i;
+
 /**
  * Validation rules shared by submit and edit. The submit/edit schemas
  * extend this so messages and limits stay in lock-step. Image paths
@@ -52,7 +54,13 @@ export const projectFieldsSchema = z.object({
   projectUrl: z
     .string()
     .trim()
-    .url("http:// 또는 https:// 로 시작하는 URL을 입력해 주세요."),
+    .url("http:// 또는 https:// 로 시작하는 URL을 입력해 주세요.")
+    // Mirrors the DB CHECK, and runs before an image-less submission opens
+    // the URL in the capture sandbox.
+    .regex(
+      WEB_URL_PATTERN,
+      "http:// 또는 https:// 로 시작하는 URL을 입력해 주세요."
+    ),
   githubUrl: z
     .string()
     .transform(blankToUndefined)

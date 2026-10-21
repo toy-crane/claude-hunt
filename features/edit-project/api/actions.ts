@@ -25,6 +25,9 @@ export interface EditProjectResult {
   ok: boolean;
 }
 
+const NOT_OWNER_MESSAGE =
+  "프로젝트를 편집하지 못했어요. 내가 제출한 프로젝트만 편집할 수 있어요.";
+
 function imagePathsOf(images: unknown): Set<string> {
   const paths = new Set<string>();
   if (Array.isArray(images)) {
@@ -86,10 +89,16 @@ export async function editProject(
   // Read the current images so we can diff and remove orphans.
   const { data: current } = await supabase
     .from("projects")
-    .select("images")
+    .select("images, user_id")
     .eq("id", input.projectId)
     .maybeSingle();
   const previousPaths = imagePathsOf(current?.images);
+
+  // Projects are publicly readable, so check ownership here before an
+  // image-less save opens the URL in a sandbox; RLS only stops the UPDATE.
+  if (input.imagePaths.length === 0 && current?.user_id !== userId) {
+    return { ok: false, error: NOT_OWNER_MESSAGE };
+  }
 
   const resolved = await resolveImagePaths(
     input.imagePaths,
@@ -130,11 +139,7 @@ export async function editProject(
     return { ok: false, error: error.message };
   }
   if (!data || data.length === 0) {
-    return {
-      ok: false,
-      error:
-        "프로젝트를 편집하지 못했어요. 내가 제출한 프로젝트만 편집할 수 있어요.",
-    };
+    return { ok: false, error: NOT_OWNER_MESSAGE };
   }
 
   // Best-effort: remove storage objects that no longer appear in the

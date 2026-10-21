@@ -1,5 +1,6 @@
 import "server-only";
 
+import { randomUUID } from "node:crypto";
 import { env } from "@shared/config/env";
 import { Sandbox } from "@vercel/sandbox";
 import {
@@ -94,6 +95,8 @@ export async function openCaptureSession(
     return { ok: false, reason: "unavailable" };
   }
 
+  // Lets only this session's commands reach the driver (see driver-source).
+  const token = randomUUID();
   const stopNow = () => sandbox.stop().catch(() => undefined);
   const stop = async () => {
     if (release) {
@@ -111,12 +114,15 @@ export async function openCaptureSession(
       cmd: "node",
       args: [DRIVER_PATH],
       cwd: CAPTURE_HOME,
-      env: { PLAYWRIGHT_BROWSERS_PATH: `${CAPTURE_HOME}/browsers` },
+      env: {
+        PLAYWRIGHT_BROWSERS_PATH: `${CAPTURE_HOME}/browsers`,
+        DRIVER_TOKEN: token,
+      },
       detached: true,
     });
 
     const call = async (path: string, body?: unknown) => {
-      const args = ["-s", "--max-time", "60"];
+      const args = ["-s", "--max-time", "60", "-H", `x-driver-token: ${token}`];
       if (body !== undefined) {
         args.push("-X", "POST", "--data-binary", JSON.stringify(body));
       }

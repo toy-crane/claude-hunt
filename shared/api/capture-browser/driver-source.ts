@@ -6,6 +6,12 @@
  * page of an untrusted project URL therefore never runs next to the app's
  * secrets (docs/decisions/project-url-capture.md).
  *
+ * Every command except /health must carry the session's random token in
+ * an `x-driver-token` header. The captured page runs inside the same
+ * sandbox and could otherwise post to the driver; browsers cannot attach a
+ * custom header to such a request without a CORS preflight the driver never
+ * grants.
+ *
  * Endpoints (JSON in, JSON out):
  * - GET  /health                → { ok: true }
  * - POST /open    { url }       → { ok, url, reason? } and writes VIEW_PATH
@@ -28,6 +34,7 @@ import { chromium } from "playwright";
 const PORT = Number(process.env.DRIVER_PORT || ${DRIVER_PORT});
 const VIEW_PATH = process.env.VIEW_PATH || "${VIEW_PATH}";
 const CAPTURE_PATH = process.env.CAPTURE_PATH || "${CAPTURE_PATH}";
+const TOKEN = process.env.DRIVER_TOKEN || "";
 const VIEWPORT = { width: 1280, height: 800 };
 const KEYS = new Set(["Enter", "Escape", "Tab", "Space", "ArrowUp", "ArrowDown", "ArrowLeft", "ArrowRight"]);
 
@@ -123,6 +130,7 @@ const server = createServer(async (req, res) => {
   try {
     const body = await readBody(req);
     if (req.url === "/health") result = { ok: true };
+    else if (!TOKEN || req.headers["x-driver-token"] !== TOKEN) result = { ok: false, reason: "forbidden" };
     else if (req.url === "/open") result = await open(String(body.url || ""));
     else if (!page) result = { ok: false, reason: "not_open" };
     else if (req.url === "/act") result = await act(String(body.name || ""), body.input || {});
