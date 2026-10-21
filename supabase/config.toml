@@ -62,6 +62,7 @@ schema_paths = [
   "./schemas/projects.sql",
   "./schemas/votes.sql",
   "./schemas/projects_with_vote_count.sql",
+  "./schemas/project_capture_runs.sql",
   "./schemas/comments.sql",
   "./schemas/comment_reactions.sql",
   "./schemas/subscribers.sql",

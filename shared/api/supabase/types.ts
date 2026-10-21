@@ -244,6 +244,61 @@ export type Database = {
           },
         ]
       }
+      project_capture_runs: {
+        Row: {
+          created_at: string
+          finished_at: string | null
+          id: string
+          images_added: number
+          project_id: string
+          status: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          finished_at?: string | null
+          id?: string
+          images_added?: number
+          project_id: string
+          status?: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          finished_at?: string | null
+          id?: string
+          images_added?: number
+          project_id?: string
+          status?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "project_capture_runs_project_id_fkey"
+            columns: ["project_id"]
+            isOneToOne: false
+            referencedRelation: "projects"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "project_capture_runs_project_id_fkey"
+            columns: ["project_id"]
+            isOneToOne: false
+            referencedRelation: "projects_with_vote_count"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "project_capture_runs_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       projects: {
         Row: {
           cohort_id: string
@@ -421,6 +476,10 @@ export type Database = {
       }
     }
     Functions: {
+      append_project_auto_image: {
+        Args: { p_expected_images: Json; p_image: Json; p_project_id: string }
+        Returns: boolean
+      }
       complete_onboarding: {
         Args: {
           p_cohort_id: string
