@@ -129,6 +129,9 @@ function actionOutcome(result: HighlightBrowserView) {
   if (result.note === "left_project_host") {
     return " [외부 사이트로 이동해 되돌림]";
   }
+  if (result.note === "typing_off_project_host") {
+    return " [프로젝트 주소가 아닌 사이트라 입력하지 않음]";
+  }
   if (result.note) {
     return " [첫 화면으로 다시 엶]";
   }
@@ -193,7 +196,7 @@ async function performAction(
   }
   const result = await browser.act(name, input);
   state.view = result.view;
-  if (name === "type_text") {
+  if (name === "type_text" && result.ok) {
     state.typed = true;
   }
   state.log.push(
@@ -238,7 +241,7 @@ async function typeSignupValue(
   }
   const result = await browser.act("type_text", { text: signup[field] });
   state.view = result.view;
-  state.typed = true;
+  state.typed ||= result.ok;
   state.log.push(
     `${state.steps}. type_signup_value(field="${field}") — ${textInput(input, "note")}${actionOutcome(result)}`
   );

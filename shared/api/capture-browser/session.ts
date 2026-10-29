@@ -27,7 +27,7 @@ export type BrowserActionName =
 
 export interface BrowserActionResult {
   changed: boolean;
-  note?: "returned_to_start" | "left_project_host";
+  note?: "returned_to_start" | "left_project_host" | "typing_off_project_host";
   ok: boolean;
   url: string;
   /** Compact screenshot of the screen after the action, for the model. */

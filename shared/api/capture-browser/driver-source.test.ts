@@ -42,6 +42,7 @@ const PAGES: Record<string, string> = {
 };
 
 let lastTyped = "";
+let lastTypedAway = "";
 
 let site: Server;
 let away: Server;
@@ -84,13 +85,29 @@ async function waitForDriver() {
 
 describe.skipIf(!RUN_DRIVER_SUITE)("capture driver", () => {
   beforeAll(async () => {
-    away = createServer((_req, res) => res.end("<h1>away</h1>"));
+    away = createServer((req, res) => {
+      const typed = new URL(req.url ?? "/", "http://x");
+      if (typed.pathname === "/typed") {
+        lastTypedAway = typed.searchParams.get("v") ?? "";
+        res.end("ok");
+        return;
+      }
+      res.setHeader("content-type", "text/html; charset=utf-8");
+      res.end(req.url === "/form" ? (PAGES["/form"] ?? "") : "<h1>away</h1>");
+    });
     const awayPort = await listen(away);
     site = createServer((req, res) => {
       const typed = new URL(req.url ?? "/", "http://x");
       if (typed.pathname === "/typed") {
         lastTyped = typed.searchParams.get("v") ?? "";
         res.end("ok");
+        return;
+      }
+      if (typed.pathname === "/sign-in-elsewhere") {
+        // e.g. a deployment that sends visitors straight to another host's sign-in
+        res.statusCode = 302;
+        res.setHeader("location", `http://localhost:${awayPort}/form`);
+        res.end();
         return;
       }
       const page = PAGES[req.url ?? ""];
@@ -180,6 +197,20 @@ describe.skipIf(!RUN_DRIVER_SUITE)("capture driver", () => {
     });
     expect(result.ok).toBe(true);
     expect(lastTyped).toBe(email);
+  });
+
+  it("types nothing on another host's page the project URL redirected to", async () => {
+    lastTypedAway = "";
+    await call("/open", { url: `${siteUrl}/sign-in-elsewhere` });
+    const result = await call("/act", {
+      name: "type_text",
+      input: { text: "demo-password" },
+    });
+    expect(result).toMatchObject({
+      ok: false,
+      note: "typing_off_project_host",
+    });
+    expect(lastTypedAway).toBe("");
   });
 
   it("saves a gallery capture of the current screen", async () => {

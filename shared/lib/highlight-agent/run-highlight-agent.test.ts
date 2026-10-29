@@ -296,6 +296,40 @@ describe("runHighlightAgent", () => {
     expect(saved).toEqual([true, false]);
   });
 
+  it("tells the model typing was refused off the project's host and does not count it toward signing in", async () => {
+    const { model, requests } = scriptedModel([
+      { name: "type_text", input: { text: "demo", note: "아이디" } },
+      {
+        name: "signed_in",
+        input: { first_screen_was_sign_in: true, note: "입장" },
+      },
+      capture("화면"),
+    ]);
+    const { browser } = fakeBrowser(["a"]);
+    vi.mocked(browser.act).mockResolvedValueOnce({
+      ok: false,
+      url: "https://vercel.com/login",
+      changed: false,
+      note: "typing_off_project_host",
+      view: Buffer.from("view"),
+    });
+    const saved: boolean[] = [];
+
+    await runHighlightAgent({
+      ...base,
+      browser,
+      model,
+      onCapture: ({ replacesFirst }) => {
+        saved.push(replacesFirst);
+        return Promise.resolve(true);
+      },
+    });
+
+    const log = (requests.at(-1) as { log: string[] }).log.join("\n");
+    expect(log).toContain("프로젝트 주소가 아닌 사이트라 입력하지 않음");
+    expect(saved).toEqual([false]);
+  });
+
   it("keeps the primary image when the agent reports signing in without having typed anything", async () => {
     const { model } = scriptedModel([
       click(400, 400),
