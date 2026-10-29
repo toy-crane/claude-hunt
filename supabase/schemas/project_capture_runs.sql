@@ -59,3 +59,31 @@ $$;
 
 revoke all on function public.append_project_auto_image(uuid, jsonb, jsonb) from PUBLIC, anon, authenticated;
 grant execute on function public.append_project_auto_image(uuid, jsonb, jsonb) to service_role;
+
+-- Replaces a project's primary image (images[0]) with an automatically
+-- captured one, used when the captured first screen was a sign-in wall and
+-- the capture run got past it. Like the append, it only applies while the
+-- gallery still equals what the run last saw, so an owner's change wins.
+create or replace function public.replace_project_auto_primary_image(
+  p_project_id uuid,
+  p_expected_images jsonb,
+  p_image jsonb
+)
+returns boolean
+language sql
+security invoker
+set search_path = ''
+as $$
+  with replaced as (
+    update public.projects
+    set images = jsonb_set(images, '{0}', p_image)
+    where id = p_project_id
+      and images = p_expected_images
+      and jsonb_array_length(images) > 0
+    returning 1
+  )
+  select exists (select 1 from replaced);
+$$;
+
+revoke all on function public.replace_project_auto_primary_image(uuid, jsonb, jsonb) from PUBLIC, anon, authenticated;
+grant execute on function public.replace_project_auto_primary_image(uuid, jsonb, jsonb) to service_role;

@@ -490,6 +490,10 @@ export type Database = {
         Returns: undefined
       }
       dismiss_email_marketing_notice: { Args: never; Returns: undefined }
+      replace_project_auto_primary_image: {
+        Args: { p_expected_images: Json; p_image: Json; p_project_id: string }
+        Returns: boolean
+      }
       set_email_marketing_consent: {
         Args: { p_consent_version: string; p_opted_in: boolean }
         Returns: undefined
