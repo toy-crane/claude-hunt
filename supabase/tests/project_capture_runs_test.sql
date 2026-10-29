@@ -2,7 +2,7 @@ begin;
 
 create extension if not exists pgtap with schema extensions;
 
-select plan(14);
+select plan(20);
 
 -- Seed one owner (handle_new_user creates the profile) and one project.
 insert into auth.users (
@@ -133,7 +133,52 @@ select is(
   'A full gallery stays at five images'
 );
 
--- 13. updated_at moves on update.
+-- 13-14. The primary-image replacement is callable only by the server role.
+select function_privs_are(
+  'public', 'replace_project_auto_primary_image', array['uuid', 'jsonb', 'jsonb'],
+  'authenticated', array[]::text[],
+  'Signed-in users cannot call the primary-image replacement'
+);
+select function_privs_are(
+  'public', 'replace_project_auto_primary_image', array['uuid', 'jsonb', 'jsonb'],
+  'anon', array[]::text[],
+  'Visitors cannot call the primary-image replacement'
+);
+
+-- 15-16. The first image is replaced while the gallery is unchanged; the
+-- rest of the gallery keeps its order.
+select is(
+  public.replace_project_auto_primary_image(
+    '00000000-0000-0000-0000-0000000000f1',
+    '[{"path":"a"},{"path":"b"},{"path":"c"},{"path":"d"},{"path":"e"}]'::jsonb,
+    '{"path": "u/after-sign-in.jpg"}'::jsonb
+  ),
+  true,
+  'Replacement succeeds when the gallery matches what the run expected'
+);
+select is(
+  (select images from public.projects where id = '00000000-0000-0000-0000-0000000000f1'),
+  '[{"path":"u/after-sign-in.jpg"},{"path":"b"},{"path":"c"},{"path":"d"},{"path":"e"}]'::jsonb,
+  'Only the primary image is replaced'
+);
+
+-- 17-18. A stale expectation (owner changed the gallery) is discarded.
+select is(
+  public.replace_project_auto_primary_image(
+    '00000000-0000-0000-0000-0000000000f1',
+    '[{"path":"a"},{"path":"b"},{"path":"c"},{"path":"d"},{"path":"e"}]'::jsonb,
+    '{"path": "u/late.jpg"}'::jsonb
+  ),
+  false,
+  'Replacement is refused when the gallery changed since the run last saw it'
+);
+select is(
+  (select images->0->>'path' from public.projects where id = '00000000-0000-0000-0000-0000000000f1'),
+  'u/after-sign-in.jpg',
+  'A refused replacement leaves the gallery untouched'
+);
+
+-- 19. updated_at moves on update.
 reset role;
 update public.project_capture_runs
 set updated_at = '2000-01-01'::timestamptz
@@ -147,7 +192,7 @@ select ok(
   'Updating a capture run refreshes updated_at'
 );
 
--- 14. Deleting the project removes its capture runs.
+-- 20. Deleting the project removes its capture runs.
 delete from public.projects where id = '00000000-0000-0000-0000-0000000000f1';
 select is(
   (select count(*)::int from public.project_capture_runs
