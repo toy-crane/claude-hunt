@@ -34,7 +34,14 @@ const PAGES: Record<string, string> = {
       onclick="document.body.style.background='orange';document.getElementById('t').textContent='김치찌개'">돌리기</button>
     <a id="away" href="__AWAY__" style="position:absolute;left:100px;top:600px;width:200px;height:40px;display:block">외부</a>
   </body></html>`,
+  // Reports every keystroke back to the test server so a test can read what was typed.
+  "/form": `<html><body style="margin:0">
+    <input id="id" autofocus style="width:600px"
+      oninput="fetch('/typed?v=' + encodeURIComponent(this.value))">
+  </body></html>`,
 };
+
+let lastTyped = "";
 
 let site: Server;
 let away: Server;
@@ -80,6 +87,12 @@ describe.skipIf(!RUN_DRIVER_SUITE)("capture driver", () => {
     away = createServer((_req, res) => res.end("<h1>away</h1>"));
     const awayPort = await listen(away);
     site = createServer((req, res) => {
+      const typed = new URL(req.url ?? "/", "http://x");
+      if (typed.pathname === "/typed") {
+        lastTyped = typed.searchParams.get("v") ?? "";
+        res.end("ok");
+        return;
+      }
       const page = PAGES[req.url ?? ""];
       if (!page) {
         res.statusCode = 404;
@@ -156,6 +169,17 @@ describe.skipIf(!RUN_DRIVER_SUITE)("capture driver", () => {
     });
     expect(result.note).toBe("left_project_host");
     expect(new URL(result.url).hostname).toBe("127.0.0.1");
+  });
+
+  it("types a long sign-in value in full", async () => {
+    const email = "verification-account-for-capture@long-domain.example.com";
+    await call("/open", { url: `${siteUrl}/form` });
+    const result = await call("/act", {
+      name: "type_text",
+      input: { text: email },
+    });
+    expect(result.ok).toBe(true);
+    expect(lastTyped).toBe(email);
   });
 
   it("saves a gallery capture of the current screen", async () => {
