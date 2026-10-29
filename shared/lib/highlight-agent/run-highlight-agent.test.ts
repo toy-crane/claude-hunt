@@ -267,6 +267,35 @@ describe("runHighlightAgent", () => {
     ]);
   });
 
+  it("replaces the primary image at most once, even when the agent signs in again", async () => {
+    const signedIn = {
+      name: "signed_in",
+      input: { first_screen_was_sign_in: true, note: "입장" },
+    };
+    const { model } = scriptedModel([
+      { name: "type_text", input: { text: "demo", note: "아이디" } },
+      signedIn,
+      capture("대시보드"),
+      { name: "type_text", input: { text: "demo", note: "다시 로그인" } },
+      signedIn,
+      capture("결과"),
+    ]);
+    const { browser } = fakeBrowser(["a", "b"]);
+    const saved: boolean[] = [];
+
+    await runHighlightAgent({
+      ...base,
+      browser,
+      model,
+      onCapture: ({ replacesFirst }) => {
+        saved.push(replacesFirst);
+        return Promise.resolve(true);
+      },
+    });
+
+    expect(saved).toEqual([true, false]);
+  });
+
   it("keeps the primary image when the agent reports signing in without having typed anything", async () => {
     const { model } = scriptedModel([
       click(400, 400),
