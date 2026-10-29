@@ -57,6 +57,10 @@ async function freshPage() {
 
 let startUrl = null;
 let host = null;
+// The submitted project URL's host. Navigation follows redirects (host), but
+// typing, which may carry credentials, only happens on this one.
+let projectSite = null;
+const siteOf = (url) => new URL(url).hostname.replace(/^www\\./, "");
 
 const md5 = (buf) => createHash("md5").update(buf).digest("hex");
 
@@ -84,11 +88,16 @@ async function open(url) {
   await settle();
   startUrl = page.url();
   host = new URL(startUrl).hostname;
+  projectSite = siteOf(url);
   await view();
   return { ok: true, url: page.url() };
 }
 
 async function act(name, input) {
+  if (name === "type_text" && siteOf(page.url()) !== projectSite) {
+    await view();
+    return { ok: false, url: page.url(), changed: false, note: "typing_off_project_host" };
+  }
   const before = md5(await page.screenshot({ type: "jpeg", quality: 70 }));
   switch (name) {
     case "click": await page.mouse.click(Number(input.x), Number(input.y)); break;
