@@ -5,6 +5,7 @@
 - A project is the product's primary content unit. It has a stable detail URL, an external project URL, a title, one-line tagline, optional longer description, one to five ordered images, and an optional GitHub repository URL.
 - The first image is the primary image used by lists and social previews; the detail page exposes the complete ordered gallery and longer context.
 - Images come from the owner or, only when the owner provides none, from automatic capture. Submitting or saving an edit with zero images makes the system capture the project URL's first screen as the primary image, and the submission or save waits for that capture; if it fails, nothing is published or saved and the owner is told the URL could not be opened. After the change succeeds, the system appends up to four more automatically captured screens to the gallery in the background. An owner who uploads even one image gets no automatic capture.
+- When the captured first screen is a sign-in or sign-up screen and the background capture gets past it, the first screen captured after signing in replaces it as the primary image and the sign-in screen leaves the gallery. If the capture never gets past the wall, the sign-in screen stays the primary image.
 - Any visitor may read a project. Only its owner may create changes to it or delete it.
 - Deleting a project cascades its database-backed comments, replies, reactions, and recommendations. Storage image cleanup is attempted after a successful change but remains best-effort so an unavailable object store never blocks the user's edit or deletion.
 - Keep the experience project-centric: there are no author profile pages or separate class sites.
@@ -22,6 +23,8 @@ The original low-friction format made sharing easy, while the detail page and or
 
 Some owners, notably students on LG Electronics machines, cannot upload screenshots at all. Waiting a few seconds for the first-screen capture keeps the invariant that every public project has a primary image, so lists, the detail page, and social previews need no image-less state; only the slower highlight captures run after publication so submission stays low-friction.
 
+A sign-in screen tells visitors nothing about the project, so it is the one first screen the background capture may replace. The invariant still holds because a primary image exists from the moment of publication; only which image it is changes a few minutes later.
+
 ## Reconsider when
 
 - Projects need categories, versioned releases, teams of owners, or author portfolios.
@@ -33,3 +36,4 @@ Some owners, notably students on LG Electronics machines, cannot upload screensh
 - Publish immediately and fill the primary image later — allows image-less public projects and needs empty states on the board, detail page, and social previews; revisit only if first-screen capture can no longer finish within a short wait.
 - Make submission wait for every automatic capture — adds one to two minutes of waiting; revisit if background capture becomes fast enough to finish within the first-screen wait.
 - Stop background capture at submission — leaves fast submitters with only the first screen.
+- Keep a sign-in screen as the primary image after the capture got past it — the board card and social preview keep showing a sign-in form; revisit if replacing the primary image in the background confuses owners.
