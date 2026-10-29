@@ -18,6 +18,10 @@ function resolved<A extends unknown[], R>(impl: (...args: A) => R) {
   return vi.fn((...args: A) => Promise.resolve(impl(...args)));
 }
 const NOW = Date.parse("2026-10-21T03:00:00Z");
+const CAPTURE_EMAIL = /^capture-[0-9a-f]+@claude-hunt\.com$/;
+const CAPTURE_NAME = /^claudehunt[0-9a-f]+$/;
+/** Upper, lower, digit, and symbol: what common password rules ask for. */
+const PASSWORD_RULES = [/[A-Z]/, /[a-z]/, /\d/, /[^A-Za-z0-9]/];
 
 function memoryStore(options: { recentRuns?: number } = {}) {
   const gallery = { images: [{ path: "u1/first.jpg" }] as { path: string }[] };
@@ -54,6 +58,16 @@ function memoryStore(options: { recentRuns?: number } = {}) {
         return false;
       }
       gallery.images = [...gallery.images, image];
+      return true;
+    }),
+    replaceFirstImage: resolved((_projectId, expected, image) => {
+      if (gallery.images.length >= ownerEditsAfter) {
+        gallery.images = [{ path: "u1/owner-upload.jpg" }];
+      }
+      if (JSON.stringify(expected) !== JSON.stringify(gallery.images)) {
+        return false;
+      }
+      gallery.images = [image, ...gallery.images.slice(1)];
       return true;
     }),
     refresh: vi.fn(),
@@ -110,6 +124,28 @@ function capturingModel(count: number): HighlightModel {
         };
       }
       return { kind: "tool" as const, name: "finish", input: { note: "n" } };
+    }),
+  };
+}
+
+/** A model that signs in past a sign-in first screen, then saves two screens. */
+function signingInModel(): HighlightModel {
+  const script = [
+    { name: "click", input: { x: 640, y: 300, note: "이름 칸" } },
+    { name: "type_text", input: { text: "검증총무", note: "이름" } },
+    { name: "click", input: { x: 640, y: 400, note: "입장" } },
+    {
+      name: "signed_in",
+      input: { first_screen_was_sign_in: true, note: "입장 완료" },
+    },
+    { name: "capture_highlight", input: { caption: "투표 목록", note: "n" } },
+    { name: "click", input: { x: 640, y: 200, note: "투표 열기" } },
+    { name: "capture_highlight", input: { caption: "투표 결과", note: "n" } },
+  ];
+  return {
+    next: resolved(() => {
+      const call = script.shift() ?? { name: "finish", input: { note: "n" } };
+      return { kind: "tool" as const, ...call };
     }),
   };
 }
@@ -182,6 +218,93 @@ describe("fillProjectHighlights", () => {
     expect(gallery.images).toEqual([{ path: "u1/owner-upload.jpg" }]);
     expect(removed).toEqual(["u1/auto-2.jpg"]);
     expect(runs).toEqual([{ id: "run-1", status: "cancelled", added: 1 }]);
+  });
+
+  it("puts the first screen captured after signing in in place of the sign-in screen and deletes the sign-in screen file", async () => {
+    const { store, gallery, runs, removed } = memoryStore();
+
+    await fillProjectHighlights({
+      session: fakeSession(["a", "b"]),
+      store,
+      model: signingInModel(),
+      projectId: "p1",
+      userId: "u1",
+      project,
+      images: [{ path: "u1/first.jpg" }],
+      now: () => NOW,
+    });
+
+    expect(gallery.images.map((i) => i.path)).toEqual([
+      "u1/auto-1.jpg",
+      "u1/auto-2.jpg",
+    ]);
+    expect(removed).toEqual(["u1/first.jpg"]);
+    expect(runs).toEqual([{ id: "run-1", status: "succeeded", added: 2 }]);
+    expect(store.refresh).toHaveBeenCalledTimes(2);
+  });
+
+  it("leaves the owner's images alone when they changed the gallery before the replacement arrived", async () => {
+    const { store, gallery, runs, removed, ownerEditsOnceGalleryHas } =
+      memoryStore();
+    ownerEditsOnceGalleryHas(1);
+
+    await fillProjectHighlights({
+      session: fakeSession(["a", "b"]),
+      store,
+      model: signingInModel(),
+      projectId: "p1",
+      userId: "u1",
+      project,
+      images: [{ path: "u1/first.jpg" }],
+      now: () => NOW,
+    });
+
+    expect(gallery.images).toEqual([{ path: "u1/owner-upload.jpg" }]);
+    expect(removed).toEqual(["u1/auto-1.jpg"]);
+    expect(runs).toEqual([{ id: "run-1", status: "cancelled", added: 0 }]);
+  });
+
+  it("signs up with a fresh Claude Hunt capture account on every run", async () => {
+    const typed: string[][] = [];
+    for (let run = 0; run < 2; run++) {
+      const session = fakeSession([]);
+      const script = (["email", "password", "name"] as const).map((field) => ({
+        name: "type_signup_value",
+        input: { field, note: field },
+      }));
+      await fillProjectHighlights({
+        session,
+        store: memoryStore().store,
+        model: {
+          next: resolved(() => {
+            const call = script.shift() ?? {
+              name: "finish",
+              input: { note: "n" },
+            };
+            return { kind: "tool" as const, ...call };
+          }),
+        },
+        projectId: "p1",
+        userId: "u1",
+        project,
+        images: [{ path: "u1/first.jpg" }],
+        now: () => NOW,
+      });
+      typed.push(
+        vi.mocked(session.act).mock.calls.map(([, input]) => String(input.text))
+      );
+    }
+
+    const [first, second] = typed as [string[], string[]];
+    const [email, password, name] = first;
+    expect(email).toMatch(CAPTURE_EMAIL);
+    for (const rule of PASSWORD_RULES) {
+      expect(password).toMatch(rule);
+    }
+    expect(password?.length).toBeGreaterThanOrEqual(12);
+    expect(name).toMatch(CAPTURE_NAME);
+    expect(second[0]).not.toBe(email);
+    expect(second[1]).not.toBe(password);
   });
 
   it(`skips the highlight run once the owner already used ${HIGHLIGHT_RUNS_PER_DAY} runs in the last day`, async () => {

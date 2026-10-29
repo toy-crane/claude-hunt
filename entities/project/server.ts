@@ -4,6 +4,7 @@ import Anthropic from "@anthropic-ai/sdk";
 import type { CaptureSession } from "@shared/api/capture-browser/session";
 import { env } from "@shared/config/env";
 import { createClaudeHighlightModel } from "@shared/lib/highlight-agent/claude-model";
+import type { HighlightProject } from "@shared/lib/highlight-agent/run-highlight-agent";
 import { after } from "next/server";
 import { createAutoImageStore } from "./api/auto-image-store";
 import {
@@ -55,7 +56,8 @@ export async function startProjectHighlights({
   images,
 }: {
   images: ProjectImage[];
-  project: { tagline: string; title: string };
+  /** The owner's description is where the agent looks for access information. */
+  project: HighlightProject;
   projectId: string;
   session: CaptureSession;
   userId: string;

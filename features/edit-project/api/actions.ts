@@ -156,7 +156,11 @@ export async function editProject(
         session: liveSession,
         projectId: input.projectId,
         userId,
-        project: { title: input.title, tagline: input.tagline },
+        project: {
+          title: input.title,
+          tagline: input.tagline,
+          description: input.description,
+        },
         images,
       })
     );

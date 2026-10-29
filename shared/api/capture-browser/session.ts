@@ -13,6 +13,8 @@ import {
 /** Where the capture snapshot keeps Playwright, Chromium, and the driver. */
 export const CAPTURE_HOME = "/opt/capture";
 const DRIVER_PATH = `${CAPTURE_HOME}/driver.mjs`;
+/** Where a request body that must stay off the command line is staged. */
+const PRIVATE_BODY_PATH = "/tmp/capture-act-body.json";
 const SANDBOX_REGION = "icn1";
 
 export type BrowserActionName =
@@ -121,9 +123,23 @@ export async function openCaptureSession(
       detached: true,
     });
 
-    const call = async (path: string, body?: unknown) => {
+    const call = async (
+      path: string,
+      body?: unknown,
+      { private: viaFile = false } = {}
+    ) => {
       const args = ["-s", "--max-time", "60", "-H", `x-driver-token: ${token}`];
-      if (body !== undefined) {
+      if (body !== undefined && viaFile) {
+        // Typed text can be a password: keep it off the command line, which
+        // the sandbox platform records, and pass it through a file instead.
+        await sandbox.writeFiles([
+          {
+            path: PRIVATE_BODY_PATH,
+            content: Buffer.from(JSON.stringify(body)),
+          },
+        ]);
+        args.push("-X", "POST", "--data-binary", `@${PRIVATE_BODY_PATH}`);
+      } else if (body !== undefined) {
         args.push("-X", "POST", "--data-binary", JSON.stringify(body));
       }
       args.push(`http://127.0.0.1:${DRIVER_PORT}${path}`);
@@ -179,7 +195,11 @@ export async function openCaptureSession(
         firstView,
         capture: readCapture,
         async act(name, input) {
-          const result = await call("/act", { name, input });
+          const result = await call(
+            "/act",
+            { name, input },
+            { private: name === "type_text" }
+          );
           return {
             ok: result.ok === true,
             url: String(result.url ?? ""),

@@ -57,8 +57,49 @@ describe("createClaudeHighlightModel", () => {
         "wait",
         "capture_highlight",
         "finish",
+        "type_signup_value",
+        "signed_in",
       ])
     );
+  });
+
+  it("hands the owner's description over as data in its own block, ahead of the step", async () => {
+    const { client, create } = fakeClient({ stop_reason: "end_turn" });
+
+    await createClaudeHighlightModel(client).next({
+      ...request,
+      project: {
+        ...request.project,
+        description: "테스트는 검증총무 / 1234 로 가능합니다.",
+      },
+    });
+
+    const body = create.mock.calls[0]?.[0] as {
+      messages: Array<{ content: Array<{ type: string; text?: string }> }>;
+    };
+    const texts = (body.messages[0]?.content ?? [])
+      .filter((c) => c.type === "text")
+      .map((c) => c.text ?? "");
+    expect(texts).toHaveLength(2);
+    expect(texts[0]).toContain("테스트는 검증총무 / 1234 로 가능합니다.");
+    expect(texts[1]).not.toContain("검증총무");
+  });
+
+  it("sends no description block when the project has none", async () => {
+    const { client, create } = fakeClient({ stop_reason: "end_turn" });
+
+    await createClaudeHighlightModel(client).next({
+      ...request,
+      project: { ...request.project, description: null },
+    });
+
+    const body = create.mock.calls[0]?.[0] as {
+      messages: Array<{ content: Array<{ type: string }> }>;
+    };
+    const texts = (body.messages[0]?.content ?? []).filter(
+      (c) => c.type === "text"
+    );
+    expect(texts).toHaveLength(1);
   });
 
   it("returns the first tool call Claude makes", async () => {
