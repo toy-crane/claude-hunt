@@ -11,8 +11,9 @@ import type { AutoImageStore } from "./auto-images";
  * Supabase-backed store for automatic captures. Uses the service role
  * because the highlight run continues after the owner's request has ended;
  * callers pass an owner id they already verified. Gallery changes go
- * through `append_project_auto_image` so a late capture can never overwrite
- * images the owner changed in the meantime.
+ * through `append_project_auto_image` and
+ * `replace_project_auto_primary_image` so a late capture can never
+ * overwrite images the owner changed in the meantime.
  */
 export function createAutoImageStore(): AutoImageStore {
   const admin = createAdminClient();
@@ -68,6 +69,20 @@ export function createAutoImageStore(): AutoImageStore {
         p_expected_images: expected as unknown as Json,
         p_image: image as unknown as Json,
       });
+      if (error) {
+        throw error;
+      }
+      return data === true;
+    },
+    async replaceFirstImage(projectId, expected, image) {
+      const { data, error } = await admin.rpc(
+        "replace_project_auto_primary_image",
+        {
+          p_project_id: projectId,
+          p_expected_images: expected as unknown as Json,
+          p_image: image as unknown as Json,
+        }
+      );
       if (error) {
         throw error;
       }

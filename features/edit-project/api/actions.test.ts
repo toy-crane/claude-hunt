@@ -294,7 +294,11 @@ describe("editProject server action", () => {
       session,
     });
 
-    const result = await editProject({ ...validInput, imagePaths: [] });
+    const result = await editProject({
+      ...validInput,
+      description: "비밀번호 : 0000",
+      imagePaths: [],
+    });
 
     expect(result.ok).toBe(true);
     expect(captureProjectFirstScreen).toHaveBeenCalledWith({
@@ -310,7 +314,11 @@ describe("editProject server action", () => {
       session,
       projectId: validInput.projectId,
       userId: "u1",
-      project: { title: "Edited Title", tagline: "Edited tagline" },
+      project: {
+        title: "Edited Title",
+        tagline: "Edited tagline",
+        description: "비밀번호 : 0000",
+      },
       images: [{ path: "u1/first.jpg" }],
     });
   });

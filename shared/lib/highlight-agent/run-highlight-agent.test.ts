@@ -61,6 +61,11 @@ const base = {
   },
   firstView: Buffer.from("first-view"),
   firstHash: "first",
+  signup: {
+    email: "capture-1a2b@claude-hunt.com",
+    password: "Ch-secret-9!",
+    name: "claudehunt1a2b",
+  },
 };
 
 const capture = (caption: string): Call => ({
@@ -194,6 +199,97 @@ describe("runHighlightAgent", () => {
 
     expect(result.endReason).toBe("timeout");
     expect(model.next).toHaveBeenCalledTimes(2);
+  });
+
+  it("types the capture account's sign-up values without showing them in the step log", async () => {
+    const { model, requests } = scriptedModel([
+      click(400, 300),
+      {
+        name: "type_signup_value",
+        input: { field: "email", note: "이메일 칸" },
+      },
+      click(400, 360),
+      {
+        name: "type_signup_value",
+        input: { field: "password", note: "비밀번호 칸" },
+      },
+    ]);
+    const { browser, acts } = fakeBrowser([]);
+
+    await runHighlightAgent({
+      ...base,
+      browser,
+      model,
+      maxSteps: 5,
+      onCapture: async () => true,
+    });
+
+    expect(acts).toEqual([
+      { name: "click", input: { x: 400, y: 300, note: "돌리기" } },
+      { name: "type_text", input: { text: "capture-1a2b@claude-hunt.com" } },
+      { name: "click", input: { x: 400, y: 360, note: "돌리기" } },
+      { name: "type_text", input: { text: "Ch-secret-9!" } },
+    ]);
+    const lastLog = (requests.at(-1) as { log: string[] }).log.join("\n");
+    expect(lastLog).toContain('type_signup_value(field="password")');
+    expect(lastLog).not.toContain("Ch-secret-9!");
+    expect(lastLog).not.toContain("capture-1a2b@claude-hunt.com");
+  });
+
+  it("marks the first screen saved after getting past a sign-in first screen as the new primary image", async () => {
+    const { model } = scriptedModel([
+      click(400, 300),
+      { name: "type_text", input: { text: "검증총무", note: "이름" } },
+      click(400, 400),
+      {
+        name: "signed_in",
+        input: { first_screen_was_sign_in: true, note: "입장 완료" },
+      },
+      capture("투표 목록"),
+      capture("투표 결과"),
+    ]);
+    const { browser } = fakeBrowser(["a", "b"]);
+    const saved: Array<{ hash: string; replacesFirst: boolean }> = [];
+
+    await runHighlightAgent({
+      ...base,
+      browser,
+      model,
+      onCapture: ({ hash, replacesFirst }) => {
+        saved.push({ hash, replacesFirst });
+        return Promise.resolve(true);
+      },
+    });
+
+    expect(saved).toEqual([
+      { hash: "a", replacesFirst: true },
+      { hash: "b", replacesFirst: false },
+    ]);
+  });
+
+  it("keeps the primary image when the agent reports signing in without having typed anything", async () => {
+    const { model } = scriptedModel([
+      click(400, 400),
+      {
+        name: "signed_in",
+        input: { first_screen_was_sign_in: true, note: "들어옴" },
+      },
+      capture("목록"),
+    ]);
+    const { browser } = fakeBrowser(["a"]);
+    const saved: boolean[] = [];
+
+    await runHighlightAgent({
+      ...base,
+      browser,
+      model,
+      onCapture: ({ replacesFirst }) => {
+        saved.push(replacesFirst);
+        return Promise.resolve(true);
+      },
+    });
+
+    expect(saved).toEqual([false]);
   });
 
   it("shows the model only the current screen at each step", async () => {

@@ -1,11 +1,14 @@
 import "server-only";
 
+import { randomBytes } from "node:crypto";
 import {
   type CaptureSession,
   openCaptureSession,
 } from "@shared/api/capture-browser/session";
 import {
   type HighlightModel,
+  type HighlightProject,
+  type HighlightSignupIdentity,
   runHighlightAgent,
 } from "@shared/lib/highlight-agent/run-highlight-agent";
 import { MAX_PROJECT_IMAGES } from "../model/constants";
@@ -20,6 +23,27 @@ const DAY_MS = 24 * 60 * 60 * 1000;
  * highlight run (capped at three minutes) and some slack.
  */
 export const CAPTURE_SANDBOX_LIFETIME_MS = 5 * 60 * 1000;
+
+/**
+ * Domain of the addresses the agent signs up with. It has address records
+ * but receives no mail, so sign-up forms that check the domain accept it
+ * while verification mail never arrives (project-url-capture decision).
+ */
+export const CAPTURE_SIGNUP_EMAIL_DOMAIN = "claude-hunt.com";
+
+/**
+ * A fresh account for one highlight run, recognizable as Claude Hunt's
+ * capture in the student's app. The password satisfies common rules
+ * (upper, lower, digit, symbol) and is never stored.
+ */
+export function createCaptureSignupIdentity(): HighlightSignupIdentity {
+  const id = randomBytes(4).toString("hex");
+  return {
+    email: `capture-${id}@${CAPTURE_SIGNUP_EMAIL_DOMAIN}`,
+    name: `claudehunt${id}`,
+    password: `Ch${randomBytes(6).toString("hex")}!7`,
+  };
+}
 
 export type CaptureRunStatus = "succeeded" | "failed" | "cancelled";
 
@@ -40,6 +64,12 @@ export interface AutoImageStore {
   /** Makes the board and detail page show the changed gallery. */
   refresh(): void;
   removeImage(path: string): Promise<void>;
+  /** Replaces the primary image only while the gallery still equals `expected`. */
+  replaceFirstImage(
+    projectId: string,
+    expected: ProjectImage[],
+    image: ProjectImage
+  ): Promise<boolean>;
   startRun(projectId: string, userId: string): Promise<string>;
   uploadImage(userId: string, image: Buffer): Promise<string>;
 }
@@ -106,7 +136,7 @@ export async function fillProjectHighlights({
   images: ProjectImage[];
   model: HighlightModel;
   now?: () => number;
-  project: { tagline: string; title: string };
+  project: HighlightProject;
   projectId: string;
   session: CaptureSession;
   store: AutoImageStore;
@@ -130,15 +160,26 @@ export async function fillProjectHighlights({
         firstHash: session.firstScreen.hash,
         maxCaptures: Math.max(0, MAX_PROJECT_IMAGES - images.length),
         now,
-        onCapture: async ({ image }) => {
+        signup: createCaptureSignupIdentity(),
+        onCapture: async ({ image, replacesFirst }) => {
           const path = await store.uploadImage(userId, image);
           const next = { path };
-          const appended = await store.appendImage(projectId, expected, next);
-          if (!appended) {
+          // The first screen after getting past a sign-in wall takes the
+          // sign-in screen's place as the primary image (project-publishing).
+          const signInScreen = replacesFirst ? expected[0] : undefined;
+          const kept = signInScreen
+            ? await store.replaceFirstImage(projectId, expected, next)
+            : await store.appendImage(projectId, expected, next);
+          if (!kept) {
             await store.removeImage(path);
             return false;
           }
-          expected = [...expected, next];
+          expected = signInScreen
+            ? [next, ...expected.slice(1)]
+            : [...expected, next];
+          if (signInScreen) {
+            await store.removeImage(signInScreen.path).catch(() => undefined);
+          }
           added += 1;
           store.refresh();
           return true;

@@ -116,7 +116,11 @@ export async function submitProject(
         session: liveSession,
         projectId: inserted.id,
         userId,
-        project: { title: input.title, tagline: input.tagline },
+        project: {
+          title: input.title,
+          tagline: input.tagline,
+          description: input.description,
+        },
         images,
       })
     );

@@ -30,12 +30,22 @@ export interface HighlightBrowser {
   capture(): Promise<HighlightCapture>;
 }
 
+/**
+ * What the agent knows about the project besides its screen. The owner's
+ * description is the only place it looks for access information.
+ */
+export interface HighlightProject {
+  description?: string | null;
+  tagline: string;
+  title: string;
+}
+
 export interface HighlightModelRequest {
   captions: string[];
   log: string[];
   maxCaptures: number;
   maxSteps: number;
-  project: { tagline: string; title: string };
+  project: HighlightProject;
   step: number;
   /** The current screen. The only image the model receives this step. */
   view: Buffer;
@@ -48,6 +58,17 @@ export type HighlightModelReply =
 
 export interface HighlightModel {
   next(request: HighlightModelRequest): Promise<HighlightModelReply>;
+}
+
+/**
+ * The account the agent signs up with when a sign-in wall blocks the
+ * project. The model only names a field; the values never enter its
+ * prompt or the step log.
+ */
+export interface HighlightSignupIdentity {
+  email: string;
+  name: string;
+  password: string;
 }
 
 export interface RunHighlightAgentOptions {
@@ -63,12 +84,15 @@ export interface RunHighlightAgentOptions {
   now?: () => number;
   /**
    * Keeps one saved screen. Return false to stop the run, e.g. when the
-   * project's images changed underneath it.
+   * project's images changed underneath it. `replacesFirst` marks the first
+   * screen saved after the agent got past a sign-in first screen, which
+   * should take that sign-in screen's place as the primary image.
    */
   onCapture: (
-    capture: HighlightCapture & { caption: string }
+    capture: HighlightCapture & { caption: string; replacesFirst: boolean }
   ) => Promise<boolean>;
-  project: { tagline: string; title: string };
+  project: HighlightProject;
+  signup: HighlightSignupIdentity;
 }
 
 export type HighlightEndReason =
@@ -119,8 +143,12 @@ function textInput(input: Record<string, unknown>, key: string) {
 interface RunState {
   captions: string[];
   log: string[];
+  /** The next saved screen replaces the sign-in first screen. */
+  replaceFirst: boolean;
   seen: Set<string>;
   steps: number;
+  /** Whether anything was typed yet; signing in needs at least that. */
+  typed: boolean;
   view: Buffer;
 }
 
@@ -137,9 +165,11 @@ async function saveHighlight(
     return "duplicate";
   }
   state.seen.add(shot.hash);
-  if (!(await onCapture({ ...shot, caption }))) {
+  const replacesFirst = state.replaceFirst;
+  if (!(await onCapture({ ...shot, caption, replacesFirst }))) {
     return "stopped";
   }
+  state.replaceFirst = false;
   state.captions.push(caption);
   state.log.push(`${state.steps}. capture_highlight — ${caption}`);
   return "kept";
@@ -158,8 +188,54 @@ async function performAction(
   }
   const result = await browser.act(name, input);
   state.view = result.view;
+  if (name === "type_text") {
+    state.typed = true;
+  }
   state.log.push(
     `${state.steps}. ${name}(${describeArgs(input)}) — ${textInput(input, "note")}${actionOutcome(result)}`
+  );
+}
+
+/**
+ * Records that the agent got into the app. When the first screen was the
+ * sign-in wall, the next saved screen replaces it as the primary image.
+ */
+function markSignedIn(state: RunState, input: Record<string, unknown>) {
+  if (!state.typed) {
+    state.log.push(
+      `${state.steps}. signed_in 거절: 아직 아무것도 입력하지 않음`
+    );
+    return;
+  }
+  if (input.first_screen_was_sign_in === true) {
+    state.replaceFirst = true;
+  }
+  state.log.push(`${state.steps}. signed_in — ${textInput(input, "note")}`);
+}
+
+const SIGNUP_FIELDS = new Set<keyof HighlightSignupIdentity>([
+  "email",
+  "name",
+  "password",
+]);
+
+/** Types one sign-up value; the log names the field, never the value. */
+async function typeSignupValue(
+  state: RunState,
+  browser: HighlightBrowser,
+  signup: HighlightSignupIdentity,
+  input: Record<string, unknown>
+) {
+  const field = textInput(input, "field") as keyof HighlightSignupIdentity;
+  if (!SIGNUP_FIELDS.has(field)) {
+    state.log.push(`${state.steps}. type_signup_value 거절: 모르는 칸`);
+    return;
+  }
+  const result = await browser.act("type_text", { text: signup[field] });
+  state.view = result.view;
+  state.typed = true;
+  state.log.push(
+    `${state.steps}. type_signup_value(field="${field}") — ${textInput(input, "note")}${actionOutcome(result)}`
   );
 }
 
@@ -170,6 +246,7 @@ export async function runHighlightAgent({
   firstView,
   firstHash,
   onCapture,
+  signup,
   maxSteps = 30,
   maxCaptures = 4,
   maxDurationMs = 180_000,
@@ -179,8 +256,10 @@ export async function runHighlightAgent({
   const state: RunState = {
     captions: [],
     log: [],
+    replaceFirst: false,
     seen: new Set([firstHash]),
     steps: 0,
+    typed: false,
     view: firstView,
   };
   const end = (endReason: HighlightEndReason): RunHighlightAgentResult => ({
@@ -204,30 +283,59 @@ export async function runHighlightAgent({
       view: state.view,
     });
 
-    if (reply.kind === "refusal") {
-      return end("refusal");
-    }
-    if (reply.kind === "none") {
-      state.log.push(`${state.steps}. (도구 호출 없음)`);
-    } else if (reply.name === "finish") {
-      return end("finished");
-    } else if (reply.name === "capture_highlight") {
-      const saved = await saveHighlight(
-        state,
-        browser,
-        textInput(reply.input, "caption"),
-        onCapture
-      );
-      if (saved === "stopped") {
-        return end("stopped");
-      }
-      if (state.captions.length >= maxCaptures) {
-        return end("max_captures");
-      }
-    } else {
-      await performAction(state, browser, reply.name, reply.input);
+    const endReason = await takeStep(state, reply, {
+      browser,
+      maxCaptures,
+      onCapture,
+      signup,
+    });
+    if (endReason) {
+      return end(endReason);
     }
   }
 
   return end("max_steps");
+}
+
+/** Carries out the model's choice for one step; returns why the run ends, if it does. */
+async function takeStep(
+  state: RunState,
+  reply: HighlightModelReply,
+  {
+    browser,
+    maxCaptures,
+    onCapture,
+    signup,
+  }: Pick<RunHighlightAgentOptions, "browser" | "onCapture" | "signup"> & {
+    maxCaptures: number;
+  }
+): Promise<HighlightEndReason | undefined> {
+  if (reply.kind === "refusal") {
+    return "refusal";
+  }
+  if (reply.kind === "none") {
+    state.log.push(`${state.steps}. (도구 호출 없음)`);
+    return;
+  }
+  switch (reply.name) {
+    case "finish":
+      return "finished";
+    case "capture_highlight": {
+      const caption = textInput(reply.input, "caption");
+      const saved = await saveHighlight(state, browser, caption, onCapture);
+      if (saved === "stopped") {
+        return "stopped";
+      }
+      return state.captions.length >= maxCaptures ? "max_captures" : undefined;
+    }
+    case "type_signup_value":
+      await typeSignupValue(state, browser, signup, reply.input);
+      return;
+    case "signed_in":
+      markSignedIn(state, reply.input);
+      return;
+    default:
+      await performAction(state, browser, reply.name, reply.input);
+      return;
+  }
 }

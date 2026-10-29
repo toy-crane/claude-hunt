@@ -243,7 +243,7 @@ describe("submitProject server action", () => {
     );
   });
 
-  it("keeps filling highlights after the response once the project is published", async () => {
+  it("keeps filling highlights after the response once the project is published, with the owner's description for signing in", async () => {
     getClaims.mockResolvedValue({
       data: { claims: { sub: "u1" } },
       error: null,
@@ -256,7 +256,11 @@ describe("submitProject server action", () => {
       session,
     });
 
-    await submitProject({ ...validInput, imagePaths: [] });
+    await submitProject({
+      ...validInput,
+      description: "테스트는 demo / 1234 로 가능합니다.",
+      imagePaths: [],
+    });
 
     expect(startProjectHighlights).not.toHaveBeenCalled();
     expect(scheduled).toHaveLength(1);
@@ -265,7 +269,11 @@ describe("submitProject server action", () => {
       session,
       projectId: "proj-1",
       userId: "u1",
-      project: { title: "My App", tagline: "A cool tool" },
+      project: {
+        title: "My App",
+        tagline: "A cool tool",
+        description: "테스트는 demo / 1234 로 가능합니다.",
+      },
       images: [{ path: "u1/first.jpg" }],
     });
   });
