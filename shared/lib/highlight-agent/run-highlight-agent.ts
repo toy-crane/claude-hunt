@@ -143,6 +143,8 @@ function textInput(input: Record<string, unknown>, key: string) {
 interface RunState {
   captions: string[];
   log: string[];
+  /** The sign-in first screen was already replaced; it happens once a run. */
+  replacedFirst: boolean;
   /** The next saved screen replaces the sign-in first screen. */
   replaceFirst: boolean;
   seen: Set<string>;
@@ -169,7 +171,10 @@ async function saveHighlight(
   if (!(await onCapture({ ...shot, caption, replacesFirst }))) {
     return "stopped";
   }
-  state.replaceFirst = false;
+  if (replacesFirst) {
+    state.replaceFirst = false;
+    state.replacedFirst = true;
+  }
   state.captions.push(caption);
   state.log.push(`${state.steps}. capture_highlight — ${caption}`);
   return "kept";
@@ -207,7 +212,7 @@ function markSignedIn(state: RunState, input: Record<string, unknown>) {
     );
     return;
   }
-  if (input.first_screen_was_sign_in === true) {
+  if (input.first_screen_was_sign_in === true && !state.replacedFirst) {
     state.replaceFirst = true;
   }
   state.log.push(`${state.steps}. signed_in — ${textInput(input, "note")}`);
@@ -257,6 +262,7 @@ export async function runHighlightAgent({
     captions: [],
     log: [],
     replaceFirst: false,
+    replacedFirst: false,
     seen: new Set([firstHash]),
     steps: 0,
     typed: false,
