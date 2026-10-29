@@ -37,6 +37,9 @@ const CAPTURE_PATH = process.env.CAPTURE_PATH || "${CAPTURE_PATH}";
 const TOKEN = process.env.DRIVER_TOKEN || "";
 const VIEWPORT = { width: 1280, height: 800 };
 const KEYS = new Set(["Enter", "Escape", "Tab", "Space", "ArrowUp", "ArrowDown", "ArrowLeft", "ArrowRight"]);
+// Long enough for a sign-in email or password taken from the owner's
+// description; still caps runaway typing.
+const MAX_TYPED = 200;
 
 const browser = await chromium.launch();
 const context = await browser.newContext({ viewport: VIEWPORT, locale: "ko-KR", acceptDownloads: false });
@@ -89,7 +92,7 @@ async function act(name, input) {
   const before = md5(await page.screenshot({ type: "jpeg", quality: 70 }));
   switch (name) {
     case "click": await page.mouse.click(Number(input.x), Number(input.y)); break;
-    case "type_text": await page.keyboard.type(String(input.text).slice(0, 40), { delay: 20 }); break;
+    case "type_text": await page.keyboard.type(String(input.text).slice(0, MAX_TYPED), { delay: 20 }); break;
     case "press_key": if (KEYS.has(input.key)) await page.keyboard.press(input.key); break;
     case "scroll": await page.mouse.wheel(0, input.direction === "up" ? -700 : 700); break;
     case "go_back": await page.goBack({ timeout: 5000 }).catch(() => {}); break;
